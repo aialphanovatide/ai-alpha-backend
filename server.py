@@ -17,7 +17,7 @@ app.register_blueprint(trendspider_notification_bp)
 if __name__ == '__main__':
     try:
         print('---AI Alpha server is running---') # Once the server is ready. Add a pin message to slack
-        app.run(threaded=True, debug=False, port=7000, use_reloader=False) 
+        app.run(threaded=True, debug=False, port=7000, use_reloader=True) 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")      
 

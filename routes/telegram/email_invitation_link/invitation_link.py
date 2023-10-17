@@ -29,7 +29,7 @@ async def send_email_to_client(link_to_chat, client_email):
     recipient_email = client_email
     subject = 'AI Alpha Invitation Link'
 
-    with open(f'{ROOT_DIRECTORY}\routes\telegram\email_invitation_link\email_body.html', 'r') as file:
+    with open(f'{ROOT_DIRECTORY}/routes/telegram/email_invitation_link/email_body.html', 'r') as file:
         html_content = file.read()
         html_content = html_content.replace('{{ link }}', link_to_chat)
 
