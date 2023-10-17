@@ -5,6 +5,7 @@ from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_J
 scheduler = BackgroundScheduler()
 scheduler.add_jobstore('sqlalchemy', url= db_url)
 if scheduler.state != 1:
+    print('Scheduler started')
     scheduler.start()
 
 

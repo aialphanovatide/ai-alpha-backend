@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, LargeBinary
-from config import Base
+from sqlalchemy.ext.declarative import declarative_base
 
+FILES_MODEL = declarative_base()
 
 # word files
-class Files(Base):
+class Files(FILES_MODEL):
     __tablename__ = 'files'
 
     id = Column(Integer, primary_key=True)
