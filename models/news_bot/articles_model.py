@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from config import Base
 
-
+ARTICLE_MODEL = declarative_base()
 
 # data of each article
-class ARTICLE(Base):
+class ARTICLE(ARTICLE_MODEL):
     __tablename__ = 'article'
 
     id = Column(Integer, primary_key=True)
@@ -16,9 +16,11 @@ class ARTICLE(Base):
     website_name = Column(String)
     images = relationship("IMAGE", backref="article", cascade="all, delete-orphan")
 
-class IMAGE(Base):
+class IMAGE(ARTICLE_MODEL):
     __tablename__ = 'image'
 
     id = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article.id'))
     url = Column(String) 
+
+
