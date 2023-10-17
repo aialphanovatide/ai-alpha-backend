@@ -1,1 +1,1 @@
-from flask import Blueprint
+from config import Base
