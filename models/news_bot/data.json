@@ -87,31 +87,36 @@
               "site": "https://cointelegraph.com/tags/bitcoin",
               "base_url": "https://cointelegraph.com",
               "website_name": "Cointelegraph",
-              "is_URL_complete": false
+              "is_URL_complete": false,
+              "main_container": ".posts-listing__list"
             },
             {
               "site": "https://beincrypto.com/bitcoin-news",
               "base_url": "https://beincrypto.com",
               "website_name": "Beincrypto",
-              "is_URL_complete": true
+              "is_URL_complete": true,
+              "main_container":".main"
             },
             {
               "site": "https://bitcoinist.com/category/bitcoin",
               "base_url": "https://bitcoinist.com",
               "website_name": "Bitcoinist",
-              "is_URL_complete": true
+              "is_URL_complete": true,
+              "main_container": ".jnews_category_content_wrapper"
             },
             {
               "site": "https://coingape.com/category/news/bitcoin-news",
               "base_url": "https://coingape.com",
               "website_name": "Coingape",
-              "is_URL_complete": true
+              "is_URL_complete": true,
+              "main_container":".covergaelist"
             },
             {
               "site": "https://www.coindesk.com/tag/bitcoin",
               "base_url": "https://www.coindesk.com",
               "website_name": "Coindesk",
-              "is_URL_complete": false
+              "is_URL_complete": false,
+              "main_container":"None"
             }
           ],
         "black_list": [
@@ -337,28 +342,34 @@
               "site": "https://cointelegraph.com/tags/ethereum",
               "base_url": "https://cointelegraph.com",
               "website_name": "Cointelegraph",
-              "is_URL_complete": false
+              "is_URL_complete": false,
+              "main_container": ".posts-listing__list"
             },
             {
               "site": "https://bitcoinist.com/category/ethereum/",
               "base_url": "https://bitcoinist.com",
               "website_name": "Bitcoinist",
-              "is_URL_complete": true
+              "is_URL_complete": true,
+              "main_container": ".jnews_category_content_wrapper"
             },
             {
               "site": "https://coingape.com/category/ethereum-news/",
               "base_url": "https://coingape.com",
               "website_name": "Coingape",
-              "is_URL_complete": true
+              "is_URL_complete": true,
+              "main_container":".covergaelist"
             },
             {
               "site": "https://www.coindesk.com/tag/ether/",
               "base_url": "https://www.coindesk.com",
               "website_name": "Coindesk",
-              "is_URL_complete": false
+              "is_URL_complete": false,
+              "main_container": "None"
             }
           ],
         "black_list":[
+          "Amaka Nwaokocha",
+          "Zhiyuan Sun",
           "Bitcoin Core",
           "Ethereum",
           "Ezra Reguerra",
@@ -580,13 +591,15 @@
               "site": "https://cointelegraph.com/search?query=hacks",
               "base_url": "https://cointelegraph.com",
               "website_name": "Cointelegraph",
-              "is_URL_complete": false
+              "is_URL_complete": false,
+              "main_container": ".search-page__results"
             },
             {
               "site": "https://www.coindesk.com/tag/hacks/",
               "base_url": "https://www.coindesk.com",
               "website_name": "Coindesk",
-              "is_URL_complete": false
+              "is_URL_complete": false,
+              "main_container":"None"
             }
           ],
         "black_list":[
@@ -775,13 +788,15 @@
             "site": "https://cointelegraph.com/search?query=LSDs",
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
-            "is_URL_complete": false
+            "is_URL_complete": false,
+            "main_container": ".search-page__results"
           },
           {
             "site": "https://www.coindesk.com/search?s=lsd",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
-            "is_URL_complete": false
+            "is_URL_complete": false,
+            "main_container":"None"
           }
         ],
         "black_list":[

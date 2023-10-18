@@ -57,7 +57,8 @@ try:
                     site=site_data['site'],
                     base_url=site_data['base_url'],
                     website_name=site_data['website_name'],
-                    is_URL_complete=site_data['is_URL_complete']
+                    is_URL_complete=site_data['is_URL_complete'],
+                    main_container=site_data['main_container']
                 )
                 scrapping_data.sites.append(site)
 
