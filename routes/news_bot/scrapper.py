@@ -10,19 +10,28 @@ from config import session
 import re
 
 
-def scrape_sites(site,base_url, website_name, is_URL_complete, main_keyword):
+def scrape_sites(site,base_url, website_name, is_URL_complete, main_keyword, main_container):
 
     article_urls = set()
 
+    print('main_container > ', main_container)
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page()
 
+
             page.goto(site)
             page.wait_for_load_state('networkidle')
 
-            a_elements = page.query_selector_all('a')
+            if main_container != "None":
+                container = page.wait_for_selector(main_container)
+                a_elements = container.query_selector_all('a')
+            else:
+                a_elements = page.query_selector_all('a')
+                print('a_elements > ', a_elements)
+
+                
 
             for link in a_elements:
                 href = link.get_attribute('href')
@@ -35,20 +44,21 @@ def scrape_sites(site,base_url, website_name, is_URL_complete, main_keyword):
                         article_url = href.strip()
 
                     
-                    if main_keyword == 'bitcoin':
-                        input_title_formatted = str(article_title).strip().casefold()
-                        title_validation = bool(re.search(main_keyword, input_title_formatted, re.IGNORECASE))
-                    else:
-                        title_validation = True
+                    # if main_keyword == 'bitcoin':
+                    #     input_title_formatted = str(article_title).strip().casefold()
+                    #     title_validation = bool(re.search(main_keyword, input_title_formatted, re.IGNORECASE))
+                    # else:
+                    #     title_validation = True
     
                     is_url_in_db = url_in_db(article_url)
-                    is_title_in_db = title_in_db(article_title)
+                    # is_title_in_db = title_in_db(article_title)
                     is_title_in_blacklist = title_in_blacklist(article_title)
             
-                    if title_validation == True:
-                        if is_title_in_blacklist == False:
-                            if is_url_in_db == False and is_title_in_db == False:
-                                article_urls.add(article_url)
+                    # if title_validation == True:
+                    if is_title_in_blacklist == False:
+                        # if is_url_in_db == False and is_title_in_db == False:
+                        if is_url_in_db == False:
+                            article_urls.add(article_url)
 
 
             browser.close()
@@ -67,18 +77,22 @@ def scrape_articles(sites, main_keyword):
         base_url = sites.base_url
         website_name = sites.website_name
         is_URL_complete = sites.is_URL_complete
+        main_container = sites.main_container
 
         print(f'Web scrape of {main_keyword} STARTED for {website_name}')
 
         article_urls, website_name = scrape_sites(site,base_url,
                                                    website_name,
                                                    is_URL_complete,
-                                                   main_keyword)
+                                                   main_keyword,
+                                                   main_container)
         
         if not article_urls:
             print(f'No articles found for {website_name}')
             return f'No articles found for {website_name}'
+        
 
+        print('article_urls > ', article_urls)
         if article_urls:
             for article_link in article_urls:
 
@@ -108,8 +122,9 @@ def scrape_articles(sites, main_keyword):
                     title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-
-                print('article_to_save > ', article_to_save)
+                
+                if len(article_to_save) > 0:
+                    print('\narticle_to_save > ', article_to_save)
                 
             #     for article_data in article_to_save:
             #         title, content, valid_date, article_link, website_name, image_urls = article_data
