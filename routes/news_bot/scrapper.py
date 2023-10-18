@@ -1,25 +1,31 @@
-from routes.news_bot.validations import title_in_blacklist, url_in_db, title_in_db
+from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
 from routes.news_bot.sites.beincrypto import validate_beincrypto_article
 from routes.news_bot.sites.bitcoinist import validate_bitcoinist_article
+from routes.news_bot.validations import title_in_blacklist, url_in_db
+from ..slack.templates.news_message import send_NEWS_message_to_slack
 from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
 from models.news_bot.news_bot_model import SCRAPPING_DATA
+from models.news_bot.articles_model import ARTICLE
 from playwright.sync_api import sync_playwright
+from .summarizer import summary_generator
 from config import session
-import re
+
+btc_slack_channel_id = 'C05RK7CCDEK'
+eth_slack_channel_id = 'C05URLDF3JP'
+lsd_slack_channel_id = 'C05UNS3M8R3'
+hacks_slack_channel_id = 'C05UU8JBKKN'
 
 
-def scrape_sites(site,base_url, website_name, is_URL_complete, main_keyword, main_container):
+def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
 
     article_urls = set()
 
-    print('main_container > ', main_container)
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page()
-
 
             page.goto(site)
             page.wait_for_load_state('networkidle')
@@ -31,35 +37,33 @@ def scrape_sites(site,base_url, website_name, is_URL_complete, main_keyword, mai
                 a_elements = page.query_selector_all('a')
                 print('a_elements > ', a_elements)
 
-                
+            keywords = []
 
+            if main_keyword == 'bitcoin':
+                keywords = ['bitcoin', 'btc']
+            elif main_keyword == 'ethereum':
+                keywords = ['ethereum', 'ether', 'eth']
+
+                
             for link in a_elements:
                 href = link.get_attribute('href')
                 article_title = link.text_content().strip().casefold()
 
                 if href and article_title:
-                    if is_URL_complete == False:
-                        article_url = base_url + href.strip()
+                    article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
+
+                    if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
+                        if any(keyword in article_title.lower() for keyword in keywords):
+                            is_title_in_blacklist = title_in_blacklist(article_title)
+                            is_url_in_db = url_in_db(article_url)
+                          
+                            if is_title_in_blacklist == False and is_url_in_db == False:
+                                article_urls.add(article_url)
                     else:
-                        article_url = href.strip()
-
-                    
-                    # if main_keyword == 'bitcoin':
-                    #     input_title_formatted = str(article_title).strip().casefold()
-                    #     title_validation = bool(re.search(main_keyword, input_title_formatted, re.IGNORECASE))
-                    # else:
-                    #     title_validation = True
-    
-                    is_url_in_db = url_in_db(article_url)
-                    # is_title_in_db = title_in_db(article_title)
-                    is_title_in_blacklist = title_in_blacklist(article_title)
-            
-                    # if title_validation == True:
-                    if is_title_in_blacklist == False:
-                        # if is_url_in_db == False and is_title_in_db == False:
-                        if is_url_in_db == False:
+                        is_title_in_blacklist = title_in_blacklist(article_title)
+                        is_url_in_db = url_in_db(article_url)
+                        if is_title_in_blacklist == False and is_url_in_db == False:
                             article_urls.add(article_url)
-
 
             browser.close()
             return article_urls, website_name
@@ -92,7 +96,6 @@ def scrape_articles(sites, main_keyword):
             return f'No articles found for {website_name}'
         
 
-        print('article_urls > ', article_urls)
         if article_urls:
             for article_link in article_urls:
 
@@ -126,42 +129,42 @@ def scrape_articles(sites, main_keyword):
                 if len(article_to_save) > 0:
                     print('\narticle_to_save > ', article_to_save)
                 
-            #     for article_data in article_to_save:
-            #         title, content, valid_date, article_link, website_name, image_urls = article_data
+                for article_data in article_to_save:
+                    title, content, valid_date, article_link, website_name, image_urls = article_data
 
-            #         new_article = ARTICLE(title=title,
-            #                             content=content,
-            #                             date=valid_date,
-            #                             url=article_link,
-            #                             website_name=website_name
-            #                             )
+                    new_article = ARTICLE(title=title,
+                                        content=content,
+                                        date=valid_date,
+                                        url=article_link,
+                                        website_name=website_name
+                                        )
 
-            #         session.add(new_article)
-            #         session.commit()
+                    session.add(new_article)
+                    session.commit()
                     
                     
-            #         if main_keyword == 'bitcoin':
-            #             channel_id = btc_slack_channel_id
-            #         elif main_keyword == 'ethereum':
-            #             channel_id = eth_slack_channel_id
-            #         elif main_keyword == 'hacks':
-            #             channel_id = hacks_slack_channel_id
-            #         else:
-            #             channel_id = lsd_slack_channel_id
+                    if main_keyword == 'bitcoin':
+                        channel_id = btc_slack_channel_id
+                    elif main_keyword == 'ethereum':
+                        channel_id = eth_slack_channel_id
+                    elif main_keyword == 'hacks':
+                        channel_id = hacks_slack_channel_id
+                    else:
+                        channel_id = lsd_slack_channel_id
 
-            #         summary = summary_generator(content, main_keyword)
+                    summary = summary_generator(content, main_keyword)
 
-            #         if summary:
-            #             send_NEWS_message_to_slack(channel_id=channel_id, 
-            #                                 title=title,
-            #                                 date_time=valid_date,
-            #                                 url=article_link,
-            #                                 summary=summary,
-            #                                 images_list=image_urls
-            #                                 )
-            #             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
-            #         else:
-            #             send_INFO_message_to_slack_channel(channel_id=channel_id, title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
+                    if summary:
+                        send_NEWS_message_to_slack(channel_id=channel_id, 
+                                            title=title,
+                                            date_time=valid_date,
+                                            url=article_link,
+                                            summary=summary,
+                                            images_list=image_urls
+                                            )
+                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
+                    else:
+                        send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
             
             return f'Web scrapping of {website_name} finished', 200
         
