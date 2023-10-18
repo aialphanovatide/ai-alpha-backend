@@ -21,6 +21,7 @@ hacks_slack_channel_id = 'C05UU8JBKKN'
 def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
 
     article_urls = set()
+    elements = []
 
     try:
         with sync_playwright() as p:
@@ -33,9 +34,27 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
             if main_container != "None":
                 container = page.wait_for_selector(main_container)
                 a_elements = container.query_selector_all('a')
+                for link in a_elements:
+                    href = link.get_attribute('href')
+                    article_title = link.text_content().strip().casefold()
+
+                    if href and article_title:
+                        elements.append({'href': href, 'article_title': article_title})
             else:
-                a_elements = page.query_selector_all('a')
-                print('a_elements > ', a_elements)
+                links = page.evaluate('''() => {
+                    const anchors = Array.from(document.querySelectorAll('a'));
+                    return anchors.map(a => ({
+                        href: a.href,
+                        text: a.textContent.trim().toLowerCase()
+                    }));
+                }''')
+
+                for link in links:
+                    href = link['href']
+                    article_title = link['text']
+
+                    if href and article_title:
+                        elements.append({'href': href, 'article_title': article_title})
 
             keywords = []
 
@@ -45,25 +64,24 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
                 keywords = ['ethereum', 'ether', 'eth']
 
                 
-            for link in a_elements:
-                href = link.get_attribute('href')
-                article_title = link.text_content().strip().casefold()
+            for link in elements:
+                href = link['href']
+                article_title = link['article_title']
+              
+                article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
 
-                if href and article_title:
-                    article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
-
-                    if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
-                        if any(keyword in article_title.lower() for keyword in keywords):
-                            is_title_in_blacklist = title_in_blacklist(article_title)
-                            is_url_in_db = url_in_db(article_url)
-                          
-                            if is_title_in_blacklist == False and is_url_in_db == False:
-                                article_urls.add(article_url)
-                    else:
+                if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
+                    if any(keyword in article_title.lower() for keyword in keywords):
                         is_title_in_blacklist = title_in_blacklist(article_title)
                         is_url_in_db = url_in_db(article_url)
+                        
                         if is_title_in_blacklist == False and is_url_in_db == False:
                             article_urls.add(article_url)
+                else:
+                    is_title_in_blacklist = title_in_blacklist(article_title)
+                    is_url_in_db = url_in_db(article_url)
+                    if is_title_in_blacklist == False and is_url_in_db == False:
+                        article_urls.add(article_url)
 
             browser.close()
             return article_urls, website_name
@@ -126,11 +144,11 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                 
-                if len(article_to_save) > 0:
-                    print('\narticle_to_save > ', article_to_save)
+                # if len(article_to_save) > 0:
+                #     print('\narticle_to_save > ', article_to_save)
                 
-                # for article_data in article_to_save:
-                #     title, content, valid_date, article_link, website_name, image_urls = article_data
+                for article_data in article_to_save:
+                    title, content, valid_date, article_link, website_name, image_urls = article_data
 
                     # new_article = ARTICLE(title=title,
                     #                     content=content,
@@ -143,14 +161,14 @@ def scrape_articles(sites, main_keyword):
                     # session.commit()
                     
                     
-                    # if main_keyword == 'bitcoin':
-                    #     channel_id = btc_slack_channel_id
-                    # elif main_keyword == 'ethereum':
-                    #     channel_id = eth_slack_channel_id
-                    # elif main_keyword == 'hacks':
-                    #     channel_id = hacks_slack_channel_id
-                    # else:
-                    #     channel_id = lsd_slack_channel_id
+                    if main_keyword == 'bitcoin':
+                        channel_id = btc_slack_channel_id
+                    elif main_keyword == 'ethereum':
+                        channel_id = eth_slack_channel_id
+                    elif main_keyword == 'hacks':
+                        channel_id = hacks_slack_channel_id
+                    else:
+                        channel_id = lsd_slack_channel_id
 
                     # summary = summary_generator(content, main_keyword)
 
@@ -162,7 +180,7 @@ def scrape_articles(sites, main_keyword):
                     #                         summary=summary,
                     #                         images_list=image_urls
                     #                         )
-                    #     print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
+                    print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
                     # else:
                     #     send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
             
