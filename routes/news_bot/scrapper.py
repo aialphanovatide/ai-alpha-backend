@@ -129,42 +129,42 @@ def scrape_articles(sites, main_keyword):
                 if len(article_to_save) > 0:
                     print('\narticle_to_save > ', article_to_save)
                 
-                for article_data in article_to_save:
-                    title, content, valid_date, article_link, website_name, image_urls = article_data
+                # for article_data in article_to_save:
+                #     title, content, valid_date, article_link, website_name, image_urls = article_data
 
-                    new_article = ARTICLE(title=title,
-                                        content=content,
-                                        date=valid_date,
-                                        url=article_link,
-                                        website_name=website_name
-                                        )
+                #     new_article = ARTICLE(title=title,
+                #                         content=content,
+                #                         date=valid_date,
+                #                         url=article_link,
+                #                         website_name=website_name
+                #                         )
 
-                    session.add(new_article)
-                    session.commit()
+                #     session.add(new_article)
+                #     session.commit()
                     
                     
-                    if main_keyword == 'bitcoin':
-                        channel_id = btc_slack_channel_id
-                    elif main_keyword == 'ethereum':
-                        channel_id = eth_slack_channel_id
-                    elif main_keyword == 'hacks':
-                        channel_id = hacks_slack_channel_id
-                    else:
-                        channel_id = lsd_slack_channel_id
+                #     if main_keyword == 'bitcoin':
+                #         channel_id = btc_slack_channel_id
+                #     elif main_keyword == 'ethereum':
+                #         channel_id = eth_slack_channel_id
+                #     elif main_keyword == 'hacks':
+                #         channel_id = hacks_slack_channel_id
+                #     else:
+                #         channel_id = lsd_slack_channel_id
 
-                    summary = summary_generator(content, main_keyword)
+                #     summary = summary_generator(content, main_keyword)
 
-                    if summary:
-                        send_NEWS_message_to_slack(channel_id=channel_id, 
-                                            title=title,
-                                            date_time=valid_date,
-                                            url=article_link,
-                                            summary=summary,
-                                            images_list=image_urls
-                                            )
-                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
-                    else:
-                        send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
+                #     if summary:
+                #         send_NEWS_message_to_slack(channel_id=channel_id, 
+                #                             title=title,
+                #                             date_time=valid_date,
+                #                             url=article_link,
+                #                             summary=summary,
+                #                             images_list=image_urls
+                #                             )
+                #         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
+                #     else:
+                #         send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
             
             return f'Web scrapping of {website_name} finished', 200
         
