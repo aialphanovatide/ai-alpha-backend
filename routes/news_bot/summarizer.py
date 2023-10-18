@@ -1,7 +1,7 @@
-import os
-import openai
-from openai import error
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
+from openai import error
+import openai
+import os
 
 from dotenv import load_dotenv
 
@@ -27,7 +27,7 @@ Step One: Rewrite the headline of the article that you are summarising: Please f
 Read the following article and then summarise it into bullet points. Please follow the below rules for the summary of the article:(i) The summary must be concise - focusing on only the most important points in the article that you are summarizing. (ii) For any points that you think are of secondary importance but should still be included, make a second summary and title it ‘additional points’. Only include this section if you deem any parts of the article are deemed worthy of inclusion here. (iii) Any content from the article that you deem to be not needed should be removed from the summary entirely.
 (v) The bullet points should be structured, and the summaries should have a beginning, middle, and end. (vi) If you are summarising a longer article (longer refers to anything over 1000 words) then it is perfectly acceptable to use subheadings for the summary that you are producing. (viii)  Highlight the most important words putting them between asterisks (*)"""
 
-def summary_generator(text, main_keyword, article link):
+def summary_generator(text, main_keyword):
     try:
         if main_keyword == 'bitcoin':
             prompt = btc_prompt

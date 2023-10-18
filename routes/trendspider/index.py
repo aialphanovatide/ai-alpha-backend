@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from flask import request, Blueprint
-from routes.trendspider.alert_startegy import send_alert_strategy_message_to_telegram
+from routes.trendspider.alert_startegy import send_alert_strategy_to_telegram
 from routes.trendspider.signal_strategy import send_signal_strategy_to_telegram
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 
@@ -14,16 +14,17 @@ trendspider_notification_bp = Blueprint(
 
 
 def get_data_from_trendspider_to_telegram(data):
+
     type = data["type"]
 
     if type == "signal":
         response, status = send_signal_strategy_to_telegram(data)
         return response, status
     else:
-        response, status = send_alert_strategy_message_to_telegram(data)
+        response, status = send_alert_strategy_to_telegram(data)
         return response, status
 
-@trendspider_notification_bp.route('/webhook', methods=['GET', 'POST'])
+@trendspider_notification_bp.route('/webhook', methods=['POST'])
 def receive_data():
         data_length = len(request.data)
         print('request.data of Trenspider >', request.data)
