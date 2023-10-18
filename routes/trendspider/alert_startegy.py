@@ -26,7 +26,7 @@ def send_alert_strategy_message_to_slack(data):
     status = data["status"] 
 
     formatted_strategy_name = str(strategy_name).upper()
-    formatted_symbol = str(symbol).capitalize()
+    formatted_symbol = str(symbol).upper()
     formatted_last_price = str(last_price)
     formatted_status = str(status).capitalize()
     formatted_type_of_alert = str(type).capitalize()
@@ -81,7 +81,7 @@ def send_alert_strategy_message_to_slack(data):
         return f'Error sending message to Slack channel. Reason: {e}', 500
     
 
-def send_alert_strategy_message_to_telegram(data):
+def send_alert_strategy_to_telegram(data):
 
     # send_alert_strategy_message_to_slack(data=data)
 
@@ -91,12 +91,12 @@ def send_alert_strategy_message_to_telegram(data):
     status = data["status"] 
 
     formatted_strategy_name = str(strategy_name).upper()
-    formatted_symbol = str(symbol).capitalize()
+    formatted_symbol = str(symbol).upper()
     formatted_last_price = str(last_price)
     formatted_status = str(status).capitalize()
 
     content = f"""<b>Alert Strategy - {formatted_symbol}</b>\n\nStrategy: {formatted_strategy_name}\nStatus: <b>{formatted_status}</b>\nLast Price: <b>${formatted_last_price}</b>\n\n"""
-
+    print("content > ", content)
     text_payload = {
             'text': content,
             'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
@@ -105,11 +105,12 @@ def send_alert_strategy_message_to_telegram(data):
             }
     try:
         response = requests.post(telegram_text_url, data=text_payload)
+        response = {"status_code": 200}
         if response.status_code == 200:
             return 'Alert message sent to Telegram successfully', 200
         else:
-            # send_notification_to_product_alerts_slack_channel(title_message='Error while sending Alert to Telegram', sub_title='Reason', message=f'{str(response.content)}')
+            send_notification_to_product_alerts_slack_channel(title_message='Error while sending Alert to Telegram', sub_title='Reason', message=f'{str(response.content)}')
             return 'Error while sending alert to Telegram', 500 
     except Exception as e:
-        # send_notification_to_product_alerts_slack_channel(title_message='Error while sending Alert to Telegram', sub_title='Reason', message=f'{str(e)}')
+        send_notification_to_product_alerts_slack_channel(title_message='Error while sending Alert to Telegram', sub_title='Reason', message=f'{str(e)}')
         return f'Error sending message to Telegram. Reason: {e}', 500

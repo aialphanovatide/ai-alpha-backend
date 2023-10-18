@@ -1,5 +1,5 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from models.news_bot.news_bot_model import SCRAPPING_DATA, KEWORDS
+from models.news_bot.news_bot_model import SCRAPPING_DATA, KEWORDS, BLACKLIST
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint
@@ -13,11 +13,6 @@ scrapper_bp = Blueprint(
     template_folder='templates',
     static_folder='static'
 )
-
-btc_slack_channel_id = 'C05RK7CCDEK'
-eth_slack_channel_id = 'C05URLDF3JP'
-lsd_slack_channel_id = 'C05UNS3M8R3'
-hacks_slack_channel_id = 'C05UU8JBKKN'
 
 news_bot_start_time = 20
 
@@ -73,7 +68,7 @@ def deactivate_news_bot(target):
 
 
 # Gets the status of the scheduler
-@scrapper_bp.route('/api/scheduler/status', methods=['GET', 'POST'])
+@scrapper_bp.route('/api/scheduler/status', methods=['GET'])
 def bot_status():
     value = scheduler.state
     if value == 1:
@@ -113,6 +108,40 @@ def add_keyword():
                 return f"The keyword '{new_keyword}' already exists in the database for keyword_info_id {keyword_info_id}.", 404
             else:
                 new_keyword_object = KEWORDS(keyword=new_keyword.casefold(), keyword_info_id=keyword_info_id)
+                session.add(new_keyword_object)
+                session.commit()
+                return f"The keyword '{new_keyword}' has been inserted into the database for keyword_info_id {keyword_info_id}.", 200
+
+
+# Adds a new keyword to the respective list - BTC, ETH, LSD or Hacks
+@scrapper_bp.route('/api/bot/add/blackword', methods=['POST'])
+def add_black_key():
+    data = request.json
+    new_keyword = data['blackword']
+    main_keyword = data['main_keyword']
+
+    if not new_keyword or not main_keyword:
+        return 'Keyword or main keyword are not present in the request', 404
+
+    if main_keyword and new_keyword:
+        scrapping_data_objects = session.query(
+            SCRAPPING_DATA).filter(
+                SCRAPPING_DATA.main_keyword == main_keyword).all()
+        
+        if not scrapping_data_objects:
+            return 'Main keyword was not found in the database', 404
+        
+        if scrapping_data_objects:
+            keyword_info_id = scrapping_data_objects[0].id
+        
+            keyword_exists = session.query(exists().where(
+                (BLACKLIST.black_Word == new_keyword.casefold()) &
+                (BLACKLIST.keyword_info_id == keyword_info_id)
+            )).scalar()
+            if keyword_exists:
+                return f"The keyword '{new_keyword}' already exists for keyword_info_id {keyword_info_id}.", 404
+            else:
+                new_keyword_object = BLACKLIST(black_Word=new_keyword.casefold(), keyword_info_id=keyword_info_id)
                 session.add(new_keyword_object)
                 session.commit()
                 return f"The keyword '{new_keyword}' has been inserted into the database for keyword_info_id {keyword_info_id}.", 200

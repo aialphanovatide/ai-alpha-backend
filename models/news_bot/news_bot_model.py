@@ -25,7 +25,7 @@ class KEWORDS(SCRAPPER_MODEL):
     keyword = Column(String)  
     created_at = Column(DateTime, default=datetime.utcnow) 
 
-class BLACKLIST(SCRAPPER_MODEL): # son palabras que no deberian pasar el filtro en el titulo o contenido.
+class BLACKLIST(SCRAPPER_MODEL): 
     __tablename__ = 'blacklist'
 
     id = Column(Integer, primary_key=True)
@@ -42,6 +42,7 @@ class SITES(SCRAPPER_MODEL):
     base_url = Column(String)  
     website_name = Column(String)  
     is_URL_complete = Column(Boolean)  
+    main_container = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow) 
 
 
