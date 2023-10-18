@@ -14,11 +14,6 @@ scrapper_bp = Blueprint(
     static_folder='static'
 )
 
-btc_slack_channel_id = 'C05RK7CCDEK'
-eth_slack_channel_id = 'C05URLDF3JP'
-lsd_slack_channel_id = 'C05UNS3M8R3'
-hacks_slack_channel_id = 'C05UU8JBKKN'
-
 news_bot_start_time = 20
 
 def activate_news_bot(target):
