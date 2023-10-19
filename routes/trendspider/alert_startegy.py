@@ -83,7 +83,7 @@ def send_alert_strategy_message_to_slack(data):
 
 def send_alert_strategy_to_telegram(data):
 
-    # send_alert_strategy_message_to_slack(data=data)
+    send_alert_strategy_message_to_slack(data=data)
 
     strategy_name = data['bot_name']  
     symbol = data['symbol']
@@ -96,7 +96,7 @@ def send_alert_strategy_to_telegram(data):
     formatted_status = str(status).capitalize()
 
     content = f"""<b>Alert Strategy - {formatted_symbol}</b>\n\nStrategy: {formatted_strategy_name}\nStatus: <b>{formatted_status}</b>\nLast Price: <b>${formatted_last_price}</b>\n\n"""
-    print("content > ", content)
+
     text_payload = {
             'text': content,
             'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
@@ -105,7 +105,7 @@ def send_alert_strategy_to_telegram(data):
             }
     try:
         response = requests.post(telegram_text_url, data=text_payload)
-        response = {"status_code": 200}
+
         if response.status_code == 200:
             return 'Alert message sent to Telegram successfully', 200
         else:
