@@ -72,6 +72,12 @@ def send_signal_strategy_to_slack(data, accuracy, position, formatted_entry_rang
                                     "text": f"*Entry Range:*\n{formatted_entry_range}"
                                 }
                             ]
+                        },
+                        {
+                        "type": "divider"
+                        },
+                        {
+                        "type": "divider"
                         }
                     ]
                 }

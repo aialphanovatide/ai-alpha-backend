@@ -64,6 +64,12 @@ def send_alert_strategy_message_to_slack(data):
                             "text": f"*Last Price:*\n${formatted_last_price}"
                         }
                     ]
+                },
+                {
+                "type": "divider"
+                },
+                {
+                "type": "divider"
                 }
             ]
         }

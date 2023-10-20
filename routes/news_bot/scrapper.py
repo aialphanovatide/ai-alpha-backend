@@ -109,7 +109,7 @@ def scrape_articles(sites, main_keyword):
                                                    main_container)
         
         if not article_urls:
-            print(f'No articles found for {website_name} of {main_container}')
+            print(f'No articles found for {website_name} of {main_keyword}')
             return f'No articles found for {website_name}'
         
         
