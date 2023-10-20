@@ -25,6 +25,12 @@ def send_notification_to_product_alerts_slack_channel(title_message, sub_title, 
                         "text": f"*{sub_title}:*\n{message}"
                     }
                 ]
+            },
+            {
+			"type": "divider"
+            },
+            {
+            "type": "divider"
             }
         ]
     }

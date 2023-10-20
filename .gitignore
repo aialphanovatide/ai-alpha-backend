@@ -2,4 +2,4 @@
 venv
 
 service_account.json
-__pycache__
+__pycache__/
