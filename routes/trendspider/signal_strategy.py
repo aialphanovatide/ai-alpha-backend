@@ -3,10 +3,8 @@ import re
 import gspread
 import requests
 from difflib import SequenceMatcher
-from routes.trendspider.create_chart import generate_chart
+from routes.trendspider.create_chart import generate_signal_chart
 from routes.trendspider.formulas import add_0_25, formulas_long, formulas_short
-
-sa = gspread.service_account('service_account.json')
 
 # Product-alerts channel webhook url
 SLACK_PRODUCT_ALERTS = os.getenv('SLACK_PRODUCT_ALERTS')
@@ -98,20 +96,24 @@ def send_signal_strategy_to_slack(data, accuracy, position, formatted_entry_rang
 
 def send_signal_strategy_to_telegram(data):
 
+    
+
     strategy_name = data['bot_name']  
     symbol = data['symbol']
     last_price = data["last_price"] 
-    type = data["type"] 
 
     entry_range = add_0_25(last_price) # adds a 0.25% to the last_price
-
-    main_sheet = sa.open('AI Alpha Signals - Trend Spider')
-    wks = main_sheet.worksheet('Summary of Swing Trading strategies')
-    all_stretegies = wks.col_values(1) 
-
+    try:
+        sa = gspread.service_account('service_account.json')
+        main_sheet = sa.open_by_url("https://docs.google.com/spreadsheets/d/10PToRlfsE6BExc8UCba5dxg062YWIYH6ZtZgVDlfciM/edit#gid=884504876")
+        wks = main_sheet.worksheet('Summary of Swing Trading strategies')
+        all_stretegies = wks.col_values(1) 
+    except Exception as e:
+        print('An error occured' + str(e))
+        return 'An error occured' + str(e)
+  
     # First look for the strategy that is equal to the incoming strategy from Trendspider
     best_match_of_all_strategies = max(all_stretegies, key=lambda strategy: SequenceMatcher(None, strategy_name, strategy).ratio())
-
     if best_match_of_all_strategies == strategy_name:
     
         row_data = None # Store the data of the found strategy
@@ -152,7 +154,7 @@ def send_signal_strategy_to_telegram(data):
             symbol_with_usdt = symbol[:3] + '/' + symbol[3:]
             position = position.split('-')[1].strip().upper() # Long or Short
 
-            chart = generate_chart(symbol, last_price)
+            chart = generate_signal_chart(symbol, last_price)
 
             files = {
             'photo': ('chart.png', chart, 'image/png')
@@ -206,11 +208,11 @@ def send_signal_strategy_to_telegram(data):
             strategy_text = f"""<b>Breakout Strategy - {symbol_with_usdt.upper()}</b>\nStrategy: Breakout Entry for {symbol_with_usdt.upper()}\nSignal Accuracy: <b>{accuracy}%</b>\n\nHello! AI Alpha's algorithm has identified a trigger to enter a potential trading position for {symbol_with_usdt.upper()}.\n\nAccording to our <b>breakout</b> strategy, we recommend entering a <b>{position}</b> position for {symbol_with_usdt.upper()} <b>Potential entry point ${formatted_entry_range}.</b>\n\nTake Profit Target 1: ${TP_1} \nTake Profit Target 2: ${TP_2}\nTake Profit Target 3: ${TP_3}\nTake Profit Target 4: ${TP_4}\nRecommended Stop Loss 1: ${stop_loss_1}\nRecommended Stop Loss 2: ${stop_loss_2}\n\nAI Alpha https://aialpha.ai/"""
             photo_payload = {'chat_id': group_id, 'caption': strategy_text, 'message_thread_id': topic_id}
 
-            send_signal_strategy_to_slack(data=data,
-                                          accuracy=accuracy,
-                                          position=position,
-                                          formatted_entry_range=formatted_entry_range,
-                                          )
+            # send_signal_strategy_to_slack(data=data,
+            #                               accuracy=accuracy,
+            #                               position=position,
+            #                               formatted_entry_range=formatted_entry_range,
+            #                               )
             
             response = requests.post(send_photo_url, data=photo_payload, files=files)
 
