@@ -1,7 +1,9 @@
-import os
-import requests
-from dotenv import load_dotenv
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
+from .create_chart import generate_alert_chart
+from dotenv import load_dotenv
+import requests
+import os
+
 
 load_dotenv()
 
@@ -16,6 +18,7 @@ CHANNEL_ID_AI_ALPHA_FOUNDERS = os.getenv('CHANNEL_ID_AI_ALPHA_FOUNDERS')
 CALL_TO_TRADE_TOPIC_ID = os.getenv('CALL_TO_TRADE_TOPIC_ID')
 
 telegram_text_url = f'https://api.telegram.org/bot{TOKEN}/sendMessage?parse_mode=HTML'
+send_photo_url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto?parse_mode=HTML'
 
 def send_alert_strategy_message_to_slack(data):
 
@@ -49,7 +52,7 @@ def send_alert_strategy_message_to_slack(data):
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Symbol:*\n{formatted_symbol}%"
+                            "text": f"*Symbol:*\n{formatted_symbol}"
                         },
                         {
                             "type": "mrkdwn",
@@ -89,7 +92,7 @@ def send_alert_strategy_message_to_slack(data):
 
 def send_alert_strategy_to_telegram(data):
 
-    send_alert_strategy_message_to_slack(data=data)
+    # send_alert_strategy_message_to_slack(data=data)
 
     strategy_name = data['bot_name']  
     symbol = data['symbol']
@@ -97,20 +100,31 @@ def send_alert_strategy_to_telegram(data):
     status = data["status"] 
 
     formatted_strategy_name = str(strategy_name).upper()
-    formatted_symbol = str(symbol).upper()
     formatted_last_price = str(last_price)
     formatted_status = str(status).capitalize()
+    formatted_symbol = symbol.split(':')[1].replace('^', '').strip() # result: SOLUSDT
 
-    content = f"""<b>Alert Strategy - {formatted_symbol}</b>\n\nStrategy: {formatted_strategy_name}\nStatus: <b>{formatted_status}</b>\nLast Price: <b>${formatted_last_price}</b>\n\n"""
+    content = f"""<b>Alert - {formatted_symbol}</b>\n\nStrategy: <b>{formatted_strategy_name}</b>\nStatus: <b>{formatted_status}</b>\nLast Price: <b>${formatted_last_price}</b>\n\n"""
 
-    text_payload = {
-            'text': content,
-            'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
-            'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
-            'protect_content': False,
-            }
+    chart = generate_alert_chart(symbol, last_price)
+
+    files = {
+    'photo': ('chart.png', chart, 'image/png')
+    }
+
+    photo_payload = {'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
+                    'caption': content,
+                    'message_thread_id': CALL_TO_TRADE_TOPIC_ID}
+
+
+    # text_payload = {
+    #         'text': content,
+    #         'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
+    #         'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
+    #         'protect_content': False,
+    #         }
     try:
-        response = requests.post(telegram_text_url, data=text_payload)
+        response = requests.post(send_photo_url, data=photo_payload, files=files)
 
         if response.status_code == 200:
             return 'Alert message sent to Telegram successfully', 200
