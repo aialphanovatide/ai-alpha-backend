@@ -63,7 +63,6 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
             elif main_keyword == 'ethereum':
                 keywords = ['ethereum', 'ether', 'eth']
 
-                
             for link in elements:
                 href = link['href']
                 article_title = link['article_title']
@@ -110,10 +109,10 @@ def scrape_articles(sites, main_keyword):
                                                    main_container)
         
         if not article_urls:
-            print(f'No articles found for {website_name}')
+            print(f'No articles found for {website_name} of {main_container}')
             return f'No articles found for {website_name}'
         
-
+        
         if article_urls:
             for article_link in article_urls:
 
@@ -171,7 +170,6 @@ def scrape_articles(sites, main_keyword):
                         channel_id = lsd_slack_channel_id
 
                     summary = summary_generator(content, main_keyword)
-                    print('summary > ', summary)
 
                     if summary:
                         send_NEWS_message_to_slack(channel_id=channel_id, 
