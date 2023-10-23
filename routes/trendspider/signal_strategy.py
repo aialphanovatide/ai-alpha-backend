@@ -208,11 +208,11 @@ def send_signal_strategy_to_telegram(data):
             strategy_text = f"""<b>Breakout Strategy - {symbol_with_usdt.upper()}</b>\nStrategy: Breakout Entry for {symbol_with_usdt.upper()}\nSignal Accuracy: <b>{accuracy}%</b>\n\nHello! AI Alpha's algorithm has identified a trigger to enter a potential trading position for {symbol_with_usdt.upper()}.\n\nAccording to our <b>breakout</b> strategy, we recommend entering a <b>{position}</b> position for {symbol_with_usdt.upper()} <b>Potential entry point ${formatted_entry_range}.</b>\n\nTake Profit Target 1: ${TP_1} \nTake Profit Target 2: ${TP_2}\nTake Profit Target 3: ${TP_3}\nTake Profit Target 4: ${TP_4}\nRecommended Stop Loss 1: ${stop_loss_1}\nRecommended Stop Loss 2: ${stop_loss_2}\n\nAI Alpha https://aialpha.ai/"""
             photo_payload = {'chat_id': group_id, 'caption': strategy_text, 'message_thread_id': topic_id}
 
-            send_signal_strategy_to_slack(data=data,
-                                          accuracy=accuracy,
-                                          position=position,
-                                          formatted_entry_range=formatted_entry_range,
-                                          )
+            # send_signal_strategy_to_slack(data=data,
+            #                               accuracy=accuracy,
+            #                               position=position,
+            #                               formatted_entry_range=formatted_entry_range,
+            #                               )
             
             response = requests.post(send_photo_url, data=photo_payload, files=files)
 

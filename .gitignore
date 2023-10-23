@@ -1,5 +1,38 @@
-.env
-venv
-
-service_account.json
+# Byte-compiled / optimized Python files
 __pycache__/
+*.pyc
+
+# Environment-specific files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Temporary files
+*.swp
+*.swo
+*.swn
+
+# Site packages
+/lib/
+/lib64/
+
+# Compiled Python files
+*.pyo
+*.pyd
+
+# Python package management
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+ENV/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Google account
+service_account.json

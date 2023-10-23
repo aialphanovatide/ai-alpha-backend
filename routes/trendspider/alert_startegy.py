@@ -92,7 +92,7 @@ def send_alert_strategy_message_to_slack(data):
 
 def send_alert_strategy_to_telegram(data):
 
-    send_alert_strategy_message_to_slack(data=data)
+    # send_alert_strategy_message_to_slack(data=data)
 
     strategy_name = data['bot_name']  
     symbol = data['symbol']
