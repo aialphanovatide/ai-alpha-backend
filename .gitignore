@@ -1,6 +1,7 @@
 # Byte-compiled / optimized Python files
 __pycache__/
 *.pyc
+*.py[co]
 
 # Environment-specific files
 __pycache__/config.cpython-311.pyc
