@@ -7,6 +7,7 @@ from ..slack.templates.news_message import send_NEWS_message_to_slack
 from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
 from models.news_bot.news_bot_model import SCRAPPING_DATA
+from routes.twitter.index import send_tweets_to_twitter
 from models.news_bot.articles_model import ARTICLE
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
@@ -147,18 +148,7 @@ def scrape_articles(sites, main_keyword):
                 #     print('\narticle_to_save > ', article_to_save)
                 
                 for article_data in article_to_save:
-                    title, content, valid_date, article_link, website_name, image_urls = article_data
-
-                    new_article = ARTICLE(title=title,
-                                        content=content,
-                                        date=valid_date,
-                                        url=article_link,
-                                        website_name=website_name
-                                        )
-
-                    session.add(new_article)
-                    session.commit()
-                    
+                    title, content, valid_date, article_link, website_name, image_urls = article_data       
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -179,6 +169,19 @@ def scrape_articles(sites, main_keyword):
                                             summary=summary,
                                             images_list=image_urls
                                             )
+                        
+                        # response, status = send_tweets_to_twitter(content=summary)
+                        # if status == 200:
+                        new_article = ARTICLE(title=title,
+                                        content=summary,
+                                        date=valid_date,
+                                        url=article_link,
+                                        website_name=website_name
+                                        )
+
+                        session.add(new_article)
+                        session.commit()
+
                         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
                     else:
                         send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
