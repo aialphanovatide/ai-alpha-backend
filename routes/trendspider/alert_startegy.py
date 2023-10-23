@@ -129,8 +129,6 @@ def send_alert_strategy_to_telegram(data):
         if response.status_code == 200:
             return 'Alert message sent to Telegram successfully', 200
         else:
-            send_notification_to_product_alerts_slack_channel(title_message='Error while sending Alert to Telegram', sub_title='Reason', message=f'{str(response.content)}')
-            return 'Error while sending alert to Telegram', 500 
+            return f'Error while sending alert to Telegram {str(response.content)}', 500 
     except Exception as e:
-        send_notification_to_product_alerts_slack_channel(title_message='Error while sending Alert to Telegram', sub_title='Reason', message=f'{str(e)}')
         return f'Error sending message to Telegram. Reason: {e}', 500

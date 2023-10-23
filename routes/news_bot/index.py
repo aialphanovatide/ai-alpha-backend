@@ -2,10 +2,10 @@ from routes.slack.templates.poduct_alert_notification import send_notification_t
 from models.news_bot.news_bot_model import SCRAPPING_DATA, KEWORDS, BLACKLIST
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
+from config import session, news_bot_start_time
 from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
-from config import session
 
 
 scrapper_bp = Blueprint(
@@ -14,7 +14,6 @@ scrapper_bp = Blueprint(
     static_folder='static'
 )
 
-news_bot_start_time = 20
 
 def activate_news_bot(target):
 
