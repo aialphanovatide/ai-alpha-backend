@@ -10,6 +10,8 @@ import os
 
 load_dotenv()
 
+news_bot_start_time = 30
+
 DB_PORT = os.getenv('DB_PORT_MAC')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
