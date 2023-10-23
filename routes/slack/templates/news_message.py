@@ -10,7 +10,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"Title: {title}",
+                    "text": f"{title}",
                     "emoji": True
                 }
             },

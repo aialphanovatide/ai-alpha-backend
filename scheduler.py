@@ -5,6 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_EXECUTED
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 
+
 scheduler = BackgroundScheduler()
 scheduler.add_jobstore('sqlalchemy', url= db_url)
 if scheduler.state != 1:
@@ -20,7 +21,7 @@ def job_error(event): # for the status with an error of the bot
     send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot has an internal error on the last scrapped', 
                                                       sub_title="Response:", 
                                                       message=f"{event.retval}")
-    print(f'{job_id} News Bot has an internal error:\nResponse: {event.retval}.')
+    print(f'{job_id} has an internal error:\ne{event.retval}')
 
 def job_max_instances_reached(event): # for the status with an error of the bot
     job_id = str(event.job_id).capitalize()
@@ -39,15 +40,17 @@ def job_max_instances_reached(event): # for the status with an error of the bot
         if job:
             send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot restarted', 
                                                               sub_title="Response:", 
-                                                              message=f"An interval of *{news_bot_start_time + 5} Minutes* has been set for scrapping data")
+                                                              message=f"Execution of {job_id} News Bot restarted successfully")
             print(f"""{job_id} News Bot restarted\n
                     An interval of *{news_bot_start_time + 5} Minutes* has been set for scrapping data')""")
     except Exception as e:
         print(f'Error while restarting {job_id} News Bot\n{str(e)}')
         send_notification_to_product_alerts_slack_channel(title_message=f'Error while restarting {job_id} News Bot', 
                                                           sub_title="Response:", 
-                                                          message=f"{str(e)}")
-        
+                                                          message=f"str(e)")
+   
+
+   
 scheduler.add_listener(job_error, EVENT_JOB_ERROR)
 scheduler.add_listener(job_max_instances_reached, EVENT_JOB_MAX_INSTANCES)
 scheduler.add_listener(job_executed, EVENT_JOB_EXECUTED)

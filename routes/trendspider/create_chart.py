@@ -37,6 +37,47 @@ def get_indicator(indicator: str, strategy_name: str) -> str:
         return False
    
 
+# def plot_rsi(data):
+#     # Calculate RSI
+#     def calculate_rsi(data, period=14):
+#         delta = data['Close'].diff(1)
+#         gain = delta.where(delta > 0, 0)
+#         loss = -delta.where(delta < 0, 0)
+
+#         avg_gain = gain.rolling(window=period).mean()
+#         avg_loss = loss.rolling(window=period).mean()
+
+#         rs = avg_gain / avg_loss
+#         rsi = 100 - (100 / (1 + rs))
+
+#         return rsi
+
+#     # Calculate RSI using the specified period (default is 14)
+#     data['RSI'] = calculate_rsi(data)
+
+#     # Create a Plotly figure for the RSI graph
+#     fig = go.Figure()
+
+#     # Adding RSI trace
+#     fig.add_trace(go.Scatter(x=data['Timestamp'], y=data['RSI'], mode='lines', name='RSI'))
+
+#     # Set layout options
+#     fig.update_layout(
+#         title='Relative Strength Index (RSI)',
+#         xaxis_title='Timestamp',
+#         yaxis_title='RSI',
+#         xaxis_rangeslider_visible=True  # Add a range slider for zooming
+#     )
+
+#     # Show the RSI graph
+#     fig.show()
+
+# binance_data = get_kline_data('SOLUSDT')
+
+# df = pd.DataFrame(binance_data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'CloseTimestamp', 'QuoteAssetVolume', 'NumberofTrades', 'TakerBuyBaseAssetVolume', 'TakerBuyQuoteAssetVolume', 'Ignore'])
+# plot_rsi(df)
+
+
 def generate_signal_chart(symbol_asset: str, last_price: str) -> bytes:
  
     last_price = float(last_price)
