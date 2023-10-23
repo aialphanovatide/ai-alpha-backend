@@ -21,6 +21,8 @@ auth = tweepy.Client(
     TWITTER_ACCESS_TOKEN_SECRET
 )
 
+# print(auth.get_me())
+
 def find_title_between_asterisks(text):
     match = re.search(r'\*{1,2}(.*?)\*{1,2}', text)
     if match:
@@ -96,13 +98,13 @@ def send_tweets_to_twitter(content: str) -> list:
             return 'An error occurred:' + str(e), 500
 
 
-content = """
-*Cryptocurrency traders face $150 million in liquidations as prices surge*
-- Over $150 million of liquidations in cryptocurrency derivatives trading in the past 24 hours
-- Majority of liquidations were leveraged shorts, worth $110 million
-- Bitcoin traders saw $55 million in liquidations, followed by ether traders with $29 million
-- Chainlink speculators suffered over $9 million in liquidations
-- Liquidations occurred as bitcoin rallied and altcoins also saw significant gains
-- Liquidations happen when traders fail to meet margin requirements or have enough funds to keep positions open.
-"""
-send_tweets_to_twitter(content)
+# content = """
+# *Cryptocurrency traders face $150 million in liquidations as prices surge*
+# - Over $150 million of liquidations in cryptocurrency derivatives trading in the past 24 hours
+# - Majority of liquidations were leveraged shorts, worth $110 million
+# - Bitcoin traders saw $55 million in liquidations, followed by ether traders with $29 million
+# - Chainlink speculators suffered over $9 million in liquidations
+# - Liquidations occurred as bitcoin rallied and altcoins also saw significant gains
+# - Liquidations happen when traders fail to meet margin requirements or have enough funds to keep positions open.
+# """
+# send_tweets_to_twitter(content)
