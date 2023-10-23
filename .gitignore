@@ -1,6 +1,53 @@
 # Byte-compiled / optimized Python files
 __pycache__/
 *.pyc
+*.py[co]
+
+# Environment-specific files
+__pycache__/config.cpython-311.pyc
+.env
+.env.*
+
+# Logs
+*.log
+
+# Temporary files
+*.swp
+*.swo
+*.swn
+
+# Database
+db.sqlite
+
+# Site packages (if using a virtual environment)
+/lib/
+/lib64/
+
+# Compiled Python files
+*.pyo
+*.pyd
+
+# Python package management
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+ENV/
+
+# IDE settings
+.vscode/
+.idea/
+
+
+
+# Static files (you might need to adjust this if your static folder is different)
+static/
+
+
+service_account.json
+__pycache__/
+*.pyc
 
 # Environment-specific files
 .env

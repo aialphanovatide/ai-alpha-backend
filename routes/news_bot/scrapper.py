@@ -32,6 +32,8 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
             page.goto(site)
             page.wait_for_load_state('networkidle')
 
+          
+
             if main_container != "None":
                 container = page.wait_for_selector(main_container)
                 a_elements = container.query_selector_all('a')
@@ -61,8 +63,8 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
 
             if main_keyword == 'bitcoin':
                 keywords = ['bitcoin', 'btc']
-            elif main_keyword == 'ethereum':
-                keywords = ['ethereum', 'ether', 'eth']
+            # elif main_keyword == 'ethereum':
+            #     keywords = ['ethereum', 'ether', 'eth']
 
             for link in elements:
                 href = link['href']
@@ -70,7 +72,7 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
               
                 article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
 
-                if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
+                if main_keyword == 'bitcoin':
                     if any(keyword in article_title.lower() for keyword in keywords):
                         is_title_in_blacklist = title_in_blacklist(article_title)
                         is_url_in_db = url_in_db(article_url)
@@ -82,7 +84,7 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
                     is_url_in_db = url_in_db(article_url)
                     if is_title_in_blacklist == False and is_url_in_db == False:
                         article_urls.add(article_url)
-
+           
             browser.close()
             return article_urls, website_name
         
@@ -148,7 +150,8 @@ def scrape_articles(sites, main_keyword):
                 #     print('\narticle_to_save > ', article_to_save)
                 
                 for article_data in article_to_save:
-                    title, content, valid_date, article_link, website_name, image_urls = article_data       
+                    title, content, valid_date, article_link, website_name, image_urls = article_data
+                    
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -170,18 +173,15 @@ def scrape_articles(sites, main_keyword):
                                             images_list=image_urls
                                             )
                         
-                        # response, status = send_tweets_to_twitter(content=summary)
-                        # if status == 200:
                         new_article = ARTICLE(title=title,
-                                        content=summary,
-                                        date=valid_date,
-                                        url=article_link,
-                                        website_name=website_name
-                                        )
+                        content=content,
+                        date=valid_date,
+                        url=article_link,
+                        website_name=website_name
+                        )
 
                         session.add(new_article)
                         session.commit()
-
                         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
                     else:
                         send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
