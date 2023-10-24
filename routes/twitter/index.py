@@ -1,4 +1,4 @@
-from tweepy.errors import TweepyException
+from tweepy.errors import TweepyException, TooManyRequests
 from tweet_counter import count_tweet
 from dotenv import load_dotenv
 import tweepy
@@ -57,16 +57,22 @@ def split_string(input_string: str) -> str:
     current_string = chunks[0]
     
     for part in chunks[1:]:
+        part = part.strip()
+        endswith_period = part.endswith('.')
+
+        if endswith_period:
+            part = part[:-1]
+
         if count_tweet(current_string + part) < 280:
-            current_string += "- " + part
+            current_string += "• " + part + '\n'
         else:
             result.append(current_string)
-            current_string = "- " + part
+            current_string = "• " + part + '\n'
 
     result.append(current_string)
     return result
 
-def send_tweets_to_twitter(content: str) -> list:
+def send_tweets_to_twitter(content: str, title: str) -> list:
 
     if len(content) == 0:
         return 'There is no content to send to Twitter', 404
@@ -77,34 +83,37 @@ def send_tweets_to_twitter(content: str) -> list:
         try:
             # print('paragraphs[0] > ', paragraphs[0])
             response = auth.create_tweet(text=paragraphs[0])
-            print('response > ',  response.content)
             return 'Summary sent to Twitter successfully', 200
         except TweepyException as e:
             print('An error occurred:' + str(e))
             return 'An error occurred:' + str(e), 500
     else:
-        id = None
+        id = None 
         try:
             for i, paragraph in enumerate(paragraphs):
-                response = auth.create_tweet(text=paragraph,
-                                            in_reply_to_tweet_id=None if i==0 else id)
-                print('response > ', response[0])
+                response = auth.create_tweet(text=paragraph, in_reply_to_tweet_id=None if i == 0 else id)
                 id = response[0].get("id")
 
-            return 'Summary sent to Twitter successfully', 200
-        
+            return f'Summary of *{title}* sent to Twitter successfully', 200
+
         except TweepyException as e:
-            print('An error occurred:' + str(e))
-            return 'An error occurred:' + str(e), 500
+            print('An error occurred: ' + str(e))
+            return 'An error occurred: ' + str(e), 500
 
 
 # content = """
-# *Cryptocurrency traders face $150 million in liquidations as prices surge*
-# - Over $150 million of liquidations in cryptocurrency derivatives trading in the past 24 hours
-# - Majority of liquidations were leveraged shorts, worth $110 million
-# - Bitcoin traders saw $55 million in liquidations, followed by ether traders with $29 million
-# - Chainlink speculators suffered over $9 million in liquidations
-# - Liquidations occurred as bitcoin rallied and altcoins also saw significant gains
-# - Liquidations happen when traders fail to meet margin requirements or have enough funds to keep positions open.
+# *Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs*
+# - Largest single Bitcoin liquidation order valued at $9.98 million
+# - 94,168 traders faced liquidation across the crypto market
+# - Bitcoin shorts experienced liquidations totaling $177.15 million
+# - Ethereum shorts had approximately $42.23 million worth of positions liquidated
+# - Majority of liquidated positions were short positions
+# - Crypto market's upward momentum caught traders off guard, leading to surge in liquidations
+# - $400 million worth of liquidations for leveraged traders in the past 24 hours
+# - Short liquidations exceeded longs, indicating a pessimistic outlook among traders
+# - Bitcoin price surged due to anticipation of increased demand from ETFs
+# - Approval of US spot Bitcoin ETFs expected in the upcoming weeks
+# - BlackRock Inc. and Fidelity Investments competing to provide ETFs
+# - Speculative fervor surrounding Bitcoin due to potential ETF approval
 # """
 # send_tweets_to_twitter(content)
