@@ -1,9 +1,9 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
+from ..slack.templates.news_message import send_NEWS_message_to_slack, send_INFO_message_to_slack_channel
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
 from routes.news_bot.sites.beincrypto import validate_beincrypto_article
 from routes.news_bot.sites.bitcoinist import validate_bitcoinist_article
 from routes.news_bot.validations import title_in_blacklist, url_in_db
-from ..slack.templates.news_message import send_NEWS_message_to_slack
 from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
 from models.news_bot.news_bot_model import SCRAPPING_DATA
@@ -170,8 +170,19 @@ def scrape_articles(sites, main_keyword):
                                             date_time=valid_date,
                                             url=article_link,
                                             summary=summary,
-                                            images_list=image_urls
+                                            images_list=image_urls,
+                                            main_keyword=main_keyword
                                             )
+                        
+                        response, status = send_tweets_to_twitter(content=summary)
+
+                        if status == 200:
+
+                            send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                            title_message="New Notification from AI Alpha",
+                                                            sub_title="Response",
+                                                            message=response
+                                                            )
                         
                         new_article = ARTICLE(title=title,
                         content=content,
