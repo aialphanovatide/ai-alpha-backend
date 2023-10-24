@@ -49,12 +49,13 @@ def split_string(input_string: str) -> str:
 
     title = find_title_between_asterisks(input_string)
     bold_title = bold(title)
+    input_string = input_string.replace(f"**{title}**", bold_title)
     input_string = input_string.replace(f"*{title}*", bold_title)
 
     result = []
 
     chunks = input_string.split("- ")
-    current_string = chunks[0]
+    current_string = chunks[0].replace('\n\n', '\n')
     
     for part in chunks[1:]:
         part = part.strip()

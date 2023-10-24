@@ -173,16 +173,17 @@ def scrape_articles(sites, main_keyword):
                                             images_list=image_urls,
                                             main_keyword=main_keyword
                                             )
-                        
-                        response, status = send_tweets_to_twitter(content=summary)
 
-                        if status == 200:
+                        if main_keyword == 'bitcoin':
+                            response, status = send_tweets_to_twitter(content=summary,
+                                                                      title=title)
 
-                            send_INFO_message_to_slack_channel(channel_id=channel_id,
-                                                            title_message="New Notification from AI Alpha",
-                                                            sub_title="Response",
-                                                            message=response
-                                                            )
+                            if status == 200:
+                                send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                                title_message="New Notification from AI Alpha",
+                                                                sub_title="Response",
+                                                                message=response
+                                                                )
                         
                         new_article = ARTICLE(title=title,
                         content=content,
@@ -195,8 +196,8 @@ def scrape_articles(sites, main_keyword):
                         session.commit()
                         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
                     else:
-                        send_notification_to_product_alerts_slack_channel(title_message='Error generating summary',sub_title='Reason', message=f'OpenAI did not respond for the article: {title} with link: {article_link}.')
-            
+                        continue
+                    
             return f'Web scrapping of {website_name} finished', 200
         
     except Exception as e:
