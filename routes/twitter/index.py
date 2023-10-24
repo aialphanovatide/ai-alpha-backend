@@ -1,5 +1,5 @@
 from tweepy.errors import TweepyException
-from tweet_counter import count_tweet
+# from tweet_counter import count_tweet
 from dotenv import load_dotenv
 import tweepy
 import re
@@ -55,7 +55,7 @@ def split_string(input_string: str) -> str:
     current_string = chunks[0]
     
     for part in chunks[1:]:
-        if count_tweet(current_string + part) < 280:
+        if len(current_string + part) < 280:
             current_string += "- " + part
         else:
             result.append(current_string)
@@ -73,9 +73,9 @@ def send_tweets_to_twitter(content: str) -> list:
 
     if len(paragraphs) == 1:
         try:
-            # print('paragraphs[0] > ', paragraphs[0])
-            response = auth.create_tweet(text=paragraphs[0])
-            print('response > ',  response.content)
+            print('paragraphs[0] > ', paragraphs[0])
+            # response = auth.create_tweet(text=paragraphs[0])
+            # print('response > ',  response.content)
             return 'Summary sent to Twitter successfully', 200
         except TweepyException as e:
             print('An error occurred:' + str(e))
@@ -84,10 +84,11 @@ def send_tweets_to_twitter(content: str) -> list:
         id = None
         try:
             for i, paragraph in enumerate(paragraphs):
-                response = auth.create_tweet(text=paragraph,
-                                            in_reply_to_tweet_id=None if i==0 else id)
-                print('response > ', response[0])
-                id = response[0].get("id")
+                print('paragraph > ', paragraph)
+                # response = auth.create_tweet(text=paragraph,
+                #                             in_reply_to_tweet_id=None if i==0 else id)
+                # print('response > ', response[0])
+                # id = response[0].get("id")
 
             return 'Summary sent to Twitter successfully', 200
         
