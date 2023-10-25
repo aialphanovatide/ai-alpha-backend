@@ -49,6 +49,11 @@ def split_string(input_string: str) -> str:
 
     title = find_title_between_asterisks(input_string)
     bold_title = bold(title)
+<<<<<<< HEAD
+=======
+    input_string = input_string.replace(f"**{title}**", bold_title)
+    input_string = input_string.replace(f"*{title}*", bold_title)
+>>>>>>> 282e74bee20876ce603b0b998630d72cce6865a1
 
     input_string = input_string.replace(f"**{title}**", bold_title)
     input_string = input_string.replace(f"*{title}*", bold_title)
@@ -56,7 +61,11 @@ def split_string(input_string: str) -> str:
     result = []
 
     chunks = input_string.split("- ")
+<<<<<<< HEAD
     current_string = chunks[0].replace('\n',' ')
+=======
+    current_string = chunks[0].replace('\n\n', '\n')
+>>>>>>> 282e74bee20876ce603b0b998630d72cce6865a1
     
     for part in chunks[1:]:
         part = part.strip()
