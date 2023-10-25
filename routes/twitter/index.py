@@ -82,7 +82,7 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
 
     if len(paragraphs) == 1:
         try:
-            # print('paragraphs[0] > ', paragraphs[0])
+            print('paragraphs[0] > ', paragraphs[0])
             response = auth.create_tweet(text=paragraphs[0])
             return 'Summary sent to Twitter successfully', 200
         except TweepyException as e:
@@ -92,6 +92,7 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
         id = None 
         try:
             for i, paragraph in enumerate(paragraphs):
+                print('paragraph > ', paragraph)
                 response = auth.create_tweet(text=paragraph, in_reply_to_tweet_id=None if i == 0 else id)
                 id = response[0].get("id")
 
