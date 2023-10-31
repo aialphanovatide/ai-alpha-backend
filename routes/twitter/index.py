@@ -1,5 +1,5 @@
 from tweepy.errors import TweepyException, TooManyRequests
-from tweet_counter import count_tweet
+# from tweet_counter import count_tweet
 from dotenv import load_dotenv
 import tweepy
 import re
@@ -51,7 +51,7 @@ def split_string(input_string: str) -> str:
     bold_title = bold(title)
     input_string = input_string.replace(f"**{title}**", bold_title)
     input_string = input_string.replace(f"*{title}*", bold_title)
-
+   
     result = []
 
     chunks = input_string.split("- ")
@@ -64,7 +64,7 @@ def split_string(input_string: str) -> str:
         if endswith_period:
             part = part[:-1]
 
-        if count_tweet(current_string + part) < 280:
+        if len(current_string + part) < 280:
             current_string += "• " + part + '\n'
         else:
             result.append(current_string)
@@ -105,6 +105,7 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
 
 # content = """
 # *Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs*
+
 # - Largest single Bitcoin liquidation order valued at $9.98 million
 # - 94,168 traders faced liquidation across the crypto market
 # - Bitcoin shorts experienced liquidations totaling $177.15 million
@@ -118,4 +119,4 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
 # - BlackRock Inc. and Fidelity Investments competing to provide ETFs
 # - Speculative fervor surrounding Bitcoin due to potential ETF approval
 # """
-# send_tweets_to_twitter(content)
+# send_tweets_to_twitter(content, "Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs")

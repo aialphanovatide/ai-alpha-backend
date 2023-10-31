@@ -2,9 +2,12 @@ import os
 import re
 import gspread
 import requests
+from dotenv import load_dotenv
 from difflib import SequenceMatcher
 from routes.trendspider.create_chart import generate_signal_chart
 from routes.trendspider.formulas import add_0_25, formulas_long, formulas_short
+
+load_dotenv()
 
 # Product-alerts channel webhook url
 SLACK_PRODUCT_ALERTS = os.getenv('SLACK_PRODUCT_ALERTS')

@@ -1,6 +1,5 @@
-from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from .create_chart import generate_alert_chart
 from dotenv import load_dotenv
+from ..trendspider.create_chart import generate_alert_chart
 import requests
 import os
 
@@ -20,58 +19,55 @@ CALL_TO_TRADE_TOPIC_ID = os.getenv('CALL_TO_TRADE_TOPIC_ID')
 telegram_text_url = f'https://api.telegram.org/bot{TOKEN}/sendMessage?parse_mode=HTML'
 send_photo_url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto?parse_mode=HTML'
 
-def send_alert_strategy_message_to_slack(data):
 
-    strategy_name = data['bot_name']  
-    symbol = data['symbol']
-    last_price = data["last_price"] 
-    type = data["type"] 
-    status = data["status"] 
+def formatted_alert_name(input_string):
 
-    formatted_strategy_name = str(strategy_name).upper()
-    formatted_symbol = str(symbol).upper()
-    formatted_last_price = str(last_price)
-    formatted_status = str(status).capitalize()
-    formatted_type_of_alert = str(type).capitalize()
+    components = input_string.split(' - ')
 
-    payload = { 
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Alert from Trendspider*"
-                    }
-                },
-                {
-                    "type": "section",
-                    "fields": [
+    if len(components) == 5:
+        new_string = f"{components[3]} {components[4].lower().replace(',', ' ').strip()} Chart - {components[0]} {components[1]} {components[2]}"
+        return new_string
+    else:
+        return False
+
+
+def send_alert_strategy_to_slack(price, alert_name, meaning):
+
+    formatted_meaning = str(meaning).capitalize()
+    new_alert_name = formatted_alert_name(alert_name) 
+    formatted_price = str(price).replace(',', ' ').strip()
+
+
+    payload = {
+                    "blocks": [
                         {
-                            "type": "mrkdwn",
-                            "text": f"*Strategy:*\n{formatted_strategy_name}"
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"*Alert from TradingView*"
+                            }
                         },
                         {
-                            "type": "mrkdwn",
-                            "text": f"*Type:*\n{formatted_type_of_alert}"
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Strategy:*\n{new_alert_name}\n\n*{formatted_meaning}*"
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Last Price:*\n{formatted_price}"
+                                },
+                            ]
                         },
                         {
-                            "type": "mrkdwn",
-                            "text": f"*Status:*\n{formatted_status}"
+                        "type": "divider"
                         },
                         {
-                            "type": "mrkdwn",
-                            "text": f"*Last Price:*\n${formatted_last_price}"
+                        "type": "divider"
                         }
                     ]
-                },
-                {
-                "type": "divider"
-                },
-                {
-                "type": "divider"
                 }
-            ]
-        }
     
     try:
         response = requests.post(SLACK_PRODUCT_ALERTS, json=payload)
@@ -86,23 +82,21 @@ def send_alert_strategy_message_to_slack(data):
         return f'Error sending message to Slack channel. Reason: {e}', 500
     
 
-def send_alert_strategy_to_telegram(data):
+def send_alert_strategy_to_telegram(exchange, price, alert_name, meaning):
 
-    send_alert_strategy_message_to_slack(data=data)
+    formatted_meaning = str(meaning).capitalize()
+    new_alert_name = formatted_alert_name(alert_name) 
+    formatted_price = str(price).replace(',', ' ').strip()
 
-    strategy_name = data['bot_name']  
-    symbol = data['symbol']
-    last_price = data["last_price"] 
-    status = data["status"] 
+    # send_alert_strategy_to_slack(price=formatted_price,
+    #                             alert_name=new_alert_name,
+    #                             meaning=formatted_meaning)
 
-    formatted_strategy_name = str(strategy_name).upper()
-    formatted_last_price = str(last_price)
-    formatted_status = str(status).capitalize()
-    formatted_symbol = symbol.split(':')[1].replace('^', '').strip() # result: SOLUSDT
 
-    content = f"""<b>{formatted_strategy_name}</b>\n\n<b>Status:{formatted_status}</b>\nLast Price: <b>{formatted_last_price}</b>\n"""
+    content = f"""<b>{new_alert_name}</b>\n\n<b>{formatted_meaning}</b>\nLast Price: <b>{formatted_price}</b>\n"""
 
-    chart = generate_alert_chart(symbol, last_price)
+    symbol = "BINANCE:^" + exchange # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
+    chart = generate_alert_chart(symbol, formatted_price)
 
     files = {
     'photo': ('chart.png', chart, 'image/png')
@@ -119,6 +113,7 @@ def send_alert_strategy_to_telegram(data):
     #         'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
     #         'protect_content': False,
     #         }
+    
     try:
         response = requests.post(send_photo_url, data=photo_payload, files=files)
 
