@@ -145,6 +145,7 @@ def scrape_articles(sites, main_keyword):
                     title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+            
                 
                 # if len(article_to_save) > 0:
                 #     print('\narticle_to_save > ', article_to_save)
