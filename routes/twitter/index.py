@@ -49,23 +49,13 @@ def split_string(input_string: str) -> str:
 
     title = find_title_between_asterisks(input_string)
     bold_title = bold(title)
-<<<<<<< HEAD
-=======
-    input_string = input_string.replace(f"**{title}**", bold_title)
-    input_string = input_string.replace(f"*{title}*", bold_title)
->>>>>>> 282e74bee20876ce603b0b998630d72cce6865a1
-
     input_string = input_string.replace(f"**{title}**", bold_title)
     input_string = input_string.replace(f"*{title}*", bold_title)
    
     result = []
 
     chunks = input_string.split("- ")
-<<<<<<< HEAD
-    current_string = chunks[0].replace('\n',' ')
-=======
     current_string = chunks[0].replace('\n\n', '\n')
->>>>>>> 282e74bee20876ce603b0b998630d72cce6865a1
     
     for part in chunks[1:]:
         part = part.strip()
@@ -93,7 +83,7 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
     if len(paragraphs) == 1:
         try:
             print('paragraphs[0] > ', paragraphs[0])
-            # response = auth.create_tweet(text=paragraphs[0])
+            response = auth.create_tweet(text=paragraphs[0])
             return 'Summary sent to Twitter successfully', 200
         except TweepyException as e:
             print('An error occurred:' + str(e))
@@ -103,8 +93,8 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
         try:
             for i, paragraph in enumerate(paragraphs):
                 print('paragraph > ', paragraph)
-                # response = auth.create_tweet(text=paragraph, in_reply_to_tweet_id=None if i == 0 else id)
-                # id = response[0].get("id")
+                response = auth.create_tweet(text=paragraph, in_reply_to_tweet_id=None if i == 0 else id)
+                id = response[0].get("id")
 
             return f'Summary of *{title}* sent to Twitter successfully', 200
 
@@ -113,20 +103,20 @@ def send_tweets_to_twitter(content: str, title: str) -> list:
             return 'An error occurred: ' + str(e), 500
 
 
-content = """
-*Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs*
+# content = """
+# *Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs*
 
-- Largest single Bitcoin liquidation order valued at $9.98 million
-- 94,168 traders faced liquidation across the crypto market
-- Bitcoin shorts experienced liquidations totaling $177.15 million
-- Ethereum shorts had approximately $42.23 million worth of positions liquidated
-- Majority of liquidated positions were short positions
-- Crypto market's upward momentum caught traders off guard, leading to surge in liquidations
-- $400 million worth of liquidations for leveraged traders in the past 24 hours
-- Short liquidations exceeded longs, indicating a pessimistic outlook among traders
-- Bitcoin price surged due to anticipation of increased demand from ETFs
-- Approval of US spot Bitcoin ETFs expected in the upcoming weeks
-- BlackRock Inc. and Fidelity Investments competing to provide ETFs
-- Speculative fervor surrounding Bitcoin due to potential ETF approval
-"""
-send_tweets_to_twitter(content, "Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs")
+# - Largest single Bitcoin liquidation order valued at $9.98 million
+# - 94,168 traders faced liquidation across the crypto market
+# - Bitcoin shorts experienced liquidations totaling $177.15 million
+# - Ethereum shorts had approximately $42.23 million worth of positions liquidated
+# - Majority of liquidated positions were short positions
+# - Crypto market's upward momentum caught traders off guard, leading to surge in liquidations
+# - $400 million worth of liquidations for leveraged traders in the past 24 hours
+# - Short liquidations exceeded longs, indicating a pessimistic outlook among traders
+# - Bitcoin price surged due to anticipation of increased demand from ETFs
+# - Approval of US spot Bitcoin ETFs expected in the upcoming weeks
+# - BlackRock Inc. and Fidelity Investments competing to provide ETFs
+# - Speculative fervor surrounding Bitcoin due to potential ETF approval
+# """
+# send_tweets_to_twitter(content, "Bitcoin Liquidations Reach $400 Million as Short Positions Overwhelm Longs")

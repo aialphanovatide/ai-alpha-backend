@@ -88,7 +88,7 @@
               "base_url": "https://cointelegraph.com",
               "website_name": "Cointelegraph",
               "is_URL_complete": false,
-              "main_container": ".posts-listing__list"
+              "main_container": ".posts-listing__list" 
             },
             {
               "site": "https://beincrypto.com/bitcoin-news",
