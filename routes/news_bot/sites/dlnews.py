@@ -1,6 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
+from news_bot.validations import validate_content, title_in_blacklist
+
+
+
 
 def validate_date_dlnews(html):
     date_div = html.find('div', text="Published on")
@@ -37,7 +41,7 @@ def extract_article_content_dlnews(html):
         return content.strip().casefold()
     return None
 
-def validate_dlnews_article(article_link):
+def validate_dlnews_article(article_link, main_keyword):
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
@@ -59,12 +63,11 @@ def validate_dlnews_article(article_link):
             content = extract_article_content_dlnews(html)
 
             if valid_date and content and title:
-                print("\nTitle:", title)
-                print("Date:", valid_date)
-                print("Image URLs:", image_urls)
-                return title, content, valid_date, image_urls
-            else:
-                return None, None, None, None
+                content_validation = validate_content(main_keyword, content)
+                title_blacklist = title_in_blacklist(title)
+                if content_validation and not title_blacklist:
+                    return title, content, valid_date, image_urls
+            return None, None, None, None
     except Exception as e:
         print("Error in Dlnews:", str(e))
         return None, None, None, None

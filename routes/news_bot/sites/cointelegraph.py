@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from helpers.verifications import validate_content, title_in_blacklist
 
 def validate_date_cointelegraph(date):
    
@@ -91,6 +91,3 @@ def validate_cointelegraph_article(article_link, main_keyword):
         # print(str(e))
         return None, None, None, None
 
-
-# print(validate_cointelegraph_article('https://cointelegraph.com/news/ethereum-defi-protocol-hope-lend-drained-after-exploit',
-# 'ethereum'))
