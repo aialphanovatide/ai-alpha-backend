@@ -2,7 +2,7 @@ from models.news_bot.news_bot_model import SCRAPPING_DATA, BLACKLIST
 from models.news_bot.articles_model import ARTICLE
 from difflib import SequenceMatcher
 from config import session
-import ahocorasick 
+import ahocorasick
 
 def title_in_db(input_title): # true if title already in db
     try:

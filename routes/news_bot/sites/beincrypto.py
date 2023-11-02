@@ -1,6 +1,6 @@
-from routes.news_bot.validations import validate_content, title_in_blacklist
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+from news_bot.validations import validate_content, title_in_blacklist
 import requests
 import re
 

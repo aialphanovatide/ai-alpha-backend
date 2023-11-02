@@ -1,4 +1,5 @@
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from news_bot.validations import validate_content, title_in_blacklist
+
 from bs4 import BeautifulSoup
 import requests
 

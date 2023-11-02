@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from datetime import datetime
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from news_bot.validations import validate_content, title_in_blacklist
 
 def validate_date_coindesk(html):
     # Encuentra el span con la clase 'typography__StyledTypography-sc-owin6q-0 hcIsFR'

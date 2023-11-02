@@ -1,3 +1,16 @@
+from routes.news_bot.sites.ambcrypto import validate_ambcrypto_article
+from routes.news_bot.sites.blockworks import validate_blockworks_article
+from routes.news_bot.sites.coincodex import validate_coincodex_article
+from routes.news_bot.sites.coinpedia import validate_coinpedia_article
+from routes.news_bot.sites.cryptodaily import validate_cryptodaily_article
+from routes.news_bot.sites.cryptopotato import validate_cryptopotato_article
+from routes.news_bot.sites.cryptoslate import validate_cryptoslate_article
+from routes.news_bot.sites.dailyhodl import validate_dailyhodl_article
+from routes.news_bot.sites.decrypto import validate_decrypt_article
+from routes.news_bot.sites.dlnews import validate_dlnews_article
+from routes.news_bot.sites.investing import validate_investing_article
+from routes.news_bot.sites.theblock import validate_theblock_article
+from routes.news_bot.sites.utoday import validate_utoday_article
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from ..slack.templates.news_message import send_NEWS_message_to_slack, send_INFO_message_to_slack_channel
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
@@ -120,6 +133,11 @@ def scrape_articles(sites, main_keyword):
             for article_link in article_urls:
 
                 article_to_save = []
+                
+                if website_name == 'Ambcrypto':
+                    title, content, valid_date, image_urls = validate_ambcrypto_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
                 if website_name == 'Beincrypto':
                     title, content, valid_date, image_urls = validate_beincrypto_article(article_link, main_keyword)
@@ -128,6 +146,16 @@ def scrape_articles(sites, main_keyword):
 
                 if website_name == 'Bitcoinist':
                     title, content, valid_date, image_urls = validate_bitcoinist_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Blockworks':
+                    title, content, valid_date, image_urls = validate_blockworks_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Coincodex':
+                    title, content, valid_date, image_urls = validate_coincodex_article(article_link, main_keyword)
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
@@ -145,6 +173,67 @@ def scrape_articles(sites, main_keyword):
                     title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                        
+                if website_name == 'Coinpedia':
+                    title, content, valid_date, image_urls = validate_coinpedia_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Dailyhodl':
+                    title, content, valid_date, image_urls = validate_dailyhodl_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Cryptodaily':
+                    title, content, valid_date, image_urls = validate_cryptodaily_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                        
+                if website_name == 'u.today':
+                    title, content, valid_date, image_urls = validate_utoday_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Cryptonews':
+                    title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                        
+                if website_name == 'Coincodex':
+                    title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Cryptopotato':
+                    title, content, valid_date, image_urls = validate_cryptopotato_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Cryptoslate':
+                    title, content, valid_date, image_urls = validate_cryptoslate_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Decrypt':
+                    title, content, valid_date, image_urls = validate_decrypt_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                        
+                if website_name == 'Dlnews':
+                    title, content, valid_date, image_urls = validate_dlnews_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Investing':
+                    title, content, valid_date, image_urls = validate_investing_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
+                if website_name == 'Theblock':
+                    title, content, valid_date, image_urls = validate_theblock_article(article_link, main_keyword)
+                    if title and content and valid_date:
+                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                
             
                 
                 if len(article_to_save) > 0:

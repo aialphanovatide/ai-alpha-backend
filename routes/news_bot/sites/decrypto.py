@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
 
+from helpers.verifications import title_in_blacklist, validate_content
+
 def validate_date_decrypt(html):
     date_tag = html.find('time', datetime=True)
     if date_tag:
@@ -36,8 +38,7 @@ def extract_article_content_decrypt(html):
         return content.strip().casefold()
     return None
 
-def validate_decrypt_article(article_link):
-
+def validate_decrypt_article(article_link, main_keyword):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
     }
@@ -47,7 +48,6 @@ def validate_decrypt_article(article_link):
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
         if article_response.status_code == 200 and 'text/html' in article_content_type:
-            
             html = BeautifulSoup(article_response.text, 'html.parser')
 
             title_element = html.find('h1', class_='post-title')
@@ -58,13 +58,11 @@ def validate_decrypt_article(article_link):
             content = extract_article_content_decrypt(html)
 
             if valid_date and content and title:
-                print("\nTitle:", title)
-                print("Date:", valid_date)
-                print("Image URLs:", image_urls)
-                return title, content, valid_date, image_urls
-            else:
-                return None, None, None, None
+                content_validation = validate_content(main_keyword, content)
+                title_blacklist = title_in_blacklist(title)
+                if content_validation and not title_blacklist:
+                    return title, content, valid_date, image_urls
+            return None, None, None, None
     except Exception as e:
         print("Error in Decrypt:", str(e))
         return None, None, None, None
-
