@@ -100,7 +100,7 @@ def send_alert_strategy_to_telegram(data):
     formatted_status = str(status).capitalize()
     formatted_symbol = symbol.split(':')[1].replace('^', '').strip() # result: SOLUSDT
 
-    content = f"""<b>{formatted_strategy_name}</b>\n\n<b>Status:{formatted_status}</b>\nLast Price: <b>{formatted_last_price}</b>\n"""
+    content = f"""<b>{formatted_strategy_name}</b>\n\nStatus: <b>{formatted_status}</b>\nLast Price: <b>{formatted_last_price}</b>\n"""
 
     chart = generate_alert_chart(symbol, last_price)
 

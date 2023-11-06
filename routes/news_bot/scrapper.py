@@ -3,7 +3,7 @@ from ..slack.templates.news_message import send_NEWS_message_to_slack, send_INFO
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
 from routes.news_bot.sites.beincrypto import validate_beincrypto_article
 from routes.news_bot.sites.bitcoinist import validate_bitcoinist_article
-from routes.news_bot.validations import title_in_blacklist, url_in_db
+from routes.news_bot.validations import title_in_blacklist, url_in_db, title_in_db
 from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
 from models.news_bot.news_bot_model import SCRAPPING_DATA
@@ -63,8 +63,8 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
 
             if main_keyword == 'bitcoin':
                 keywords = ['bitcoin', 'btc']
-            # elif main_keyword == 'ethereum':
-            #     keywords = ['ethereum', 'ether', 'eth']
+            elif main_keyword == 'ethereum':
+                keywords = ['ethereum', 'ether', 'eth']
 
             for link in elements:
                 href = link['href']
@@ -72,17 +72,20 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
               
                 article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
 
-                if main_keyword == 'bitcoin':
+                if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
                     if any(keyword in article_title.lower() for keyword in keywords):
                         is_title_in_blacklist = title_in_blacklist(article_title)
+                        is_title_in_db = title_in_db(article_title)
                         is_url_in_db = url_in_db(article_url)
                         
-                        if is_title_in_blacklist == False and is_url_in_db == False:
+                        if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
                             article_urls.add(article_url)
                 else:
                     is_title_in_blacklist = title_in_blacklist(article_title)
                     is_url_in_db = url_in_db(article_url)
-                    if is_title_in_blacklist == False and is_url_in_db == False:
+                    is_title_in_db = title_in_db(article_title)
+
+                    if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
                         article_urls.add(article_url)
            
             browser.close()

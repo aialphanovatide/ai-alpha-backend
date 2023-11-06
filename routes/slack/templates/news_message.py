@@ -35,7 +35,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 			},
 			"accessory": {
 				"type": "image",
-				"image_url": f"{images_list[1] if images_list else 'No Image'}",
+				"image_url": f"Unavailable",
 				"alt_text": "alt text for image"
 			}
             },
