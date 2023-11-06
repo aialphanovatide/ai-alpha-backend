@@ -20,24 +20,27 @@ def receive_data_from_tv():
             return 'Invalid request format', 400
         else:
             try:
-                print('request.data', request.data)
-                # data_text = request.data.decode('utf-8')  # Decode the bytes to a string
-                # data_lines = data_text.split('\n')  # Split the text into lines
-                # data_dict = {} 
+                # print('request.data', request.data)
+                data_text = request.data.decode('utf-8')  # Decode the bytes to a string
+                data_lines = data_text.split(',')  # Split the text into lines
+               
+                data_dict = {} 
 
-                # for line in data_lines:
-                #     if ':' in line:
-                #         key, value = line.split(':', 1)
-                #         data_dict[key.strip()] = value.strip()
+                for line in data_lines:
+                    if ':' in line:
+                        key, value = line.split(':', 1)
+                        data_dict[key.strip()] = value.strip()
 
-                # price_value = data_dict.get('price', '')  
-                # alert_name_value = data_dict.get('alert name', '') 
-                # meaning_value = data_dict.get('meaning', '')  
-                # exchange = data_dict.get('exchange', '')
+               
 
-                # response, status = send_alert_strategy_to_slack(price=price_value, # Delete after send_alert_strategy_to_telegram works
-                #                             alert_name=alert_name_value, # Delete after send_alert_strategy_to_telegram works
-                #                             meaning=meaning_value) # Delete after send_alert_strategy_to_telegram works
+                last_price = data_dict.get('last_price', '')  
+                alert_name = data_dict.get('alert_name', '') 
+                symbol = data_dict.get('symbol', '')  
+                last_time = data_dict.get('last_time', '')
+
+                response, status = send_alert_strategy_to_slack(price=last_price, # Delete after send_alert_strategy_to_telegram works
+                                            alert_name=alert_name, # Delete after send_alert_strategy_to_telegram works
+                                            symbol=symbol) # Delete after send_alert_strategy_to_telegram works
                 
                 # send_alert_strategy_to_telegram(exchange=exchange,
                 #                                 price=price_value,
@@ -45,7 +48,7 @@ def receive_data_from_tv():
                 #                                 meaning=meaning_value
                 #                                 )
 
-                return 'ok', 200
+                return response, status
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')

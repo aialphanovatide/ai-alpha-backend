@@ -23,7 +23,7 @@ if __name__ == '__main__':
     try:
         # send_notification_to_product_alerts_slack_channel(title_message='AI Alpha Server is running', message="Message:", sub_title="All dependencies are working")
         print('---AI Alpha server is running---') # Once the server is ready. Add a pin message to slack
-        app.run(threaded=True, debug=False, port=9000, use_reloader=False) 
+        app.run(threaded=True, debug=False, port=9000, use_reloader=True) 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")      
 
