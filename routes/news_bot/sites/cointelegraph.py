@@ -3,10 +3,10 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from helpers.verifications import validate_content, title_in_blacklist
+from routes.news_bot.validations import validate_content, title_in_blacklist
+
 
 def validate_date_cointelegraph(date):
-   
     current_date = datetime.now()
     valid_date = None
 
@@ -90,4 +90,3 @@ def validate_cointelegraph_article(article_link, main_keyword):
     except Exception as e:
         # print(str(e))
         return None, None, None, None
-

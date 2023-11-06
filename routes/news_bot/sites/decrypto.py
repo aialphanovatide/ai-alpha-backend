@@ -1,8 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
-
-from helpers.verifications import title_in_blacklist, validate_content
+from routes.news_bot.validations import title_in_blacklist, validate_content
 
 def validate_date_decrypt(html):
     date_tag = html.find('time', datetime=True)

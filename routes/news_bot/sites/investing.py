@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
-from news_bot.validations import validate_content, title_in_blacklist
+from routes.news_bot.validations import validate_content, title_in_blacklist
 
 
 def validate_date_investing(date_text):
