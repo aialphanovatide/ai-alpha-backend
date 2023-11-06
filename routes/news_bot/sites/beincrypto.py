@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from news_bot.validations import validate_content, title_in_blacklist
+from routes.news_bot.validations import validate_content, title_in_blacklist
 import requests
 import re
 
@@ -87,4 +87,4 @@ def validate_beincrypto_article(article_link, main_keyword):
             # print(f'Error in the request of Beincrypto {str(e)}')
             return None, None, None, None
         
-# validate_article('https://es.beincrypto.com/aprende/bonos-corredor-bolsa-libertex/', keyword_dict)
+validate_beincrypto_article('https://es.beincrypto.com/aprende/bonos-corredor-bolsa-libertex/')
