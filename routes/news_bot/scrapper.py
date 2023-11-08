@@ -11,7 +11,7 @@ from routes.news_bot.sites.dlnews import validate_dlnews_article
 from routes.news_bot.sites.investing import validate_investing_article
 from routes.news_bot.sites.theblock import validate_theblock_article
 from routes.news_bot.sites.utoday import validate_utoday_article
-from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
+#from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from ..slack.templates.news_message import send_NEWS_message_to_slack, send_INFO_message_to_slack_channel
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
 from routes.news_bot.sites.beincrypto import validate_beincrypto_article
@@ -30,6 +30,7 @@ btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
 lsd_slack_channel_id = 'C05UNS3M8R3'
 hacks_slack_channel_id = 'C05UU8JBKKN'
+solana_slack_channel_id = 'C05URM66B5Z'
 
 
 def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
@@ -42,8 +43,8 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
             browser = p.chromium.launch()
             page = browser.new_page()
 
-            page.goto(site)
-            page.wait_for_load_state('networkidle')
+            page.goto(site, timeout=70000)
+            page.wait_for_load_state("domcontentloaded")
 
           
 
@@ -124,10 +125,12 @@ def scrape_articles(sites, main_keyword):
                                                    main_keyword,
                                                    main_container)
         
+
+        
         if not article_urls:
             print(f'No articles found for {website_name} of {main_keyword}')
             return f'No articles found for {website_name}'
-        
+         
         
         if article_urls:
             for article_link in article_urls:
@@ -237,7 +240,7 @@ def scrape_articles(sites, main_keyword):
             
                 
                 if len(article_to_save) > 0:
-                    print('\narticle_to_save > ', article_to_save)
+                   print('\narticle_to_save > ', article_to_save)
                 
                 # for article_data in article_to_save:
                 #     title, content, valid_date, article_link, website_name, image_urls = article_data
@@ -249,6 +252,8 @@ def scrape_articles(sites, main_keyword):
                 #         channel_id = eth_slack_channel_id
                 #     elif main_keyword == 'hacks':
                 #         channel_id = hacks_slack_channel_id
+                #     elif main_keyword == 'solana':
+                #         channel_id = solana_slack_channel_id
                 #     else:
                 #         channel_id = lsd_slack_channel_id
 

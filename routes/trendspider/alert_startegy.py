@@ -1,4 +1,4 @@
-from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
+#from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from .create_chart import generate_alert_chart
 from dotenv import load_dotenv
 import requests
