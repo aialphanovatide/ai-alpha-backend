@@ -43,7 +43,7 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
             browser = p.chromium.launch()
             page = browser.new_page()
 
-            page.goto(site, timeout=70000)
+            page.goto(site, timeout=100000)
             page.wait_for_load_state("domcontentloaded")
 
           
@@ -242,56 +242,56 @@ def scrape_articles(sites, main_keyword):
                 if len(article_to_save) > 0:
                    print('\narticle_to_save > ', article_to_save)
                 
-                # for article_data in article_to_save:
-                #     title, content, valid_date, article_link, website_name, image_urls = article_data
+                for article_data in article_to_save:
+                    title, content, valid_date, article_link, website_name, image_urls = article_data
                     
                     
-                #     if main_keyword == 'bitcoin':
-                #         channel_id = btc_slack_channel_id
-                #     elif main_keyword == 'ethereum':
-                #         channel_id = eth_slack_channel_id
-                #     elif main_keyword == 'hacks':
-                #         channel_id = hacks_slack_channel_id
-                #     elif main_keyword == 'solana':
-                #         channel_id = solana_slack_channel_id
-                #     else:
-                #         channel_id = lsd_slack_channel_id
+                    if main_keyword == 'bitcoin':
+                        channel_id = btc_slack_channel_id
+                    elif main_keyword == 'ethereum':
+                        channel_id = eth_slack_channel_id
+                    elif main_keyword == 'hacks':
+                        channel_id = hacks_slack_channel_id
+                    elif main_keyword == 'solana':
+                        channel_id = solana_slack_channel_id
+                    else:
+                        channel_id = lsd_slack_channel_id
 
-                #     summary = summary_generator(content, main_keyword)
+                    summary = summary_generator(content, main_keyword)
 
-                #     if summary:
-                #         send_NEWS_message_to_slack(channel_id=channel_id, 
-                #                             title=title,
-                #                             date_time=valid_date,
-                #                             url=article_link,
-                #                             summary=summary,
-                #                             images_list=image_urls,
-                #                             main_keyword=main_keyword
-                #                             )
+                    if summary:
+                        send_NEWS_message_to_slack(channel_id=channel_id, 
+                                            title=title,
+                                            date_time=valid_date,
+                                            url=article_link,
+                                            summary=summary,
+                                            images_list=image_urls,
+                                            main_keyword=main_keyword
+                                            )
 
-                #         if main_keyword == 'bitcoin':
-                #             response, status = send_tweets_to_twitter(content=summary,
-                #                                                       title=title)
+                        if main_keyword == 'bitcoin':
+                            response, status = send_tweets_to_twitter(content=summary,
+                                                                      title=title)
 
-                #             if status == 200:
-                #                 send_INFO_message_to_slack_channel(channel_id=channel_id,
-                #                                                 title_message="New Notification from AI Alpha",
-                #                                                 sub_title="Response",
-                #                                                 message=response
-                #                                                 )
+                            if status == 200:
+                                send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                                title_message="New Notification from AI Alpha",
+                                                                sub_title="Response",
+                                                                message=response
+                                                                )
                         
-                #         new_article = ARTICLE(title=title,
-                #         content=content,
-                #         date=valid_date,
-                #         url=article_link,
-                #         website_name=website_name
-                #         )
+                        new_article = ARTICLE(title=title,
+                        content=content,
+                        date=valid_date,
+                        url=article_link,
+                        website_name=website_name
+                        )
 
-                #         session.add(new_article)
-                #         session.commit()
-                #         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
-                #     else:
-                #         continue
+                        session.add(new_article)
+                        session.commit()
+                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
+                    else:
+                        continue
                     
             return f'Web scrapping of {website_name} finished', 200
         

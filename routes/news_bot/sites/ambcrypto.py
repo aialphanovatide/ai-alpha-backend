@@ -7,7 +7,7 @@ def validate_date_ambcrypto(date_text):
     try:
         date = datetime.strptime(date_text, '%B %d, %Y')
         # Comprueba si la fecha está dentro del rango de 24 horas o es el mismo día
-        if (datetime.now() - date) < timedelta(days=2):
+        if (datetime.now() - date) < timedelta(days=1):
             return date.strftime('%Y-%m-%d')
         else:
             return None
@@ -72,6 +72,7 @@ def validate_ambcrypto_article(article_link, main_keyword):
             content_validation = validate_content(main_keyword, content)
 
             if valid_date and content and title and not is_title_in_blacklist and content_validation:
+                print(title, content, image_urls)
                 return content, valid_date, image_urls
     except Exception as e:
         print("Error in ambcrypto:", str(e))

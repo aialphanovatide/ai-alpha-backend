@@ -130,7 +130,7 @@
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
+            "main_container": "None"
             },
             {
               "site": "https://u.today/bitcoin-news",
@@ -755,7 +755,6 @@
               "is_URL_complete": false,
               "main_container":".collectionFeed"
             }
-
             
           ],
         "black_list":[
@@ -953,6 +952,69 @@
             "website_name": "Coindesk",
             "is_URL_complete": false,
             "main_container":"None"
+          },
+          {
+            "site": "https://www.theblock.co/search?query=LSDs",
+            "base_url": "https://www.theblock.co",
+            "website_name": "theblock",
+            "is_URL_complete": false,
+            "main_container":".collectionFeed"
+          },
+          {
+          "site": "https://ambcrypto.com/search/LSD",
+          "base_url": "https://ambcrypto.com",
+          "website_name": "Ambcrypto",
+          "is_URL_complete": true,
+          "main_container": ".home-blog-wrap"
+          },
+          {
+            "site": "https://dailyhodl.com/?s=LSD",
+            "base_url": "https://dailyhodl.com",
+            "website_name": "Dailyhodl",
+            "is_URL_complete": true,
+            "main_container":".jeg_inner_content"
+          },
+          {
+            "site": "https://cryptopotato.com/?s=LSD",
+            "base_url": "https://cryptopotato.com",
+            "website_name": "Cryptopotato",
+            "is_URL_complete": true,
+            "main_container": ".container"
+            },
+          {
+            "site": "https://cryptoslate.com/?s=LSD",
+            "base_url": "https://cryptoslate.com",
+            "website_name": "Cryptoslate",
+            "is_URL_complete": true,
+            "main_container":".main-news-search"
+          },
+          {
+            "site": "https://decrypt.co/search/all/LSD",
+            "base_url": "https://decrypt.co",
+            "website_name": "decrypt",
+            "is_URL_complete": false,
+            "main_container":"None"
+          },
+          {
+            "site": "https://decrypt.co/search/all/LSD",
+            "base_url": "https://decrypt.co",
+            "website_name": "decrypt",
+            "is_URL_complete": false,
+            "main_container":"None"
+          },
+          {
+            "site": "https://www.dlnews.com/",
+            "base_url": "https://www.dlnews.com/",
+            "website_name": "decrypt",
+            "is_URL_complete": false,
+            "main_container":"None"
+          },
+          {
+            "site": "https://cryptodaily.co.uk/search?q=LSD",
+            "base_url": "https://cryptodaily.co.uk",
+            "website_name": "cryptodaily",
+            "is_URL_complete": true,
+            "main_container":".container"
           }
         ],
         "black_list":[
@@ -1343,7 +1405,7 @@
             "main_container":"None"
           },
           {
-            "site": "https://coingape.com/category/news/solana-news",
+            "site": "https://coingape.com/search_gcse/?q=solana#gsc.tab=0&gsc.q=solana&gsc.page=1",
             "base_url": "https://coingape.com",
             "website_name": "Coingape",
             "is_URL_complete": true,
@@ -1371,11 +1433,11 @@
             "main_container":"None"
           },
           {
-            "site": "https://cryptopotato.com/?s=solana",
+            "site": "https://cryptopotato.com/crypto-news/",
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container":".content"
+            "main_container":".entry-content"
           },
           {
             "site": "https://www.theblock.co/search?query=solana",
@@ -1388,8 +1450,8 @@
             "site": "https://cryptodaily.co.uk/search?q=solana",
             "base_url": "https://cryptodaily.co.uk",
             "website_name": "cryptodaily",
-            "is_URL_complete": false,
-            "main_container":".posts-list latest-list"
+            "is_URL_complete": true,
+            "main_container":".row"
           },
           {
             "site": "https://dailyhodl.com/?s=solana",
@@ -1399,6 +1461,13 @@
             "main_container":".jeg_posts jeg_load_more_flag"
           },
           {
+            "site": "https://decrypt.co/search/all/solana",
+            "base_url": "https://decrypt.co",
+            "website_name": "cryptodaily",
+            "is_URL_complete": true,
+            "main_container":".row"
+          },
+          {
             "site": "https://cryptonews.net/?q=solana&rubricId=-1",
             "base_url": "https://cryptonews.net",
             "website_name": "cryptonews",
@@ -1406,34 +1475,33 @@
             "main_container":"None"
           },
           {
-            "site": "https://www.investing.com/search/?q=solana",
+            "site": "https://www.investing.com/crypto/solana/news",
             "base_url": "https://www.investing.com",
             "website_name": "investing",
             "is_URL_complete": false,
-            "main_container":".largeTitle"
+            "main_container":".mb-4"
           },
           {
             "site": "https://u.today/search/node?keys=solana",
             "base_url": "https://u.today",
             "website_name": "utoday",
-            "is_URL_complete": false,
+            "is_URL_complete": true,
             "main_container":".search-result"
           },
           {
-            "site": "https://blockworks.co/search",
+            "site": "https://blockworks.co/category/markets",
             "base_url": "https://blockworks.co",
             "website_name": "blockworks",
             "is_URL_complete": false,
-            "main_container":".grid gap-8 grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+            "main_container":".min-w-full"
           },
           {
             "site": "https://coinpedia.org/?s=solana",
             "base_url": "https://coinpedia.org",
             "website_name": "coinpedia",
-            "is_URL_complete": false,
-            "main_container":".posts-container"
+            "is_URL_complete": true,
+            "main_container":".container-wrapper"
           }
-
         ],
       "black_list": [
         
