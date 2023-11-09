@@ -5,8 +5,8 @@ from routes.news_bot.validations import validate_content, title_in_blacklist
 
 def validate_date_coincodex(date_text):
     try:
-        # Convertir la fecha en un objeto de fecha
-        date = datetime.strptime(date_text, '%b %d, %Y')
+        # Convertir la cadena de fecha en un objeto datetime
+        date = datetime.strptime(date_text, '%Y-%m-%d %H:%M:%S')
         # Comprobar si la fecha está dentro de las últimas 24 horas
         current_time = datetime.now()
         time_difference = current_time - date
@@ -16,6 +16,7 @@ def validate_date_coincodex(date_text):
         pass
     return None
 
+
 def extract_image_url_coincodex(base_url, image_src):
     # Construir la URL completa de la imagen
     image_url = base_url + image_src
@@ -23,11 +24,10 @@ def extract_image_url_coincodex(base_url, image_src):
 
 def extract_article_content_coincodex(html):
     content = ""
-    h1_tags = html.find_all('h1')
     h2_tags = html.find_all('h2')
     h3_tags = html.find_all('h3')
     p_tags = html.find_all('p')
-    for tag in h1_tags + h2_tags + h3_tags + p_tags:
+    for tag in h2_tags + h3_tags + p_tags:
         content += tag.text.strip()
     return content.casefold()
 
@@ -39,16 +39,19 @@ def validate_coincodex_article(article_link, main_keyword):
     }
 
     try:
+        print("entroo")
         article_response = requests.get(article_link, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
         if article_response.status_code == 200 and 'text/html' in article_content_type:
+            print("entro 2")
             html = BeautifulSoup(article_response.text, 'html.parser')
 
             # Extract date
             date_element = html.find('time')
-            date_text = date_element.find('span').text.strip() if date_element else None
+            date_text = date_element['datetime'].strip() if date_element and 'datetime' in date_element.attrs else None
             valid_date = validate_date_coincodex(date_text)
+            print(valid_date)
 
             # Extract article content
             content = extract_article_content_coincodex(html)
@@ -65,8 +68,9 @@ def validate_coincodex_article(article_link, main_keyword):
             content_validation = validate_content(main_keyword, content)
 
             if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                return content, valid_date, image_url
+                return content, valid_date, image_url, title
     except Exception as e:
         print("Error in CoinCodex:", str(e))
 
     return None, None, None
+
