@@ -3,12 +3,17 @@ import requests
 from datetime import datetime, timedelta
 from routes.news_bot.validations import validate_content, title_in_blacklist
 
-
 def validate_date_cryptopotato(date_text):
     try:
-        # Convertir la fecha en un objeto de fecha
-        date = datetime.strptime(date_text, '%b %d, %Y @ %H:%M')
-        # Comprobar si la fecha está dentro de las últimas 24 horas
+        # Extrae la parte de la fecha que contiene la hora
+        time_part = date_text.split('@')[-1].strip()
+        # Obtiene la fecha actual
+        current_date = datetime.now().strftime('%b %d, %Y')
+        # Combina la fecha actual con la hora
+        date_with_time = f"{current_date} @ {time_part}"
+        # Convierte la fecha en un objeto de fecha
+        date = datetime.strptime(date_with_time, '%b %d, %Y @ %H:%M')
+        # Comprueba si la fecha está dentro de las últimas 24 horas
         current_time = datetime.now()
         time_difference = current_time - date
         if time_difference <= timedelta(hours=24):
@@ -17,10 +22,13 @@ def validate_date_cryptopotato(date_text):
         pass
     return None
 
+
+
 def extract_article_content_cryptopotato(html):
     content = ""
     content_div = html.find('div', class_='entry-content col-sm-11')
     if content_div:
+ 
         h2_tags = content_div.find_all('h2')
         p_tags = content_div.find_all('p')
         for tag in h2_tags + p_tags:
@@ -35,7 +43,6 @@ def validate_cryptopotato_article(article_link, main_keyword):
     try:
         article_response = requests.get(article_link, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
-
         if article_response.status_code == 200 and 'text/html' in article_content_type:
             html = BeautifulSoup(article_response.text, 'html.parser')
 
@@ -54,8 +61,11 @@ def validate_cryptopotato_article(article_link, main_keyword):
             content_validation = validate_content(main_keyword, content)
 
             if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                return content, valid_date, None
+                print("ok")
+                return content, valid_date, title
     except Exception as e:
         print("Error in CryptoPotato:", str(e))
 
     return None, None, None
+
+
