@@ -123,6 +123,7 @@ def generate_alert_chart(symbol: str, last_price: str) -> bytes:
  
     last_price = float(last_price)
     symbol = symbol.split(':')[1].replace('^', '').strip() # result: SOLUSDT
+    print('symbol 2 > ', symbol)
     binance_data = get_kline_data(symbol)
 
     df = pd.DataFrame(binance_data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'CloseTimestamp', 'QuoteAssetVolume', 'NumberofTrades', 'TakerBuyBaseAssetVolume', 'TakerBuyQuoteAssetVolume', 'Ignore'])
