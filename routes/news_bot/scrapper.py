@@ -11,7 +11,7 @@ from routes.news_bot.sites.dlnews import validate_dlnews_article
 from routes.news_bot.sites.investing import validate_investing_article
 from routes.news_bot.sites.theblock import validate_theblock_article
 from routes.news_bot.sites.utoday import validate_utoday_article
-#from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
+from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from ..slack.templates.news_message import send_NEWS_message_to_slack, send_INFO_message_to_slack_channel
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
 from routes.news_bot.sites.beincrypto import validate_beincrypto_article
