@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from routes.news_bot.validations import validate_content, title_in_blacklist, title_in_db
 
 def validate_date_ambcrypto(date_text):
     try:
@@ -78,5 +78,4 @@ def validate_ambcrypto_article(article_link, main_keyword):
         print("Error in ambcrypto:", str(e))
 
     return None, None, None
-
 

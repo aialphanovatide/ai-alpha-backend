@@ -130,7 +130,7 @@
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".home-blog-wrap"
             },
             {
               "site": "https://u.today/bitcoin-news",
@@ -142,7 +142,7 @@
             {
               "site": "https://cryptonews.net/news/bitcoin/",
               "base_url": "https://cryptonews.net",
-              "website_name": "cryptonews",
+              "website_name": "Cryptonews",
               "is_URL_complete": false,
               "main_container":".container"
             },
@@ -425,7 +425,7 @@
             {
               "site": "https://cryptonews.net/news/security/",
               "base_url": "https://cryptonews.net",
-              "website_name": "cryptonews",
+              "website_name": "Cryptonews",
               "is_URL_complete": false,
               "main_container":".container"
             },
@@ -714,11 +714,11 @@
             "main_container": ".home-blog-wrap"
             },
             {
-              "site": "https://blockworks.co/search",
+              "site": "https://blockworks.co/news",
               "base_url": "https://blockworks.co",
               "website_name": "Blockworks",
               "is_URL_complete": false,
-              "main_container":"p-8"
+              "main_container":"w-full"
             },
             {
               "site": "https://cryptoslate.com/?s=hacks",
@@ -730,7 +730,7 @@
             {
               "site": "https://cryptonews.net/news/security/",
               "base_url": "https://cryptonews.net",
-              "website_name": "cryptonews",
+              "website_name": "Cryptonews",
               "is_URL_complete": false,
               "main_container":".container"
             },
@@ -751,7 +751,7 @@
             {
               "site": "https://www.theblock.co/search?query=crypto%20hack",
               "base_url": "https://www.theblock.co",
-              "website_name": "theblock",
+              "website_name": "Theblock",
               "is_URL_complete": false,
               "main_container":".collectionFeed"
             }
@@ -956,7 +956,7 @@
           {
             "site": "https://www.theblock.co/search?query=LSDs",
             "base_url": "https://www.theblock.co",
-            "website_name": "theblock",
+            "website_name": "Theblock",
             "is_URL_complete": false,
             "main_container":".collectionFeed"
           },
@@ -991,28 +991,28 @@
           {
             "site": "https://decrypt.co/search/all/LSD",
             "base_url": "https://decrypt.co",
-            "website_name": "decrypt",
+            "website_name": "Decrypt",
             "is_URL_complete": false,
             "main_container":"None"
           },
           {
             "site": "https://decrypt.co/search/all/LSD",
             "base_url": "https://decrypt.co",
-            "website_name": "decrypt",
+            "website_name": "Decrypt",
             "is_URL_complete": false,
             "main_container":"None"
           },
           {
             "site": "https://www.dlnews.com/",
             "base_url": "https://www.dlnews.com/",
-            "website_name": "decrypt",
+            "website_name": "Decrypt",
             "is_URL_complete": false,
             "main_container":"None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=LSD",
             "base_url": "https://cryptodaily.co.uk",
-            "website_name": "cryptodaily",
+            "website_name": "Cryptodaily",
             "is_URL_complete": true,
             "main_container":".container"
           }
@@ -1442,63 +1442,63 @@
           {
             "site": "https://www.theblock.co/search?query=solana",
             "base_url": "https://www.theblock.co",
-            "website_name": "theblock",
+            "website_name": "Theblock",
             "is_URL_complete": false,
             "main_container":".collectionFeed"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=solana",
             "base_url": "https://cryptodaily.co.uk",
-            "website_name": "cryptodaily",
+            "website_name": "Cryptodaily",
             "is_URL_complete": true,
             "main_container":".row"
           },
           {
             "site": "https://dailyhodl.com/?s=solana",
             "base_url": "https://dailyhodl.com",
-            "website_name": "dailyhodl",
-            "is_URL_complete": false,
-            "main_container":".jeg_posts jeg_load_more_flag"
+            "website_name": "Dailyhodl",
+            "is_URL_complete": true,
+            "main_container":".jeg_inner_content"
           },
           {
             "site": "https://decrypt.co/search/all/solana",
             "base_url": "https://decrypt.co",
-            "website_name": "cryptodaily",
+            "website_name": "Decrypt",
             "is_URL_complete": true,
             "main_container":".row"
           },
           {
             "site": "https://cryptonews.net/?q=solana&rubricId=-1",
             "base_url": "https://cryptonews.net",
-            "website_name": "cryptonews",
+            "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container":"None"
+            "main_container":".container"
           },
           {
             "site": "https://www.investing.com/crypto/solana/news",
             "base_url": "https://www.investing.com",
-            "website_name": "investing",
+            "website_name": "Investing",
             "is_URL_complete": false,
             "main_container":".mb-4"
           },
           {
             "site": "https://u.today/search/node?keys=solana",
             "base_url": "https://u.today",
-            "website_name": "utoday",
+            "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container":".search-result"
+            "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
           },
           {
             "site": "https://blockworks.co/category/markets",
             "base_url": "https://blockworks.co",
-            "website_name": "blockworks",
+            "website_name": "Blockworks",
             "is_URL_complete": false,
             "main_container":".min-w-full"
           },
           {
             "site": "https://coinpedia.org/?s=solana",
             "base_url": "https://coinpedia.org",
-            "website_name": "coinpedia",
+            "website_name": "Coinpedia",
             "is_URL_complete": true,
             "main_container":".container-wrapper"
           }
@@ -2991,123 +2991,123 @@
           ],
     "sites": [
         {
-          "site": "https://cointelegraph.com/tags/layer0",
+          "site": "https://cointelegraph.com/search?query=layer%25200",
           "base_url": "https://cointelegraph.com",
           "website_name": "Cointelegraph",
           "is_URL_complete": false,
           "main_container":"None"
         },
         {
-          "site": "https://beincrypto.com/layer0-news",
+          "site": "https://beincrypto.com/?s=layer+0",
           "base_url": "https://beincrypto.com",
           "website_name": "Beincrypto",
           "is_URL_complete": true,
           "main_container":"None"
         },
         {
-          "site": "https://bitcoinist.com/category/layer0",
+          "site": "https://bitcoinist.com/?s=layer+0",
           "base_url": "https://bitcoinist.com",
           "website_name": "Bitcoinist",
           "is_URL_complete": true,
           "main_container":"None"
         },
         {
-          "site": "https://coingape.com/category/news/layer0-news",
+          "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=layer%200&gsc.page=1",
           "base_url": "https://coingape.com",
           "website_name": "Coingape",
           "is_URL_complete": true,
           "main_container":"None"
         },
         {
-          "site": "https://www.coindesk.com/tag/layer0",
+          "site": "https://www.coindesk.com/search?s=layer%200",
           "base_url": "https://www.coindesk.com",
           "website_name": "Coindesk",
           "is_URL_complete": false,
           "main_container":"None"
         },
         {
-          "site": "https://ambcrypto.com/category/new-news/",
+          "site": "https://ambcrypto.com/search/layer+0",
           "base_url": "https://ambcrypto.com",
           "website_name": "Ambcrypto",
           "is_URL_complete": true,
-          "main_container":"None"
+          "main_container":".home-blog-wrap"
         },
         {
-          "site": "https://cryptonews.com/?s=layer0",
+          "site": "https://cryptonews.com/?s=layer+0",
           "base_url": "https://cryptonews.com",
-          "website_name": "cryptonews",
+          "website_name": "Cryptonews",
           "is_URL_complete": false,
-          "main_container":".row search-results__list"
+          "main_container":".mb-80"
         },
         {
-          "site": "https://cryptoslate.com/news/layer0/",
+          "site": "https://cryptoslate.com/?s=layer+0",
           "base_url": "https://cryptoslate.com",
           "website_name": "cryptoslate",
-          "is_URL_complete": false,
-          "main_container":".None"
+          "is_URL_complete": true,
+          "main_container":".main-news-search"
         },
         {
-          "site": "https://cryptopotato.com/?s=layer0",
+          "site": "https://cryptopotato.com/?s=layer+0",
           "base_url": "https://cryptopotato.com",
           "website_name": "cryptopotato",
-          "is_URL_complete": false,
-          "main_container":".list-items"
+          "is_URL_complete": true,
+          "main_container":".container"
         },
         {
-          "site": "https://www.theblock.co/search?query=layer0",
+          "site": "https://www.theblock.co/search?query=layer%200",
           "base_url": "https://www.theblock.co",
-          "website_name": "theblock",
+          "website_name": "Theblock",
           "is_URL_complete": false,
           "main_container":".collectionFeed"
         },
         {
-          "site": "https://cryptodaily.co.uk/search?q=layer0",
+          "site": "https://cryptodaily.co.uk/search?q=layer%200",
           "base_url": "https://cryptodaily.co.uk",
-          "website_name": "cryptodaily",
+          "website_name": "Cryptodaily",
           "is_URL_complete": true,
           "main_container":"None"
         },
         {
-          "site": "https://dailyhodl.com/?s=layer0",
+          "site": "https://dailyhodl.com/?s=layer+0",
           "base_url": "https://dailyhodl.com",
-          "website_name": "dailyhodl",
-          "is_URL_complete": false,
-          "main_container":".jeg_posts jeg_load_more_flag"
+          "website_name": "Dailyhodl",
+          "is_URL_complete": true,
+          "main_container":".jeg_inner_content"
         },
         {
-          "site": "https://cryptonews.net/?q=layer0&rubricId=-1",
+          "site": "https://cryptonews.net/?q=layer+0&rubricId=-1",
           "base_url": "https://cryptonews.net",
-          "website_name": "cryptonews",
+          "website_name": "Cryptonews",
           "is_URL_complete": false,
-          "main_container":".col-xs-12 no-right-side col-sm-9 col-md-8"
+          "main_container":".container"
         },
         {
-          "site": "https://www.investing.com/search/?q=layer0",
+          "site": "https://www.investing.com/search/?q=layer%200",
           "base_url": "https://www.investing.com",
-          "website_name": "investing",
+          "website_name": "Investing",
           "is_URL_complete": false,
-          "main_container":".largeTitle"
+          "main_container":".mb-4"
         },
         {
-          "site": "https://u.today/search/node?keys=layer0",
+          "site": "https://u.today/search/node?keys=layer+0",
           "base_url": "https://u.today",
-          "website_name": "utoday",
-          "is_URL_complete": false,
-          "main_container":".search-result"
+          "website_name": "Utoday",
+          "is_URL_complete": true,
+          "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
         },
         {
-          "site": "https://blockworks.co/search",
+          "site": "https://blockworks.co/news",
           "base_url": "https://blockworks.co",
-          "website_name": "blockworks",
+          "website_name": "Blockworks",
           "is_URL_complete": false,
-          "main_container":".grid gap-8 grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+          "main_container":".w-full"
         },
         {
-          "site": "https://coinpedia.org/?s=layer0",
+          "site": "https://coinpedia.org/?s=layer+0",
           "base_url": "https://coinpedia.org",
-          "website_name": "coinpedia",
-          "is_URL_complete": false,
-          "main_container":".posts-container"
+          "website_name": "Coinpedia",
+          "is_URL_complete": true,
+          "main_container":".posts-items"
         }
 
       ],
@@ -3133,133 +3133,125 @@
     "KAS"
   ],
   "sites": [
-      {
-        "site": "https://cointelegraph.com/tags/layer1",
-        "base_url": "https://cointelegraph.com",
-        "website_name": "Cointelegraph",
-        "is_URL_complete": false,
-        "main_container":"None"
-      },
-      {
-        "site": "https://beincrypto.com/layer1-news",
-        "base_url": "https://beincrypto.com",
-        "website_name": "Beincrypto",
-        "is_URL_complete": true,
-        "main_container":"None"
-      },
-      {
-        "site": "https://bitcoinist.com/category/layer1",
-        "base_url": "https://bitcoinist.com",
-        "website_name": "Bitcoinist",
-        "is_URL_complete": true,
-        "main_container":"None"
-      },
-      {
-        "site": "https://coingape.com/category/news/layer1-news",
-        "base_url": "https://coingape.com",
-        "website_name": "Coingape",
-        "is_URL_complete": true,
-        "main_container":"None"
-      },
-      {
-        "site": "https://www.coindesk.com/tag/layer1",
-        "base_url": "https://www.coindesk.com",
-        "website_name": "Coindesk",
-        "is_URL_complete": false,
-        "main_container":"None"
-      }
-      ,
-      {
-        "site": "https://ambcrypto.com/search/layer1",
-        "base_url": "https://ambcrypto.com",
-        "website_name": "Ambcrypto",
-        "is_URL_complete": false,
-        "main_container":"None"
-      },
-      {
-        "site": "https://coingape.com/search_gcse/?q=layer1#gsc&gsc.tab=0&gsc.q=layer1&gsc.sort=",
-        "base_url": "https://coingape.com",
-        "website_name": "coingape",
-        "is_URL_complete": false,
-        "main_container":".gsc-expansionArea"
-      },
-      {
-        "site": "https://cryptonews.com/?s=layer1",
-        "base_url": "https://cryptonews.com",
-        "website_name": "cryptonews",
-        "is_URL_complete": false,
-        "main_container":".row search-results__list"
-      },
-      {
-        "site": "https://cryptoslate.com/news/layer1/",
-        "base_url": "https://cryptoslate.com",
-        "website_name": "cryptoslate",
-        "is_URL_complete": false,
-        "main_container":".None"
-      },
-      {
-        "site": "https://cryptopotato.com/?s=layer1",
-        "base_url": "https://cryptopotato.com",
-        "website_name": "cryptopotato",
-        "is_URL_complete": false,
-        "main_container":".list-items"
-      },
-      {
-        "site": "https://www.theblock.co/search?query=layer1",
-        "base_url": "https://www.theblock.co",
-        "website_name": "theblock",
-        "is_URL_complete": false,
-        "main_container":".collectionFeed"
-      },
-      {
-        "site": "https://cryptodaily.co.uk/search?q=layer1",
-        "base_url": "https://cryptodaily.co.uk",
-        "website_name": "cryptodaily",
-        "is_URL_complete": false,
-        "main_container":".posts-list latest-list"
-      },
-      {
-        "site": "https://dailyhodl.com/?s=layer1",
-        "base_url": "https://dailyhodl.com",
-        "website_name": "dailyhodl",
-        "is_URL_complete": false,
-        "main_container":".jeg_posts jeg_load_more_flag"
-      },
-      {
-        "site": "https://cryptonews.net/?q=layer1&rubricId=-1",
-        "base_url": "https://cryptonews.net",
-        "website_name": "cryptonews",
-        "is_URL_complete": false,
-        "main_container":".col-xs-12 no-right-side col-sm-9 col-md-8"
-      },
-      {
-        "site": "https://www.investing.com/search/?q=layer1",
-        "base_url": "https://www.investing.com",
-        "website_name": "investing",
-        "is_URL_complete": false,
-        "main_container":".largeTitle"
-      },
-      {
-        "site": "https://u.today/search/node?keys=layer1",
-        "base_url": "https://u.today",
-        "website_name": "utoday",
-        "is_URL_complete": false,
-        "main_container":".search-result"
-      },
-      {
-        "site": "https://blockworks.co/search",
-        "base_url": "https://blockworks.co",
-        "website_name": "blockworks",
-        "is_URL_complete": false,
-        "main_container":".grid gap-8 grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-      },
-      {
-        "site": "https://coinpedia.org/?s=layer1",
-        "base_url": "https://coinpedia.org",
-        "website_name": "coinpedia",
-        "is_URL_complete": false,
-        "main_container":".posts-container"
-      }
+    {
+      "site": "https://cointelegraph.com/search?query=layer%25201",
+      "base_url": "https://cointelegraph.com",
+      "website_name": "Cointelegraph",
+      "is_URL_complete": false,
+      "main_container":"None"
+    },
+    {
+      "site": "https://beincrypto.com/?s=layer+1",
+      "base_url": "https://beincrypto.com",
+      "website_name": "Beincrypto",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://bitcoinist.com/?s=layer+1",
+      "base_url": "https://bitcoinist.com",
+      "website_name": "Bitcoinist",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://coingape.com/search_gcse/?q=layer+1#gsc.tab=0&gsc.q=layer%201&gsc.page=1",
+      "base_url": "https://coingape.com",
+      "website_name": "Coingape",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://www.coindesk.com/search?s=layer%201",
+      "base_url": "https://www.coindesk.com",
+      "website_name": "Coindesk",
+      "is_URL_complete": false,
+      "main_container":"None"
+    },
+    {
+      "site": "https://ambcrypto.com/search/layer+1",
+      "base_url": "https://ambcrypto.com",
+      "website_name": "Ambcrypto",
+      "is_URL_complete": true,
+      "main_container":".home-blog-wrap"
+    },
+    {
+      "site": "https://cryptonews.com/?s=layer+1",
+      "base_url": "https://cryptonews.com",
+      "website_name": "Cryptonews",
+      "is_URL_complete": false,
+      "main_container":".mb-80"
+    },
+    {
+      "site": "https://cryptoslate.com/?s=layer+1",
+      "base_url": "https://cryptoslate.com",
+      "website_name": "cryptoslate",
+      "is_URL_complete": true,
+      "main_container":".main-news-search"
+    },
+    {
+      "site": "https://cryptopotato.com/?s=layer+1",
+      "base_url": "https://cryptopotato.com",
+      "website_name": "cryptopotato",
+      "is_URL_complete": true,
+      "main_container":".container"
+    },
+    {
+      "site": "https://www.theblock.co/search?query=layer%201",
+      "base_url": "https://www.theblock.co",
+      "website_name": "Theblock",
+      "is_URL_complete": false,
+      "main_container":".collectionFeed"
+    },
+    {
+      "site": "https://cryptodaily.co.uk/search?q=layer%201",
+      "base_url": "https://cryptodaily.co.uk",
+      "website_name": "Cryptodaily",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://dailyhodl.com/?s=layer+1",
+      "base_url": "https://dailyhodl.com",
+      "website_name": "Dailyhodl",
+      "is_URL_complete": true,
+      "main_container":".jeg_inner_content"
+    },
+    {
+      "site": "https://cryptonews.net/?q=layer+1&rubricId=-1",
+      "base_url": "https://cryptonews.net",
+      "website_name": "Cryptonews",
+      "is_URL_complete": false,
+      "main_container":".container"
+    },
+    {
+      "site": "https://www.investing.com/search/?q=layer%201",
+      "base_url": "https://www.investing.com",
+      "website_name": "Investing",
+      "is_URL_complete": false,
+      "main_container":".mb-4"
+    },
+    {
+      "site": "https://u.today/search/node?keys=layer+1",
+      "base_url": "https://u.today",
+      "website_name": "Utoday",
+      "is_URL_complete": true,
+      "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+    },
+    {
+      "site": "https://blockworks.co/news",
+      "base_url": "https://blockworks.co",
+      "website_name": "Blockworks",
+      "is_URL_complete": false,
+      "main_container":".w-full"
+    },
+    {
+      "site": "https://coinpedia.org/?s=layer+1",
+      "base_url": "https://coinpedia.org",
+      "website_name": "Coinpedia",
+      "is_URL_complete": true,
+      "main_container":".posts-items"
+    }
 
     ],
   "black_list": [
