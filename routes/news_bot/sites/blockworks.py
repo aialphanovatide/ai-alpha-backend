@@ -6,14 +6,14 @@ from routes.news_bot.validations import validate_content, title_in_blacklist
 
 def validate_date_blockworks(date_text):
     try:
-        # Extrae la fecha de la etiqueta "time"
         date = datetime.fromisoformat(date_text['datetime'])
-        # Comprueba si la fecha está dentro de las últimas 24 horas
-        current_time = datetime.now()
+        current_time = datetime.now(date.tzinfo)
         time_difference = current_time - date
         if time_difference <= timedelta(hours=24):
+            print("Time correct")
             return date
     except (ValueError, KeyError):
+        print("error:", ValueError, KeyError)
         pass
     return None
 
@@ -22,7 +22,6 @@ def extract_image_url_blockworks(html):
     if image:
         srcset = image.get('srcset')
         if srcset:
-            # Obtiene la URL de la imagen de la cadena srcset
             parts = srcset.split()
             for i in range(0, len(parts), 2):
                 if parts[i].startswith("https://blockworks-co.imgix.net/"):
@@ -65,10 +64,12 @@ def validate_blockworks_article(article_link, main_keyword):
             title = title_element.text.strip() if title_element else None
             is_title_in_blacklist = title_in_blacklist(title)
             content_validation = validate_content(main_keyword, content)
-        
+
             if valid_date and content and title and not is_title_in_blacklist and content_validation:
                 return content, valid_date, image_url
     except Exception as e:
         print("Error in Blockworks:", str(e))
 
     return None, None, None
+
+

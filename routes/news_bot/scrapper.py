@@ -131,6 +131,7 @@ def scrape_articles(sites, main_keyword):
             print(f'No articles found for {website_name} of {main_keyword}')
             return f'No articles found for {website_name}'
          
+        print('article_urls > ', article_urls)
         
         if article_urls:
             for article_link in article_urls:
@@ -192,7 +193,7 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                         
-                if website_name == 'u.today':
+                if website_name == 'Utoday':
                     title, content, valid_date, image_urls = validate_utoday_article(article_link, main_keyword)
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
@@ -237,14 +238,20 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                 
-            
+                if not article_to_save:
+                    print(f'{website_name} has no articles to save')
                 
-                if len(article_to_save) > 0:
-                   print('\narticle_to_save > ', article_to_save)
-                
+                # if len(article_to_save) > 0:
+                #     print('title: ', article_to_save[0])
+                #     print('Date: ', article_to_save[2])
+                #     print('Link: ', article_to_save[3]) 
+                   
+               
                 for article_data in article_to_save:
                     title, content, valid_date, article_link, website_name, image_urls = article_data
-                    
+                    print('\ntitle > ', title)
+                    print('article_link > ', article_link)
+                    print('valid_date > ', valid_date)
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -258,8 +265,9 @@ def scrape_articles(sites, main_keyword):
                         channel_id = lsd_slack_channel_id
 
                     summary = summary_generator(content, main_keyword)
-
+                    
                     if summary:
+                        print('-----There is a summary-----')
                         send_NEWS_message_to_slack(channel_id=channel_id, 
                                             title=title,
                                             date_time=valid_date,
@@ -291,6 +299,7 @@ def scrape_articles(sites, main_keyword):
                         session.commit()
                         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
                     else:
+                        print('------ there is no summary -----')
                         continue
                     
             return f'Web scrapping of {website_name} finished', 200

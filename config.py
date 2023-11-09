@@ -32,7 +32,6 @@ session = Session()
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
-print('_________________')
 try: 
     # Populates the sites and keyword tables
     if not session.query(SCRAPPING_DATA).first():
@@ -56,18 +55,18 @@ try:
 
             for site_data in sites:
                 site = SITES(
-                    site=site_data['site'],
-                    base_url=site_data['base_url'],
-                    website_name=site_data['website_name'],
+                    site=str(site_data['site']),
+                    base_url=str(site_data['base_url']).casefold(),
+                    website_name=str(site_data['website_name']).capitalize(),
                     is_URL_complete=site_data['is_URL_complete'],
-                    main_container=site_data['main_container']
+                    main_container=str(site_data['main_container'])
                 )
                 scrapping_data.sites.append(site)
 
             
             session.add(scrapping_data)
 
-        print('Initial site data saved to db')
+        print('-----Initial site data saved to db------')
         session.commit()
 except Exception as e:
     print(f'An error occurred: {str(e)}')
