@@ -78,3 +78,4 @@ def validate_cryptodaily_article(article_link, main_keyword):
         print("Error in CryptoDaily:", str(e))
 
     return None, None, None
+
