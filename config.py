@@ -1,6 +1,7 @@
 from models.news_bot.news_bot_model import SCRAPPER_MODEL, SCRAPPING_DATA, BLACKLIST, KEWORDS, SITES
 from models.word_files.word_files_model import FILES_MODEL
 from models.news_bot.articles_model import ARTICLE_MODEL
+from models.alerts.alerts import ALERT_MODEL
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
@@ -25,15 +26,13 @@ Session = sessionmaker(bind=engine)
 FILES_MODEL.metadata.create_all(engine)
 SCRAPPER_MODEL.metadata.create_all(engine)
 ARTICLE_MODEL.metadata.create_all(engine)
+ALERT_MODEL.metadata.create_all(engine)
 
 # Export the sql session
 session = Session() 
  
-
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
-print('ROOT IN CONFIG > ', ROOT_DIRECTORY)
 
-print('_________________')
 try: 
     # Populates the sites and keyword tables
     if not session.query(SCRAPPING_DATA).first():
