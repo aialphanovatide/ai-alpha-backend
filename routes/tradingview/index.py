@@ -20,7 +20,7 @@ def receive_data_from_tv():
             return 'Invalid request format', 400
         else:
             try:
-                # print('request.data', request.data)
+                print('request.data', request.data)
                 data_text = request.data.decode('utf-8')  # Decode the bytes to a string
                 data_lines = data_text.split(',')  # Split the text into lines
                
@@ -31,30 +31,29 @@ def receive_data_from_tv():
                         key, value = line.split(':', 1)
                         data_dict[key.strip()] = value.strip()
 
-               
+                print('data_dict > ', data_dict)
 
-                last_price = data_dict.get('last_price', '')  
                 alert_name = data_dict.get('alert_name', '') 
                 symbol = data_dict.get('symbol', '')  
-                last_time = data_dict.get('last_time', '')
+                price = data_dict.get('price', '')
 
-                response, status = send_alert_strategy_to_slack(price=last_price, # Delete after send_alert_strategy_to_telegram works
+              
+                response, status = send_alert_strategy_to_slack(price=price, # Delete after send_alert_strategy_to_telegram works
                                             alert_name=alert_name, # Delete after send_alert_strategy_to_telegram works
                                             symbol=symbol) # Delete after send_alert_strategy_to_telegram works
                 
-                # send_alert_strategy_to_telegram(exchange=exchange,
-                #                                 price=price_value,
-                #                                 alert_name=alert_name_value,
-                #                                 meaning=meaning_value
+                # send_alert_strategy_to_telegram(price=price,
+                #                                 alert_name=alert_name,
+                #     CODE NOT UPDATED, DO IT     symbol=symbol,
                 #                                 )
 
                 return response, status
             
-            except Exception as e:
-                print(f'Error sending message to Slack channel. Reason: {e}')
-                # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
+            except Exception as e: # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
                 #                                               sub_title='Reason',
                 #                                               message=str(e))
+                print(f'Error sending message to Slack channel. Reason: {e}')
+               
                 return f'Error sending message to Slack channel. Reason: {e}', 500
     except Exception as e:
         print(f'Error main thread. Reason: {e}')
