@@ -3,7 +3,7 @@ from ..slack.templates.news_message import send_NEWS_message_to_slack, send_INFO
 from routes.news_bot.sites.cointelegraph import validate_cointelegraph_article
 from routes.news_bot.sites.beincrypto import validate_beincrypto_article
 from routes.news_bot.sites.bitcoinist import validate_bitcoinist_article
-from routes.news_bot.validations import title_in_blacklist, url_in_db
+from routes.news_bot.validations import title_in_blacklist, url_in_db, title_in_db
 from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
 from models.news_bot.news_bot_model import SCRAPPING_DATA
@@ -63,8 +63,8 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
 
             if main_keyword == 'bitcoin':
                 keywords = ['bitcoin', 'btc']
-            # elif main_keyword == 'ethereum':
-            #     keywords = ['ethereum', 'ether', 'eth']
+            elif main_keyword == 'ethereum':
+                keywords = ['ethereum', 'ether', 'eth']
 
             for link in elements:
                 href = link['href']
@@ -72,17 +72,20 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
               
                 article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
 
-                if main_keyword == 'bitcoin':
+                if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
                     if any(keyword in article_title.lower() for keyword in keywords):
                         is_title_in_blacklist = title_in_blacklist(article_title)
+                        is_title_in_db = title_in_db(article_title)
                         is_url_in_db = url_in_db(article_url)
                         
-                        if is_title_in_blacklist == False and is_url_in_db == False:
+                        if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
                             article_urls.add(article_url)
                 else:
                     is_title_in_blacklist = title_in_blacklist(article_title)
                     is_url_in_db = url_in_db(article_url)
-                    if is_title_in_blacklist == False and is_url_in_db == False:
+                    is_title_in_db = title_in_db(article_title)
+
+                    if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
                         article_urls.add(article_url)
            
             browser.close()
@@ -147,57 +150,57 @@ def scrape_articles(sites, main_keyword):
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
             
                 
-                if len(article_to_save) > 0:
-                    print('\narticle_to_save > ', article_to_save)
+                # if len(article_to_save) > 0:
+                #     print('\narticle_to_save > ', article_to_save)
                 
-                # for article_data in article_to_save:
-                #     title, content, valid_date, article_link, website_name, image_urls = article_data
+                for article_data in article_to_save:
+                    title, content, valid_date, article_link, website_name, image_urls = article_data
                     
                     
-                #     if main_keyword == 'bitcoin':
-                #         channel_id = btc_slack_channel_id
-                #     elif main_keyword == 'ethereum':
-                #         channel_id = eth_slack_channel_id
-                #     elif main_keyword == 'hacks':
-                #         channel_id = hacks_slack_channel_id
-                #     else:
-                #         channel_id = lsd_slack_channel_id
+                    if main_keyword == 'bitcoin':
+                        channel_id = btc_slack_channel_id
+                    elif main_keyword == 'ethereum':
+                        channel_id = eth_slack_channel_id
+                    elif main_keyword == 'hacks':
+                        channel_id = hacks_slack_channel_id
+                    else:
+                        channel_id = lsd_slack_channel_id
 
-                #     summary = summary_generator(content, main_keyword)
+                    summary = summary_generator(content, main_keyword)
 
-                #     if summary:
-                #         send_NEWS_message_to_slack(channel_id=channel_id, 
-                #                             title=title,
-                #                             date_time=valid_date,
-                #                             url=article_link,
-                #                             summary=summary,
-                #                             images_list=image_urls,
-                #                             main_keyword=main_keyword
-                #                             )
+                    if summary:
+                        send_NEWS_message_to_slack(channel_id=channel_id, 
+                                            title=title,
+                                            date_time=valid_date,
+                                            url=article_link,
+                                            summary=summary,
+                                            images_list=image_urls,
+                                            main_keyword=main_keyword
+                                            )
 
-                #         if main_keyword == 'bitcoin':
-                #             response, status = send_tweets_to_twitter(content=summary,
-                #                                                       title=title)
+                        if main_keyword == 'bitcoin':
+                            response, status = send_tweets_to_twitter(content=summary,
+                                                                      title=title)
 
-                #             if status == 200:
-                #                 send_INFO_message_to_slack_channel(channel_id=channel_id,
-                #                                                 title_message="New Notification from AI Alpha",
-                #                                                 sub_title="Response",
-                #                                                 message=response
-                #                                                 )
+                            if status == 200:
+                                send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                                title_message="New Notification from AI Alpha",
+                                                                sub_title="Response",
+                                                                message=response
+                                                                )
                         
-                #         new_article = ARTICLE(title=title,
-                #         content=content,
-                #         date=valid_date,
-                #         url=article_link,
-                #         website_name=website_name
-                #         )
+                        new_article = ARTICLE(title=title,
+                        content=content,
+                        date=valid_date,
+                        url=article_link,
+                        website_name=website_name
+                        )
 
-                #         session.add(new_article)
-                #         session.commit()
-                #         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
-                #     else:
-                #         continue
+                        session.add(new_article)
+                        session.commit()
+                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
+                    else:
+                        continue
                     
             return f'Web scrapping of {website_name} finished', 200
         

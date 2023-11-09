@@ -14,9 +14,9 @@ def receive_data_from_tv():
     try:
         if request.is_json:
             print('request.data AS JSON', request.data)
-            # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
-            #                                                   sub_title='Invalid request format',
-            #                                                   message=str(request.data))
+            send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
+                                                              sub_title='Invalid request format',
+                                                              message=str(request.data))
             return 'Invalid request format', 400
         else:
             try:
@@ -31,29 +31,27 @@ def receive_data_from_tv():
                         key, value = line.split(':', 1)
                         data_dict[key.strip()] = value.strip()
 
-                print('data_dict > ', data_dict)
-
                 alert_name = data_dict.get('alert_name', '') 
                 symbol = data_dict.get('symbol', '')  
-                price = data_dict.get('price', '')
+                price = data_dict.get('price', data_dict.get('last_price', ''))
 
               
-                response, status = send_alert_strategy_to_slack(price=price, # Delete after send_alert_strategy_to_telegram works
-                                            alert_name=alert_name, # Delete after send_alert_strategy_to_telegram works
-                                            symbol=symbol) # Delete after send_alert_strategy_to_telegram works
+                # response, status = send_alert_strategy_to_slack(price=price, # Delete after send_alert_strategy_to_telegram works
+                #                             alert_name=alert_name, # Delete after send_alert_strategy_to_telegram works
+                #                             symbol=symbol) # Delete after send_alert_strategy_to_telegram works
                 
-                # send_alert_strategy_to_telegram(price=price,
-                #                                 alert_name=alert_name,
-                #     CODE NOT UPDATED, DO IT     symbol=symbol,
-                #                                 )
+                response, status = send_alert_strategy_to_telegram(price=price,
+                                                alert_name=alert_name,
+                                                symbol=symbol,
+                                                )
 
                 return response, status
             
-            except Exception as e: # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
-                #                                               sub_title='Reason',
-                #                                               message=str(e))
+            except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
-               
+                send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
+                                                              sub_title='Reason',
+                                                              message=str(e))
                 return f'Error sending message to Slack channel. Reason: {e}', 500
     except Exception as e:
         print(f'Error main thread. Reason: {e}')

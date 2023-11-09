@@ -22,7 +22,7 @@ def activate_news_bot(target):
    
     news_bot_job = scheduler.get_job(target)
     if news_bot_job:
-        # send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot is already active',sub_title='Target', message=f'An interval of *{news_bot_start_time} Minutes* has been set for scrapping data')
+        send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot is already active',sub_title='Target', message=f'An interval of *{news_bot_start_time} Minutes* has been set for scrapping data')
         return f'{target.capitalize()} News Bot is already active', 400
     else:
         scrapping_data_objects = session.query(SCRAPPING_DATA).filter(SCRAPPING_DATA.main_keyword == target.casefold()).all()
@@ -35,7 +35,7 @@ def activate_news_bot(target):
             main_keyword = scrapping_data_objects[0].main_keyword
             job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=news_bot_start_time, id=target, replace_existing=True, args=[main_keyword], max_instances=1)
             if job:
-                # send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot activated successfully',sub_title='Start', message=f'An interval of *{news_bot_start_time} Minutes* has been set for scrapping data')
+                send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot activated successfully',sub_title='Start', message=f'An interval of *{news_bot_start_time} Minutes* has been set for scrapping data')
                 return f'{target.capitalize()} News Bot activated', 200
             else:
                 print(f'Error while activating the {target.capitalize()} News Bot')
@@ -52,11 +52,11 @@ def deactivate_news_bot(target):
         news_bot_job = scheduler.get_job(target)
 
         if not news_bot_job:
-            # send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot is alreadu inactive',sub_title='Start', message='Inactive')
+            send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot is alreadu inactive',sub_title='Start', message='Inactive')
             return f'{target.capitalize()} News Bot is already inactive', 400
                 
         scheduler.remove_job(news_bot_job.id)
-        # send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot deactivated successfully',sub_title='Start', message='Inactive')
+        send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot deactivated successfully',sub_title='Start', message='Inactive')
         return f'{target.capitalize()} News Bot deactivated', 200
     
     except JobLookupError:
