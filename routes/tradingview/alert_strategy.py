@@ -1,5 +1,5 @@
-from dotenv import load_dotenv
 from ..trendspider.create_chart import generate_alert_chart
+from dotenv import load_dotenv
 import requests
 import os
 
@@ -24,8 +24,8 @@ send_photo_url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto?parse_mode=HTML
 def formatted_alert_name(input_string):
 
     components = input_string.split(' - ')
-    print('components > ', components)
-    time_frame = components[0]
+    
+    time_frame = components[0].casefold()
     alert_message = components[1]
 
     return time_frame, alert_message
@@ -37,12 +37,8 @@ def send_alert_strategy_to_slack(price, alert_name, symbol):
     time_frame, alert_message = formatted_alert_name(alert_name) 
     formatted_price = str(price)
 
-    new_alert_name = formatted_symbol + "T" + " - " + time_frame
-    print('new_alert_name > ', new_alert_name)
-    
-    print('alert_message > ', alert_message)
-    print('formatted_price > ', formatted_price)
-    
+    new_alert_name = formatted_symbol + " - " + time_frame
+
     payload = {
                     "blocks": [
                         {
@@ -57,12 +53,8 @@ def send_alert_strategy_to_slack(price, alert_name, symbol):
                             "fields": [
                                 {
                                     "type": "mrkdwn",
-                                    "text": f"*{new_alert_name}*\n\n{alert_message}"
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Last Price:*\n{formatted_price}"
-                                },
+                                    "text": f"*{new_alert_name}*\n\n{alert_message}\n*Last Price:* {formatted_price}"
+                                }
                             ]
                         },
                         {
@@ -93,40 +85,42 @@ def send_alert_strategy_to_telegram(price, alert_name, symbol):
     time_frame, alert_message = formatted_alert_name(alert_name) 
     formatted_price = str(price)
 
-    new_alert_name = formatted_symbol + "T" + " - " + time_frame
+    new_alert_name = formatted_symbol + " - " + time_frame
 
-    # send_alert_strategy_to_slack(price=formatted_price,
-    #                             alert_name=alert_name,
-    #                             symbol=symbol)
+    send_alert_strategy_to_slack(price=price,
+                                alert_name=alert_name,
+                                symbol=symbol)
 
 
     content = f"""<b>{new_alert_name}</b>\n\n<b>{alert_message}</b>\nLast Price: <b>{formatted_price}</b>\n"""
 
-    symbol = "BINANCE:^" + formatted_symbol + "T" # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
+    symbol = "BINANCE:^" + formatted_symbol # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
+  
     chart = generate_alert_chart(symbol, formatted_price)
 
     files = {
     'photo': ('chart.png', chart, 'image/png')
     }
 
-    photo_payload = {'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
-                    'caption': content,
-                    'message_thread_id': CALL_TO_TRADE_TOPIC_ID}
+    # photo_payload = {'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
+    #                 'caption': content,
+    #                 'message_thread_id': CALL_TO_TRADE_TOPIC_ID}
 
 
-    # text_payload = {
-    #         'text': content,
-    #         'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
-    #         'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
-    #         'protect_content': False,
-    #         }
+    text_payload = {
+            'text': content,
+            'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
+            'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
+            'protect_content': False,
+            }
     
     try:
-        response = requests.post(send_photo_url, data=photo_payload, files=files)
-
+        response = requests.post(telegram_text_url, data=text_payload)
+        
         if response.status_code == 200:
             return 'Alert message sent to Telegram successfully', 200
         else:
             return f'Error while sending alert to Telegram {str(response.content)}', 500 
     except Exception as e:
         return f'Error sending message to Telegram. Reason: {e}', 500
+    

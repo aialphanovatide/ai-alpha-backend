@@ -10,9 +10,9 @@ import os
 
 load_dotenv()
 
-news_bot_start_time = 5
+news_bot_start_time = 50
 
-DB_PORT = os.getenv('DB_PORT')
+DB_PORT = os.getenv('DB_PORT_MAC')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
@@ -31,6 +31,7 @@ session = Session()
  
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
+print('ROOT IN CONFIG > ', ROOT_DIRECTORY)
 
 print('_________________')
 try: 
