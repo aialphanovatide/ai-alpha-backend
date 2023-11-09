@@ -1,5 +1,7 @@
 from ..trendspider.create_chart import generate_alert_chart
+from ...models.alerts.alerts import ALERT
 from dotenv import load_dotenv
+from ...config import session
 import requests
 import os
 
@@ -118,6 +120,15 @@ def send_alert_strategy_to_telegram(price, alert_name, symbol):
         response = requests.post(telegram_text_url, data=text_payload)
         
         if response.status_code == 200:
+            new_alert = ALERT(alert_name=new_alert_name,
+                        alert_message = alert_message,
+                        symbol=formatted_symbol,
+                        price=formatted_price
+                        )
+
+            session.add(new_alert)
+            session.commit()
+
             return 'Alert message sent to Telegram successfully', 200
         else:
             return f'Error while sending alert to Telegram {str(response.content)}', 500 

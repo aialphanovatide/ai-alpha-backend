@@ -10,6 +10,7 @@ class ALERT(ALERT_MODEL):
 
     alert_id = Column(Integer, primary_key=True)
     alert_name = Column(String)
+    alert_message = Column(String)
     symbol = Column(String)
-    price = Column(Integer)
+    price = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow) 
