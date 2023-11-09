@@ -1,26 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-
-from routes.news_bot.validations import title_in_blacklist, validate_content
+from dateutil.parser import parse
 
 def validate_date_cryptonews(date_text):
     try:
-        if 'm' in date_text:
-            # Si la fecha está en minutos
-            minutes_ago = int(date_text.split()[0])
-            current_time = datetime.now()
-            article_date = current_time - timedelta(minutes=minutes_ago)
-        else:
-            # Si la fecha está en un formato diferente, puedes adaptarlo según el caso
-            article_date = None
-
-        if article_date and (current_time - article_date) < timedelta(days=1):
-            return article_date.strftime('%Y-%m-%d')
-        else:
-            return None
+        # Utiliza dateutil.parser para analizar el formato de fecha dado
+        article_date = parse(date_text)
+        # Formatea la fecha en el formato deseado
+        return article_date.strftime('%Y-%m-%d')
     except Exception:
         return None
+
 
 def extract_image_urls_cryptonews(html):
     image_urls = []
@@ -51,10 +42,9 @@ def extract_article_content_cryptonews(html):
     content_tags = html.find_all(['h2', 'p'])
     for tag in content_tags:
         content += tag.text.strip() + '\n'
-
     return title, content
 
-def validate_cryptonews_article(article_link, main_keyword):
+def validate_cryptonews_article(article_link):
     headers = {
         'User-Agent': 'Your User-Agent String Here'
     }
@@ -66,23 +56,22 @@ def validate_cryptonews_article(article_link, main_keyword):
 
         html = BeautifulSoup(article_response.text, 'html.parser')
 
-        date_element = html.find('span', class_='datetime flex middle-xs')
-        if date_element:
-            date_text = date_element.text.strip()
-            valid_date = validate_date_cryptonews(date_text)
-        else:
-            print('Error: Date not found')
-            valid_date = None
+        date_element = html.find('time')
+        date_text = date_element['datetime'].strip() if date_element and 'datetime' in date_element.attrs else None
+        valid_date = validate_date_cryptonews(date_text)
+
+
 
         image_urls = extract_image_urls_cryptonews(article_response.text)
         title, content = extract_article_content_cryptonews(html)
 
-        is_title_in_blacklist = title_in_blacklist(title)
-        content_validation = validate_content(main_keyword, content)
-
-        if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                return content, valid_date, image_urls
+        if valid_date and content and title:
+ 
+            return content, valid_date, image_urls, title
     except Exception as e:
-        print("Error in CryptoNews:", str(e))
+        print(f"Error in cryptonews: {str(e)}")
 
     return None, None, None
+
+link = "https://cryptonews.com/news/bitcoin-price-prediction-as-btc-price-reverses-on-anticipation-that-blackrock-to-apply-for-spot-ethereum-etf-here-are-the-key-levels-to-watch.htm"
+validate_cryptonews_article(link)
