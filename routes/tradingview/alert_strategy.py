@@ -1,7 +1,7 @@
-from ..trendspider.create_chart import generate_alert_chart
-from ...models.alerts.alerts import ALERT
+from routes.trendspider.create_chart import generate_alert_chart
+from models.alerts.alerts import ALERT
 from dotenv import load_dotenv
-from ...config import session
+from config import session
 import requests
 import os
 
