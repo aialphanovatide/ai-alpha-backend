@@ -4,7 +4,13 @@ from slack_sdk.errors import SlackApiError
 
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, images_list, main_keyword):
 
-        
+        print('title > ', title)
+        print('url > ', url)
+        print('date_time > ', date_time)
+        print('main_keyword > ', main_keyword)
+
+        # return 'ok', 200
+
         blocks=[
             {
                 "type": "header",
@@ -50,13 +56,15 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
                 text=f'New Notification from {str(main_keyword).capitalize()} News Bot', 
                 blocks=blocks
             )
+         
             response = result['ok']
             if response == True:
-                return f'Message sent successfully to Slack channel {channel_id}', 200
+                print(f'Message sent successfully to Slack channel {main_keyword}')
+                return f'Message sent successfully to Slack channel {main_keyword}', 200
 
         except SlackApiError as e:
             print(f"Error posting message: {e}")
-            return f'Error sending message to Slack channel {channel_id}', 500
+            return f'Error sending message to Slack channel {main_keyword}', 500
         
 # send_NEWS_message_to_slack(channel_id="C05RK7CCDEK",
 #                             title="Just how bullish is the Bitcoin halving for BTC price? Experts debate",

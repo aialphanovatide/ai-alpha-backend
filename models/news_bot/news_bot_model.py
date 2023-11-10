@@ -15,6 +15,7 @@ class SCRAPPING_DATA(SCRAPPER_MODEL):
     keywords = relationship("KEWORDS", cascade="all, delete-orphan")
     sites = relationship("SITES", cascade="all, delete-orphan")
     blacklist = relationship("BLACKLIST", cascade="all, delete-orphan")
+    time_interval = Column(Integer, default=40)
     created_at = Column(DateTime, default=datetime.utcnow) 
 
 class KEWORDS(SCRAPPER_MODEL): 
