@@ -121,7 +121,7 @@ def scrape_articles(sites, main_keyword):
         is_URL_complete = sites.is_URL_complete
         main_container = sites.main_container
 
-        print(f'Web scrape of {main_keyword} STARTED for {website_name}')
+        print(f'---Web scrape of {main_keyword} STARTED for {website_name}---')
 
         article_urls, website_name = scrape_sites(site,base_url,
                                                    website_name,
@@ -132,13 +132,13 @@ def scrape_articles(sites, main_keyword):
 
         
         if not article_urls:
-            print(f'No articles found for {website_name} of {main_keyword}')
+            print(f'---No articles found for {website_name} of {main_keyword}---')
             return f'No articles found for {website_name}'
          
        
         
         if article_urls:
-            print('ARTICLES TO ANALIZE> ', article_urls)
+            # print('---ARTICLES TO ANALIZE---', article_urls)
             for article_link in article_urls:
 
                 article_to_save = []
@@ -243,6 +243,8 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                 
+                if not article_to_save:
+                    print(f"Article did not passed {website_name} validations in {main_keyword}")
                 
                 for article_data in article_to_save:
                     title, content, valid_date, article_link, website_name, image_urls = article_data
@@ -258,7 +260,8 @@ def scrape_articles(sites, main_keyword):
                     else:
                         channel_id = lsd_slack_channel_id
 
-                    summary = summary_generator(content, main_keyword)
+                    # summary = summary_generator(content, main_keyword)
+                    summary = True
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -278,9 +281,9 @@ def scrape_articles(sites, main_keyword):
                         channel_id = other_altcoins_slack_channel_id
 
                     summary = summary_generator(content, main_keyword)
+                    # summary = True
 
                     if summary:
-                        print('----Summarry ----', summary)
                         send_NEWS_message_to_slack(channel_id=channel_id, 
                                             title=title,
                                             date_time=valid_date,

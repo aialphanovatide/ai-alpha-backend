@@ -420,10 +420,10 @@
               "base_url": "https://u.today",
               "website_name": "Utoday",
               "is_URL_complete": true,
-              "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+              "main_container":".js-view-dom-id-640bbbf70a4eb439d2bcfa00e9e00f2543053e010110abf4ac9719514c23d0d3"
             },
             {
-              "site": "https://cryptonews.net/news/security/",
+              "site": "https://cryptonews.net/news/ethereum/",
               "base_url": "https://cryptonews.net",
               "website_name": "Cryptonews",
               "is_URL_complete": false,
@@ -672,46 +672,11 @@
               "main_container":"None"
             },
             {
-              "site": "https://cointelegraph.com/tags/ethereum",
-              "base_url": "https://cointelegraph.com",
-              "website_name": "Cointelegraph",
-              "is_URL_complete": false,
-              "main_container": ".posts-listing__list"
-            },
-            {
-              "site": "https://bitcoinist.com/category/ethereum/",
-              "base_url": "https://bitcoinist.com",
-              "website_name": "Bitcoinist",
-              "is_URL_complete": true,
-              "main_container": ".jnews_category_content_wrapper"
-            },
-            {
-              "site": "https://coingape.com/category/ethereum-news/",
-              "base_url": "https://coingape.com",
-              "website_name": "Coingape",
-              "is_URL_complete": true,
-              "main_container":".covergaelist"
-            },
-            {
-              "site": "https://www.coindesk.com/tag/ether/",
-              "base_url": "https://www.coindesk.com",
-              "website_name": "Coindesk",
-              "is_URL_complete": false,
-              "main_container": "None"
-            },
-            {
               "site": "https://dailyhodl.com/scams/",
               "base_url": "https://dailyhodl.com",
               "website_name": "Dailyhodl",
               "is_URL_complete": true,
               "main_container":".jeg_inner_content"
-            },
-            {
-            "site": "https://ambcrypto.com/search/ethereum",
-            "base_url": "https://ambcrypto.com",
-            "website_name": "Ambcrypto",
-            "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
             },
             {
               "site": "https://blockworks.co/news",
@@ -987,13 +952,6 @@
             "website_name": "Cryptoslate",
             "is_URL_complete": true,
             "main_container":".main-news-search"
-          },
-          {
-            "site": "https://decrypt.co/search/all/LSD",
-            "base_url": "https://decrypt.co",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container":"None"
           },
           {
             "site": "https://decrypt.co/search/all/LSD",
@@ -1388,28 +1346,28 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container":"None"
+            "main_container":".posts-listing__list"
           },
           {
             "site": "https://beincrypto.com/solana-news",
             "base_url": "https://beincrypto.com",
             "website_name": "Beincrypto",
             "is_URL_complete": true,
-            "main_container":"None"
+            "main_container":".main"
           },
           {
             "site": "https://bitcoinist.com/category/solana",
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container":"None"
+            "main_container":".jnews_category_content_wrapper"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=solana#gsc.tab=0&gsc.q=solana&gsc.page=1",
             "base_url": "https://coingape.com",
             "website_name": "Coingape",
             "is_URL_complete": true,
-            "main_container":"None"
+            "main_container":".gsc-expansionArea"
           },
           {
             "site": "https://www.coindesk.com/tag/solana",
@@ -1465,7 +1423,7 @@
             "base_url": "https://decrypt.co",
             "website_name": "Decrypt",
             "is_URL_complete": true,
-            "main_container":".row"
+            "main_container":"None"
           },
           {
             "site": "https://cryptonews.net/?q=solana&rubricId=-1",
@@ -1486,7 +1444,7 @@
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container":".search-result"
           },
           {
             "site": "https://blockworks.co/category/markets",
@@ -1504,8 +1462,8 @@
           }
         ],
       "black_list": [
-        
-       
+        "Cointelegraph Accelerator News",
+        "Analysis"
       ]  
   },
   {
@@ -2991,18 +2949,46 @@
           ],
     "sites": [
         {
-          "site": "https://cointelegraph.com/search?query=layer%25200",
+          "site": "https://cointelegraph.com/search?query=atom",
           "base_url": "https://cointelegraph.com",
           "website_name": "Cointelegraph",
           "is_URL_complete": false,
-          "main_container":"None"
+          "main_container":".search-page__results"
+        },
+        {
+          "site": "https://cointelegraph.com/search?query=dot",
+          "base_url": "https://cointelegraph.com",
+          "website_name": "Cointelegraph",
+          "is_URL_complete": false,
+          "main_container":".search-page__results"
+        },
+        {
+          "site": "https://cointelegraph.com/search?query=qnt",
+          "base_url": "https://cointelegraph.com",
+          "website_name": "Cointelegraph",
+          "is_URL_complete": false,
+          "main_container":".search-page__results"
         },
         {
           "site": "https://beincrypto.com/?s=layer+0",
           "base_url": "https://beincrypto.com",
           "website_name": "Beincrypto",
           "is_URL_complete": true,
-          "main_container":"None"
+          "main_container":".main"
+        },
+        {
+          "site": "https://beincrypto.com/?s=dot",
+          "base_url": "https://beincrypto.com",
+          "website_name": "Beincrypto",
+          "is_URL_complete": true,
+          "main_container":".main"
+        },
+        {
+          "site": "https://beincrypto.com/?s=qnt",
+          "base_url": "https://beincrypto.com",
+          "website_name": "Beincrypto",
+          "is_URL_complete": true,
+          "main_container":".main"
         },
         {
           "site": "https://bitcoinist.com/?s=layer+0",
@@ -3019,6 +3005,27 @@
           "main_container":"None"
         },
         {
+          "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=atom&gsc.sort=",
+          "base_url": "https://coingape.com",
+          "website_name": "Coingape",
+          "is_URL_complete": true,
+          "main_container":"None"
+        },
+        {
+          "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=dot&gsc.sort=",
+          "base_url": "https://coingape.com",
+          "website_name": "Coingape",
+          "is_URL_complete": true,
+          "main_container":"None"
+        },
+        {
+          "site": "https://coingape.com/search_gcse/?q=qnt#gsc.tab=0&gsc.q=qnt&gsc.page=1",
+          "base_url": "https://coingape.com",
+          "website_name": "Coingape",
+          "is_URL_complete": true,
+          "main_container":"None"
+        },
+        {
           "site": "https://www.coindesk.com/search?s=layer%200",
           "base_url": "https://www.coindesk.com",
           "website_name": "Coindesk",
@@ -3026,21 +3033,42 @@
           "main_container":"None"
         },
         {
-          "site": "https://ambcrypto.com/search/layer+0",
-          "base_url": "https://ambcrypto.com",
-          "website_name": "Ambcrypto",
-          "is_URL_complete": true,
-          "main_container":".home-blog-wrap"
+          "site": "https://www.coindesk.com/search?s=atom",
+          "base_url": "https://www.coindesk.com",
+          "website_name": "Coindesk",
+          "is_URL_complete": false,
+          "main_container":"None"
         },
         {
-          "site": "https://cryptonews.com/?s=layer+0",
-          "base_url": "https://cryptonews.com",
-          "website_name": "Cryptonews",
+          "site": "https://www.coindesk.com/search?s=dot",
+          "base_url": "https://www.coindesk.com",
+          "website_name": "Coindesk",
           "is_URL_complete": false,
-          "main_container":".mb-80"
+          "main_container":"None"
+        },
+        {
+          "site": "https://www.coindesk.com/search?s=qnt",
+          "base_url": "https://www.coindesk.com",
+          "website_name": "Coindesk",
+          "is_URL_complete": false,
+          "main_container":"None"
         },
         {
           "site": "https://cryptoslate.com/?s=layer+0",
+          "base_url": "https://cryptoslate.com",
+          "website_name": "cryptoslate",
+          "is_URL_complete": true,
+          "main_container":".main-news-search"
+        },
+        {
+          "site": "https://cryptoslate.com/?s=atom",
+          "base_url": "https://cryptoslate.com",
+          "website_name": "cryptoslate",
+          "is_URL_complete": true,
+          "main_container":".main-news-search"
+        },
+        {
+          "site": "https://cryptoslate.com/?s=dot",
           "base_url": "https://cryptoslate.com",
           "website_name": "cryptoslate",
           "is_URL_complete": true,
@@ -3082,6 +3110,13 @@
           "main_container":".container"
         },
         {
+          "site": "https://cryptonews.net/?q=dot&rubricId=-1",
+          "base_url": "https://cryptonews.net",
+          "website_name": "Cryptonews",
+          "is_URL_complete": false,
+          "main_container":".container"
+        },
+        {
           "site": "https://www.investing.com/search/?q=layer%200",
           "base_url": "https://www.investing.com",
           "website_name": "Investing",
@@ -3090,6 +3125,20 @@
         },
         {
           "site": "https://u.today/search/node?keys=layer+0",
+          "base_url": "https://u.today",
+          "website_name": "Utoday",
+          "is_URL_complete": true,
+          "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+        },
+        {
+          "site": "https://u.today/search/node?keys=atom",
+          "base_url": "https://u.today",
+          "website_name": "Utoday",
+          "is_URL_complete": true,
+          "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+        },
+        {
+          "site": "https://u.today/search/node?keys=qnt",
           "base_url": "https://u.today",
           "website_name": "Utoday",
           "is_URL_complete": true,
@@ -3109,10 +3158,9 @@
           "is_URL_complete": true,
           "main_container":".posts-items"
         }
-
       ],
     "black_list": [
-      
+      "Tristan Greene"
      
     ]  
 },
@@ -3138,7 +3186,7 @@
       "base_url": "https://cointelegraph.com",
       "website_name": "Cointelegraph",
       "is_URL_complete": false,
-      "main_container":"None"
+      "main_container":".search-page__results"
     },
     {
       "site": "https://beincrypto.com/?s=layer+1",
@@ -3152,7 +3200,7 @@
       "base_url": "https://bitcoinist.com",
       "website_name": "Bitcoinist",
       "is_URL_complete": true,
-      "main_container":"None"
+      "main_container":".jnews_category_content_wrapper"
     },
     {
       "site": "https://coingape.com/search_gcse/?q=layer+1#gsc.tab=0&gsc.q=layer%201&gsc.page=1",
@@ -3167,13 +3215,6 @@
       "website_name": "Coindesk",
       "is_URL_complete": false,
       "main_container":"None"
-    },
-    {
-      "site": "https://ambcrypto.com/search/layer+1",
-      "base_url": "https://ambcrypto.com",
-      "website_name": "Ambcrypto",
-      "is_URL_complete": true,
-      "main_container":".home-blog-wrap"
     },
     {
       "site": "https://cryptonews.com/?s=layer+1",

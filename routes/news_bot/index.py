@@ -62,7 +62,30 @@ def deactivate_news_bot(target):
     except JobLookupError:
         print(f"{target.capitalize()} News Bot was not found")
         return f"{target.capitalize()} News Bot was not found", 500
-    
+
+
+# Chnage the time interval of scrapping data    
+@scrapper_bp.route('/api/bot/change/interval', methods=['POST'])
+def change_time_interval():
+    try:
+        # Assuming the request contains JSON data with keys 'target' and 'new_interval'
+        data = request.get_json()
+        target = data.get('target')
+        new_interval = data.get('new_interval')
+
+        # Query the database for the record based on the target
+        scrapping_data_object = session.query(SCRAPPING_DATA).filter(SCRAPPING_DATA.main_keyword == target.casefold()).first()
+
+        if scrapping_data_object:
+            scrapping_data_object.time_interval = new_interval
+            session.commit()
+
+            return "Time interval updated successfully", 200
+        else:
+            return"Record not found", 404
+
+    except Exception as e:
+        return "error" + str(e), 500
 
 
 # Gets the status of the scheduler
