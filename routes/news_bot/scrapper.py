@@ -30,8 +30,9 @@ btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
 lsd_slack_channel_id = 'C05UNS3M8R3'
 hacks_slack_channel_id = 'C05UU8JBKKN'
-solana_slack_channel_id = 'C05URM66B5Z'
-
+layer_1_slack_channel_id = 'C05URM66B5Z' # For Solana too
+layer_0_slack_channel_id = 'C05URM3UY8K' 
+other_altcoins_slack_channel_id = 'C05UU8EKME0' 
 
 def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
 
@@ -134,9 +135,10 @@ def scrape_articles(sites, main_keyword):
             print(f'No articles found for {website_name} of {main_keyword}')
             return f'No articles found for {website_name}'
          
-        print('article_urls > ', article_urls)
+       
         
         if article_urls:
+            print('ARTICLES TO ANALIZE> ', article_urls)
             for article_link in article_urls:
 
                 article_to_save = []
@@ -241,28 +243,9 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                 
-<<<<<<< HEAD
-                if not article_to_save:
-                    print(f'{website_name} has no articles to save')
-                
-                # if len(article_to_save) > 0:
-                #     print('title: ', article_to_save[0])
-                #     print('Date: ', article_to_save[2])
-                #     print('Link: ', article_to_save[3]) 
-                   
-               
-                for article_data in article_to_save:
-                    title, content, valid_date, article_link, website_name, image_urls = article_data
-                    print('\ntitle > ', title)
-                    print('article_link > ', article_link)
-                    print('valid_date > ', valid_date)
-=======
-                # if len(article_to_save) > 0:
-                #     print('\narticle_to_save > ', article_to_save)
                 
                 for article_data in article_to_save:
                     title, content, valid_date, article_link, website_name, image_urls = article_data
->>>>>>> a4584f99586ad09ec6b7d73961342f7bfbe634d5
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -271,29 +254,33 @@ def scrape_articles(sites, main_keyword):
                     elif main_keyword == 'hacks':
                         channel_id = hacks_slack_channel_id
                     elif main_keyword == 'solana':
-                        channel_id = solana_slack_channel_id
+                        channel_id = layer_1_slack_channel_id
                     else:
                         channel_id = lsd_slack_channel_id
 
                     summary = summary_generator(content, main_keyword)
                     
-<<<<<<< HEAD
-                    if summary:
-                        print('-----There is a summary-----')
-=======
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
                     elif main_keyword == 'ethereum':
                         channel_id = eth_slack_channel_id
                     elif main_keyword == 'hacks':
                         channel_id = hacks_slack_channel_id
-                    else:
+                    elif main_keyword == 'solana':
+                        channel_id = layer_1_slack_channel_id
+                    elif main_keyword == 'layer 0':
+                        channel_id = layer_0_slack_channel_id
+                    elif main_keyword == 'layer 1':
+                        channel_id = layer_1_slack_channel_id
+                    elif main_keyword == 'lsd':
                         channel_id = lsd_slack_channel_id
+                    else:
+                        channel_id = other_altcoins_slack_channel_id
 
                     summary = summary_generator(content, main_keyword)
 
                     if summary:
->>>>>>> a4584f99586ad09ec6b7d73961342f7bfbe634d5
+                        print('----Summarry ----', summary)
                         send_NEWS_message_to_slack(channel_id=channel_id, 
                                             title=title,
                                             date_time=valid_date,
@@ -323,12 +310,9 @@ def scrape_articles(sites, main_keyword):
 
                         session.add(new_article)
                         session.commit()
-                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
+                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
                     else:
-<<<<<<< HEAD
-                        print('------ there is no summary -----')
-=======
->>>>>>> a4584f99586ad09ec6b7d73961342f7bfbe634d5
+                        print('------ THERE IS NO AN AVAILABLE SUMMARY -----')
                         continue
                     
             return f'Web scrapping of {website_name} finished', 200
