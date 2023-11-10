@@ -1,21 +1,40 @@
+import re
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
 from routes.news_bot.validations import validate_content, title_in_blacklist
 
 
-def validate_date_utoday(date_text):
+def validate_date_utoday(html):
     try:
-        # Convertir la fecha en un objeto de fecha
-        date = datetime.strptime(date_text, '%a, %m/%d/%Y - %H:%M')
-        # Comprobar si la fecha está dentro de las últimas 24 horas
-        current_time = datetime.now()
-        time_difference = current_time - date
-        if time_difference <= timedelta(hours=24):
-            return date
-    except ValueError:
+        # Obtener el texto dentro del div
+        date_text = html.get_text(strip=True)
+        
+        # Obtener el día de la fecha en el artículo
+        article_day = date_text.split(' - ')[0]
+        day = article_day.split(', ')[1]
+
+        # Convertir la fecha a formato datetime
+        article_date = datetime.strptime(day, '%m/%d/%Y')
+        print(article_date)
+
+        # Obtener la fecha actual sin la información de la hora, los minutos y los segundos
+        current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        print(current_date)
+
+        # Comparar las fechas
+        if article_date == current_date:
+            print("la fecha es correcta")
+            return True
+        else:
+             print("entro al else")
+    except (ValueError, IndexError):
         pass
-    return None
+    return False
+
+
+
+
 
 def extract_image_url_utoday(base_url, image_src):
     # Construir la URL completa de la imagen
@@ -26,12 +45,11 @@ def extract_article_content_utoday(html):
     content = ""
     content_div = html.find('div', class_='article__content')
     if content_div:
-        h1_tags = content_div.find_all('h1')
-        h2_tags = content_div.find_all('h2')
         p_tags = content_div.find_all('p')
-        for tag in h1_tags + h2_tags + p_tags:
+        for tag in p_tags:
             content += tag.text.strip()
     return content.casefold()
+
 
 def validate_utoday_article(article_link, main_keyword):
     base_url = "https://u.today/sites/default/files/"
@@ -48,15 +66,15 @@ def validate_utoday_article(article_link, main_keyword):
             html = BeautifulSoup(article_response.text, 'html.parser')
 
             # Extract date
-            date_div = html.find('div', class_='humble article__short-humble')
-            date_text = date_div.text.strip() if date_div else None
-            valid_date = validate_date_utoday(date_text)
+            date_div = html.find('div', class_='humble article__short-humble', string=re.compile(r'\d{1,2}/\d{1,2}/\d{4} - \d{1,2}:\d{2}'))
+            valid_date = validate_date_utoday(date_div)
 
             # Extract article content
             content = extract_article_content_utoday(html)
+            print(content)
 
             # Extract image URL
-            image_element = html.find('img', class_='article__img')
+            image_element = html.find('img')
             image_src = image_element['src'] if image_element else None
             image_url = extract_image_url_utoday(base_url, image_src)
 
@@ -67,8 +85,9 @@ def validate_utoday_article(article_link, main_keyword):
             content_validation = validate_content(main_keyword, content)
 
             if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                return content, valid_date, image_url
+
+                return content, valid_date, image_url, title
     except Exception as e:
         print("Error in U.Today:", str(e))
-
+    print("error")
     return None, None, None
