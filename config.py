@@ -13,7 +13,7 @@ load_dotenv()
 
 news_bot_start_time = 50
 
-DB_PORT = os.getenv('DB_PORT_MAC')
+DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
@@ -67,7 +67,7 @@ try:
             
             session.add(scrapping_data)
 
-        print('-----Initial site data saved to db------')
+        print('-----Initial site data saved to db-----')
         session.commit()
 except Exception as e:
     print(f'An error occurred: {str(e)}')

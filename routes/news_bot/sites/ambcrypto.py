@@ -42,12 +42,10 @@ def extract_article_content_ambcrypto(html):
     return title, content
 
 def validate_ambcrypto_article(article_link, main_keyword):
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
     }
-    
-    print("link:")
-    print(article_link)
 
     try:
         print("Article Link:", article_link) 
