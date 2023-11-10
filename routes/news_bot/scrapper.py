@@ -7,7 +7,6 @@ from routes.news_bot.sites.cryptopotato import validate_cryptopotato_article
 from routes.news_bot.sites.cryptoslate import validate_cryptoslate_article
 from routes.news_bot.sites.dailyhodl import validate_dailyhodl_article
 from routes.news_bot.sites.decrypto import validate_decrypt_article
-from routes.news_bot.sites.dlnews import validate_dlnews_article
 from routes.news_bot.sites.investing import validate_investing_article
 from routes.news_bot.sites.theblock import validate_theblock_article
 from routes.news_bot.sites.utoday import validate_utoday_article
@@ -226,11 +225,6 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                         
-                if website_name == 'Dlnews':
-                    title, content, valid_date, image_urls = validate_dlnews_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
                 if website_name == 'Investing':
                     title, content, valid_date, image_urls = validate_investing_article(article_link, main_keyword)
                     if title and content and valid_date:
@@ -241,7 +235,6 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                 
-<<<<<<< HEAD
                 if not article_to_save:
                     print(f'{website_name} has no articles to save')
                 
@@ -256,13 +249,6 @@ def scrape_articles(sites, main_keyword):
                     print('\ntitle > ', title)
                     print('article_link > ', article_link)
                     print('valid_date > ', valid_date)
-=======
-                # if len(article_to_save) > 0:
-                #     print('\narticle_to_save > ', article_to_save)
-                
-                for article_data in article_to_save:
-                    title, content, valid_date, article_link, website_name, image_urls = article_data
->>>>>>> a4584f99586ad09ec6b7d73961342f7bfbe634d5
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -277,23 +263,8 @@ def scrape_articles(sites, main_keyword):
 
                     summary = summary_generator(content, main_keyword)
                     
-<<<<<<< HEAD
                     if summary:
                         print('-----There is a summary-----')
-=======
-                    if main_keyword == 'bitcoin':
-                        channel_id = btc_slack_channel_id
-                    elif main_keyword == 'ethereum':
-                        channel_id = eth_slack_channel_id
-                    elif main_keyword == 'hacks':
-                        channel_id = hacks_slack_channel_id
-                    else:
-                        channel_id = lsd_slack_channel_id
-
-                    summary = summary_generator(content, main_keyword)
-
-                    if summary:
->>>>>>> a4584f99586ad09ec6b7d73961342f7bfbe634d5
                         send_NEWS_message_to_slack(channel_id=channel_id, 
                                             title=title,
                                             date_time=valid_date,
@@ -325,10 +296,7 @@ def scrape_articles(sites, main_keyword):
                         session.commit()
                         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword.capitalize()}.')
                     else:
-<<<<<<< HEAD
                         print('------ there is no summary -----')
-=======
->>>>>>> a4584f99586ad09ec6b7d73961342f7bfbe634d5
                         continue
                     
             return f'Web scrapping of {website_name} finished', 200

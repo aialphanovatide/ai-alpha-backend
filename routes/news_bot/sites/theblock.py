@@ -5,21 +5,35 @@ from routes.news_bot.validations import validate_content, title_in_blacklist
 
 
 
-
 def validate_date_theblock(html):
-    date_div = html.find('div', class_='timestamp tbcoTimestamp')
-    if date_div:
-        date_text = date_div.text.strip()
-        try:
-            # Extract the date and time from the text
-            date = datetime.strptime(date_text, '• %B %d, %Y, %I:%M%p EDT')
-            # Check if the date is within the last 24 hours
-            current_time = datetime.now()
-            time_difference = current_time - date
-            if time_difference <= timedelta(hours=24):
-                return date
-        except ValueError:
-            pass
+    try:
+        date_div = html.find('div', class_='timestamp tbcoTimestamp')
+        if date_div:
+            # Obtener el texto dentro del div
+            print(date_div)
+            date_text = date_div.get_text().strip()
+            dateee = date_text.split('• ')[1]
+            datex = dateee.replace(',', '').split(' ')
+            if datex:
+                final_date_to_validate_str = f"{datex[1]} {datex[0]} {datex[2]}"
+                print(final_date_to_validate_str)
+            else:
+                print("Incorrect date:", datex)
+
+            # Convertir la cadena a un objeto datetime
+            final_date_to_validate = datetime.strptime(final_date_to_validate_str, '%d %B %Y')
+            print("sisi", final_date_to_validate)
+
+            # Obtener la fecha en el formato deseado (sin la hora y la zona horaria)
+            formatted_date = final_date_to_validate.strftime('%B %d %Y')
+            print(formatted_date)
+
+            # Verificar si la fecha está dentro de las últimas 24 horas
+            current_date = datetime.now().strftime('%B %d %Y')
+            if formatted_date == current_date:
+                return final_date_to_validate
+    except ValueError:
+        pass
     return None
 
 def extract_image_urls_theblock(html):
@@ -32,7 +46,7 @@ def extract_image_urls_theblock(html):
     return image_urls
 
 def extract_article_content_theblock(html):
-    main_content_div = html.find('div', id='main-content')
+    main_content_div = html.find('div')
     if main_content_div:
         content = ""
         p_elements = main_content_div.find_all('p')
