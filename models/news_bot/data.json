@@ -1409,7 +1409,7 @@
             "base_url": "https://cryptodaily.co.uk",
             "website_name": "Cryptodaily",
             "is_URL_complete": true,
-            "main_container":".row"
+            "main_container":"None"
           },
           {
             "site": "https://dailyhodl.com/?s=solana",
