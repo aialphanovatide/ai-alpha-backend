@@ -19,7 +19,7 @@ send_email_bp = Blueprint(
 )
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
-print('ROOT IN INVITATION LINK > ', ROOT_DIRECTORY)
+
 
 async def send_email_to_client(link_to_chat, client_email):
     EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -29,7 +29,6 @@ async def send_email_to_client(link_to_chat, client_email):
     sender_password = EMAIL_PASSWORD
     recipient_email = client_email
     subject = 'AI Alpha Invitation Link'
-    # /Users/novatideteam/Desktop/ai_alpha_server_V2/routes/telegram/email_invitation_link/email_body.html
     with open(f'{ROOT_DIRECTORY}/email_body.html', 'r') as file:
         html_content = file.read()
         html_content = html_content.replace('{{ link }}', link_to_chat)

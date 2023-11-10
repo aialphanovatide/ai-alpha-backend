@@ -9,7 +9,7 @@ from routes.slack.templates.poduct_alert_notification import send_notification_t
 scheduler = BackgroundScheduler()
 scheduler.add_jobstore('sqlalchemy', url= db_url)
 if scheduler.state != 1:
-    print('Scheduler started')
+    print('-----Scheduler started-----')
     scheduler.start()
 
 def job_executed(event): # for the status 200 of the bot
@@ -17,17 +17,20 @@ def job_executed(event): # for the status 200 of the bot
 
 def job_error(event): # for the status with an error of the bot
     job_id = str(event.job_id).capitalize()
+    message = f'{job_id} has an internal error:\ne{event.retval}'
     ##send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot has an internal error on the last scrapped', 
                                                       #sub_title="Response:", 
                                                       #message=f"{event.retval}")
-    print(f'{job_id} has an internal error:\ne{event.retval}')
+    print(message)
 
 def job_max_instances_reached(event): # for the status with an error of the bot
     job_id = str(event.job_id).capitalize()
     message = f'Maximum number of running instances reached, *Upgrade* the time interval'
+    
     ##send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot - Execution error', 
                                                       #sub_title="Response", 
                                                       #message=message)
+    print(message)
     try:
         target = event.job_id
         scheduler.remove_job(job_id=target)
