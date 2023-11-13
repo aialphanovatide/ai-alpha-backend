@@ -6,15 +6,16 @@ from routes.news_bot.validations import validate_content, title_in_blacklist
 
 def validate_date_cryptoslate(date_text):
     try:
-        # Convertir la fecha en un objeto de fecha
-        date = datetime.strptime(date_text, '%B %d, %Y')
-        # Comprobar si la fecha está dentro de las últimas 24 horas
+        correct_date = date_text.split('<')[0].strip()
+        print(correct_date)
+        date = datetime.strptime(correct_date, '%b. %d, %Y')
         current_time = datetime.now()
         time_difference = current_time - date
         if time_difference <= timedelta(hours=24):
+            print("date", date)
             return date
-    except ValueError:
-        pass
+    except ValueError as e:
+        print("Error:", str(e))
     return None
 
 def extract_image_url_cryptoslate(html):
@@ -49,10 +50,11 @@ def validate_cryptoslate_article(article_link, main_keyword):
             html = BeautifulSoup(article_response.text, 'html.parser')
 
             # Extract date
-            date_span = html.find('span', class_='post-date')
-            date_text = date_span.text.strip() if date_span else None
-            valid_date = validate_date_cryptoslate(date_text)
-
+            date_div = html.find('div', class_='post-date')
+            if date_div:
+                date_text = date_div.encode_contents().decode('utf-8')  # Convertir la fecha a string
+                valid_date = validate_date_cryptoslate(date_text)
+                
             # Extract image URL
             image_url = extract_image_url_cryptoslate(html)
 

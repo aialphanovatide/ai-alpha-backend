@@ -8,14 +8,14 @@ def validate_date_decrypt(html):
     if date_tag:
         date_text = date_tag.text.strip()
         try:
-            # Extrae la fecha de la etiqueta "datetime"
-            date = datetime.fromisoformat(date_tag['datetime'])
+            # Ajuste para manejar el formato específico de la fecha
+            date = datetime.strptime(date_text, '%b %d, %Y')
             # Comprueba si la fecha está dentro de las últimas 24 horas
             current_time = datetime.now()
             time_difference = current_time - date
             if time_difference <= timedelta(hours=24):
                 return date
-        except (ValueError, KeyError):
+        except ValueError:
             pass
     return None
 
@@ -49,7 +49,7 @@ def validate_decrypt_article(article_link, main_keyword):
         if article_response.status_code == 200 and 'text/html' in article_content_type:
             html = BeautifulSoup(article_response.text, 'html.parser')
 
-            title_element = html.find('h1', class_='post-title')
+            title_element = html.find('h1')
             title = title_element.text.strip() if title_element else None
 
             valid_date = validate_date_decrypt(html)
