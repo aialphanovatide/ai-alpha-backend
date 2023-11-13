@@ -20,9 +20,10 @@ from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
 from models.news_bot.news_bot_model import SCRAPPING_DATA
 from routes.twitter.index import send_tweets_to_twitter
-from models.news_bot.articles_model import ARTICLE
+from models.news_bot.articles_model import ARTICLE, ANALIZED_ARTICLE
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
+from sqlalchemy import exists
 from config import session
 
 btc_slack_channel_id = 'C05RK7CCDEK'
@@ -33,77 +34,119 @@ layer_1_slack_channel_id = 'C05URM66B5Z' # For Solana too
 layer_0_slack_channel_id = 'C05URM3UY8K' 
 other_altcoins_slack_channel_id = 'C05UU8EKME0' 
 
+
+def get_links(site, main_container):
+
+    
+
+    try:
+        elements = []
+        with sync_playwright() as p:
+                browser = p.chromium.launch()
+                page = browser.new_page()
+
+                page.goto(site, timeout=100000)
+                page.wait_for_load_state("domcontentloaded")
+
+                if main_container != "None":
+                    container = page.wait_for_selector(main_container)
+                    a_elements = container.query_selector_all('a')
+
+                    for link in a_elements:
+                        href = link.get_attribute('href')
+                        article_title = link.text_content().strip().casefold()
+
+                        if href and article_title:
+                            elements.append({'href': href, 'article_title': article_title})
+                else:
+                    links = page.evaluate('''() => {
+                        const anchors = Array.from(document.querySelectorAll('a'));
+                        return anchors.map(a => ({
+                            href: a.href,
+                            text: a.textContent.trim().toLowerCase()
+                        }));
+                    }''')
+
+                    for link in links:
+                        href = link['href']
+                        article_title = link['text']
+
+                        if href and article_title:
+                            elements.append({'href': href, 'article_title': article_title})
+
+                browser.close()
+        return elements
+        
+    except Exception as e:
+        print("Error getting links" + str(e))  
+
 def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
 
     article_urls = set()
-    elements = []
+   
+    elements = get_links(site=site,
+              main_container=main_container,
+              )
 
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
+    print('elemetns > ', elements)
+    keywords = []
 
-            page.goto(site, timeout=100000)
-            page.wait_for_load_state("domcontentloaded")
+    if main_keyword == 'bitcoin':
+        keywords = ['bitcoin', 'btc']
+    elif main_keyword == 'ethereum':
+        keywords = ['ethereum', 'ether', 'eth']
 
-          
-
-            if main_container != "None":
-                container = page.wait_for_selector(main_container)
-                a_elements = container.query_selector_all('a')
-                for link in a_elements:
-                    href = link.get_attribute('href')
-                    article_title = link.text_content().strip().casefold()
-
-                    if href and article_title:
-                        elements.append({'href': href, 'article_title': article_title})
-            else:
-                links = page.evaluate('''() => {
-                    const anchors = Array.from(document.querySelectorAll('a'));
-                    return anchors.map(a => ({
-                        href: a.href,
-                        text: a.textContent.trim().toLowerCase()
-                    }));
-                }''')
-
-                for link in links:
-                    href = link['href']
-                    article_title = link['text']
-
-                    if href and article_title:
-                        elements.append({'href': href, 'article_title': article_title})
-
-            keywords = []
-
-            if main_keyword == 'bitcoin':
-                keywords = ['bitcoin', 'btc']
-            elif main_keyword == 'ethereum':
-                keywords = ['ethereum', 'ether', 'eth']
-
-            for link in elements:
-                href = link['href']
-                article_title = link['article_title']
-              
-                article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
-
-                if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
-                    if any(keyword in article_title.lower() for keyword in keywords):
-                        is_title_in_blacklist = title_in_blacklist(article_title)
-                        is_title_in_db = title_in_db(article_title)
-                        is_url_in_db = url_in_db(article_url)
-                        
-                        if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
-                            article_urls.add(article_url)
-                else:
-                    is_title_in_blacklist = title_in_blacklist(article_title)
-                    is_url_in_db = url_in_db(article_url)
-                    is_title_in_db = title_in_db(article_title)
-
-                    if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
-                        article_urls.add(article_url)
            
-            browser.close()
-            return article_urls, website_name
+    try:
+        for link in elements:
+            href = link['href']
+            article_title = link['article_title']
+            
+            article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
+
+            if article_url:
+
+                # Check if the article is already analized
+                url = article_url.casefold().strip()
+                existing_article = session.query(exists().where(ANALIZED_ARTICLE.url == url)).scalar()
+                
+                print("--- is already analized??? --- ", existing_article)
+
+                if not existing_article:
+                    new_article = ANALIZED_ARTICLE(
+                        source=website_name,
+                        url=url,
+                        is_analized=False
+                    )
+
+                    session.add(new_article)
+                    session.commit()  
+
+                    # proceed to make first verification
+
+                if existing_article:
+                    is_article_analyzed = existing_article.is_analized
+
+                    if not is_article_analyzed:
+
+                        # proceed to make first verification
+                        is_title_in_db = title_in_db(article_title)
+                        is_title_in_blacklist = title_in_blacklist(article_title)
+                        is_url_in_db = url_in_db(article_url)
+
+                        if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
+
+                            if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
+                                if any(keyword in article_title.lower() for keyword in keywords):
+                                    article_urls.add(article_url)
+                            else:
+                                article_urls.add(article_url)         
+        
+                    # is_url_analized = session.query(ANALIZED_ARTILCE).filter(ANALIZED_ARTILCE.url == article_url).first()
+                    # is_url_analized.is_analized = True
+        
+        
+        return article_urls, website_name
         
     except Exception as e:
         print(f'An error occurred: {str(e)}')
@@ -137,174 +180,180 @@ def scrape_articles(sites, main_keyword):
        
         
         if article_urls:
-            print('---ARTICLES TO ANALIZE---', article_urls)
-            for article_link in article_urls:
-
+            print(f'\n\n--- {len(article_urls)} ARTICLES TO ANALIZE--- \n\n', article_urls)
+            try:
+                
                 article_to_save = []
-                
-                if website_name == 'Ambcrypto':
-                    title, content, valid_date, image_urls = validate_ambcrypto_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
-                if website_name == 'Beincrypto':
-                    title, content, valid_date, image_urls = validate_beincrypto_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                for article_link in article_urls:
 
-                if website_name == 'Bitcoinist':
-                    title, content, valid_date, image_urls = validate_bitcoinist_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Blockworks':
-                    title, content, valid_date, image_urls = validate_blockworks_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Coincodex':
-                    title, content, valid_date, image_urls = validate_coincodex_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-
-                if website_name == 'Cointelegraph':
-                    title, content, valid_date, image_urls = validate_cointelegraph_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-
-                if website_name == 'Coingape':
-                    title, content, valid_date, image_urls = validate_coingape_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-
-                if website_name == 'Coindesk':
-                    title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                        
-                if website_name == 'Coinpedia':
-                    title, content, valid_date, image_urls = validate_coinpedia_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Dailyhodl':
-                    title, content, valid_date, image_urls = validate_dailyhodl_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Cryptodaily':
-                    title, content, valid_date, image_urls = validate_cryptodaily_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                        
-                if website_name == 'Utoday':
-                    title, content, valid_date, image_urls = validate_utoday_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Cryptonews':
-                    title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                        
-                if website_name == 'Coincodex':
-                    title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Cryptopotato':
-                    title, content, valid_date, image_urls = validate_cryptopotato_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Cryptoslate':
-                    title, content, valid_date, image_urls = validate_cryptoslate_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Decrypt':
-                    title, content, valid_date, image_urls = validate_decrypt_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                        
-                if website_name == 'Investing':
-                    title, content, valid_date, image_urls = validate_investing_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if website_name == 'Theblock':
-                    title, content, valid_date, image_urls = validate_theblock_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
-                if not article_to_save:
-                    print(f'{website_name} has no articles to save') 
-
-                
-                for article_data in article_to_save:
-                    title, content, valid_date, article_link, website_name, image_urls = article_data
-
-                    print('\ntitle > ', title)
-                    print('article_link > ', article_link)
-                    print('valid_date > ', valid_date)
-
-                    # summary = summary_generator(content, main_keyword)
-                    summary = True
                     
-                    if main_keyword == 'bitcoin':
-                        channel_id = btc_slack_channel_id
-                    elif main_keyword == 'ethereum':
-                        channel_id = eth_slack_channel_id
-                    elif main_keyword == 'hacks':
-                        channel_id = hacks_slack_channel_id
-                    elif main_keyword == 'solana':
-                        channel_id = layer_1_slack_channel_id
-                    elif main_keyword == 'layer 0':
-                        channel_id = layer_0_slack_channel_id
-                    elif main_keyword == 'layer 1':
-                        channel_id = layer_1_slack_channel_id
-                    elif main_keyword == 'lsd':
-                        channel_id = lsd_slack_channel_id                                       
-                    else:
-                        channel_id = other_altcoins_slack_channel_id
+                    if website_name == 'Ambcrypto':
+                        title, content, valid_date, image_urls = validate_ambcrypto_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
-                    if summary:
-                        # send_NEWS_message_to_slack(channel_id=channel_id, 
-                        #                     title=title,
-                        #                     date_time=valid_date,
-                        #                     url=article_link,
-                        #                     summary=summary,
-                        #                     images_list=image_urls,
-                        #                     main_keyword=main_keyword
-                        #                     )
+                    if website_name == 'Beincrypto':
+                        title, content, valid_date, image_urls = validate_beincrypto_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
+                    if website_name == 'Bitcoinist':
+                        title, content, valid_date, image_urls = validate_bitcoinist_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Blockworks':
+                        title, content, valid_date, image_urls = validate_blockworks_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Coincodex':
+                        title, content, valid_date, image_urls = validate_coincodex_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
+                    if website_name == 'Cointelegraph':
+                        title, content, valid_date, image_urls = validate_cointelegraph_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+
+                    if website_name == 'Coingape':
+                        title, content, valid_date, image_urls = validate_coingape_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+
+                    if website_name == 'Coindesk':
+                        title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                            
+                    if website_name == 'Coinpedia':
+                        title, content, valid_date, image_urls = validate_coinpedia_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Dailyhodl':
+                        title, content, valid_date, image_urls = validate_dailyhodl_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Cryptodaily':
+                        title, content, valid_date, image_urls = validate_cryptodaily_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                            
+                    if website_name == 'Utoday':
+                        title, content, valid_date, image_urls = validate_utoday_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Cryptonews':
+                        title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                            
+                    if website_name == 'Coincodex':
+                        title, content, valid_date, image_urls = validate_coindesk_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Cryptopotato':
+                        title, content, valid_date, image_urls = validate_cryptopotato_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Cryptoslate':
+                        title, content, valid_date, image_urls = validate_cryptoslate_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Decrypt':
+                        title, content, valid_date, image_urls = validate_decrypt_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                            
+                    if website_name == 'Investing':
+                        title, content, valid_date, image_urls = validate_investing_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
+                    
+                    if website_name == 'Theblock':
+                        title, content, valid_date, image_urls = validate_theblock_article(article_link, main_keyword)
+                        if title and content and valid_date:
+                            article_to_save.append((title, content, valid_date, article_link, website_name, image_urls)) 
+
+                    
+                    for article_data in article_to_save:
+                        title, content, valid_date, article_link, website_name, image_urls = article_data
+
+                        print('\ntitle > ', title)
+                        print('article_link > ', article_link)
+                        print('valid_date > ', valid_date)
+
+                        # summary = summary_generator(content, main_keyword)
+                        summary = True
+                        
                         if main_keyword == 'bitcoin':
-                            response, status = send_tweets_to_twitter(content=summary,
-                                                                      title=title)
+                            channel_id = btc_slack_channel_id
+                        elif main_keyword == 'ethereum':
+                            channel_id = eth_slack_channel_id
+                        elif main_keyword == 'hacks':
+                            channel_id = hacks_slack_channel_id
+                        elif main_keyword == 'solana':
+                            channel_id = layer_1_slack_channel_id
+                        elif main_keyword == 'layer 0':
+                            channel_id = layer_0_slack_channel_id
+                        elif main_keyword == 'layer 1':
+                            channel_id = layer_1_slack_channel_id
+                        elif main_keyword == 'lsd':
+                            channel_id = lsd_slack_channel_id                                       
+                        else:
+                            channel_id = other_altcoins_slack_channel_id
 
-                            if status == 200:
-                                send_INFO_message_to_slack_channel(channel_id=channel_id,
-                                                                title_message="New Notification from AI Alpha",
-                                                                sub_title="Response",
-                                                                message=response
-                                                                )
-                        
-                        # new_article = ARTICLE(title=title,
-                        # content=content,
-                        # date=valid_date,
-                        # url=article_link,
-                        # website_name=website_name
-                        # )
+                        if summary:
+                            # send_NEWS_message_to_slack(channel_id=channel_id, 
+                            #                     title=title,
+                            #                     date_time=valid_date,
+                            #                     url=article_link,
+                            #                     summary=summary,
+                            #                     images_list=image_urls,
+                            #                     main_keyword=main_keyword
+                            #                     )
 
-                        # session.add(new_article)
-                        # session.commit()
-                        print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
-                    else:
-                        print('------ THERE IS NO AN AVAILABLE SUMMARY -----')
-                        continue
-                    
-            return f'Web scrapping of {website_name} finished', 200
+
+                            if main_keyword == 'bitcoin':
+                                response, status = send_tweets_to_twitter(content=summary,
+                                                                        title=title)
+
+                                if status == 200:
+                                    send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                                    title_message="New Notification from AI Alpha",
+                                                                    sub_title="Response",
+                                                                    message=response
+                                                                    )
+                            
+                            # new_article = ARTICLE(title=title,
+                            # content=content,
+                            # date=valid_date,
+                            # url=article_link,
+                            # website_name=website_name
+                            # )
+
+                            # session.add(new_article)
+                            # session.commit()
+                            print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
+                        else:
+                            print('------ THERE IS NO AN AVAILABLE SUMMARY -----')
+                            continue
+
+                if not article_to_save:
+                        print(f'\n\n{len(article_to_save)} article was analized for {website_name}')       
+
+                return f'Web scrapping of {website_name} finished', 200
+            
+            except Exception as e:
+                print(f'Error in analizing scrape_articles: {str(e)}')
         
     except Exception as e:
         return f'Error in scrape_articles: {str(e)}', 500
