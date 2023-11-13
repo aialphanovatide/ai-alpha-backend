@@ -138,7 +138,7 @@ def scrape_articles(sites, main_keyword):
        
         
         if article_urls:
-            # print('---ARTICLES TO ANALIZE---', article_urls)
+            print('---ARTICLES TO ANALIZE---', article_urls)
             for article_link in article_urls:
 
                 article_to_save = []
@@ -249,8 +249,8 @@ def scrape_articles(sites, main_keyword):
                 for article_data in article_to_save:
                     title, content, valid_date, article_link, website_name, image_urls = article_data
 
-                    # summary = summary_generator(content, main_keyword)
-                    summary = True
+                    summary = summary_generator(content, main_keyword)
+                    # summary = True
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -269,18 +269,15 @@ def scrape_articles(sites, main_keyword):
                     else:
                         channel_id = other_altcoins_slack_channel_id
 
-                    # summary = summary_generator(content, main_keyword)
-                    summary = True
-
                     if summary:
-                        # send_NEWS_message_to_slack(channel_id=channel_id, 
-                        #                     title=title,
-                        #                     date_time=valid_date,
-                        #                     url=article_link,
-                        #                     summary=summary,
-                        #                     images_list=image_urls,
-                        #                     main_keyword=main_keyword
-                        #                     )
+                        send_NEWS_message_to_slack(channel_id=channel_id, 
+                                            title=title,
+                                            date_time=valid_date,
+                                            url=article_link,
+                                            summary=summary,
+                                            images_list=image_urls,
+                                            main_keyword=main_keyword
+                                            )
 
                         if main_keyword == 'bitcoin':
                             response, status = send_tweets_to_twitter(content=summary,

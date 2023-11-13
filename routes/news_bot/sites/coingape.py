@@ -3,28 +3,34 @@ from bs4 import BeautifulSoup
 import requests
 
 def validate_date_coingape(html):
-    date_div = html.find('div', class_='publishby d-flex')
+    try:
+        date_div = html.find('div', class_='publishby d-flex')
 
-    if date_div:
-        # Verifica si el texto del div contiene "mins ago" o "hours ago"
-        date_text = date_div.text.lower()
-        if "mins ago" in date_text or "hours ago" in date_text:
-            return date_text.strip()
+        if date_div:
+            # Verifica si el texto del div contiene "mins ago" o "hours ago"
+            date_text = date_div.text.lower()
+            if "mins ago" in date_text or "hours ago" in date_text:
+                return date_text.strip()
 
-    return False
+        return False
+    except Exception as e:
+        print("Error processing the date in coingape > " + str(e))
 
 def extract_image_urls(html):
-    image_urls = []
-    soup = BeautifulSoup(html, 'html.parser')
-    img_elements = soup.find_all('img')
+    try:
+        image_urls = []
+        soup = BeautifulSoup(html, 'html.parser')
+        img_elements = soup.find_all('img')
 
-    for img in img_elements:
-        src = img.get('src')
+        for img in img_elements:
+            src = img.get('src')
 
-        if src and src.startswith('https://coingape.com/wp-content/uploads/'):
-            image_urls.append(src)
+            if src and src.startswith('https://coingape.com/wp-content/uploads/'):
+                image_urls.append(src)
 
-    return image_urls
+        return image_urls
+    except Exception as e:
+        print("Error finding Images in coingape" + str(e))
         
 def extract_article_content(html):
     # Encuentra el div con el ID 'main-content'
@@ -39,11 +45,9 @@ def extract_article_content(html):
         
         # Recorre todas las etiquetas 'p' y extrae el texto de las etiquetas 'span' dentro de ellas
         for p_element in p_elements:
-            span_elements = p_element.find_all('span')
-            for span_element in span_elements:
-                content += span_element.text.strip()
+            content += p_element.text.strip().casefold()
         
-        return content.strip().casefold()
+        return content
 
     return None
 
@@ -63,14 +67,10 @@ def validate_coingape_article(article_link, main_keyword):
             title_element = article_soup.find('h1')
             title = title_element.text.strip() if title_element else None 
 
+            # print(f'validing {title} ARTICLE COINGAPE')
+
             # Extract article content using the new function
             content = extract_article_content(article_soup)
-
-            # content = "" 
-            # all_p_elements = article_soup.findAll("p")
-            # for el in all_p_elements:
-            #     content += el.text.lower()
-        
 
             if not title or not content:
                 # print('Article does not have a title or content')
@@ -93,6 +93,7 @@ def validate_coingape_article(article_link, main_keyword):
             else:
                 return None, None, None, None
     except Exception as e:
+        print("Error in extrading content in coingape:" + str(e))
         return None, None, None, None
 
 
