@@ -16,17 +16,17 @@ def validate_date_theblock(html):
             datex = dateee.replace(',', '').split(' ')
             if datex:
                 final_date_to_validate_str = f"{datex[1]} {datex[0]} {datex[2]}"
-                print(final_date_to_validate_str)
+                # print(final_date_to_validate_str)
             else:
                 print("Incorrect date:", datex)
 
             # Convertir la cadena a un objeto datetime
             final_date_to_validate = datetime.strptime(final_date_to_validate_str, '%d %B %Y')
-            print("sisi", final_date_to_validate)
+            # print("sisi", final_date_to_validate)
 
             # Obtener la fecha en el formato deseado (sin la hora y la zona horaria)
             formatted_date = final_date_to_validate.strftime('%B %d %Y')
-            print(formatted_date)
+            # print(formatted_date)
 
             # Verificar si la fecha está dentro de las últimas 24 horas
             current_date = datetime.now().strftime('%B %d %Y')
