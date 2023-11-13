@@ -37,16 +37,16 @@ other_altcoins_slack_channel_id = 'C05UU8EKME0'
 
 def get_links(site, main_container):
 
-    
-
     try:
-        elements = []
+       
         with sync_playwright() as p:
                 browser = p.chromium.launch()
                 page = browser.new_page()
 
                 page.goto(site, timeout=100000)
                 page.wait_for_load_state("domcontentloaded")
+
+                elements = []
 
                 if main_container != "None":
                     container = page.wait_for_selector(main_container)
@@ -75,7 +75,7 @@ def get_links(site, main_container):
                             elements.append({'href': href, 'article_title': article_title})
 
                 browser.close()
-        return elements
+                return elements
         
     except Exception as e:
         print("Error getting links" + str(e))  
@@ -88,7 +88,8 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
               main_container=main_container,
               )
 
-    print('elemetns > ', elements)
+    # print('\n\nScrapped articles > ', elements)
+
     keywords = []
 
     if main_keyword == 'bitcoin':
@@ -108,9 +109,7 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
 
                 # Check if the article is already analized
                 url = article_url.casefold().strip()
-                existing_article = session.query(exists().where(ANALIZED_ARTICLE.url == url)).scalar()
-                
-                print("--- is already analized??? --- ", existing_article)
+                existing_article = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url==url).first()
 
                 if not existing_article:
                     new_article = ANALIZED_ARTICLE(
@@ -120,9 +119,21 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
                     )
 
                     session.add(new_article)
-                    session.commit()  
+                    session.commit() 
+                    # print(f'\n\n--- Article URL: {url} WAS SAVED IN THE ANALIZED TABLE ---') 
 
                     # proceed to make first verification
+                    is_title_in_db = title_in_db(article_title)
+                    is_title_in_blacklist = title_in_blacklist(article_title)
+                    is_url_in_db = url_in_db(url)
+
+                    if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
+
+                        if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
+                            if any(keyword in article_title.lower() for keyword in keywords):
+                                article_urls.add(url)
+                        else:
+                            article_urls.add(url)   
 
                 if existing_article:
                     is_article_analyzed = existing_article.is_analized
@@ -163,7 +174,7 @@ def scrape_articles(sites, main_keyword):
         is_URL_complete = sites.is_URL_complete
         main_container = sites.main_container
 
-        print(f'---Web scrape of {main_keyword} STARTED for {website_name}---')
+        print(f'\n---Web scrape of {main_keyword} STARTED for {website_name}---')
 
         article_urls, website_name = scrape_sites(site,base_url,
                                                    website_name,
@@ -174,16 +185,17 @@ def scrape_articles(sites, main_keyword):
 
         
         if not article_urls:
-            print(f'---No articles found for {website_name} of {main_keyword}---')
+            print(f'\n---No articles found for {website_name} of {main_keyword}---')
             return f'No articles found for {website_name}'
          
        
         
         if article_urls:
-            print(f'\n\n--- {len(article_urls)} ARTICLES TO ANALIZE--- \n\n', article_urls)
+            print(f'\n--- {len(article_urls)} ARTICLES TO ANALIZE --- \n', article_urls)
             try:
                 
                 article_to_save = []
+                counter_articles_saved = 0
 
                 for article_link in article_urls:
 
@@ -342,13 +354,14 @@ def scrape_articles(sites, main_keyword):
 
                             # session.add(new_article)
                             # session.commit()
+                            counter_articles_saved +=1
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
                         else:
                             print('------ THERE IS NO AN AVAILABLE SUMMARY -----')
                             continue
 
-                if not article_to_save:
-                        print(f'\n\n{len(article_to_save)} article was analized for {website_name}')       
+                
+                print(f'\n--- {len(article_urls)} article were analized for {website_name} and {counter_articles_saved} were SAVED\n ---')       
 
                 return f'Web scrapping of {website_name} finished', 200
             
