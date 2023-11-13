@@ -7,7 +7,6 @@ from routes.news_bot.sites.cryptopotato import validate_cryptopotato_article
 from routes.news_bot.sites.cryptoslate import validate_cryptoslate_article
 from routes.news_bot.sites.dailyhodl import validate_dailyhodl_article
 from routes.news_bot.sites.decrypto import validate_decrypt_article
-from routes.news_bot.sites.dlnews import validate_dlnews_article
 from routes.news_bot.sites.investing import validate_investing_article
 from routes.news_bot.sites.theblock import validate_theblock_article
 from routes.news_bot.sites.utoday import validate_utoday_article
@@ -228,11 +227,6 @@ def scrape_articles(sites, main_keyword):
                     if title and content and valid_date:
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                         
-                if website_name == 'Dlnews':
-                    title, content, valid_date, image_urls = validate_dlnews_article(article_link, main_keyword)
-                    if title and content and valid_date:
-                        article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
-                
                 if website_name == 'Investing':
                     title, content, valid_date, image_urls = validate_investing_article(article_link, main_keyword)
                     if title and content and valid_date:
@@ -244,13 +238,18 @@ def scrape_articles(sites, main_keyword):
                         article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
                 
                 if not article_to_save:
-                    print(f"Article did not passed {website_name} validations in {main_keyword}")
+                    print(f'{website_name} has no articles to save') 
+
                 
                 for article_data in article_to_save:
                     title, content, valid_date, article_link, website_name, image_urls = article_data
 
-                    summary = summary_generator(content, main_keyword)
-                    # summary = True
+                    print('\ntitle > ', title)
+                    print('article_link > ', article_link)
+                    print('valid_date > ', valid_date)
+
+                    # summary = summary_generator(content, main_keyword)
+                    summary = True
                     
                     if main_keyword == 'bitcoin':
                         channel_id = btc_slack_channel_id
@@ -265,19 +264,20 @@ def scrape_articles(sites, main_keyword):
                     elif main_keyword == 'layer 1':
                         channel_id = layer_1_slack_channel_id
                     elif main_keyword == 'lsd':
-                        channel_id = lsd_slack_channel_id
+                        channel_id = lsd_slack_channel_id                                       
                     else:
                         channel_id = other_altcoins_slack_channel_id
 
                     if summary:
-                        send_NEWS_message_to_slack(channel_id=channel_id, 
-                                            title=title,
-                                            date_time=valid_date,
-                                            url=article_link,
-                                            summary=summary,
-                                            images_list=image_urls,
-                                            main_keyword=main_keyword
-                                            )
+                        # send_NEWS_message_to_slack(channel_id=channel_id, 
+                        #                     title=title,
+                        #                     date_time=valid_date,
+                        #                     url=article_link,
+                        #                     summary=summary,
+                        #                     images_list=image_urls,
+                        #                     main_keyword=main_keyword
+                        #                     )
+
 
                         if main_keyword == 'bitcoin':
                             response, status = send_tweets_to_twitter(content=summary,
@@ -290,15 +290,15 @@ def scrape_articles(sites, main_keyword):
                                                                 message=response
                                                                 )
                         
-                        new_article = ARTICLE(title=title,
-                        content=content,
-                        date=valid_date,
-                        url=article_link,
-                        website_name=website_name
-                        )
+                        # new_article = ARTICLE(title=title,
+                        # content=content,
+                        # date=valid_date,
+                        # url=article_link,
+                        # website_name=website_name
+                        # )
 
-                        session.add(new_article)
-                        session.commit()
+                        # session.add(new_article)
+                        # session.commit()
                         print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
                     else:
                         print('------ THERE IS NO AN AVAILABLE SUMMARY -----')

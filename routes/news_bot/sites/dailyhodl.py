@@ -6,12 +6,18 @@ from routes.news_bot.validations import validate_content, title_in_blacklist
 
 def validate_date_dailyhodl(date_text):
     try:
-        date = datetime.strptime(date_text, "%B %d, %Y")
-        # Comprueba si la fecha está dentro de las últimas 24 horas
-        current_time = datetime.now()
-        time_difference = current_time - date
-        if time_difference <= timedelta(hours=24):
-            return date
+        # Buscar el enlace <a> dentro del div
+        link = date_text.find('a')
+        if link:
+            # Extraer el texto del enlace
+            date_str = link.text.strip()
+            # Convertir la fecha en un objeto de fecha
+            date = datetime.strptime(date_str, "%B %d, %Y")
+            # Comprobar si la fecha está dentro de las últimas 24 horas
+            current_time = datetime.now()
+            time_difference = current_time - date
+            if time_difference <= timedelta(hours=24):
+                return date
     except ValueError:
         pass
     return None
@@ -47,7 +53,7 @@ def validate_dailyhodl_article(article_link, main_keyword):
 
             # Extract date
             date_div = html.find('div', class_='jeg_meta_date')
-            date_text = date_div.get_text() if date_div else None
+            date_text = date_div if date_div else None
             valid_date = validate_date_dailyhodl(date_text)
 
             # Extract image URL
@@ -62,9 +68,12 @@ def validate_dailyhodl_article(article_link, main_keyword):
             is_title_in_blacklist = title_in_blacklist(title)
             content_validation = validate_content(main_keyword, content)
 
-            if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                return content, valid_date, image_url
+            if valid_date and content and title and not title_in_blacklist and content_validation:
+                print("ok")
+                return content, title, valid_date, image_url
     except Exception as e:
         print("Error in DailyHodl:", str(e))
-
+    print("error")
     return None, None, None
+
+
