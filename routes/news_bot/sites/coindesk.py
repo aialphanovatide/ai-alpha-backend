@@ -1,107 +1,124 @@
-import re
-import requests
+from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from models.news_bot.articles_model import ANALIZED_ARTICLE
 from datetime import datetime
 from bs4 import BeautifulSoup
-from datetime import datetime
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from config import session
+import requests
+import re
 
 def validate_date_coindesk(html):
-    # Encuentra el span con la clase 'typography__StyledTypography-sc-owin6q-0 hcIsFR'
-    date_span = html.find('span', class_='typography__StyledTypography-sc-owin6q-0 hcIsFR')
 
-    if date_span:
-        date_text = date_span.text.strip()
-        
-        # Utiliza una expresión regular para extraer el día y el mes del texto de la fecha
-        match = re.search(r'(\w+) (\d+), (\d+)', date_text)
-        
-        if match:
-            month_str, day_str, year_str = match.groups()
-            current_date = datetime.now()
+    try:
+
+        date_span = html.find('span', class_='typography__StyledTypography-sc-owin6q-0 hcIsFR')
+
+        if date_span:
+            date_text = date_span.text.strip()
+
+            # Regular expression to get the date
+            match = re.search(r'(\w+) (\d+), (\d+)', date_text)
             
-            # Convierte el mes a número utilizando un diccionario de mapeo
-            months = {
-                'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-                'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
-            }
-            
-            month = months.get(month_str)
-            day = int(day_str)
-            year = int(year_str)
-            
-            # Comprueba si el día, mes y año coinciden con la fecha actual
-            if year == current_date.year and month == current_date.month and day == current_date.day:
-                return date_text
+            if match:
+                month_str, day_str, year_str = match.groups()
+                current_date = datetime.now()
+                
+                months = {
+                    'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+                    'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+                }
+                
+                month = months.get(month_str)
+                day = int(day_str)
+                year = int(year_str)
+                
+                if year == current_date.year and month == current_date.month and day == current_date.day:
+                    return date_text
 
-    return False
+        return False
+    except Exception as e:
+        print("Error proccessing the date in Coindesk" + str(e))
+        return False
 
 
-def extract_image_urls_coindesk(html):
-    image_urls = []
-    soup = BeautifulSoup(html, 'html.parser')
-    img_elements = soup.find_all('img')
+def extract_image_urls_coindesk(soup):
+    try:
 
-    for img in img_elements:
-        src = img.get('src')
+        image_urls = []
+        img_elements = soup.find_all('img')
 
-        if src and src.startswith('https://www.coindesk.com/resizer/'):
-            image_urls.append(src)
+        for img in img_elements:
+            src = img.get('src')
+            if src and src.startswith('https://www.coindesk.com/resizer/'):
+                image_urls.append(src)
 
-    return image_urls
+        return image_urls
+    
+    except Exception as e:
+        print("Error extracting images in Coindesk" + str(e))
+        return []
 
 
 def validate_coindesk_article(article_link, main_keyword):
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
-    }
+    normalized_article_url = article_link.strip().casefold()
 
-    article_response = requests.get(article_link, headers=headers)
-    article_content_type = article_response.headers.get("Content-Type", "").lower()
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
+        }
 
-    if article_response.status_code == 200 and 'text/html' in article_content_type:
-        article_soup = BeautifulSoup(article_response.text, 'html.parser')
+        article_response = requests.get(normalized_article_url, headers=headers)
+        article_content_type = article_response.headers.get("Content-Type", "").lower()
 
-        content = ""  
+        if article_response.status_code == 200 and 'text/html' in article_content_type:
+            article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
-        # Busca el div con la clase 'at-content-wrapper'
-        content_div = article_soup.find('div', class_='at-content-wrapper')
+            content = ""
+            a_elements = article_soup.find_all("p")
+            for a in a_elements:
+                content += a.text.strip()
 
-        if content_div:
-            # Encuentra todos los párrafos (etiquetas <p>) dentro del div
-            paragraphs = content_div.find_all('p')
+            title_element = article_soup.find('h1')
+            title = title_element.text.strip() if title_element else None
 
-            # Concatena el texto de todos los párrafos para obtener el contenido del artículo
-            content = "\n".join(paragraph.text.strip() for paragraph in paragraphs)
 
-        title_element = article_soup.find('h1')
-        title = title_element.text.strip() if title_element else None
+            # These three following lines changes the status of the article to ANALIZED.
+            is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+            is_url_analized.is_analized = True
+            session.commit()
 
-        if not title or not content:
-            # print('Article does not have a title or content')
-            return None, None, None, None
-        else:
-            is_title_in_blacklist = title_in_blacklist(title)
-            content_validation = validate_content(main_keyword, content)
-            
-        if is_title_in_blacklist or not content_validation:
-            # print('Article does not meet requirements')
-            return None, None, None, None
+            try:
+                if title and content:
+                    is_title_in_blacklist = title_in_blacklist(title)
+                    is_valid_content = validate_content(main_keyword, content)
+                    is_url_in_db = url_in_db(article_link)
+                    is_title_in_db = title_in_db(title)
 
-        valid_date = validate_date_coindesk(article_soup)
+                    if not is_title_in_blacklist and is_valid_content and not is_url_in_db and not is_title_in_db:
+                        valid_date = validate_date_coindesk(article_soup)
+                        image_urls = extract_image_urls_coindesk(article_soup)
+                       
+                        if valid_date:
+                            return title, content, valid_date, image_urls
+                        
+                return None, None, None, None
+                        
+            except Exception as e:
+                print("Inner Error in Coindesk" + str(e))
+                return None, None, None, None
 
-        # Extract image URLs from the article
-        image_urls = extract_image_urls_coindesk(article_response.text)
+    except Exception as e:
+        print(f"Error in Coindesk" + str(e))
+        return None, None, None, None
+      
+
 
         
-        if  content_validation and valid_date and title:
-            return title, content, valid_date, image_urls
-        else:
-            # print("The article does not meet the required conditions.")
-            return None, None, None, None
 
+# result_title, result_content, result_valid_date, result_image_urls = validate_coindesk_article('https://www.coindesk.com/tech/2023/11/08/protocol-latest-tech-news-crypto-blockchain/', 'bitcoin')
 
-
-
-# validate_coindesk_article('https://www.coindesk.com/consensus-magazine/2023/09/25/how-much-does-the-first-mover-advantage-matter-for-crypto-staking/', 'lsd')
-           
+# if result_title:
+#     print('Article passed the verifications > ', result_title)
+#     print('Date: ', result_valid_date)
+# else:
+#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')

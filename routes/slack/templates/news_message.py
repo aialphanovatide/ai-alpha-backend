@@ -4,13 +4,6 @@ from slack_sdk.errors import SlackApiError
 
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, images_list, main_keyword):
 
-        print('title > ', title)
-        print('url > ', url)
-        print('date_time > ', date_time)
-        print('main_keyword > ', main_keyword)
-
-        # return 'ok', 200
-
         blocks=[
             {
                 "type": "header",
@@ -52,7 +45,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "Send to AI Alpha App"
+				"text": "*Send to AI Alpha App*"
 			},
 			"accessory": {
 				"type": "button",
@@ -82,8 +75,8 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
          
             response = result['ok']
             if response == True:
-                print(f'Message sent successfully to Slack channel {main_keyword}')
-                return f'Message sent successfully to Slack channel {main_keyword}', 200
+                print(f'Article {title} sent successfully to Slack channel {main_keyword}')
+                return f'Article {title} sent successfully to Slack channel {main_keyword}', 200
 
         except SlackApiError as e:
             print(f"Error posting message: {e}")
