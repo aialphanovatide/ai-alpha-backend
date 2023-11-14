@@ -13,7 +13,7 @@ if scheduler.state != 1:
     scheduler.start()
 
 def job_executed(event): # for the status 200 of the bot
-    print(f'{event.job_id} was executed successfully at {event.scheduled_run_time}, response: {event.retval}')
+    print(f'\n\n{event.job_id} was executed successfully at {event.scheduled_run_time}, response: {event.retval}')
 
 def job_error(event): # for the status with an error of the bot
     job_id = str(event.job_id).capitalize()
