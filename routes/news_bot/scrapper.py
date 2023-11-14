@@ -367,10 +367,10 @@ def scrape_articles(sites, main_keyword):
                 return f'Web scrapping of {website_name} finished', 200
             
             except Exception as e:
-                print(f'Error processing {website_name}: {str(e)}')
+                print(f'\nError processing {website_name}: {str(e)}')
         
     except Exception as e:
-        return f'Error in scrape_articles: {str(e)}', 500
+        return f'\nError in scrape_articles: {str(e)}', 500
     
 
 def start_periodic_scraping(main_keyword):
