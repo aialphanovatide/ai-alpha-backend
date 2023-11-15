@@ -1,5 +1,5 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from openai import error
+from openai import APIError, RateLimitError, APIConnectionError
 import openai
 import os
 
@@ -47,19 +47,19 @@ def summary_generator(text, main_keyword):
         summary = response.choices[0].message.content
         return summary
 
-    except error.APIError as e:
+    except APIError as e:
         send_notification_to_product_alerts_slack_channel(title_message="OpenAI API returned an API Error",
                                                           sub_title="Reason",
                                                           message=str(e))
         print(f"OpenAI API returned an API Error: {e}")
         return None
-    except error.APIConnectionError as e:
+    except APIConnectionError as e:
         send_notification_to_product_alerts_slack_channel(title_message="Failed to connect to OpenAI API",
                                                           sub_title="Reason",
                                                           message=str(e))
         print(f"Failed to connect to OpenAI API: {e}")
         return None
-    except error.RateLimitError as e:
+    except RateLimitError as e:
         send_notification_to_product_alerts_slack_channel(title_message="OpenAI API request exceeded rate limit",
                                                           sub_title="Reason",
                                                           message=str(e))

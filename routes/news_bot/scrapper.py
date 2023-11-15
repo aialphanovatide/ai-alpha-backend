@@ -193,12 +193,13 @@ def scrape_articles(sites, main_keyword):
         if article_urls:
             print(f'\n--- {len(article_urls)} ARTICLES TO ANALIZE --- \n', article_urls)
             try:
-                
-                article_to_save = []
                 counter_articles_saved = 0
 
                 for article_link in article_urls:
+                    
+                    article_to_save = []
 
+                    print('--- URL to analize----', article_link)
                     
                     if website_name == 'Ambcrypto':
                         title, content, valid_date, image_urls = validate_ambcrypto_article(article_link, main_keyword)
@@ -295,13 +296,10 @@ def scrape_articles(sites, main_keyword):
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, website_name, image_urls)) 
 
-                    
+                    print('--- Article to save ---\n\nTitle: ', article_to_save[0])
+
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, website_name, image_urls = article_data
-
-                        print('\ntitle > ', title)
-                        print('article_link > ', article_link)
-                        print('valid_date > ', valid_date)
 
                         # summary = summary_generator(content, main_keyword)
                         summary = True
@@ -366,10 +364,10 @@ def scrape_articles(sites, main_keyword):
                 return f'Web scrapping of {website_name} finished', 200
             
             except Exception as e:
-                print(f'Error in analizing scrape_articles: {str(e)}')
+                print(f'--- Error proccessing data in {website_name} > {str(e)} ---')
         
     except Exception as e:
-        return f'Error in scrape_articles: {str(e)}', 500
+        return f'--- Error in scrape_articles: {str(e)} ---', 500
     
 
 def start_periodic_scraping(main_keyword):
