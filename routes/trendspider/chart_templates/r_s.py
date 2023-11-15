@@ -114,7 +114,7 @@ def generate_chart_with_support_resistance(symbol, interval, resistance, support
 
 
 # Usage
-generate_chart_with_support_resistance(symbol='ETHUSDT',
-                                       interval='1d',
-                                       resistance=1863,
-                                       support=1653)
+# generate_chart_with_support_resistance(symbol='ETHUSDT',
+#                                        interval='1d',
+#                                        resistance=1863,
+#                                        support=1653)

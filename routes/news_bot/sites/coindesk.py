@@ -72,7 +72,6 @@ def validate_coindesk_article(article_link, main_keyword):
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
             #Firstly extract the title and content
-
             content = ""
             a_elements = article_soup.find_all("p")
             for a in a_elements:
@@ -84,8 +83,10 @@ def validate_coindesk_article(article_link, main_keyword):
 
             # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
-            is_url_analized.is_analized = True
-            session.commit()
+            
+            if is_url_analized:
+                is_url_analized.is_analized = True
+                session.commit()
 
             try:
                 if title and content:
@@ -117,10 +118,10 @@ def validate_coindesk_article(article_link, main_keyword):
 
         
 
-result_title, result_content, result_valid_date, result_image_urls = validate_coindesk_article('https://www.coindesk.com/tech/2023/11/08/protocol-latest-tech-news-crypto-blockchain/', 'bitcoin')
+# result_title, result_content, result_valid_date, result_image_urls = validate_coindesk_article('https://www.coindesk.com/tech/2023/11/08/protocol-latest-tech-news-crypto-blockchain/', 'bitcoin')
 
-if result_title:
-    print('Article passed the verifications > ', result_title)
-    print('Date: ', result_valid_date)
-else:
-    print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
+# if result_title:
+#     print('Article passed the verifications > ', result_title)
+#     print('Date: ', result_valid_date)
+# else:
+#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
