@@ -1,18 +1,17 @@
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
-from routes.news_bot.validations import validate_content, title_in_blacklist
-
+from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from models.news_bot.articles_model import ANALIZED_ARTICLE
+from config import session
 
 def validate_date_cryptoslate(date_text):
     try:
         correct_date = date_text.split('<')[0].strip()
-        print(correct_date)
         date = datetime.strptime(correct_date, '%b. %d, %Y')
         current_time = datetime.now()
         time_difference = current_time - date
         if time_difference <= timedelta(hours=24):
-            print("date", date)
             return date
     except ValueError as e:
         print("Error:", str(e))
@@ -55,21 +54,34 @@ def validate_cryptoslate_article(article_link, main_keyword):
                 date_text = date_div.encode_contents().decode('utf-8')  # Convertir la fecha a string
                 valid_date = validate_date_cryptoslate(date_text)
                 
-            # Extract image URL
-            image_url = extract_image_url_cryptoslate(html)
+                # Extract image URL
+                image_url = extract_image_url_cryptoslate(html)
 
-            # Extract article content
-            content = extract_article_content_cryptoslate(html)
+                # Extract article content
+                content = extract_article_content_cryptoslate(html)
 
-            # Validate title, content, and date
-            title_element = html.find('h1')
-            title = title_element.text.strip() if title_element else None
-            is_title_in_blacklist = title_in_blacklist(title)
-            content_validation = validate_content(main_keyword, content)
+                # Validate title, content, and date
+                title_element = html.find('h1')
+                title = title_element.text.strip() if title_element else None
 
-            if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                return content, valid_date, image_url
+                # These three following lines change the status of the article to ANALYZED.
+                normalized_article_url = article_link.strip().casefold()
+                is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+                if is_url_analized:
+                    is_url_analized.is_analized = True
+                    session.commit()
+
+                is_title_in_blacklist = title_in_blacklist(title)
+                content_validation = validate_content(main_keyword, content)
+                is_url_in_db = url_in_db(article_link)
+                is_title_in_db = title_in_db(title)
+
+                # If all conditions are met, go on
+                if not is_title_in_blacklist and content_validation and not is_url_in_db and not is_title_in_db:
+                    return content, valid_date, image_url, title
+                else:
+                    return None, None, None, None
     except Exception as e:
         print("Error in CryptoSlate:", str(e))
 
-    return None, None, None
+    return None, None, None, None

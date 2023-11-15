@@ -114,13 +114,3 @@ def validate_coindesk_article(article_link, main_keyword):
         return None, None, None, None
       
 
-
-        
-
-result_title, result_content, result_valid_date, result_image_urls = validate_coindesk_article('https://www.coindesk.com/tech/2023/11/08/protocol-latest-tech-news-crypto-blockchain/', 'bitcoin')
-
-if result_title:
-    print('Article passed the verifications > ', result_title)
-    print('Date: ', result_valid_date)
-else:
-    print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
