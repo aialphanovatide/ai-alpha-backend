@@ -3292,7 +3292,233 @@
       "website_name": "Coinpedia",
       "is_URL_complete": true,
       "main_container":".posts-items"
+    } ,
+    {
+      "site": "https://cointelegraph.com/search?query=ADA%2520BNB%2520AVAX",
+      "base_url": "https://cointelegraph.com",
+      "website_name": "Cointelegraph",
+      "is_URL_complete": false,
+      "main_container":".search-page__results"
+    },
+    {
+      "site": "https://beincrypto.com/?s=ADA+BNB+AVAX",
+      "base_url": "https://beincrypto.com",
+      "website_name": "Beincrypto",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://bitcoinist.com/?s=ADA+BNB+AVAX",
+      "base_url": "https://bitcoinist.com",
+      "website_name": "Bitcoinist",
+      "is_URL_complete": true,
+      "main_container":".jnews_category_content_wrapper"
+    },
+    {
+      "site": "https://coingape.com/search_gcse/?q=ADA+BNB+AVAX#gsc.tab=0&gsc.q=ADA%20BNB%20AVAX&gsc.page=1",
+      "base_url": "https://coingape.com",
+      "website_name": "Coingape",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://www.coindesk.com/search?s=ADA%20BNB%20AVAX",
+      "base_url": "https://www.coindesk.com",
+      "website_name": "Coindesk",
+      "is_URL_complete": false,
+      "main_container":"None"
+    },
+    {
+      "site": "https://cryptonews.com/?s=ADA+BNB+AVAX",
+      "base_url": "https://cryptonews.com",
+      "website_name": "Cryptonews",
+      "is_URL_complete": false,
+      "main_container":".mb-80"
+    },
+    {
+      "site": "https://cryptoslate.com/?s=ADA+BNB+AVAX",
+      "base_url": "https://cryptoslate.com",
+      "website_name": "cryptoslate",
+      "is_URL_complete": true,
+      "main_container":".main-news-search"
+    },
+    {
+      "site": "https://cryptopotato.com/?s=ADA+BNB+AVAX",
+      "base_url": "https://cryptopotato.com",
+      "website_name": "cryptopotato",
+      "is_URL_complete": true,
+      "main_container":".container"
+    },
+    {
+      "site": "https://www.theblock.co/search?query=ADA%20BNB%20AVAX",
+      "base_url": "https://www.theblock.co",
+      "website_name": "Theblock",
+      "is_URL_complete": false,
+      "main_container":".collectionFeed"
+    },
+    {
+      "site": "https://cryptodaily.co.uk/search?q=ADA%20BNB%20AVAX",
+      "base_url": "https://cryptodaily.co.uk",
+      "website_name": "Cryptodaily",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://dailyhodl.com/?s=ADA+BNB+AVAX",
+      "base_url": "https://dailyhodl.com",
+      "website_name": "Dailyhodl",
+      "is_URL_complete": true,
+      "main_container":".jeg_inner_content"
+    },
+    {
+      "site": "https://cryptonews.net/?q=ADA+BNB+AVAX&rubricId=-1",
+      "base_url": "https://cryptonews.net",
+      "website_name": "Cryptonews",
+      "is_URL_complete": false,
+      "main_container":".container"
+    },
+    {
+      "site": "https://www.investing.com/search/?q=ADA%20BNB%20AVAX",
+      "base_url": "https://www.investing.com",
+      "website_name": "Investing",
+      "is_URL_complete": false,
+      "main_container":".mb-4"
+    },
+    {
+      "site": "https://u.today/search/node?keys=ADA+BNB+AVAX",
+      "base_url": "https://u.today",
+      "website_name": "Utoday",
+      "is_URL_complete": true,
+      "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+    },
+    {
+      "site": "https://blockworks.co/news",
+      "base_url": "https://blockworks.co",
+      "website_name": "Blockworks",
+      "is_URL_complete": false,
+      "main_container":".w-full"
+    },
+    {
+      "site": "https://coinpedia.org/?s=ADA+BNB+AVAX",
+      "base_url": "https://coinpedia.org",
+      "website_name": "Coinpedia",
+      "is_URL_complete": true,
+      "main_container":".posts-items"
+    },
+    {
+      "site": "https://cointelegraph.com/search?query=NEAR%2520FTM%2520KAS",
+      "base_url": "https://cointelegraph.com",
+      "website_name": "Cointelegraph",
+      "is_URL_complete": false,
+      "main_container":".search-page__results"
+    },
+    {
+      "site": "https://beincrypto.com/?s=NEAR+FTM+KAS",
+      "base_url": "https://beincrypto.com",
+      "website_name": "Beincrypto",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://bitcoinist.com/?s=NEAR+FTM+KAS",
+      "base_url": "https://bitcoinist.com",
+      "website_name": "Bitcoinist",
+      "is_URL_complete": true,
+      "main_container":".jnews_category_content_wrapper"
+    },
+    {
+      "site": "https://coingape.com/search_gcse/?q=NEAR+FTM+KAS#gsc.tab=0&gsc.q=NEAR%20FTM%20KAS&gsc.page=1",
+      "base_url": "https://coingape.com",
+      "website_name": "Coingape",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://www.coindesk.com/search?s=NEAR%20FTM%20KAS",
+      "base_url": "https://www.coindesk.com",
+      "website_name": "Coindesk",
+      "is_URL_complete": false,
+      "main_container":"None"
+    },
+    {
+      "site": "https://cryptonews.com/?s=NEAR+FTM+KAS",
+      "base_url": "https://cryptonews.com",
+      "website_name": "Cryptonews",
+      "is_URL_complete": false,
+      "main_container":".mb-80"
+    },
+    {
+      "site": "https://cryptoslate.com/?s=NEAR+FTM+KAS",
+      "base_url": "https://cryptoslate.com",
+      "website_name": "cryptoslate",
+      "is_URL_complete": true,
+      "main_container":".main-news-search"
+    },
+    {
+      "site": "https://cryptopotato.com/?s=NEAR+FTM+KAS",
+      "base_url": "https://cryptopotato.com",
+      "website_name": "cryptopotato",
+      "is_URL_complete": true,
+      "main_container":".container"
+    },
+    {
+      "site": "https://www.theblock.co/search?query=NEAR%20FTM%20KAS",
+      "base_url": "https://www.theblock.co",
+      "website_name": "Theblock",
+      "is_URL_complete": false,
+      "main_container":".collectionFeed"
+    },
+    {
+      "site": "https://cryptodaily.co.uk/search?q=NEAR%20FTM%20KAS",
+      "base_url": "https://cryptodaily.co.uk",
+      "website_name": "Cryptodaily",
+      "is_URL_complete": true,
+      "main_container":"None"
+    },
+    {
+      "site": "https://dailyhodl.com/?s=NEAR+FTM+KAS",
+      "base_url": "https://dailyhodl.com",
+      "website_name": "Dailyhodl",
+      "is_URL_complete": true,
+      "main_container":".jeg_inner_content"
+    },
+    {
+      "site": "https://cryptonews.net/?q=NEAR+FTM+KAS&rubricId=-1",
+      "base_url": "https://cryptonews.net",
+      "website_name": "Cryptonews",
+      "is_URL_complete": false,
+      "main_container":".container"
+    },
+    {
+      "site": "https://www.investing.com/search/?q=NEAR%20FTM%20KAS",
+      "base_url": "https://www.investing.com",
+      "website_name": "Investing",
+      "is_URL_complete": false,
+      "main_container":".mb-4"
+    },
+    {
+      "site": "https://u.today/search/node?keys=NEAR+FTM+KAS",
+      "base_url": "https://u.today",
+      "website_name": "Utoday",
+      "is_URL_complete": true,
+      "main_container":".data-drupal-views-infinite-scroll-content-wrapper"
+    },
+    {
+      "site": "https://blockworks.co/news",
+      "base_url": "https://blockworks.co",
+      "website_name": "Blockworks",
+      "is_URL_complete": false,
+      "main_container":".w-full"
+    },
+    {
+      "site": "https://coinpedia.org/?s=NEAR+FTM+KAS",
+      "base_url": "https://coinpedia.org",
+      "website_name": "Coinpedia",
+      "is_URL_complete": true,
+      "main_container":".posts-items"
     }
+    
+    
 
     ],
   "black_list": [
