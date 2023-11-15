@@ -16,23 +16,20 @@ def validate_date_utoday(html):
 
         # Convertir la fecha a formato datetime
         article_date = datetime.strptime(day, '%m/%d/%Y')
-        print(article_date)
+ 
 
         # Obtener la fecha actual sin la información de la hora, los minutos y los segundos
         current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        print(current_date)
+
 
         # Comparar las fechas
         if article_date == current_date:
-            print("la fecha es correcta")
             return True
         else:
-             print("entro al else")
+             print("Date Not Correct")
     except (ValueError, IndexError):
         pass
     return False
-
-
 
 
 
@@ -71,7 +68,7 @@ def validate_utoday_article(article_link, main_keyword):
 
             # Extract article content
             content = extract_article_content_utoday(html)
-            print(content)
+    
 
             # Extract image URL
             image_element = html.find('img')
@@ -85,9 +82,7 @@ def validate_utoday_article(article_link, main_keyword):
             content_validation = validate_content(main_keyword, content)
 
             if valid_date and content and title and not is_title_in_blacklist and content_validation:
-
                 return content, valid_date, image_url, title
     except Exception as e:
         print("Error in U.Today:", str(e))
-    print("error")
     return None, None, None
