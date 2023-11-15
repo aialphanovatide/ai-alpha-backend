@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime, timedelta
-from routes.news_bot.validations import validate_content, title_in_blacklist
-
+from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from models.news_bot.articles_model import ANALIZED_ARTICLE
+from config import session
 
 def validate_date_dailyhodl(date_text):
     try:
@@ -18,26 +19,33 @@ def validate_date_dailyhodl(date_text):
             time_difference = current_time - date
             if time_difference <= timedelta(hours=24):
                 return date
-    except ValueError:
-        pass
-    return None
+    except Exception as e:
+        print("Error in DailyHodl:", str(e))
+        return False
 
 def extract_image_url_dailyhodl(html):
-    image = html.find('img', class_='wp-post-image')
-    if image:
-        src = image.get('src')
-        if src:
-            return src
-    return None
+    try:
+        image = html.find('img', class_='wp-post-image')
+        if image:
+            src = image.get('src')
+            if src:
+                return src
+    except Exception as e:
+        print("Error in DailyHodl:", str(e))
+        return False
 
 def extract_article_content_dailyhodl(html):
-    content = ""
-    content_div = html.find('div', class_='content-inner')
-    if content_div:
-        p_tags = content_div.find_all('p')
-        for tag in p_tags:
-            content += tag.text.strip()
-    return content.casefold()
+    try:
+        content = ""
+        content_div = html.find('div', class_='content-inner')
+        if content_div:
+            p_tags = content_div.find_all('p')
+            for tag in p_tags:
+                content += tag.text.strip()
+        return content.casefold()
+    except Exception as e:
+        print("Error in DailyHodl:", str(e))
+        return False
 
 def validate_dailyhodl_article(article_link, main_keyword):
     headers = {
@@ -65,15 +73,24 @@ def validate_dailyhodl_article(article_link, main_keyword):
             # Validate title, content, and date
             title_element = html.find('h1')
             title = title_element.text.strip() if title_element else None
+
+            # These three following lines change the status of the article to ANALYZED.
+            normalized_article_url = article_link.strip().casefold()
+            is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+            if is_url_analized:
+                is_url_analized.is_analized = True
+                session.commit()
+
             is_title_in_blacklist = title_in_blacklist(title)
             content_validation = validate_content(main_keyword, content)
+            is_url_in_db = url_in_db(article_link)
+            is_title_in_db = title_in_db(title)
 
-            if valid_date and content and title and not title_in_blacklist and content_validation:
-                print("ok")
+            # If all conditions are met, go on
+            if not is_title_in_blacklist and content_validation and not is_url_in_db and not is_title_in_db:
                 return content, title, valid_date, image_url
+            else:
+                return None, None, None, None
     except Exception as e:
         print("Error in DailyHodl:", str(e))
-    print("error")
-    return None, None, None
-
-
+        return None, None, None, None

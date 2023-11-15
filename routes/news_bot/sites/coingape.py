@@ -1,17 +1,21 @@
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from models.news_bot.articles_model import ANALIZED_ARTICLE
+from datetime import datetime
 from bs4 import BeautifulSoup
+from config import session
 import requests
+import re
 
 def validate_date_coingape(html):
     try:
         date_div = html.find('div', class_='publishby d-flex')
-
+        print(date_div)
         if date_div:
-            # Verifica si el texto del div contiene "mins ago" o "hours ago"
             date_text = date_div.text.lower()
+            print("date: ", date_text)
             if "mins ago" in date_text or "hours ago" in date_text:
                 return date_text.strip()
-
+        print("error de fechas")
         return False
     except Exception as e:
         print("Error processing the date in coingape > " + str(e))
@@ -33,17 +37,14 @@ def extract_image_urls(html):
         print("Error finding Images in coingape" + str(e))
         
 def extract_article_content(html):
-    # Encuentra el div con el ID 'main-content'
+    
     main_content_div = html.find('div', id='main-content')
 
     if main_content_div:
-        # Encuentra todas las etiquetas 'p' dentro del div 'main-content'
         p_elements = main_content_div.find_all('p')
         
-        # Inicializa el contenido del artículo
         content = ""
         
-        # Recorre todas las etiquetas 'p' y extrae el texto de las etiquetas 'span' dentro de ellas
         for p_element in p_elements:
             content += p_element.text.strip().casefold()
         
@@ -53,11 +54,11 @@ def extract_article_content(html):
 
 # Function to validate the article using keywords
 def validate_coingape_article(article_link, main_keyword):
-
-    headers = {
+    try:
+        headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
         }
-    try:
+
         article_response = requests.get(article_link, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower() 
 
@@ -67,34 +68,49 @@ def validate_coingape_article(article_link, main_keyword):
             title_element = article_soup.find('h1')
             title = title_element.text.strip() if title_element else None 
 
-            # print(f'validing {title} ARTICLE COINGAPE')
-
             # Extract article content using the new function
             content = extract_article_content(article_soup)
 
             if not title or not content:
-                # print('Article does not have a title or content')
                 return None, None, None, None
             else:
-                is_title_in_blacklist = title_in_blacklist(title)
-                content_validation = validate_content(main_keyword, content)
-            
-            if is_title_in_blacklist or not content_validation:
-                # print('Article does not meet requirements')
-                return None, None, None, None
-           
-            valid_date = validate_date_coingape(article_soup)
+                # These three following lines change the status of the article to ANALIZED.
+                normalized_article_url = article_link.strip().casefold()
+                
+                is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+                if is_url_analized:
+                    is_url_analized.is_analized = True
+                    session.commit()
 
-            # Extract image URLs from the article
-            image_urls = extract_image_urls(article_response.text)
+                    is_title_in_blacklist = title_in_blacklist(title)
+                    content_validation = validate_content(main_keyword, content)
+                    is_url_in_db = url_in_db(article_link)
+                    is_title_in_db = title_in_db(title)
 
-            if  content_validation and valid_date and title:
-                return title, content, valid_date, image_urls
-            else:
-                return None, None, None, None
+                    # Check if is_url_analized is not None before accessing attributes
+                    if is_title_in_blacklist or not content_validation or is_url_in_db or is_title_in_db:
+                        return None, None, None, None
+
+                    valid_date = validate_date_coingape(article_soup)
+
+                    # Extract image URLs from the article
+                    image_urls = extract_image_urls(article_response.text)
+                    
+
+                    if content_validation and valid_date and title:
+                        return title, content, valid_date, image_urls
+                    else:
+                        return None, None, None, None
     except Exception as e:
-        print("Error in extrading content in coingape:" + str(e))
+        print("Error in extracting content in coingape:" + str(e))
         return None, None, None, None
 
+    
+result = validate_coingape_article('https://coingape.com/breaking-sec-delays-grayscale-ethereum-etf-decision-to-2024/?utm_source=24hrsupdateall', 'bitcoin')
 
-# validate_article('https://coingape.com/weekly-recap-crypto-market-remains-strong-btc-eth-rally/', keyword_dict)
+if result:
+    title, content, valid_date, image_urls = result
+    print('Article passed the verifications > ', valid_date)
+else:
+
+    print('ARTICLE DID NOT PASS THE VERIFICATIONS')
