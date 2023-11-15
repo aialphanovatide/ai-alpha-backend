@@ -47,12 +47,6 @@ def summary_generator(text, main_keyword):
         summary = response.choices[0].message.content
         return summary
 
-    except APIError as e:
-        send_notification_to_product_alerts_slack_channel(title_message="OpenAI API returned an API Error",
-                                                          sub_title="Reason",
-                                                          message=str(e))
-        print(f"OpenAI API returned an API Error: {e}")
-        return None
     except APIConnectionError as e:
         send_notification_to_product_alerts_slack_channel(title_message="Failed to connect to OpenAI API",
                                                           sub_title="Reason",
@@ -64,4 +58,10 @@ def summary_generator(text, main_keyword):
                                                           sub_title="Reason",
                                                           message=str(e))
         print(f"OpenAI API request exceeded rate limit: {e}")
+        return None
+    except APIError as e:
+        send_notification_to_product_alerts_slack_channel(title_message="OpenAI API returned an API Error",
+                                                          sub_title="Reason",
+                                                          message=str(e))
+        print(f"OpenAI API returned an API Error: {e}")
         return None
