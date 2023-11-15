@@ -23,7 +23,6 @@ from routes.twitter.index import send_tweets_to_twitter
 from models.news_bot.articles_model import ARTICLE, ANALIZED_ARTICLE
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
-from sqlalchemy import exists
 from config import session
 
 btc_slack_channel_id = 'C05RK7CCDEK'
@@ -33,7 +32,6 @@ hacks_slack_channel_id = 'C05UU8JBKKN'
 layer_1_slack_channel_id = 'C05URM66B5Z' # For Solana too
 layer_0_slack_channel_id = 'C05URM3UY8K' 
 other_altcoins_slack_channel_id = 'C05UU8EKME0' 
-
 
 def get_links(site, main_container):
 
@@ -78,7 +76,8 @@ def get_links(site, main_container):
                 return elements
         
     except Exception as e:
-        print("Error getting links" + str(e))  
+        print("Error getting links" + str(e)) 
+
 
 def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
 
@@ -87,8 +86,6 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
     elements = get_links(site=site,
               main_container=main_container,
               )
-
-    # print('\n\nScrapped articles > ', elements)
 
     keywords = []
 
@@ -120,8 +117,7 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
 
                     session.add(new_article)
                     session.commit() 
-                    # print(f'\n\n--- Article URL: {url} WAS SAVED IN THE ANALIZED TABLE ---') 
-
+                   
                     # proceed to make first verification
                     is_title_in_db = title_in_db(article_title)
                     is_title_in_blacklist = title_in_blacklist(article_title)
@@ -153,15 +149,13 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
                             else:
                                 article_urls.add(article_url)         
         
-                    # is_url_analized = session.query(ANALIZED_ARTILCE).filter(ANALIZED_ARTILCE.url == article_url).first()
-                    # is_url_analized.is_analized = True
-        
+                 
         
         return article_urls, website_name
         
     except Exception as e:
-        print(f'An error occurred: {str(e)}')
-        return f'An error occurred: {str(e)}'
+        print(f'An error occurred in scrape_sites' + str(e))
+        return f'An error occurred in scrape_sites' + str(e)
                  
 
 
@@ -174,7 +168,7 @@ def scrape_articles(sites, main_keyword):
         is_URL_complete = sites.is_URL_complete
         main_container = sites.main_container
 
-        print(f'\n---Web scrape of {main_keyword} STARTED for {website_name}---')
+        print(f'---Web scrape of {main_keyword} STARTED for {website_name}---')
 
         article_urls, website_name = scrape_sites(site,base_url,
                                                    website_name,
@@ -185,7 +179,7 @@ def scrape_articles(sites, main_keyword):
 
         
         if not article_urls:
-            print(f'\n---No articles found for {website_name} of {main_keyword}---')
+            print(f'---No articles found for {website_name} of {main_keyword}---')
             return f'No articles found for {website_name}'
          
        
@@ -196,10 +190,8 @@ def scrape_articles(sites, main_keyword):
                 counter_articles_saved = 0
 
                 for article_link in article_urls:
-                    
-                    article_to_save = []
 
-                    print('--- URL to analize----', article_link)
+                    article_to_save = []
                     
                     if website_name == 'Ambcrypto':
                         title, content, valid_date, image_urls = validate_ambcrypto_article(article_link, main_keyword)
@@ -231,7 +223,7 @@ def scrape_articles(sites, main_keyword):
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
 
-                    if website_name == 'Coingape':
+                    if website_name == 'Coingape':                        
                         title, content, valid_date, image_urls = validate_coingape_article(article_link, main_keyword)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, website_name, image_urls))
@@ -296,8 +288,9 @@ def scrape_articles(sites, main_keyword):
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, website_name, image_urls)) 
 
-                    print('--- Article to save ---\n\nTitle: ', article_to_save[0])
-
+                    if not article_to_save:
+                        print(f"Article did not passed {website_name} validations in {main_keyword}")
+                    
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, website_name, image_urls = article_data
 
@@ -364,7 +357,7 @@ def scrape_articles(sites, main_keyword):
                 return f'Web scrapping of {website_name} finished', 200
             
             except Exception as e:
-                print(f'--- Error proccessing data in {website_name} > {str(e)} ---')
+                print(f'Error processing {website_name}: {str(e)}')
         
     except Exception as e:
         return f'--- Error in scrape_articles: {str(e)} ---', 500

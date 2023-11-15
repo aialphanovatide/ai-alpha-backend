@@ -10,18 +10,18 @@ def validate_date_beincrypto(date):
         current_date = datetime.now()
         valid_date = None
 
-        # Utiliza una expresión regular para extraer la fecha en formato año-mes-día
         date_pattern = r'(\d{4}-\d{2}-\d{2})'
         match = re.search(date_pattern, date)
         
         if match:
             article_date = datetime.strptime(match.group(1), '%Y-%m-%d')
-            # Comprueba si la fecha está dentro del rango de 24 horas
+           
             if current_date.date() == article_date.date() or current_date.date() - article_date.date() == timedelta(days=1):
                 valid_date = date
         return valid_date
    
    except Exception as e:
+       print()
        return None
 
 # Function to extract image URLs from the HTML content
@@ -84,6 +84,6 @@ def validate_beincrypto_article(article_link, main_keyword):
             else:
                 return None, None, None, None
     except Exception as e:
-            # print(f'Error in the request of Beincrypto {str(e)}')
+            print(f'Error in the request of Beincrypto {str(e)}')
             return None, None, None, None
         
