@@ -14,9 +14,9 @@ def receive_data_from_tv():
     try:
         if request.is_json:
             print('Data AS JSON in Tradingview', request.data)
-            send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
-                                                              sub_title='Invalid request format',
-                                                              message=str(request.data))
+            # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
+            #                                                   sub_title='Invalid request format',
+            #                                                   message=str(request.data))
             return 'Invalid request format', 400
         else:
             try:
@@ -47,9 +47,9 @@ def receive_data_from_tv():
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
-                send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
-                                                              sub_title='Reason',
-                                                              message=str(e))
+                # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
+                #                                               sub_title='Reason',
+                #                                               message=str(e))
                 return f'Error sending message to Slack channel. Reason: {e}', 500
     except Exception as e:
         print(f'Error main thread. Reason: {e}')
