@@ -33,13 +33,8 @@ def formatted_alert_name(input_string):
     return time_frame, alert_message
 
 
-def send_alert_strategy_to_slack(price, alert_name, symbol):
+def send_alert_strategy_to_slack(price, alert_name, message):
 
-    formatted_symbol = str(symbol).upper()
-    time_frame, alert_message = formatted_alert_name(alert_name) 
-    formatted_price = str(price)
-
-    new_alert_name = formatted_symbol + " - " + time_frame
 
     payload = {
                     "blocks": [
@@ -55,7 +50,7 @@ def send_alert_strategy_to_slack(price, alert_name, symbol):
                             "fields": [
                                 {
                                     "type": "mrkdwn",
-                                    "text": f"*{new_alert_name}*\n\n{alert_message}\n*Last Price:* {formatted_price}"
+                                    "text": f"*{alert_name}*\n\n{message}\n*Last Price:* {price}"
                                 }
                             ]
                         },
@@ -81,28 +76,31 @@ def send_alert_strategy_to_slack(price, alert_name, symbol):
         return f'Error sending message to Slack channel. Reason: {e}', 500
     
 
-def send_alert_strategy_to_telegram(price, alert_name, symbol):
+def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
+    alert_message = str(message).capitalize()
     formatted_symbol = str(symbol).upper()
-    time_frame, alert_message = formatted_alert_name(alert_name) 
+    alert_Name = str(alert_name).upper()
     formatted_price = str(price)
 
-    new_alert_name = formatted_symbol + " - " + time_frame
-
-    send_alert_strategy_to_slack(price=price,
-                                alert_name=alert_name,
-                                symbol=symbol)
+    send_alert_strategy_to_slack(price=formatted_price,
+                                alert_name=alert_Name,
+                                message=alert_message)
 
 
-    content = f"""<b>{new_alert_name}</b>\n\n<b>{alert_message}</b>\nLast Price: <b>{formatted_price}</b>\n"""
+    content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: {formatted_price}\n"""
 
-    symbol = "BINANCE:^" + formatted_symbol # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
+    # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
+    symbol_value = "BINANCE:^" + formatted_symbol 
   
-    chart = generate_alert_chart(symbol, formatted_price)
+    # chart = generate_alert_chart(symbol_value, formatted_price)
 
-    files = {
-    'photo': ('chart.png', chart, 'image/png')
-    }
+    # files = None
+
+    # if chart:
+    #     files = {
+    #     'photo': ('chart.png', chart, 'image/png')
+    #     }
 
     # photo_payload = {'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
     #                 'caption': content,
@@ -118,9 +116,9 @@ def send_alert_strategy_to_telegram(price, alert_name, symbol):
     
     try:
         response = requests.post(telegram_text_url, data=text_payload)
-        
-        if response.status_code == 200:
-            new_alert = ALERT(alert_name=new_alert_name,
+       
+        if response == 200:
+            new_alert = ALERT(alert_name=alert_Name,
                         alert_message = alert_message,
                         symbol=formatted_symbol,
                         price=formatted_price
