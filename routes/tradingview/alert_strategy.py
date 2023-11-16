@@ -50,7 +50,7 @@ def send_alert_strategy_to_slack(price, alert_name, message):
                             "fields": [
                                 {
                                     "type": "mrkdwn",
-                                    "text": f"*{alert_name}*\n\n{message}\n*Last Price:* {price}"
+                                    "text": f"*{alert_name}*\n\n{message}\n*Last Price:* ${price}"
                                 }
                             ]
                         },
@@ -83,13 +83,13 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
     alert_Name = str(alert_name).upper()
     formatted_price = str(price)
 
-    send_alert_strategy_to_slack(price=formatted_price,
-                                alert_name=alert_Name,
-                                message=alert_message)
+    # send_alert_strategy_to_slack(price=formatted_price,
+    #                             alert_name=alert_Name,
+    #                             message=alert_message)
 
 
-    content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: {formatted_price}\n"""
-
+    content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
+   
     # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
     symbol_value = "BINANCE:^" + formatted_symbol 
   
@@ -115,8 +115,9 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
             }
     
     try:
-        response = requests.post(telegram_text_url, data=text_payload)
-       
+        # response = requests.post(telegram_text_url, data=text_payload)
+        response = 200 
+
         if response == 200:
             new_alert = ALERT(alert_name=alert_Name,
                         alert_message = alert_message,
