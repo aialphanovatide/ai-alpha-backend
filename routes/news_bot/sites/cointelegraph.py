@@ -1,46 +1,55 @@
 import re
 import requests
-from datetime import datetime
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from routes.news_bot.validations import validate_content, title_in_blacklist
+from bs4 import BeautifulSoup
+from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from models.news_bot.articles_model import ANALIZED_ARTICLE
+from config import session
 
 
 def validate_date_cointelegraph(date):
-    current_date = datetime.now()
-    valid_date = None
+    try:
+        current_date = datetime.now()
+        valid_date = None
 
-    # Utiliza una expresión regular para extraer la fecha en formato año-mes-día
-    date_pattern = r'(\d{4}-\d{2}-\d{2})'
-    match = re.search(date_pattern, date)
+        # Utiliza una expresión regular para extraer la fecha en formato año-mes-día
+        date_pattern = r'(\d{4}-\d{2}-\d{2})'
+        match = re.search(date_pattern, date)
 
-    if match:
-        article_date = datetime.strptime(match.group(1), '%Y-%m-%d')
-        # Comprueba si la fecha está dentro del rango de 24 horas
-        if current_date.date() == article_date.date() or current_date.date() - article_date.date() == timedelta(days=1):
-            valid_date = date
+        if match:
+            article_date = datetime.strptime(match.group(1), '%Y-%m-%d')
+            time_difference = current_date - article_date
+            if timedelta(days=1) > time_difference:
+                valid_date = date
+        return valid_date
+    except Exception as e:
+        print("Error in Cointelegraph:", str(e))
+        return None
 
-    return valid_date
+        
 
 def extract_image_urls(html):
-    image_urls = []
-    soup = BeautifulSoup(html, 'html.parser')
-    img_elements = soup.find_all('img')
+    try:
+        image_urls = []
+        soup = BeautifulSoup(html, 'html.parser')
+        img_elements = soup.find_all('img')
 
-    for img in img_elements:
-        srcset = img.get('srcset')
-        src = img.get('src')
+        for img in img_elements:
+            srcset = img.get('srcset')
+            src = img.get('src')
 
-        if srcset:
-            # Divide el atributo srcset en sus componentes y toma la URL de la imagen más grande (última URL)
-            srcset_parts = srcset.split(',')
-            largest_img_url = srcset_parts[-1].strip().split(' ')[-1]
-            image_urls.append(largest_img_url)
-        elif src and not src.startswith('data:'):
-            image_urls.append(src)
+            if srcset:
+                srcset_parts = srcset.split(',')
+                largest_img_url = srcset_parts[-1].strip().split(' ')[-1]
+                image_urls.append(largest_img_url)
+            elif src and not src.startswith('data:'):
+                image_urls.append(src)
+            return image_urls
+    except Exception as e:
+        print("Error in Cointelegraph:", str(e))
+        return None
 
-    return image_urls
-
+    
 
 def validate_cointelegraph_article(article_link, main_keyword):
 
@@ -66,27 +75,34 @@ def validate_cointelegraph_article(article_link, main_keyword):
         
 
             if not title or not content:
-                # print('Article does not have a title or content')
                 return None, None, None, None
             else:
+                # These three following lines change the status of the article to ANALYZED.
+                normalized_article_url = article_link.strip().casefold()
+                is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+                if is_url_analized:
+                    is_url_analized.is_analized = True
+                    session.commit()
+
                 is_title_in_blacklist = title_in_blacklist(title)
                 content_validation = validate_content(main_keyword, content)
-            
-            if is_title_in_blacklist or not content_validation:
-                # print('Article does not meet requirements')
-                return None, None, None, None
+                is_url_in_db = url_in_db(article_link)
+                is_title_in_db = title_in_db(title)
 
+                if is_title_in_blacklist or not content_validation or is_url_in_db or is_title_in_db:
+                    return None, None, None, None
 
-            date_time_element = article_soup.find('time')
-            date = date_time_element['datetime'].strip() if date_time_element and 'datetime' in date_time_element.attrs else None
-            valid_date = validate_date_cointelegraph(date)
+                date_time_element = article_soup.find('time')
+                date = date_time_element['datetime'].strip() if date_time_element and 'datetime' in date_time_element.attrs else None
+                valid_date = validate_date_cointelegraph(date)
 
-            image_urls = extract_image_urls(article_response.text)
+                image_urls = extract_image_urls(article_response.text)
 
-            if  content_validation and valid_date and title:
-                return title, content, valid_date, image_urls
-            else:
-                return None, None, None, None
+                if  content_validation and valid_date and title:
+                    return title, content, valid_date, image_urls
+                else:
+                    return None, None, None, None
     except Exception as e:
-        # print(str(e))
+        print("Error in Cointelegraph:", str(e))
         return None, None, None, None
+
