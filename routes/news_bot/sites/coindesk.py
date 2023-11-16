@@ -81,9 +81,8 @@ def validate_coindesk_article(article_link, main_keyword):
             title = title_element.text.strip() if title_element else None
 
 
-            # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
-            
+
             if is_url_analized:
                 is_url_analized.is_analized = True
                 session.commit()
@@ -114,14 +113,3 @@ def validate_coindesk_article(article_link, main_keyword):
         print(f"Error in Coindesk" + str(e))
         return None, None, None, None
       
-
-
-        
-
-# result_title, result_content, result_valid_date, result_image_urls = validate_coindesk_article('https://www.coindesk.com/tech/2023/11/08/protocol-latest-tech-news-crypto-blockchain/', 'bitcoin')
-
-# if result_title:
-#     print('Article passed the verifications > ', result_title)
-#     print('Date: ', result_valid_date)
-# else:
-#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
