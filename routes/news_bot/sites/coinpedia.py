@@ -98,12 +98,12 @@ def validate_coinpedia_article(article_link, main_keyword):
       
 
 
-result_title, result_content, result_valid_date, result_image_urls = validate_coinpedia_article('https://coinpedia.org/news/stablecoin-issuer-tether-plans-to-invest-500-million-in-bitcoin-mining-to-become-the-biggest-miner/', 'bitcoin')
+# result_title, result_content, result_valid_date, result_image_urls = validate_coinpedia_article('https://coinpedia.org/news/stablecoin-issuer-tether-plans-to-invest-500-million-in-bitcoin-mining-to-become-the-biggest-miner/', 'bitcoin')
 
-if result_valid_date:
-    print('Article passed the verifications > ', result_title)
-    print('Date: ', result_valid_date)
-    print('Url: ', result_image_urls)
-else:
-    print('ARTICLE DID NOT PASS THE VERIFICATIONS')
+# if result_valid_date:
+#     print('Article passed the verifications > ', result_title)
+#     print('Date: ', result_valid_date)
+#     print('Url: ', result_image_urls)
+# else:
+#     print('ARTICLE DID NOT PASS THE VERIFICATIONS')
 
