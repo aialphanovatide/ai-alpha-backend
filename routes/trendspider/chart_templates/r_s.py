@@ -108,7 +108,7 @@ def generate_chart_with_support_resistance(symbol, interval, resistance, support
     fig.update_yaxes(showline=True, linewidth=1, linecolor='#0E1E25', gridcolor='#0E1E25')
     
     # Muestra el gráfico
-    fig.show()
+    # fig.show()
     image_bytes = fig.to_image(format="png")
     return image_bytes
 
