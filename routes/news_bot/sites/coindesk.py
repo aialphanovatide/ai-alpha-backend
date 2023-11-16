@@ -82,10 +82,10 @@ def validate_coindesk_article(article_link, main_keyword):
             title = title_element.text.strip() if title_element else None
 
 
-            # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
-            is_url_analized.is_analized = True
-            session.commit()
+            if is_url_analized:
+                is_url_analized.is_analized = True
+                session.commit()
 
             try:
                 if title and content:
@@ -114,3 +114,5 @@ def validate_coindesk_article(article_link, main_keyword):
         return None, None, None, None
       
 
+
+        
