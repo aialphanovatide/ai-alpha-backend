@@ -1,6 +1,6 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from openai import APIError, RateLimitError, APIConnectionError
-import openai
+from openai import OpenAI
 import os
 
 from dotenv import load_dotenv
@@ -8,7 +8,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_KEY = os.getenv('OPENAI_KEY')
-openai.api_key = OPENAI_KEY
+
+client = OpenAI(
+   
+    api_key=OPENAI_KEY,
+)
 
 btc_prompt = """Imagine you are one of the world’s greatest experts on Bitcoin but you are also a world-renowned journalist who is great at summarising articles about Bitcoin. Your job involves two steps. Step One: Rewrite the headline of the article that you are summarising: Please follow these rules for the headline: (i) The headline should never be longer than seven words. It can be shorter, but it should never be longer.
 (ii) The headline should not read like it is clickbait. This means the headline should read like something out of the Financial Times or Bloomberg rather than The Daily Mail. (iii) The headline needs to be as factual as possible. This means that if the headline discusses an opinion, the people or person sharing the opinion should be mentioned in the headline. An example might be ‘Saylor says Bitcoins price will rise to 100k this year’. (iv) Make sure that when you write this headline you put it between asterisks. Step Two: Summarise the article
@@ -38,7 +42,7 @@ def summary_generator(text, main_keyword):
         else:
             prompt = lsd_prompt
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt + '>' + text}],
             temperature=0.6,
