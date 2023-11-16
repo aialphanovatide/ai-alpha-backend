@@ -33,6 +33,9 @@ layer_1_slack_channel_id = 'C05URM66B5Z' # For Solana too
 layer_0_slack_channel_id = 'C05URM3UY8K' 
 other_altcoins_slack_channel_id = 'C05UU8EKME0' 
 
+
+# Note: images_urls sometimes are a list[] and sometimes just return a single string of the a URL.
+
 def get_links(site, main_container):
 
     try:
