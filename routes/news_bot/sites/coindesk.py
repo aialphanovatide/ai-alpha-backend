@@ -72,7 +72,6 @@ def validate_coindesk_article(article_link, main_keyword):
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
             #Firstly extract the title and content
-
             content = ""
             a_elements = article_soup.find_all("p")
             for a in a_elements:
@@ -83,6 +82,7 @@ def validate_coindesk_article(article_link, main_keyword):
 
 
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+
             if is_url_analized:
                 is_url_analized.is_analized = True
                 session.commit()
@@ -113,6 +113,3 @@ def validate_coindesk_article(article_link, main_keyword):
         print(f"Error in Coindesk" + str(e))
         return None, None, None, None
       
-
-
-        
