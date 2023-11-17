@@ -33,6 +33,9 @@ layer_1_slack_channel_id = 'C05URM66B5Z' # For Solana too
 layer_0_slack_channel_id = 'C05URM3UY8K' 
 other_altcoins_slack_channel_id = 'C05UU8EKME0' 
 
+
+# Note: images_urls sometimes are a list[] and sometimes just return a single string of the a URL.
+
 def get_links(site, main_container):
 
     try:
@@ -294,7 +297,7 @@ def scrape_articles(sites, main_keyword):
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, website_name, image_urls = article_data
 
-                        # summary = summary_generator(content, main_keyword)
+                        #summary = summary_generator(content, main_keyword)
                         summary = True
                         
                         if main_keyword == 'bitcoin':
@@ -336,15 +339,15 @@ def scrape_articles(sites, main_keyword):
                                                                     message=response
                                                                     )
                             
-                            # new_article = ARTICLE(title=title,
-                            # content=content,
-                            # date=valid_date,
-                            # url=article_link,
-                            # website_name=website_name
-                            # )
+                            new_article = ARTICLE(title=title,
+                            content=content,
+                            date=valid_date,
+                            url=article_link,
+                            website_name=website_name
+                            )
 
-                            # session.add(new_article)
-                            # session.commit()
+                            session.add(new_article)
+                            session.commit()
                             counter_articles_saved +=1
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
                         else:

@@ -247,4 +247,4 @@ def generate_chart_with_rsi_from_params(symbol, interval, rsi_condition):
     subplots.show()
 
 # generate_chart_with_rsi_from_params("BTCUSDT", "1d", "RSI>70")
-generate_rsi_chart("BTCUSDT", "1d", "RSI>70")
+# generate_rsi_chart("BTCUSDT", "1d", "RSI>70")

@@ -1,6 +1,8 @@
 import requests
+from config import session
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from models.news_bot.articles_model import ANALIZED_ARTICLE
 from routes.news_bot.validations import validate_content, title_in_blacklist, title_in_db, url_in_db
 
 def validate_date_ambcrypto(date_text):
@@ -11,8 +13,9 @@ def validate_date_ambcrypto(date_text):
             return date.strftime('%Y-%m-%d')
         else:
             return None
+        
     except Exception as e:
-        print("Error proccessing date in ambcrypto" + str(e))
+        print("Error proccessing date in Ambcrypto" + str(e))
         return None
 
 def extract_image_urls_ambcrypto(soup):
@@ -31,7 +34,7 @@ def extract_image_urls_ambcrypto(soup):
         return image_urls
     
     except Exception as e:
-        print('Error proccessing the images in ambcrypto' + str(e))
+        print('Error proccessing the images in Ambcrypto' + str(e))
         return []
 
 def extract_article_content_ambcrypto(html):
@@ -54,43 +57,61 @@ def extract_article_content_ambcrypto(html):
 
 def validate_ambcrypto_article(article_link, main_keyword):
 
+    normalized_article_url = article_link.strip().casefold()
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
     }
 
     try:
-        article_response = requests.get(article_link, headers=headers)
+        article_response = requests.get(normalized_article_url, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
         if article_response.status_code == 200 and 'text/html' in article_content_type:
             html = BeautifulSoup(article_response.text, 'html.parser')
 
             title, content = extract_article_content_ambcrypto(html)
-
-            if title and content:
-
-                is_title_in_blacklist = title_in_blacklist(title)
-                is_valid_content = validate_content(main_keyword, content)
-                is_url_in_db = url_in_db(article_link)
-                is_title_in_db = title_in_db(title)
-
-
-            is_title_in_blacklist = title_in_blacklist(title)
-            content_validation = validate_content(main_keyword, content)
-
-            date_element = html.find('time')
-            date_text = date_element.text.strip() if date_element else None
-            valid_date = validate_date_ambcrypto(date_text)
-
-           
-           
-            image_urls = extract_image_urls_ambcrypto(article_response.text)
-
-            if valid_date and content and title and not is_title_in_blacklist and content_validation:
-                print(title, content, image_urls)
-                return content, valid_date, image_urls
             
+            # These three following lines changes the status of the article to ANALIZED.
+            is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+            
+            if is_url_analized:
+                is_url_analized.is_analized = True
+                session.commit()
+
+            try:
+                if title and content:
+                    is_title_in_blacklist = title_in_blacklist(title)
+                    is_valid_content = validate_content(main_keyword, content)
+                    is_url_in_db = url_in_db(normalized_article_url)
+                    is_title_in_db = title_in_db(title)
+
+                    # if the all conditions passed then go on
+                    if not is_title_in_blacklist and is_valid_content and not is_url_in_db and not is_title_in_db:
+
+                        date_element = html.find('time')
+                        date_text = date_element.text.strip() if date_element else None
+                        valid_date = validate_date_ambcrypto(date_text)
+
+                        image_urls = extract_image_urls_ambcrypto(html)
+                    
+                        if valid_date:
+                            return title, content, valid_date, image_urls
+                            
+                    return None, None, None, None
+                            
+            except Exception as e:
+                print("Inner Error in Ambcrypto" + str(e))
+                return None, None, None, None
+
     except Exception as e:
-        print("Error in ambcrypto:", str(e))
+        print(f"Error in Ambcrypto" + str(e))
         return None, None, None, None
 
+# result_title, result_content, result_valid_date, result_image_urls = validate_ambcrypto_article('https://ambcrypto.com/blockchain-association-opposes-proposed-irs-tax-rules/', 'bitcoin')
+
+# if result_title:
+#     print('Article passed the verifications > ', result_title)
+#     print('Date: ', result_valid_date)
+# else:
+#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
