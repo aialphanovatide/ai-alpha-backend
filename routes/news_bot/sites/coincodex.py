@@ -98,3 +98,4 @@ def validate_coincodex_article(article_link, main_keyword):
       
 
 
+

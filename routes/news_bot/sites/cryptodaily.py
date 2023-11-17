@@ -5,26 +5,29 @@ from routes.news_bot.validations import validate_content, title_in_blacklist, ur
 from models.news_bot.articles_model import ANALIZED_ARTICLE
 from config import session
 
-def validate_date_cryptodaily(date_text):
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+
+def validate_date_cryptodaily(html):
     try:
-        # Extraer la parte de tiempo del texto
-        time_part = date_text.split("Published")[-1].strip()
+        date_element = html.find('div', class_='date-count')
+        if date_element:
+            # Buscar todas las etiquetas <b> dentro del div con clase "date-count"
+            b_elements = date_element.find_all('b')
+
+            # Obtener el contenido de las etiquetas <b>
+            b_contents = [b.get_text(separator=' ', strip=True) for b in b_elements]
+
+            if any(keyword in content.lower() for keyword in ["hour ago", "hours ago", "minutes ago"] for content in b_contents):
+                return b_contents
+
+            return False
         
-        # Comprobar si el tiempo contiene "minutes ago" o "hours ago"
-        if "minutes ago" in time_part or "hours ago" in time_part:
-            return datetime.now()
-        
-        # Si no contiene "minutes ago" o "hours ago", entonces extraer la fecha
-        date = datetime.strptime(date_text, "%B %d, %Y")
-        
-        # Comprobar si la fecha está dentro de las últimas 24 horas
-        current_time = datetime.now()
-        time_difference = current_time - date
-        if time_difference <= timedelta(hours=24):
-            return date
     except Exception as e:
         print("Error in CryptoDaily:", str(e))
-        return None
+        return False
+
+
 
 def extract_image_url_cryptodaily(html):
     try:
@@ -51,7 +54,7 @@ def validate_cryptodaily_article(article_link, main_keyword):
 
         if article_response.status_code == 200 and 'text/html' in article_content_type:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
-
+            
             #Firstly extract the title and content
 
             content = ""
@@ -95,12 +98,3 @@ def validate_cryptodaily_article(article_link, main_keyword):
         return None, None, None, None
       
 
-
-# result_title, result_content, result_valid_date, result_image_urls = validate_cryptodaily_article('https://cryptodaily.co.uk/2023/11/marathon-shifts-strategy-ahead-of-bitcoin-halving', 'bitcoin')
-
-# if result_valid_date:
-#     print('Article passed the verifications > ', result_title)
-#     print('Date: ', result_valid_date)
-# else:
-#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
-        
