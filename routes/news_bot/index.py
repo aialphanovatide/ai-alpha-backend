@@ -52,7 +52,7 @@ def deactivate_news_bot(target):
         news_bot_job = scheduler.get_job(target)
 
         if not news_bot_job:
-            send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot is alreadu inactive',sub_title='Start', message='Inactive')
+            send_notification_to_product_alerts_slack_channel(title_message=f'{target.capitalize()} News Bot is already inactive',sub_title='Start', message='Inactive')
             return f'{target.capitalize()} News Bot is already inactive', 400
                 
         scheduler.remove_job(news_bot_job.id)
@@ -178,7 +178,7 @@ def news_bot_commands():
             target = data['target']
 
             if command == 'activate': 
-                #res, status = activate_news_bot(target)
+                # res, status = activate_news_bot(target)
                 res, status = start_periodic_scraping(target)
                 return res, status
             elif command == 'deactivate':

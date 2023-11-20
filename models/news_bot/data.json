@@ -1370,11 +1370,11 @@
           "main_container":".gsc-expansionArea"
         },
         {
-          "site": "https://www.coindesk.com/tag/solana",
+          "site": "https://www.coindesk.com/search?s=solana",
           "base_url": "https://www.coindesk.com",
           "website_name": "Coindesk",
           "is_URL_complete": false,
-          "main_container":"None"
+          "main_container":"queryly_advanced_container"
         },
         {
           "site": "https://cryptonews.com/?s=solana",
