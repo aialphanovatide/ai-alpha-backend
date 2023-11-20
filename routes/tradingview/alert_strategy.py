@@ -89,9 +89,9 @@ def send_alert_strategy_to_telegram(price, alert_name, symbol):
 
     new_alert_name = formatted_symbol + " - " + time_frame
 
-    send_alert_strategy_to_slack(price=price,
-                                alert_name=alert_name,
-                                symbol=symbol)
+    # send_alert_strategy_to_slack(price=price,
+    #                             alert_name=alert_name,
+    #                             symbol=symbol)
 
 
     content = f"""<b>{new_alert_name}</b>\n\n<b>{alert_message}</b>\nLast Price: <b>{formatted_price}</b>\n"""
@@ -117,18 +117,18 @@ def send_alert_strategy_to_telegram(price, alert_name, symbol):
             }
     
     try:
-        response = requests.post(telegram_text_url, data=text_payload)
-        
-        if response.status_code == 200:
-            new_alert = ALERT(alert_name=new_alert_name,
+
+        new_alert = ALERT(alert_name=new_alert_name,
                         alert_message = alert_message,
                         symbol=formatted_symbol,
                         price=formatted_price
                         )
 
-            session.add(new_alert)
-            session.commit()
-
+        session.add(new_alert)
+        session.commit()
+        response = requests.post(telegram_text_url, data=text_payload)
+        
+        if response.status_code == 200:
             return 'Alert message sent to Telegram successfully', 200
         else:
             return f'Error while sending alert to Telegram {str(response.content)}', 500 
