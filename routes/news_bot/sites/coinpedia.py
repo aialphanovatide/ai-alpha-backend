@@ -28,7 +28,7 @@ def extract_image_url_coinpedia(html):
        
 
         # Find the img tag with a src attribute containing the base URL
-        img_tag = html.find('img', {'src': lambda x: x and x.startswith('https://image.coinpedia.org/wp-content/uploads/2020')})
+        img_tag = html.find('img', {'src': lambda x: x and x.startswith('https://image.coinpedia.org/wp-content/uploads')})
 
         # Extract the image URL from the src attribute
         if img_tag:
@@ -50,7 +50,9 @@ def validate_coinpedia_article(article_link, main_keyword):
         article_response = requests.get(normalized_article_url, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
-        if article_response.status_code == 200 and 'text/html' in article_content_type:
+        if not 'text/html' in article_content_type or article_response.status_code != 200:
+            return None, None, None, None
+        else:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
             #Firstly extract the title and content
@@ -96,14 +98,4 @@ def validate_coinpedia_article(article_link, main_keyword):
         print(f"Error in cryptoslate" + str(e))
         return None, None, None, None
       
-
-
-# result_title, result_content, result_valid_date, result_image_urls = validate_coinpedia_article('https://coinpedia.org/news/stablecoin-issuer-tether-plans-to-invest-500-million-in-bitcoin-mining-to-become-the-biggest-miner/', 'bitcoin')
-
-# if result_valid_date:
-#     print('Article passed the verifications > ', result_title)
-#     print('Date: ', result_valid_date)
-#     print('Url: ', result_image_urls)
-# else:
-#     print('ARTICLE DID NOT PASS THE VERIFICATIONS')
 
