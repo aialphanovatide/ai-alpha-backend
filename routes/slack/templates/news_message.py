@@ -4,7 +4,6 @@ from slack_sdk.errors import SlackApiError
 
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, images_list, main_keyword):
 
-        
         blocks=[
             {
                 "type": "header",
@@ -28,16 +27,39 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
                 ]
             },
             {
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f"*Summary*\n{summary}"
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*Summary*\n{summary}"
 			},
 			"accessory": {
 				"type": "image",
 				"image_url": f"Unavailable",
 				"alt_text": "alt text for image"
 			}
+            },
+            {
+                "type": "divider"
+            },
+            {
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Send to AI Alpha App*"
+			},
+			"accessory": {
+				"type": "button",
+				"text": {
+					"type": "plain_text",
+					"text": "SEND",
+					"emoji": True
+				},
+				"value": f"{summary},{date_time}",
+				"action_id": "button-action"
+			}
+		    },
+            {
+                "type": "divider"
             },
             {
                 "type": "divider"
@@ -50,13 +72,24 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
                 text=f'New Notification from {str(main_keyword).capitalize()} News Bot', 
                 blocks=blocks
             )
+         
             response = result['ok']
             if response == True:
-                return f'Message sent successfully to Slack channel {channel_id}', 200
+                print(f'Article {title} sent successfully to Slack channel {main_keyword}')
+                return f'Article {title} sent successfully to Slack channel {main_keyword}', 200
 
         except SlackApiError as e:
             print(f"Error posting message: {e}")
-            return f'Error sending message to Slack channel {channel_id}', 500
+            return f'Error sending message to Slack channel {main_keyword}', 500
+        
+# send_NEWS_message_to_slack(channel_id="C05RM0DF8J3",
+#                            title="Testing interactive button",
+#                            date_time="11/14/2023",
+#                            url="Testing URL",
+#                            summary="Testing summary",
+#                            main_keyword="News Bot Testing",
+#                            images_list=[]
+#                            )
         
 # send_NEWS_message_to_slack(channel_id="C05RK7CCDEK",
 #                             title="Just how bullish is the Bitcoin halving for BTC price? Experts debate",

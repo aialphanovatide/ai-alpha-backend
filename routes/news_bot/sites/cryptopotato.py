@@ -1,40 +1,43 @@
+from bs4 import BeautifulSoup
+import requests
+from datetime import datetime, timedelta
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
 from models.news_bot.articles_model import ANALIZED_ARTICLE
-from datetime import datetime
-from bs4 import BeautifulSoup
 from config import session
-import requests
-import re
 
-def validate_date_coingape(html):
+def validate_date_cryptopotato(html):
     try:
-        date_div = html.find('div', class_='publishby d-flex')
-        if date_div:
-            date_text = date_div.text.lower()
-            if "mins ago" in date_text or "hours ago" in date_text:
-                return date_text.strip()
+        # Find the span with class "last-modified-timestamp"
+        date_span = html.find('span', class_='last-modified-timestamp')
+        
+        if date_span:
+            # Extract the date string from the span
+            date_text = date_span.get_text(strip=True)
+            
+            # Convert the date string to datetime
+            article_date = datetime.strptime(date_text, '%b %d, %Y @ %H:%M')
+            
+            # Check if the date is within the last 24 hours
+            current_time = datetime.now()
+            time_difference = current_time - article_date
+            if time_difference <= timedelta(hours=24):
+                return article_date
+    except Exception as e:
+        print("Error in CryptoPotato:", str(e))
+    return False
+
+def extract_image_url_cryptopotato(html):
+    try:
+        image = html.find('img', class_='wp-post-image')
+        if image:
+            src = image.get('src') or image.get('data-src')
+            if src:
+                return src
+    except Exception as e:
+        print("Error in CryptoPotato:", str(e))
         return False
-    except Exception as e:
-        print("Error processing the date in coingape > ", str(e))
-        return None
 
-def extract_image_urls(soup):
-    try:
-        image_urls = []
-        img_elements = soup.find_all('img')
-        for img in img_elements:
-            src = img.get('src')
-
-            if src and src.startswith('https://coingape.com/wp-content/uploads/'):
-                image_urls.append(src)
-
-        return image_urls
-    except Exception as e:
-        print("Error finding Images in coingape" , str(e))
-        return None
-
-# Function to validate the article using keywords
-def validate_coingape_article(article_link, main_keyword):
+def validate_cryptopotato_article(article_link, main_keyword):
     normalized_article_url = article_link.strip().casefold()
 
     try:
@@ -58,12 +61,11 @@ def validate_coingape_article(article_link, main_keyword):
             title_element = article_soup.find('h1')
             title = title_element.text.strip() if title_element else None
 
-
-            # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
             if is_url_analized:
                 is_url_analized.is_analized = True
                 session.commit()
+
 
             try:
                 if title and content:
@@ -75,8 +77,8 @@ def validate_coingape_article(article_link, main_keyword):
 
                     # if the all conditions passed then go on
                     if not is_title_in_blacklist and is_valid_content and not is_url_in_db and not is_title_in_db:
-                        valid_date = validate_date_coingape(article_soup)
-                        image_urls = extract_image_urls(article_soup)
+                        valid_date = validate_date_cryptopotato(article_soup)
+                        image_urls = extract_image_url_cryptopotato(article_soup)
                        
                         if valid_date:
                             return title, content, valid_date, image_urls
@@ -84,10 +86,11 @@ def validate_coingape_article(article_link, main_keyword):
                 return None, None, None, None
                         
             except Exception as e:
-                print("Inner Error in Coindesk" + str(e))
+                print("Inner Error in Cryptopotato" + str(e))
                 return None, None, None, None
 
     except Exception as e:
-        print(f"Error in Coindesk" + str(e))
+        print(f"Error in Cryptopotato" + str(e))
         return None, None, None, None
       
+

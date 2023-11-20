@@ -2,7 +2,7 @@ from models.news_bot.news_bot_model import SCRAPPING_DATA, BLACKLIST
 from models.news_bot.articles_model import ARTICLE
 from difflib import SequenceMatcher
 from config import session
-import ahocorasick 
+import ahocorasick
 
 def title_in_db(input_title): # true if title already in db
     try:
@@ -20,8 +20,11 @@ def title_in_db(input_title): # true if title already in db
 
 def url_in_db(input_url): # true if url already in db
     try:
+
+        url = input_url.casefold().strip()
+        
         # Check if the URL already exists in the database (case-insensitive)
-        existing_url = session.query(ARTICLE).filter(ARTICLE.url.ilike(input_url)).first()
+        existing_url = session.query(ARTICLE).filter(ARTICLE.url.ilike(url)).first()
 
         if existing_url:
             return True
