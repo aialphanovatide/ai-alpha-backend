@@ -1,40 +1,47 @@
+from bs4 import BeautifulSoup
+import requests
+from datetime import datetime, timedelta
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
 from models.news_bot.articles_model import ANALIZED_ARTICLE
-from datetime import datetime
-from bs4 import BeautifulSoup
 from config import session
-import requests
-import re
 
-def validate_date_coingape(html):
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+
+def validate_date_cryptodaily(html):
     try:
-        date_div = html.find('div', class_='publishby d-flex')
-        if date_div:
-            date_text = date_div.text.lower()
-            if "mins ago" in date_text or "hours ago" in date_text:
-                return date_text.strip()
+        date_element = html.find('div', class_='date-count')
+        if date_element:
+            # Buscar todas las etiquetas <b> dentro del div con clase "date-count"
+            b_elements = date_element.find_all('b')
+
+            # Obtener el contenido de las etiquetas <b>
+            b_contents = [b.get_text(separator=' ', strip=True) for b in b_elements]
+
+            if any(keyword in content.lower() for keyword in ["hour ago", "hours ago", "minutes ago"] for content in b_contents):
+                return b_contents
+
+            return False
+        
+    except Exception as e:
+        print("Error in CryptoDaily:", str(e))
         return False
-    except Exception as e:
-        print("Error processing the date in coingape > ", str(e))
-        return None
 
-def extract_image_urls(soup):
+
+
+def extract_image_url_cryptodaily(html):
     try:
-        image_urls = []
-        img_elements = soup.find_all('img')
-        for img in img_elements:
-            src = img.get('src')
-
-            if src and src.startswith('https://coingape.com/wp-content/uploads/'):
-                image_urls.append(src)
-
-        return image_urls
+        image = html.find('img', class_='img-fluid post-image')
+        if image:
+            src = image.get('data-src') or image.get('src')
+            if src:
+                return src
     except Exception as e:
-        print("Error finding Images in coingape" , str(e))
+        print("Error in CryptoDaily:", str(e))
         return None
 
-# Function to validate the article using keywords
-def validate_coingape_article(article_link, main_keyword):
+def validate_cryptodaily_article(article_link, main_keyword):
+
     normalized_article_url = article_link.strip().casefold()
 
     try:
@@ -47,7 +54,7 @@ def validate_coingape_article(article_link, main_keyword):
 
         if article_response.status_code == 200 and 'text/html' in article_content_type:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
-
+            
             #Firstly extract the title and content
 
             content = ""
@@ -58,12 +65,11 @@ def validate_coingape_article(article_link, main_keyword):
             title_element = article_soup.find('h1')
             title = title_element.text.strip() if title_element else None
 
-
-            # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
             if is_url_analized:
                 is_url_analized.is_analized = True
                 session.commit()
+
 
             try:
                 if title and content:
@@ -75,8 +81,8 @@ def validate_coingape_article(article_link, main_keyword):
 
                     # if the all conditions passed then go on
                     if not is_title_in_blacklist and is_valid_content and not is_url_in_db and not is_title_in_db:
-                        valid_date = validate_date_coingape(article_soup)
-                        image_urls = extract_image_urls(article_soup)
+                        valid_date = validate_date_cryptodaily(article_soup)
+                        image_urls = extract_image_url_cryptodaily(article_soup)
                        
                         if valid_date:
                             return title, content, valid_date, image_urls
@@ -84,10 +90,11 @@ def validate_coingape_article(article_link, main_keyword):
                 return None, None, None, None
                         
             except Exception as e:
-                print("Inner Error in Coindesk" + str(e))
+                print("Inner Error in Cryptodaily" + str(e))
                 return None, None, None, None
 
     except Exception as e:
-        print(f"Error in Coindesk" + str(e))
+        print(f"Error in Cryptodaily" + str(e))
         return None, None, None, None
       
+

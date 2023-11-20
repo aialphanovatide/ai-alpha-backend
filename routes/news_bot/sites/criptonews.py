@@ -1,57 +1,47 @@
-import re
 import requests
-from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+from dateutil.parser import parse
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
 from models.news_bot.articles_model import ANALIZED_ARTICLE
 from config import session
 
 
-def validate_date_cointelegraph(date):
+def validate_date_cryptonews(date_text):
     try:
+        article_date = parse(date_text, fuzzy_with_tokens=True)
         current_date = datetime.now()
-        valid_date = None
+        time_difference = current_date - article_date[0]
 
-        # Utiliza una expresión regular para extraer la fecha en formato año-mes-día
-        date_pattern = r'(\d{4}-\d{2}-\d{2})'
-        match = re.search(date_pattern, date)
-
-        if match:
-            article_date = datetime.strptime(match.group(1), '%Y-%m-%d')
-            time_difference = current_date - article_date
-            if timedelta(days=1) > time_difference:
-                valid_date = date
-        return valid_date
+        if time_difference <= timedelta(hours=24):
+            return article_date[0].strftime('%Y-%m-%d %H:%M:%S')
     except Exception as e:
-        print("Error in Cointelegraph:", str(e))
-        return None
+        print(f"Error in cryptonews: {str(e)}")
+    return None
 
-        
-
-def extract_image_urls(html):
+def extract_image_urls_cryptonews(html):
     try:
         image_urls = []
+        base_url = "https://cnews24.ru/uploads/"
+
         soup = BeautifulSoup(html, 'html.parser')
-        img_elements = soup.find_all('img')
+        image_divs = soup.find_all('div', class_='detail-image-wrap')
 
-        for img in img_elements:
-            srcset = img.get('srcset')
-            src = img.get('src')
-
-            if srcset:
-                srcset_parts = srcset.split(',')
-                largest_img_url = srcset_parts[-1].strip().split(' ')[-1]
-                image_urls.append(largest_img_url)
-            elif src and not src.startswith('data:'):
-                image_urls.append(src)
-            return image_urls
+        for div in image_divs:
+            style = div.get('style')
+            if style:
+                url_start = style.find('(') + 1
+                url_end = style.find(')')
+                image_url = style[url_start:url_end]
+                if image_url.startswith(base_url):
+                    image_urls.append(image_url)
+        return image_urls
     except Exception as e:
-        print("Error in Cointelegraph:", str(e))
+        print(f"Error in cryptonews: {str(e)}")
         return None
-
-    
-
-def validate_cointelegraph_article(article_link, main_keyword):
+        
+        
+def validate_cryptonews_article(article_link, main_keyword):
 
     try:
 
@@ -94,15 +84,14 @@ def validate_cointelegraph_article(article_link, main_keyword):
 
                 date_time_element = article_soup.find('time')
                 date = date_time_element['datetime'].strip() if date_time_element and 'datetime' in date_time_element.attrs else None
-                valid_date = validate_date_cointelegraph(date)
+                valid_date = validate_date_cryptonews(date)
 
-                image_urls = extract_image_urls(article_response.text)
+                image_urls = extract_image_urls_cryptonews(article_response.text)
 
                 if  content_validation and valid_date and title:
                     return title, content, valid_date, image_urls
                 else:
                     return None, None, None, None
     except Exception as e:
-        print("Error in Cointelegraph:", str(e))
+        print("Error in Cryptonews:", str(e))
         return None, None, None, None
-

@@ -1,55 +1,61 @@
 import requests
 from config import session
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.news_bot.articles_model import ANALIZED_ARTICLE
-from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from routes.news_bot.validations import validate_content, title_in_blacklist, title_in_db, url_in_db
 
-
-
-def validate_date_theblock(html):
-
+def validate_date_ambcrypto(date_text):
     try:
-        date_div = html.find('div', class_='timestamp tbcoTimestamp')
-
-        if date_div:
-            date_text = date_div.get_text().strip()
-            date = date_text.split('• ')[1]
-            datex = date.replace(',', '').split(' ')
-            if datex:
-                final_date_to_validate_str = f"{datex[1]} {datex[0]} {datex[2]}"
-
-                final_date_to_validate = datetime.strptime(final_date_to_validate_str, '%d %B %Y')
-                formatted_date = final_date_to_validate.strftime('%B %d %Y')
-           
-                current_date = datetime.now().strftime('%B %d %Y')
-                if formatted_date == current_date:
-                    return final_date_to_validate
-        return None
-    
+        date = datetime.strptime(date_text, '%B %d, %Y')
+  
+        if (datetime.now() - date) < timedelta(days=1):
+            return date.strftime('%Y-%m-%d')
+        else:
+            return None
+        
     except Exception as e:
-        print("Error proccessing date in TheBlock", str(e))
+        print("Error proccessing date in Ambcrypto" + str(e))
         return None
 
-
-def extract_image_urls_theblock(html):
+def extract_image_urls_ambcrypto(soup):
 
     try:
         image_urls = []
-        img_elements = html.find_all('img')
+        base_url = "https://statics.ambcrypto.com/wp-content/"
+
+        img_elements = soup.find_all('img')
+
         for img in img_elements:
             src = img.get('src')
-            if src:
+
+            if src and src.startswith(base_url):
                 image_urls.append(src)
-      
         return image_urls
     
     except Exception as e:
-        print("Error extracting images in Theblock", str(e))
+        print('Error proccessing the images in Ambcrypto' + str(e))
         return []
 
+def extract_article_content_ambcrypto(html):
 
-def validate_theblock_article(article_link, main_keyword):
+    try:
+        title_element = html.find('h1')
+        title = title_element.text.strip() if title_element else None
+
+        content = ""
+        content_paragraphs = html.find_all('p')
+
+        for paragraph in content_paragraphs:
+            content += paragraph.text.strip()
+
+        return title, content
+
+    except Exception as e:
+        print('Error proccessing title and content in Ambcrypto', str(e))
+        return None, None
+
+def validate_ambcrypto_article(article_link, main_keyword):
 
     normalized_article_url = article_link.strip().casefold()
 
@@ -64,14 +70,7 @@ def validate_theblock_article(article_link, main_keyword):
         if article_response.status_code == 200 and 'text/html' in article_content_type:
             html = BeautifulSoup(article_response.text, 'html.parser')
 
-            title_element = html.find('h1')
-            title = title_element.text.strip() if title_element else None
-
-            content = ""
-            a_elements = html.find_all("p")
-            for a in a_elements:
-                content += a.text.strip()
-
+            title, content = extract_article_content_ambcrypto(html)
             
             # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
@@ -81,7 +80,7 @@ def validate_theblock_article(article_link, main_keyword):
                 session.commit()
 
             try:
-                if  title and content:
+                if title and content:
                     is_title_in_blacklist = title_in_blacklist(title)
                     is_valid_content = validate_content(main_keyword, content)
                     is_url_in_db = url_in_db(normalized_article_url)
@@ -89,26 +88,27 @@ def validate_theblock_article(article_link, main_keyword):
 
                     # if the all conditions passed then go on
                     if not is_title_in_blacklist and is_valid_content and not is_url_in_db and not is_title_in_db:
+
+                        date_element = html.find('time')
+                        date_text = date_element.text.strip() if date_element else None
+                        valid_date = validate_date_ambcrypto(date_text)
+
+                        image_urls = extract_image_urls_ambcrypto(html)
                     
-                        valid_date = validate_date_theblock(html)
-                        image_urls = extract_image_urls_theblock(html)
-            
                         if valid_date:
                             return title, content, valid_date, image_urls
-                        
-                return None, None, None, None
-                        
+                            
+                    return None, None, None, None
+                            
             except Exception as e:
-                print("Inner Error in Theblock" + str(e))
+                print("Inner Error in Ambcrypto" + str(e))
                 return None, None, None, None
 
     except Exception as e:
-        print(f"Error in Theblock" + str(e))
+        print(f"Error in Ambcrypto" + str(e))
         return None, None, None, None
-            
 
-
-# result_title, result_content, result_valid_date, result_image_urls = validate_theblock_article('https://www.theblock.co/post/263127/bitcoin-etp-exposure-hits-all-time-highs-approval-window-spot-etfs-nears-end', 'bitcoin')
+# result_title, result_content, result_valid_date, result_image_urls = validate_ambcrypto_article('https://ambcrypto.com/blockchain-association-opposes-proposed-irs-tax-rules/', 'bitcoin')
 
 # if result_title:
 #     print('Article passed the verifications > ', result_title)

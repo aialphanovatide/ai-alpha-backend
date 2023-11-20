@@ -86,11 +86,11 @@ def send_signal_strategy_to_slack(data, accuracy, position, formatted_entry_rang
     try:
         response = requests.post(SLACK_PRODUCT_ALERTS, json=payload)
         if response.status_code == 200:
-            print('Alert message sent to Slack successfully')
-            return 'Alert message sent to Slack successfully', 200
+            print('Signal message sent to Slack successfully')
+            return 'Signal message sent to Slack successfully', 200
         else:
-            print(f'Error while sending alert message to Slack {response.content}')
-            return 'Error while sending alert message to Slack', 500 
+            print(f'Error while sending Signal message to Slack {response.content}')
+            return 'Error while sending Signal message to Slack', 500 
     except Exception as e:
         print(f'Error sending message to Slack channel. Reason: {e}')
         return f'Error sending message to Slack channel. Reason: {e}', 500

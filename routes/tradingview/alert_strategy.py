@@ -33,13 +33,8 @@ def formatted_alert_name(input_string):
     return time_frame, alert_message
 
 
-def send_alert_strategy_to_slack(price, alert_name, symbol):
+def send_alert_strategy_to_slack(price, alert_name, message):
 
-    formatted_symbol = str(symbol).upper()
-    time_frame, alert_message = formatted_alert_name(alert_name) 
-    formatted_price = str(price)
-
-    new_alert_name = formatted_symbol + " - " + time_frame
 
     payload = {
                     "blocks": [
@@ -55,7 +50,7 @@ def send_alert_strategy_to_slack(price, alert_name, symbol):
                             "fields": [
                                 {
                                     "type": "mrkdwn",
-                                    "text": f"*{new_alert_name}*\n\n{alert_message}\n*Last Price:* {formatted_price}"
+                                    "text": f"*{alert_name}*\n\n{message}\n*Last Price:* ${price}"
                                 }
                             ]
                         },
@@ -71,38 +66,42 @@ def send_alert_strategy_to_slack(price, alert_name, symbol):
     try:
         response = requests.post(SLACK_PRODUCT_ALERTS, json=payload)
         if response.status_code == 200:
-            print('Alert message sent to Slack successfully')
-            return 'Alert message sent to Slack successfully', 200
+            print('Alert message from Tradingview sent to Slack successfully')
+            return 'Alert message from Tradingview sent to Slack successfully', 200
         else:
-            print(f'Error while sending alert message to Slack {response.content}')
-            return 'Error while sending alert message to Slack', 500 
+            print(f'Error while sending alert message from Tradingview to Slack {response.content}')
+            return 'Error while sending alert message from Tradingview to Slack', 500 
     except Exception as e:
-        print(f'Error sending message to Slack channel. Reason: {e}')
-        return f'Error sending message to Slack channel. Reason: {e}', 500
+        print(f'Error sending message from Tradingview to Slack channel. Reason: {e}')
+        return f'Error sending message from Tradingview to Slack channel. Reason: {e}', 500
     
 
-def send_alert_strategy_to_telegram(price, alert_name, symbol):
+def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
+    alert_message = str(message).capitalize()
     formatted_symbol = str(symbol).upper()
-    time_frame, alert_message = formatted_alert_name(alert_name) 
+    alert_Name = str(alert_name).upper()
     formatted_price = str(price)
-
-    new_alert_name = formatted_symbol + " - " + time_frame
-
-    # send_alert_strategy_to_slack(price=price,
-    #                             alert_name=alert_name,
-    #                             symbol=symbol)
-
-
-    content = f"""<b>{new_alert_name}</b>\n\n<b>{alert_message}</b>\nLast Price: <b>{formatted_price}</b>\n"""
-
-    symbol = "BINANCE:^" + formatted_symbol # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
   
-    chart = generate_alert_chart(symbol, formatted_price)
+    send_alert_strategy_to_slack(price=formatted_price,
+                                alert_name=alert_Name,
+                                message=alert_message)
 
-    files = {
-    'photo': ('chart.png', chart, 'image/png')
-    }
+
+
+    content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
+   
+    # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
+    symbol_value = "BINANCE:^" + formatted_symbol 
+  
+    # chart = generate_alert_chart(symbol_value, formatted_price)
+
+    # files = None
+
+    # if chart:
+    #     files = {
+    #     'photo': ('chart.png', chart, 'image/png')
+    #     }
 
     # photo_payload = {'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
     #                 'caption': content,
@@ -117,21 +116,23 @@ def send_alert_strategy_to_telegram(price, alert_name, symbol):
             }
     
     try:
+       
+        response = requests.post(telegram_text_url, data=text_payload)
 
-        new_alert = ALERT(alert_name=new_alert_name,
+        if response.status_code == 200:
+            
+            new_alert = ALERT(alert_name=alert_Name,
                         alert_message = alert_message,
                         symbol=formatted_symbol,
                         price=formatted_price
                         )
 
-        session.add(new_alert)
-        session.commit()
-        response = requests.post(telegram_text_url, data=text_payload)
+            session.add(new_alert)
+            session.commit()
         
-        if response.status_code == 200:
-            return 'Alert message sent to Telegram successfully', 200
+            return 'Alert message sent from Tradingview to Telegram successfully', 200
         else:
-            return f'Error while sending alert to Telegram {str(response.content)}', 500 
+            return f'Error while sending message from Tradingview to Telegram {str(response.content)}', 500 
     except Exception as e:
-        return f'Error sending message to Telegram. Reason: {e}', 500
+        return f'Error sending message from Tradingview to Telegram. Reason: {e}', 500
     
