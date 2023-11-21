@@ -67,7 +67,9 @@ def validate_ambcrypto_article(article_link, main_keyword):
         article_response = requests.get(normalized_article_url, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
-        if article_response.status_code == 200 and 'text/html' in article_content_type:
+        if not 'text/html' in article_content_type or article_response.status_code != 200:
+            return None, None, None, None
+        else:
             html = BeautifulSoup(article_response.text, 'html.parser')
 
             title, content = extract_article_content_ambcrypto(html)
