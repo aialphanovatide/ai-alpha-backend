@@ -66,14 +66,14 @@ def send_alert_strategy_to_slack(price, alert_name, message):
     try:
         response = requests.post(SLACK_PRODUCT_ALERTS, json=payload)
         if response.status_code == 200:
-            print('Alert message sent to Slack successfully')
-            return 'Alert message sent to Slack successfully', 200
+            print('Alert message from Tradingview sent to Slack successfully')
+            return 'Alert message from Tradingview sent to Slack successfully', 200
         else:
-            print(f'Error while sending alert message to Slack {response.content}')
-            return 'Error while sending alert message to Slack', 500 
+            print(f'Error while sending alert message from Tradingview to Slack {response.content}')
+            return 'Error while sending alert message from Tradingview to Slack', 500 
     except Exception as e:
-        print(f'Error sending message to Slack channel. Reason: {e}')
-        return f'Error sending message to Slack channel. Reason: {e}', 500
+        print(f'Error sending message from Tradingview to Slack channel. Reason: {e}')
+        return f'Error sending message from Tradingview to Slack channel. Reason: {e}', 500
     
 
 def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
@@ -82,10 +82,11 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
     formatted_symbol = str(symbol).upper()
     alert_Name = str(alert_name).upper()
     formatted_price = str(price)
-
+  
     send_alert_strategy_to_slack(price=formatted_price,
                                 alert_name=alert_Name,
                                 message=alert_message)
+
 
 
     content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
@@ -115,9 +116,11 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
             }
     
     try:
+       
         response = requests.post(telegram_text_url, data=text_payload)
 
-        if response == 200:
+        if response.status_code == 200:
+            
             new_alert = ALERT(alert_name=alert_Name,
                         alert_message = alert_message,
                         symbol=formatted_symbol,
@@ -126,10 +129,10 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
             session.add(new_alert)
             session.commit()
-
-            return 'Alert message sent to Telegram successfully', 200
+        
+            return 'Alert message sent from Tradingview to Telegram successfully', 200
         else:
-            return f'Error while sending alert to Telegram {str(response.content)}', 500 
+            return f'Error while sending message from Tradingview to Telegram {str(response.content)}', 500 
     except Exception as e:
-        return f'Error sending message to Telegram. Reason: {e}', 500
+        return f'Error sending message from Tradingview to Telegram. Reason: {e}', 500
     
