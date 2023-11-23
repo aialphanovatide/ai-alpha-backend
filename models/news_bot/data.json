@@ -7196,7 +7196,7 @@
         "base_url": "https://www.theblock.co",
         "website_name": "Theblock",
         "is_URL_complete": false,
-        "main_container":".collectionFeed"
+        "main_container":"None"
       },
       {
         "site": "https://dailyhodl.com/?s=matic+polygon",
@@ -7217,14 +7217,14 @@
         "base_url": "https://www.investing.com",
         "website_name": "Investing",
         "is_URL_complete": false,
-        "main_container":"largeTitle"
+        "main_container":"None"
       },
       {
         "site": "https://www.investing.com/search/?q=arb%20op",
         "base_url": "https://www.investing.com",
         "website_name": "Investing",
         "is_URL_complete": false,
-        "main_container":"largeTitle"
+        "main_container":"None"
       },
       {
         "site": "https://u.today/search/node?keys=matic+polygon",
