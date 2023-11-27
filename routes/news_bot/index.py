@@ -182,8 +182,8 @@ def news_bot_commands():
             target = data['target']
 
             if command == 'activate': 
-                res, status = activate_news_bot(target)
-                # res, status = start_periodic_scraping(target)
+                #res, status = activate_news_bot(target)
+                res, status = start_periodic_scraping(target)
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(target)
