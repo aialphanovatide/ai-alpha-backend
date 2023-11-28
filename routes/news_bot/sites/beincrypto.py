@@ -114,10 +114,10 @@ def validate_beincrypto_article(article_link, main_keyword):
         return None, None, None, None
         
 
-result_title, result_content, result_valid_date, result_image_urls = validate_beincrypto_article('https://servedbyadbutler.com/redirect.spark?mid=177750&plid=2144261&setid=609748&channelid=0&cid=786862&banid=521184991&pid=0&textadid=0&tc=1&scheduleid=2067757&adsize=0x0&mt=1700511831918366&sw=1280&sh=720&spr=1&referrer=https%3a%2f%2fbeincrypto.com%2f&hc=1d5c1abe79f03a66926c52de792c314d7f6e9069&location=https://track.youhodler.app/32d78590-62e2-4a0b-b3b4-778ad9160f88?utm_source=bic&utm_medium=fixed&utm_campaign=aff_eng_toppage_youhodler_cloudmining', 'layer 1')
+# result_title, result_content, result_valid_date, result_image_urls = validate_beincrypto_article('https://servedbyadbutler.com/redirect.spark?mid=177750&plid=2144261&setid=609748&channelid=0&cid=786862&banid=521184991&pid=0&textadid=0&tc=1&scheduleid=2067757&adsize=0x0&mt=1700511831918366&sw=1280&sh=720&spr=1&referrer=https%3a%2f%2fbeincrypto.com%2f&hc=1d5c1abe79f03a66926c52de792c314d7f6e9069&location=https://track.youhodler.app/32d78590-62e2-4a0b-b3b4-778ad9160f88?utm_source=bic&utm_medium=fixed&utm_campaign=aff_eng_toppage_youhodler_cloudmining', 'layer 1')
 
-if result_title:
-    print('Article passed the verifications > ', result_title)
-    print('Date: ', result_valid_date)
-else:
-    print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
+# if result_title:
+#     print('Article passed the verifications > ', result_title)
+#     print('Date: ', result_valid_date)
+# else:
+#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
