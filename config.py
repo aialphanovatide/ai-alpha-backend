@@ -11,7 +11,8 @@ import os
 
 load_dotenv()
 
-news_bot_start_time = 50
+news_bot_start_time=40
+
 
 DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
@@ -32,43 +33,48 @@ ALERT_MODEL.metadata.create_all(engine)
 session = Session() 
  
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
+print('ROOT_DIRECTORY :', ROOT_DIRECTORY)
 
 try: 
     # Populates the sites and keyword tables
     if not session.query(SCRAPPING_DATA).first():
 
-        with open(f'{ROOT_DIRECTORY}/models/news_bot/data.json', 'r') as data_file:
+        with open(f'{ROOT_DIRECTORY}/models/news_bot/data.json', 'r', encoding="utf8") as data_file:
             config = json.load(data_file)
 
-        for item in config:   
-            keyword = item['main_keyword']
-            keywords = item['keywords']
-            sites = item['sites']
-            black_list = item['black_list']
+            for item in config:   
+                main_keyword = item['main_keyword']
+                coins = item['coins']
 
-            scrapping_data = SCRAPPING_DATA(main_keyword=keyword.casefold())
+                for coin in coins:
+                    coin_keyword = coin['coin_keyword']
+                    keywords = coin['keywords']
+                    sites = coin['sites']
+                    black_list = coin['black_list']
+                
+                    scrapping_data = SCRAPPING_DATA(main_keyword=coin_keyword.casefold())
 
-            for keyword in keywords:
-                scrapping_data.keywords.append(KEWORDS(keyword=keyword.casefold()))
+                    for keyword in keywords:
+                        scrapping_data.keywords.append(KEWORDS(keyword=keyword.casefold()))
 
-            for word in black_list:
-                scrapping_data.blacklist.append(BLACKLIST(black_Word=word.casefold()))
+                    for word in black_list:
+                        scrapping_data.blacklist.append(BLACKLIST(black_Word=word.casefold()))
 
-            for site_data in sites:
-                site = SITES(
-                    site=str(site_data['site']),
-                    base_url=str(site_data['base_url']).casefold(),
-                    website_name=str(site_data['website_name']).capitalize(),
-                    is_URL_complete=site_data['is_URL_complete'],
-                    main_container=str(site_data['main_container'])
-                )
-                scrapping_data.sites.append(site)
+                    for site_data in sites:
+                        site = SITES(
+                            site=str(site_data['site']),
+                            base_url=str(site_data['base_url']).casefold(),
+                            website_name=str(site_data['website_name']).capitalize(),
+                            is_URL_complete=site_data['is_URL_complete'],
+                            main_container=str(site_data['main_container'])
+                        )
+                        scrapping_data.sites.append(site)
 
-            
-            session.add(scrapping_data)
+                
+                session.add(scrapping_data)
 
-        print('-----Initial site data saved to db-----')
-        session.commit()
+                print('-----Initial site data saved to db-----')
+                session.commit()
 except Exception as e:
     print(f'An error occurred: {str(e)}')
 

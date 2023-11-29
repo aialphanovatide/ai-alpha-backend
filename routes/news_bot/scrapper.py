@@ -297,8 +297,8 @@ def scrape_articles(sites, main_keyword):
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, website_name, image_urls = article_data
 
-                        summary = summary_generator(content, main_keyword)
-                        # summary = True
+                        # summary = summary_generator(content, main_keyword)
+                        summary = True
                         
                         if main_keyword == 'bitcoin':
                             channel_id = btc_slack_channel_id

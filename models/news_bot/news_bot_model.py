@@ -10,7 +10,7 @@ SCRAPPER_MODEL = declarative_base()
 class SCRAPPING_DATA(SCRAPPER_MODEL):
     __tablename__ = 'scrapping_data'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     main_keyword = Column(String)
     keywords = relationship("KEWORDS", cascade="all, delete-orphan")
     sites = relationship("SITES", cascade="all, delete-orphan")
@@ -21,7 +21,7 @@ class SCRAPPING_DATA(SCRAPPER_MODEL):
 class KEWORDS(SCRAPPER_MODEL): 
     __tablename__ = 'keyword'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     keyword_info_id = Column(Integer, ForeignKey('scrapping_data.id'), nullable=False)
     keyword = Column(String)  
     created_at = Column(DateTime, default=datetime.utcnow) 
@@ -29,7 +29,7 @@ class KEWORDS(SCRAPPER_MODEL):
 class BLACKLIST(SCRAPPER_MODEL): 
     __tablename__ = 'blacklist'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     keyword_info_id = Column(Integer, ForeignKey('scrapping_data.id'), nullable=False)
     black_Word = Column(String)  
     created_at = Column(DateTime, default=datetime.utcnow) 
@@ -37,7 +37,7 @@ class BLACKLIST(SCRAPPER_MODEL):
 class SITES(SCRAPPER_MODEL):
     __tablename__ = 'sites'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     keyword_info_id = Column(Integer, ForeignKey('scrapping_data.id'), nullable=False)
     site = Column(String)  
     base_url = Column(String)  
