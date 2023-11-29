@@ -7,7 +7,7 @@ FILES_MODEL = declarative_base()
 class Files(FILES_MODEL):
     __tablename__ = 'files'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     filename = Column(String)
     paragraphs = Column(String) 
     embeddings = Column(LargeBinary)
