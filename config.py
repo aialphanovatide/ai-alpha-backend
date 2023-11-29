@@ -35,13 +35,12 @@ session = Session()
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 print('ROOT_DIRECTORY :', ROOT_DIRECTORY)
 
-try: 
-    # Populates the sites and keyword tables
+try:
+    # Llena las tablas de sitios y palabras clave
     if not session.query(SCRAPPING_DATA).first():
-
         with open(f'{ROOT_DIRECTORY}/models/news_bot/data.json', 'r', encoding="utf8") as data_file:
             config = json.load(data_file)
-
+           
             for item in config:   
                 main_keyword = item['main_keyword']
                 coins = item['coins']
@@ -51,9 +50,10 @@ try:
                     keywords = coin['keywords']
                     sites = coin['sites']
                     black_list = coin['black_list']
+                    
                 
                     scrapping_data = SCRAPPING_DATA(main_keyword=coin_keyword.casefold())
-
+                    
                     for keyword in keywords:
                         scrapping_data.keywords.append(KEWORDS(keyword=keyword.casefold()))
 
@@ -70,11 +70,12 @@ try:
                         )
                         scrapping_data.sites.append(site)
 
-                
-                session.add(scrapping_data)
+                    session.add(scrapping_data)
+                    print('-----Datos iniciales del sitio guardados en la base de datos-----')
+                    session.commit()
 
-                print('-----Initial site data saved to db-----')
-                session.commit()
 except Exception as e:
-    print(f'An error occurred: {str(e)}')
-
+    print(f'Ocurrió un error: {str(e)}')
+    session.rollback()
+finally:
+    session.close()
