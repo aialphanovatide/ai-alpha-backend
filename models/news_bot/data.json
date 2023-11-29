@@ -1312,7 +1312,7 @@
             "base_url": "https://cryptodaily.co.uk",
             "website_name": "Cryptodaily",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -1868,7 +1868,7 @@
             "base_url": "https://cryptodaily.co.uk",
             "website_name": "Cryptodaily",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -2225,7 +2225,7 @@
             "base_url": "https://cryptodaily.co.uk",
             "website_name": "Cryptodaily",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           }
         ],
         "black_list": [
