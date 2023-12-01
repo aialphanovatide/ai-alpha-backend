@@ -735,6 +735,9 @@
           }
         ],
         "black_list": [
+          "Sam Bankman-Fried's Wildest",
+          "Craziest",
+          "Dumbest Trades",
           "Amaka Nwaokocha",
           "Bitcoin Core",
           "Ethereum",
@@ -3094,7 +3097,7 @@
           "Cosmos Cold Storage",
           "Cosmos Multisig",
           "Cosmos Multi-Signature"
-        ],
+       ],
         "sites": [
           {
             "site": "https://cointelegraph.com/search?query=atom",

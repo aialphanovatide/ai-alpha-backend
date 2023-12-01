@@ -18,21 +18,25 @@ from routes.news_bot.sites.bitcoinist import validate_bitcoinist_article
 from routes.news_bot.validations import title_in_blacklist, url_in_db, title_in_db
 from routes.news_bot.sites.coindesk import validate_coindesk_article
 from routes.news_bot.sites.coingape import validate_coingape_article
-from models.news_bot.news_bot_model import SCRAPPING_DATA
 from routes.twitter.index import send_tweets_to_twitter
-from models.news_bot.articles_model import ARTICLE, ANALIZED_ARTICLE
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
-from config import session
+from config import session, CoinBot, AnalyzedArticle, Article, Category
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
-lsd_slack_channel_id = 'C05UNS3M8R3'
 hacks_slack_channel_id = 'C05UU8JBKKN'
-layer_1_slack_channel_id = 'C05URM66B5Z' # For Solana too
+layer_1_lmc_slack_channel_id = 'C05URM66B5Z' 
 layer_0_slack_channel_id = 'C05URM3UY8K' 
-other_altcoins_slack_channel_id = 'C05UU8EKME0' 
-
+layer_2_slack_channel = 'C05UB8G8B0F'
+layer_1_mmc_slack_channel_id = 'C067ZA4GGNM' 
+cross_border_payment_slack_channel = 'C067P4CNC92'
+lsd_slack_channel_id = 'C05UNS3M8R3'
+oracles_slack_channel = 'C0600Q7UPS4'
+defi_slack_channel = 'C067P43P8MA'
+defi_perpetual_slack_channel = 'C05UU8EKME0'
+defi_others_slack_channel = 'C067HNE4V0D'
+ai_slack_channel = 'C067E1LJYKY'
 
 # Note: images_urls sometimes are a list[] and sometimes just return a single string of the a URL.
 
@@ -82,11 +86,11 @@ def get_links(site, main_container):
         print("Error getting links" + str(e)) 
 
 
-def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, main_container):
+def scrape_sites(data_source_url, base_url, site_name, main_keyword, main_container):
 
     article_urls = set()
    
-    elements = get_links(site=site,
+    elements = get_links(site=data_source_url,
               main_container=main_container,
               )
 
@@ -99,62 +103,63 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
 
            
     try:
-        for link in elements:
-            href = link['href']
-            article_title = link['article_title']
-            
-            article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
+        with session:
+            for link in elements:
+                href = link['href']
+                article_title = link['article_title']
+                
+                article_url = base_url + href.strip() if not href.startswith('http') else href.strip()
 
-            if article_url:
+                if article_url:
 
-                # Check if the article is already analized
-                url = article_url.casefold().strip()
-                existing_article = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url==url).first()
+                    # Check if the article is already analized
+                    url = article_url.casefold().strip()
+                    existing_article = session.query(AnalyzedArticle).filter(AnalyzedArticle.url==url).first()
 
-                if not existing_article:
-                    new_article = ANALIZED_ARTICLE(
-                        source=website_name,
-                        url=url,
-                        is_analized=False
-                    )
+                    if not existing_article:
+                        new_article = AnalyzedArticle(
+                            source=site_name,
+                            url=url,
+                            is_analyzed=False
+                        )
 
-                    session.add(new_article)
-                    session.commit() 
-                   
-                    # proceed to make first verification
-                    is_title_in_db = title_in_db(article_title)
-                    is_title_in_blacklist = title_in_blacklist(article_title)
-                    is_url_in_db = url_in_db(url)
-
-                    if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
-
-                        if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
-                            if any(keyword in article_title.lower() for keyword in keywords):
-                                article_urls.add(url)
-                        else:
-                            article_urls.add(url)   
-
-                if existing_article:
-                    is_article_analyzed = existing_article.is_analized
-
-                    if not is_article_analyzed:
-
+                        session.add(new_article)
+                        session.commit() 
+                    
                         # proceed to make first verification
                         is_title_in_db = title_in_db(article_title)
                         is_title_in_blacklist = title_in_blacklist(article_title)
-                        is_url_in_db = url_in_db(article_url)
+                        is_url_in_db = url_in_db(url)
 
                         if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
 
                             if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
                                 if any(keyword in article_title.lower() for keyword in keywords):
-                                    article_urls.add(article_url)
+                                    article_urls.add(url)
                             else:
-                                article_urls.add(article_url)         
-        
-                 
-        
-        return article_urls, website_name
+                                article_urls.add(url)   
+
+                    if existing_article:
+                        is_article_analyzed = existing_article.is_analyzed
+
+                        if not is_article_analyzed:
+
+                            # proceed to make first verification
+                            is_title_in_db = title_in_db(article_title)
+                            is_title_in_blacklist = title_in_blacklist(article_title)
+                            is_url_in_db = url_in_db(article_url)
+
+                            if not is_title_in_blacklist and not is_url_in_db and not is_title_in_db:
+
+                                if main_keyword == 'bitcoin' or main_keyword == 'ethereum':
+                                    if any(keyword in article_title.lower() for keyword in keywords):
+                                        article_urls.add(article_url)
+                                else:
+                                    article_urls.add(article_url)         
+            
+                    
+            
+            return article_urls, site_name
         
     except Exception as e:
         print(f'An error occurred in scrape_sites' + str(e))
@@ -162,22 +167,22 @@ def scrape_sites(site, base_url, website_name, is_URL_complete, main_keyword, ma
                  
 
 
-def scrape_articles(sites, main_keyword):
+def scrape_articles(site, main_keyword):
 
     try:
-        site = sites.site
-        base_url = sites.base_url
-        website_name = sites.website_name
-        is_URL_complete = sites.is_URL_complete
-        main_container = sites.main_container
+        site_name = site.site_name
+        base_url = site.base_url
+        data_source_url = site.data_source_url
+        main_container = site.main_container
 
-        print(f'---Web scrape of {main_keyword} STARTED for {website_name}---')
+        print(f'---Web scrape of {main_keyword} STARTED for {site_name}---')
 
-        article_urls, website_name = scrape_sites(site,base_url,
-                                                   website_name,
-                                                   is_URL_complete,
-                                                   main_keyword,
-                                                   main_container)
+        article_urls, website_name = scrape_sites(data_source_url=data_source_url,
+                                                  base_url=base_url,
+                                                  site_name=site_name,
+                                                  main_container=main_container,
+                                                  main_keyword=main_keyword
+                                                  )
         
 
         
@@ -300,22 +305,46 @@ def scrape_articles(sites, main_keyword):
                         # summary = summary_generator(content, main_keyword)
                         summary = True
                         
-                        if main_keyword == 'bitcoin':
-                            channel_id = btc_slack_channel_id
-                        elif main_keyword == 'ethereum':
-                            channel_id = eth_slack_channel_id
-                        elif main_keyword == 'hacks':
-                            channel_id = hacks_slack_channel_id
-                        elif main_keyword == 'solana':
-                            channel_id = layer_1_slack_channel_id
-                        elif main_keyword == 'layer 0':
-                            channel_id = layer_0_slack_channel_id
-                        elif main_keyword == 'layer 1':
-                            channel_id = layer_1_slack_channel_id
-                        elif main_keyword == 'lsd':
-                            channel_id = lsd_slack_channel_id                                       
-                        else:
-                            channel_id = other_altcoins_slack_channel_id
+                        channel_mapping = {
+                            'btc': btc_slack_channel_id,
+                            'eth': eth_slack_channel_id,
+                            'hacks': hacks_slack_channel_id,
+                            'ldo': lsd_slack_channel_id,
+                            'rpl': lsd_slack_channel_id,
+                            'fxs': lsd_slack_channel_id,
+                            'atom': layer_0_slack_channel_id,
+                            'dot': layer_0_slack_channel_id,
+                            'qnt': layer_0_slack_channel_id,
+                            'ada': layer_1_lmc_slack_channel_id,
+                            'sol': layer_1_lmc_slack_channel_id,
+                            'avax': layer_1_lmc_slack_channel_id,
+                            'near': layer_1_mmc_slack_channel_id,
+                            'ftm': layer_1_mmc_slack_channel_id,
+                            'kas': layer_1_mmc_slack_channel_id,
+                            'matic': layer_2_slack_channel,
+                            'arb': layer_2_slack_channel,
+                            'op': layer_2_slack_channel,
+                            'link': oracles_slack_channel,
+                            'api3': oracles_slack_channel,
+                            'band': oracles_slack_channel,
+                            'xlm': cross_border_payment_slack_channel,
+                            'algo': cross_border_payment_slack_channel,
+                            'xrp': cross_border_payment_slack_channel,
+                            'dydx': defi_perpetual_slack_channel,
+                            'velo': defi_perpetual_slack_channel,
+                            'gmx': defi_perpetual_slack_channel,
+                            'uni': defi_slack_channel,
+                            'sushi': defi_slack_channel,
+                            'cake': defi_slack_channel,
+                            'aave': defi_others_slack_channel,
+                            'pendle': defi_others_slack_channel,
+                            '1inch': defi_others_slack_channel,
+                            'ocean': lsd_slack_channel_id,
+                            'fet': lsd_slack_channel_id,
+                            'rndr': lsd_slack_channel_id,
+                        }
+
+                        channel_id = channel_mapping.get(main_keyword, None)
 
                         if summary:
                             # send_NEWS_message_to_slack(channel_id=channel_id, 
@@ -328,28 +357,28 @@ def scrape_articles(sites, main_keyword):
                             #                     )
 
 
-                            if main_keyword == 'bitcoin':
-                                response, status = send_tweets_to_twitter(content=summary,
-                                                                        title=title)
+                            # if main_keyword == 'bitcoin':
+                            #     response, status = send_tweets_to_twitter(content=summary,
+                            #                                             title=title)
 
-                                if status == 200:
-                                    send_INFO_message_to_slack_channel(channel_id=channel_id,
-                                                                    title_message="New Notification from AI Alpha",
-                                                                    sub_title="Response",
-                                                                    message=response
-                                                                    )
-                            
-                            new_article = ARTICLE(title=title,
-                            content=content,
-                            date=valid_date,
-                            url=article_link,
-                            website_name=website_name
-                            )
+                            #     if status == 200:
+                            #         send_INFO_message_to_slack_channel(channel_id=channel_id,
+                            #                                         title_message="New Notification from AI Alpha",
+                            #                                         sub_title="Response",
+                            #                                         message=response
+                            #                                         )
+                            with  session:
+                                new_article = Article(title=title,
+                                content=summary,
+                                date=valid_date,
+                                url=article_link,
+                                website_name=website_name
+                                )
 
-                            session.add(new_article)
-                            session.commit()
-                            counter_articles_saved +=1
-                            print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
+                                session.add(new_article)
+                                session.commit()
+                                counter_articles_saved +=1
+                                print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {website_name} in {main_keyword}.')
                         else:
                             print('------ THERE IS NO AN AVAILABLE SUMMARY -----')
                             continue
@@ -366,16 +395,16 @@ def scrape_articles(sites, main_keyword):
         return f'--- Error in scrape_articles: {str(e)} ---', 500
     
 
-def start_periodic_scraping(main_keyword):
+def start_periodic_scraping(bot_name):
 
-    scrapping_data_objects = session.query(SCRAPPING_DATA).filter(SCRAPPING_DATA.main_keyword == main_keyword).all()
+    coin_bots = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).all()
+    category_id = coin_bots[0].category_id
+    category = session.query(Category).filter(Category.category_id == category_id).first()
+    category_name = category.category
 
-    if not scrapping_data_objects:
-        print(f'Bot with keyword {main_keyword} was not found')
-        return f'Bot with keyword {main_keyword} was not found'
-    else:
-        sites = scrapping_data_objects[0].sites
+    for coin_bot in coin_bots:
+        sites = coin_bot.sites
         for site in sites:
-            scrape_articles(site, main_keyword)
+            scrape_articles(site, category_name)
 
-        return f'All {str(main_keyword).casefold().capitalize()} sites scraped', 200
+    return f'All {str(category_name).capitalize()} sites scraped', 200  

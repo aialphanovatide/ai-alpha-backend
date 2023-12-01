@@ -7,6 +7,7 @@ from flask import jsonify
 from email.mime.text import MIMEText
 from flask import request, Blueprint
 from email.mime.multipart import MIMEMultipart
+from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHANNEL_ID_AI_ALPHA_LITE = os.getenv('CHANNEL_ID_AI_ALPHA_LITE')
@@ -48,6 +49,10 @@ async def send_email_to_client(link_to_chat, client_email):
 
         server.send_message(message)
         print(f"Invitation link sent successfully to {client_email}")
+        send_notification_to_product_alerts_slack_channel(title_message='Invitation Link to Telegram', 
+                                                          sub_title="Message", 
+                                                          message=f"Invitation link sent successfully to {client_email}")
+
         return f"Invitation link sent successfully to {client_email}"
 
     except smtplib.SMTPAuthenticationError:
