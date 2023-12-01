@@ -1,5 +1,5 @@
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
-from models.news_bot.articles_model import ANALIZED_ARTICLE
+from config import AnalyzedArticle as ANALIZED_ARTICLE
 from datetime import datetime
 from bs4 import BeautifulSoup
 from config import session
@@ -64,7 +64,7 @@ def validate_coingape_article(article_link, main_keyword):
             # These three following lines changes the status of the article to ANALIZED.
             is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
             if is_url_analized:
-                is_url_analized.is_analized = True
+                is_url_analized.is_analyzed = True
                 session.commit()
 
             try:
