@@ -42,7 +42,7 @@ def extract_image_url_dailyhodl(html):
         print("Error in DailyHodl:", str(e))
         return False
 
-def validate_dailyhodl_article(article_link, main_keyword):
+def validate_dailyhodl_article(article_link, bot_name):
     
     normalized_article_url = article_link.strip().casefold()
 
@@ -78,7 +78,7 @@ def validate_dailyhodl_article(article_link, main_keyword):
             try:
                 if title and content:
                     is_title_in_blacklist = title_in_blacklist(title)
-                    is_valid_content = validate_content(main_keyword, content)
+                    is_valid_content = validate_content(bot_name, content)
                     is_url_in_db = url_in_db(article_link)
                     is_title_in_db = title_in_db(title)
 
@@ -102,4 +102,8 @@ def validate_dailyhodl_article(article_link, main_keyword):
         return None, None, None, None
       
 
+
+# title, content, valid_date, image_urls = validate_dailyhodl_article(article_link='https://dailyhodl.com/2023/12/01/40000-bitcoin-coming-soon-as-btc-now-giving-few-reasons-to-sell-top-crypto-trader/',
+#                                                                     bot_name='btc'
+#                                                                     )
 
