@@ -57,7 +57,7 @@ class CoinBot(Base):
     __tablename__ = 'coin_bot'
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
     bot_name = Column(String(255))
-    time_interval = Column(Integer, default=40)
+    time_interval = Column(Integer, default=2)
     image = Column(String(255), default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
@@ -120,7 +120,7 @@ class Article(Base):
     article_id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(String(255))
     title = Column(String(255))
-    url = Column(String(255))
+    url = Column(String(255)) 
     summary = Column(String(255))
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 

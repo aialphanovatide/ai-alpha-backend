@@ -91,7 +91,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".posts-listing__list"
+            "main_container": ".tag-page__posts-col"
           },
           {
             "site": "https://beincrypto.com/bitcoin-news",
@@ -115,7 +115,7 @@
             "main_container": ".covergaelist"
           },
           {
-            "site": "https://www.coindesk.com/tag/bitcoin",
+            "site": "https://www.coindesk.com/tag/bitcoin/",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
             "is_URL_complete": false,
@@ -158,6 +158,7 @@
           }
         ],
         "black_list": [
+          "btc",
           "Bitcoin (BTC) Price Index",
           "Bitcoin",
           "Bitcoin Cash Price Index",
@@ -386,7 +387,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".posts-listing__list"
+            "main_container": ".tag-page__posts-col"
           },
           {
             "site": "https://bitcoinist.com/category/ethereum/",
@@ -428,7 +429,7 @@
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".js-view-dom-id-640bbbf70a4eb439d2bcfa00e9e00f2543053e010110abf4ac9719514c23d0d3"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/news/ethereum/",
@@ -2200,7 +2201,7 @@
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=FXS",

@@ -8,7 +8,7 @@ import ahocorasick
 def title_in_db(input_title): # True if Title already in DB  
     try:
         # Open a session
-        with session:
+        # with session:
             # Check if the title already exists in the database (case-insensitive)
             existing_title = session.query(Article).filter(Article.title.ilike(input_title)).first()
 
@@ -20,12 +20,11 @@ def title_in_db(input_title): # True if Title already in DB
     
 def url_in_db(input_url): # True if URL already in DB
     try:
-        url = input_url.casefold().strip()
-
+       
         # Open a session
-        with session:
+        # with session:
             # Check if the URL already exists in the database (case-insensitive)
-            existing_url = session.query(Article).filter(Article.url.ilike(url)).first()
+            existing_url = session.query(Article).filter(Article.url.ilike(input_url.casefold().strip())).first()
 
             return existing_url is not None
 
@@ -33,18 +32,18 @@ def url_in_db(input_url): # True if URL already in DB
         print(f'Error in url_in_db: {str(e)}')
         return False
 
-def validate_content(main_keyword, content):
+def validate_content(bot_name, content):
     try:
         # Open a session
-        with session:
-            scrapping_data_objects = session.query(CoinBot).filter(CoinBot.bot_name == main_keyword.casefold()).all()
+        # with session:
+            coin_name = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
-            if not scrapping_data_objects:
+            if not coin_name:
                 # Handle the case where no matching SCRAPPING_DATA object is found
                 return False
 
-            keywords = scrapping_data_objects[0].keywords
-            keyword_values = {keyword.keyword.casefold() for keyword in keywords}  # Set of case-folded keywords for faster lookup
+            keywords = coin_name.keywords
+            keyword_values = {keyword.word.casefold() for keyword in keywords}  # Set of case-folded keywords for faster lookup
 
             # Build Aho-Corasick automaton
             A = ahocorasick.Automaton()
@@ -68,7 +67,7 @@ def validate_content(main_keyword, content):
 def title_in_blacklist(input_title_formatted): # True if Title in blacklist
     try:
         # Open a session
-        with session:
+        # with session:
             # Query the database for the BLACKLIST objects
             black_list = session.query(Blacklist).all()
             black_list_values = {keyword.word.casefold() for keyword in black_list}  # Set for faster lookup
