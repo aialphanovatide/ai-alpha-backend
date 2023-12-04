@@ -20,7 +20,7 @@ def receive_data_from_tv():
             return 'Invalid request format', 400
         else:
             try:
-                print('Data from Tradingview', request.data)
+                print('Da view', request.data)
                 data_text = request.data.decode('utf-8')  # Decode the bytes to a string
                 data_lines = data_text.split(',')  # Split the text into lines
                

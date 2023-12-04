@@ -10,7 +10,7 @@ ARTICLE_MODEL = declarative_base()
 class ARTICLE(ARTICLE_MODEL):
     __tablename__ = 'article'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String)  
     content = Column(String)   
     date = Column(String)   
@@ -21,7 +21,7 @@ class ARTICLE(ARTICLE_MODEL):
 class IMAGE(ARTICLE_MODEL):
     __tablename__ = 'image'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     article_id = Column(Integer, ForeignKey('article.id'))
     url = Column(String) 
 
@@ -29,7 +29,7 @@ class IMAGE(ARTICLE_MODEL):
 class ANALIZED_ARTICLE(ARTICLE_MODEL):
     __tablename__ = 'is_article_analized'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     source = Column(String) 
     url = Column(String) 
     is_analized = Column(Boolean)
