@@ -18,18 +18,18 @@ def job_executed(event): # for the status 200 of the bot
 def job_error(event): # for the status with an error of the bot
     job_id = str(event.job_id).capitalize()
     message = f'{job_id} has an internal error:\ne{event.retval}'
-    ##send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot has an internal error on the last scrapped', 
-                                                      #sub_title="Response:", 
-                                                      #message=f"{event.retval}")
+    send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot has an internal error on the last scrapped', 
+                                                      sub_title="Response:", 
+                                                      message=f"{event.retval}")
     print(message)
 
 def job_max_instances_reached(event): # for the status with an error of the bot
     job_id = str(event.job_id).capitalize()
     message = f'Maximum number of running instances reached, *Upgrade* the time interval'
     
-    ##send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot - Execution error', 
-                                                      #sub_title="Response", 
-                                                      #message=message)
+    send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot - Execution error', 
+                                                      sub_title="Response", 
+                                                      message=message)
     print(message)
     try:
         target = event.job_id
@@ -49,16 +49,16 @@ def job_max_instances_reached(event): # for the status with an error of the bot
 
             job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=(new_time_interval), id=target, replace_existing=True, args=[main_keyword], max_instances=1)
             if job:
-                ##send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot restarted', 
-                                                                #sub_title="Response:", 
-                                                                #message=f"An interval of *{new_time_interval} Minutes* has been set for scrapping data")
+                send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot restarted', 
+                                                                sub_title="Response:", 
+                                                                message=f"An interval of *{new_time_interval} Minutes* has been set for scrapping data")
                 print(f"""---{job_id} News Bot restarted\n
                         An interval of *{new_time_interval} Minutes* has been set for scrapping data---""")
     except Exception as e:
         print(f'Error while restarting {job_id} News Bot\n{str(e)}')
-        ##send_notification_to_product_alerts_slack_channel(title_message=f'Error while restarting {job_id} News Bot', 
-                                                          #sub_title="Response:", 
-                                                          #message=f"str(e)")
+        send_notification_to_product_alerts_slack_channel(title_message=f'Error while restarting {job_id} News Bot', 
+                                                          sub_title="Response:", 
+                                                          message=f"str(e)")
    
 
    

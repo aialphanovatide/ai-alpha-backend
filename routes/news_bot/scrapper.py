@@ -318,14 +318,14 @@ def scrape_articles(sites, main_keyword):
                             channel_id = other_altcoins_slack_channel_id
 
                         if summary:
-                            # send_NEWS_message_to_slack(channel_id=channel_id, 
-                            #                     title=title,
-                            #                     date_time=valid_date,
-                            #                     url=article_link,
-                            #                     summary=summary,
-                            #                     images_list=image_urls,
-                            #                     main_keyword=main_keyword
-                            #                     )
+                            send_NEWS_message_to_slack(channel_id=channel_id, 
+                                                title=title,
+                                                date_time=valid_date,
+                                                url=article_link,
+                                                summary=summary,
+                                                images_list=image_urls,
+                                                main_keyword=main_keyword
+                                                )
 
 
                             if main_keyword == 'bitcoin':
