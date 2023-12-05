@@ -1,7 +1,6 @@
 from routes.trendspider.create_chart import generate_alert_chart
-from models.alerts.alerts import ALERT
+from config import session, CoinBot, Alert 
 from dotenv import load_dotenv
-from config import session
 import requests
 import os
 
@@ -91,22 +90,6 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
     content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
    
-    # result BINANCE:^BTCUSDT -> return symbol from TS, "BINANCE:^" was added to the result from TV to match the one from TS
-    symbol_value = "BINANCE:^" + formatted_symbol 
-  
-    # chart = generate_alert_chart(symbol_value, formatted_price)
-
-    # files = None
-
-    # if chart:
-    #     files = {
-    #     'photo': ('chart.png', chart, 'image/png')
-    #     }
-
-    # photo_payload = {'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
-    #                 'caption': content,
-    #                 'message_thread_id': CALL_TO_TRADE_TOPIC_ID}
-
 
     text_payload = {
             'text': content,
@@ -120,15 +103,16 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
         response = requests.post(telegram_text_url, data=text_payload)
 
         if response.status_code == 200:
-            
-            new_alert = ALERT(alert_name=alert_Name,
-                        alert_message = alert_message,
-                        symbol=formatted_symbol,
-                        price=formatted_price
-                        )
+            # with session:
+            #     scrapping_data_object = session.query(CoinBot).filter(CoinBot.bot_name == formatted_symbol.casefold()).first()
+            #     new_alert = Alert(alert_name=alert_Name,
+            #                 alert_message = alert_message,
+            #                 symbol=formatted_symbol,
+            #                 price=formatted_price
+            #                 )
 
-            session.add(new_alert)
-            session.commit()
+            #     session.add(new_alert)
+            #     session.commit()
         
             return 'Alert message sent from Tradingview to Telegram successfully', 200
         else:

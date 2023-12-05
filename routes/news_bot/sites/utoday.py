@@ -1,30 +1,23 @@
-import re
 import requests
-from config import session
 from bs4 import BeautifulSoup
 from datetime import datetime
-from models.news_bot.articles_model import ANALIZED_ARTICLE
+from config import AnalyzedArticle as ANALIZED_ARTICLE
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
 
 
 def validate_date_utoday(html):
     try:
-        # Buscar el div con la clase "humble article__short-humble"
         date_div = html.find('div', class_='humble article__short-humble')
 
         if date_div:
-            # Buscar la etiqueta <span> dentro del div
             date_span = date_div.find('span')
 
             if date_span:
-                # Obtener el texto de la etiqueta <span>
                 article_date_str = date_span.get_text(strip=True)
                 article_date = datetime.strptime(article_date_str, '%Y/%m/%d %H:%M').replace(hour=0, minute=0, second=0, microsecond=0)
 
-                # Obtener la fecha actual sin tener en cuenta la hora y los minutos
                 current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-                # Verificar si la fecha del artículo es la misma que la fecha actual
                 if article_date == current_date:
                     return article_date
 
@@ -53,7 +46,7 @@ def extract_image_url_utoday(article_soup):
         return False
 
 
-def validate_utoday_article(article_link, main_keyword):
+def validate_utoday_article(article_link, main_keyword, session_instance):
 
     normalized_article_url = article_link.strip().casefold()
 
@@ -80,18 +73,18 @@ def validate_utoday_article(article_link, main_keyword):
             title_element = article_soup.find('h1')
             title = title_element.text.strip() if title_element else None
 
-            is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+            is_url_analized = session_instance.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
             if is_url_analized:
-                is_url_analized.is_analized = True
-                session.commit()
+                is_url_analized.is_analyzed = True
+                session_instance.commit()
 
 
             try:
                 if title and content:
-                    is_title_in_blacklist = title_in_blacklist(title)
-                    is_valid_content = validate_content(main_keyword, content)
-                    is_url_in_db = url_in_db(article_link)
-                    is_title_in_db = title_in_db(title)
+                    is_title_in_blacklist = title_in_blacklist(title, session_instance)
+                    is_valid_content = validate_content(main_keyword, content, session_instance)
+                    is_url_in_db = url_in_db(normalized_article_url, session_instance)
+                    is_title_in_db = title_in_db(title, session_instance)
 
 
                     # if the all conditions passed then go on
@@ -113,13 +106,3 @@ def validate_utoday_article(article_link, main_keyword):
         return None, None, None, None
       
 
-
-
-
-# result_title, result_content, result_valid_date, result_image_urls = validate_utoday_article('https://u.today/press-releases/sleek-the-web3-social-network-raises-us5m-to-power-the-ownership-economy', 'solana')
-
-# if result_title:
-#     print('Article passed the verifications > ', result_title)
-#     print('Date: ', result_valid_date)
-# else:
-#     print('ARTICLE DID NOT PASSED THE VERIFICATIONS')
