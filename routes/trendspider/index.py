@@ -27,7 +27,7 @@ def get_data_from_trendspider_to_telegram(data):
 @trendspider_notification_bp.route('/webhook', methods=['POST'])
 def receive_data():
         data_length = len(request.data)
-        print('request.data of Trenspider >', request.data)
+        print('Data from Trenspider: ', request.data)
         if data_length > 0:
             if request.is_json:
                 try:
@@ -36,10 +36,10 @@ def receive_data():
                     result, status = get_data_from_trendspider_to_telegram(json_data)
             
                     if status == 200:
-                        return result, 200
+                        return result, status
                     else:
                         send_notification_to_product_alerts_slack_channel(title_message='Message from Trendspider failed', sub_title='Reason', message=str(result))
-                        return result, 500
+                        return result, status
 
                     
                 except Exception as e:
@@ -50,7 +50,7 @@ def receive_data():
                 send_notification_to_product_alerts_slack_channel(title_message='Message from Trendspider failed', sub_title='Reason', message='Malformed body message, please check last notifcation on Trendspider')
                 return "Data received as text/plain", 400
         else:
-            send_notification_to_product_alerts_slack_channel(title_message='Message from Trendspider', sub_title='Info', message='Notification from Trendpider empty')
+            send_notification_to_product_alerts_slack_channel(title_message='Message from Trendspider failed', sub_title='Info', message='Notification from Trendpider empty')
             return "Notification from Trendpider empty", 400
 
 

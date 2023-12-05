@@ -12,15 +12,17 @@ tradingview_notification_bp = Blueprint(
 @tradingview_notification_bp.route('/api/alert/tv', methods=['GET', 'POST'])
 def receive_data_from_tv():
     try:
-        if request.is_json:
-            print('Data AS JSON in Tradingview', request.data)
-            # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
-            #                                                   sub_title='Invalid request format',
-            #                                                   message=str(request.data))
+        if not request.data:
+            return 'No data sent in the request', 400
+        elif request.is_json:
+            print('Message from Tradingview received as JSON', request.data)
+            send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
+                                                              sub_title='Invalid request format',
+                                                              message=str(request.data))
             return 'Invalid request format', 400
         else:
             try:
-                print('Da view', request.data)
+                print('Data from Tradingview', request.data)
                 data_text = request.data.decode('utf-8')  # Decode the bytes to a string
                 data_lines = data_text.split(',')  # Split the text into lines
                
@@ -47,9 +49,9 @@ def receive_data_from_tv():
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
-                # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
-                #                                               sub_title='Reason',
-                #                                               message=str(e))
+                send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview failed',
+                                                              sub_title='Reason',
+                                                              message=str(e))
                 return f'Error sending message to Slack channel. Reason: {e}', 500
     except Exception as e:
         print(f'Error main thread. Reason: {e}')
