@@ -2,7 +2,7 @@ from routes.slack.index import client
 from slack_sdk.errors import SlackApiError
 
 
-def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, images_list, main_keyword):
+def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, images_list, category_name):
 
         blocks=[
             {
@@ -69,18 +69,18 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
         try:
             result = client.chat_postMessage(
                 channel=channel_id,
-                text=f'New Notification from {str(main_keyword).capitalize()} News Bot', 
+                text=f'New Notification from {str(category_name).capitalize()}', 
                 blocks=blocks
             )
          
             response = result['ok']
             if response == True:
-                print(f'Article {title} sent successfully to Slack channel {main_keyword}')
-                return f'Article {title} sent successfully to Slack channel {main_keyword}', 200
+                print(f'Article {title} sent successfully to Slack channel {category_name}')
+                return f'Article {title} sent successfully to Slack channel {category_name}', 200
 
         except SlackApiError as e:
             print(f"Error posting message: {e}")
-            return f'Error sending message to Slack channel {main_keyword}', 500
+            return f'Error sending message to Slack channel {category_name}', 500
         
 # send_NEWS_message_to_slack(channel_id="C05RM0DF8J3",
 #                            title="Testing interactive button",

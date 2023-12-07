@@ -82,9 +82,9 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
     alert_Name = str(alert_name).upper()
     formatted_price = str(price)
   
-    # send_alert_strategy_to_slack(price=formatted_price,
-    #                             alert_name=alert_Name,
-    #                             message=alert_message)
+    send_alert_strategy_to_slack(price=formatted_price,
+                                alert_name=alert_Name,
+                                message=alert_message)
 
 
 
