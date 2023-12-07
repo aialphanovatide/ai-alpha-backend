@@ -6,7 +6,6 @@ from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
 
-
 scrapper_bp = Blueprint(
     'scrapper_bp', __name__,
     template_folder='templates',
