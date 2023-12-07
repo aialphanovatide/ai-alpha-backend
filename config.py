@@ -6,6 +6,7 @@ from pathlib import Path
 import json  
 import os
 
+
 load_dotenv()
 
 DB_PORT = os.getenv('DB_PORT_MAC')
@@ -22,6 +23,17 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
+class Admin(Base):
+    __tablename__ = 'admin'
+    admin_id = Column(Integer, primary_key=True, autoincrement=True)
+    mail = Column(String(255))
+    username = Column(String(255))
+    password = Column(String(255))
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {'admin_id': self.admin_id, 'username': self.username, 'mail': self.mail}
 
 class User(Base):
     __tablename__ = 'user_table'
