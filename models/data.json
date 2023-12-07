@@ -140,7 +140,7 @@
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/news/bitcoin/",
@@ -3189,14 +3189,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=atom",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -3210,7 +3210,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -3785,14 +3785,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=dot",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -3806,7 +3806,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -4457,14 +4457,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=qnt",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -4478,7 +4478,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -5065,14 +5065,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=ada",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -5086,7 +5086,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -5751,14 +5751,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=SOL",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -5772,7 +5772,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -6562,14 +6562,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=avax",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -6583,7 +6583,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -7013,14 +7013,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=near",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -7034,7 +7034,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -7763,14 +7763,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=ftm",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -7784,7 +7784,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -8584,14 +8584,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=kas",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -8605,7 +8605,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -12446,14 +12446,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=xlm",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -12467,7 +12467,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -12931,14 +12931,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=ALGO",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -12952,7 +12952,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -14228,14 +14228,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=dydx",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -14249,7 +14249,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -14766,14 +14766,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=velo",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -14787,7 +14787,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -15514,14 +15514,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=uni",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -15535,7 +15535,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -15970,14 +15970,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=sushi",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -15991,7 +15991,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -16873,14 +16873,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=aave",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -16894,7 +16894,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -17358,14 +17358,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=pendle",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -17379,7 +17379,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -17987,14 +17987,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=OCEAN",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -18008,7 +18008,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -18496,14 +18496,14 @@
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": ".mb-4"
+            "main_container": "None"
           },
           {
             "site": "https://u.today/search/node?keys=fet",
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": ".data-drupal-views-infinite-scroll-content-wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -18517,7 +18517,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": ".posts-items"
+            "main_container": "None"
           }
         ],
         "black_list": [

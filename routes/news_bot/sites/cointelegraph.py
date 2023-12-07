@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
 from config import AnalyzedArticle as ANALIZED_ARTICLE
-from config import session
 
 
 def validate_date_cointelegraph(date):
@@ -51,7 +50,7 @@ def extract_image_urls(html):
 
     
 
-def validate_cointelegraph_article(article_link, main_keyword):
+def validate_cointelegraph_article(article_link, main_keyword, session_instance):
 
     try:
 
@@ -81,17 +80,17 @@ def validate_cointelegraph_article(article_link, main_keyword):
             else:
                 # These three following lines change the status of the article to ANALYZED.
                 normalized_article_url = article_link.strip().casefold()
-                is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+                is_url_analized = session_instance.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
                 if is_url_analized:
                     is_url_analized.is_analyzed = True
-                    session.commit()
+                    session_instance.commit()
 
-                is_title_in_blacklist = title_in_blacklist(title)
-                content_validation = validate_content(main_keyword, content)
-                is_url_in_db = url_in_db(article_link)
-                is_title_in_db = title_in_db(title)
+                is_title_in_blacklist = title_in_blacklist(title, session_instance)
+                is_valid_content = validate_content(main_keyword, content, session_instance)
+                is_url_in_db = url_in_db(normalized_article_url, session_instance)
+                is_title_in_db = title_in_db(title, session_instance)
 
-                if is_title_in_blacklist or not content_validation or is_url_in_db or is_title_in_db:
+                if is_title_in_blacklist or not is_valid_content or is_url_in_db or is_title_in_db:
                     return None, None, None, None
 
                 date_time_element = article_soup.find('time')
@@ -100,7 +99,7 @@ def validate_cointelegraph_article(article_link, main_keyword):
 
                 image_urls = extract_image_urls(article_response.text)
 
-                if  content_validation and valid_date and title:
+                if  is_valid_content and valid_date and title:
                     return title, content, valid_date, image_urls
                 else:
                     return None, None, None, None
