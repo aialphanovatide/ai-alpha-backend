@@ -27,6 +27,8 @@ def activate_news_bot(category_name):
             return f'{category_name.capitalize()} does not match any in the database', 404
         
         time_interval = category.time_interval
+        category.is_active = True
+        session.commit()
             
         job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=1)
         if job:

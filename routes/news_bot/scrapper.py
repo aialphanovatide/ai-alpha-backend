@@ -286,8 +286,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, site_name, image_urls = article_data
 
-                        summary = summary_generator(content, category_name)
-                        # summary = True
+                        # summary = summary_generator(content, category_name)
+                        summary = True
                         
                         channel_mapping = {
                             'btc': btc_slack_channel_id,
@@ -331,26 +331,26 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         channel_id = channel_mapping.get(coin_bot_name, None)
 
                         if summary:
-                            send_NEWS_message_to_slack(channel_id=channel_id, 
-                                                title=title,
-                                                date_time=valid_date,
-                                                url=article_link,
-                                                summary=summary,
-                                                images_list=image_urls,
-                                                category_name=category_name
-                                                )
+                            # send_NEWS_message_to_slack(channel_id=channel_id, 
+                            #                     title=title,
+                            #                     date_time=valid_date,
+                            #                     url=article_link,
+                            #                     summary=summary,
+                            #                     images_list=image_urls,
+                            #                     category_name=category_name
+                            #                     )
 
 
-                            if category_name == 'bitcoin':
-                                response, status = send_tweets_to_twitter(content=summary,
-                                                                        title=title)
+                            # if category_name == 'bitcoin':
+                            #     response, status = send_tweets_to_twitter(content=summary,
+                            #                                             title=title)
 
-                                if status == 200:
-                                    send_INFO_message_to_slack_channel(channel_id=channel_id,
-                                                                    title_message="New Notification from AI Alpha",
-                                                                    sub_title="Response",
-                                                                    message=response
-                                                                    )
+                            #     if status == 200:
+                            #         send_INFO_message_to_slack_channel(channel_id=channel_id,
+                            #                                         title_message="New Notification from AI Alpha",
+                            #                                         sub_title="Response",
+                            #                                         message=response
+                            #                                         )
                            
                             site_source = session.query(Site).filter(Site.site_name == site_name).first()
                             coin_bot_id = site_source.coin_bot_id
