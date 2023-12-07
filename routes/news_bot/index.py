@@ -25,18 +25,16 @@ def activate_news_bot(category_name):
             print(f'{category_name.capitalize()} does not match any in the database')
             return f'{category_name.capitalize()} does not match any in the database', 404
         
-        category_id = category.category_id
-        coin_bots = session.query(CoinBot).filter(CoinBot.category_id == category_id).all()
-
-        for coin_bot in coin_bots:
-            bot_name = coin_bot.bot_name
-            time_interval = coin_bot.time_interval
+        time_interval = category.time_interval
+        category.is_active = True
+        session.commit()
             
-            job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=bot_name, replace_existing=True, args=[bot_name], max_instances=1)
-            if job:
-                message = f'{category_name.capitalize()} News Bot activated successfully'
-                print(message)
-                # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Start', message=f'An interval of *{time_interval} Minutes* has been set for scrapping data')
+        job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=1)
+        if job:
+            print(f'{category_name.capitalize()} activated successfully')
+        
+        message = f'{category_name.capitalize()} activated successfully'
+        # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Message', message=f'An interval of *{time_interval} Minutes* has been set for scrapping data')
         return f'{category_name.capitalize()} News Bot activated', 200
 
     except Exception as e:
@@ -57,25 +55,16 @@ def deactivate_news_bot(category_name):
             print(f'{category_name.capitalize()} does not match any in the database')
             return f'{category_name.capitalize()} does not match any in the database', 404
 
-        category_id = category.category_id
-        coin_bots = session.query(CoinBot).filter(CoinBot.category_id == category_id).all()
+       
+        scheduler.remove_job(category_name)
 
-        for coin_bot in coin_bots:
-          
-            bot_name = coin_bot.bot_name
-            bot = scheduler.get_job(bot_name)
-
-            if bot:
-                scheduler.remove_job(bot.id)
-                message = f'{category_name.capitalize()} News Bot deactivated successfully'
-                print(message)
-                # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Status', message='Inactive')
-
-        return f'{category_name.capitalize()} News Bots deactivated', 200
+        message = f'{category_name.capitalize()} deactivated successfully'
+        # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Status', message='Inactive')
+        return f'{category_name.capitalize()} deactivated', 200
 
     except Exception as e:
-        print(f'Error while deactivating the {category_name.capitalize()} News Bots: {str(e)}')
-        return f'Error while deactivating the {category_name.capitalize()} News Bots', 500
+        print(f'Error while deactivating {category_name.capitalize()}: {str(e)}')
+        return f'Error while deactivating {category_name.capitalize()}: {str(e)}', 500
 
 
 
@@ -86,10 +75,11 @@ def news_bot_commands():
             data = request.json
             command = data['command']
             category = data['category']
+            category = str(category).casefold()
 
             if command == 'activate': 
-                #res, status = activate_news_bot(category)
-                res, status = start_periodic_scraping(bot_name='eth')
+                res, status = activate_news_bot(category)
+                # res, status = start_periodic_scraping(category)
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(category)
