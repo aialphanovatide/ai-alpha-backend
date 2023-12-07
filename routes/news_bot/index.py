@@ -6,7 +6,6 @@ from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
 
-
 scrapper_bp = Blueprint(
     'scrapper_bp', __name__,
     template_folder='templates',
@@ -89,8 +88,8 @@ def news_bot_commands():
             category = data['category']
 
             if command == 'activate': 
-                res, status = activate_news_bot(category)
-                # res, status = start_periodic_scraping(bot_name='eth')
+                #res, status = activate_news_bot(category)
+                res, status = start_periodic_scraping(bot_name='eth')
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(category)
