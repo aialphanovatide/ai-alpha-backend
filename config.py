@@ -9,7 +9,7 @@ import os
 
 load_dotenv()
 
-DB_PORT = os.getenv('DB_PORT')
+DB_PORT = os.getenv('DB_PORT_MAC')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
@@ -38,17 +38,17 @@ class Admin(Base):
 class User(Base):
     __tablename__ = 'user_table'
     user_id = Column(Integer, primary_key=True, autoincrement=True)
-    nickname = Column(String(255))
-    email = Column(String(255))
-    email_verified = Column(String(255))
-    picture = Column(String(255))
+    nickname = Column(String)
+    email = Column(String)
+    email_verified = Column(String)
+    picture = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
 
 class PurchasedPlan(Base):
     __tablename__ = 'purchased_plan'
     product_id = Column(Integer, primary_key=True, autoincrement=True)
-    reference_name = Column(String(255))
+    reference_name = Column(String)
     price = Column(Integer)
     is_subscribed = Column(Boolean)
     user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=False)
@@ -59,8 +59,10 @@ class PurchasedPlan(Base):
 class Category(Base):
     __tablename__ = 'category'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
-    category = Column(String(255))
-    image = Column(String(255), default='No Image')
+    category = Column(String, nullable=False)
+    time_interval = Column(Integer, default=40)
+    is_active = Column(Boolean, default=False)
+    image = Column(String, default='No Image')
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
@@ -68,9 +70,8 @@ class Category(Base):
 class CoinBot(Base):
     __tablename__ = 'coin_bot'
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
-    bot_name = Column(String(255))
-    time_interval = Column(Integer, default=40)
-    image = Column(String(255), default='No Image')
+    bot_name = Column(String)
+    image = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
@@ -87,7 +88,7 @@ class CoinBot(Base):
 class Keyword(Base):
     __tablename__ = 'keyword'
     keyword_id = Column(Integer, primary_key=True, autoincrement=True)
-    word = Column(String(255))
+    word = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
@@ -96,11 +97,11 @@ class Keyword(Base):
 class Site(Base):
     __tablename__ = 'site'
     site_id = Column(Integer, primary_key=True, autoincrement=True)
-    site_name = Column(String(255))
-    base_url = Column(String(255))
-    data_source_url = Column(String(255))
+    site_name = Column(String)
+    base_url = Column(String)
+    data_source_url = Column(String)
     is_URL_complete = Column(Boolean)
-    main_container = Column(String(255))
+    main_container = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
@@ -109,7 +110,7 @@ class Site(Base):
 class Blacklist(Base):
     __tablename__ = 'blacklist'
     blacklist_id = Column(Integer, primary_key=True, autoincrement=True)
-    word = Column(String(255))
+    word = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
@@ -118,9 +119,9 @@ class Blacklist(Base):
 class Alert(Base):
     __tablename__ = 'alert'
     alert_id = Column(Integer, primary_key=True, autoincrement=True)
-    alert_name = Column(String(255))
-    alert_message = Column(String(255))
-    symbol = Column(String(255))
+    alert_name = Column(String)
+    alert_message = Column(String)
+    symbol = Column(String)
     price = Column(Float)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
@@ -130,10 +131,10 @@ class Alert(Base):
 class Article(Base):
     __tablename__ = 'article'
     article_id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(String(255))
-    title = Column(String(255))
-    url = Column(String(255))
-    summary = Column(String(255))
+    date = Column(String)
+    title = Column(String)
+    url = Column(String) 
+    summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
 
@@ -143,7 +144,7 @@ class Article(Base):
 class ArticleImage(Base):
     __tablename__ = 'article_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
-    image = Column(String(255))
+    image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     article_id = Column(Integer, ForeignKey('article.article_id'), nullable=False)
     article = relationship('Article', back_populates='images')
@@ -152,8 +153,8 @@ class ArticleImage(Base):
 class TopStory(Base):
     __tablename__ = 'top_story'
     top_story_id = Column(Integer, primary_key=True, autoincrement=True)
-    story_date = Column(String(255))
-    summary = Column(String(255))
+    story_date = Column(String)
+    summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
 
@@ -163,7 +164,7 @@ class TopStory(Base):
 class TopStoryImage(Base):
     __tablename__ = 'top_story_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
-    image = Column(String(255))
+    image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     top_story_id = Column(Integer, ForeignKey('top_story.top_story_id'))
 
@@ -172,7 +173,7 @@ class TopStoryImage(Base):
 class Analysis(Base):
     __tablename__ = 'analysis'
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
-    analysis = Column(String(255))
+    analysis = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
     
@@ -182,7 +183,7 @@ class Analysis(Base):
 class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
-    image = Column(String(255))
+    image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
 
@@ -191,8 +192,8 @@ class AnalysisImage(Base):
 class AnalyzedArticle(Base):
     __tablename__ = 'analyzed_article'
     article_id = Column(Integer, primary_key=True, autoincrement=True)
-    source = Column(String(255))
-    url = Column(String(255))
+    source = Column(String)
+    url = Column(String)
     is_analyzed = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
@@ -217,7 +218,7 @@ class Chart(Base):
 
 # Export the sql session
 Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session() 
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()

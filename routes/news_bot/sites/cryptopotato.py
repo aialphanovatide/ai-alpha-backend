@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timedelta
 from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
 from config import AnalyzedArticle as ANALIZED_ARTICLE
-from config import session
+
 
 def validate_date_cryptopotato(html):
     try:
@@ -37,7 +37,7 @@ def extract_image_url_cryptopotato(html):
         print("Error in CryptoPotato:", str(e))
         return False
 
-def validate_cryptopotato_article(article_link, main_keyword):
+def validate_cryptopotato_article(article_link, main_keyword, session_instance):
     normalized_article_url = article_link.strip().casefold()
 
     try:
@@ -63,18 +63,18 @@ def validate_cryptopotato_article(article_link, main_keyword):
             title_element = article_soup.find('h1')
             title = title_element.text.strip() if title_element else None
 
-            is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
+            is_url_analized = session_instance.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
             if is_url_analized:
                 is_url_analized.is_analyzed = True
-                session.commit()
+                session_instance.commit()
 
 
             try:
                 if title and content:
-                    is_title_in_blacklist = title_in_blacklist(title)
-                    is_valid_content = validate_content(main_keyword, content)
-                    is_url_in_db = url_in_db(article_link)
-                    is_title_in_db = title_in_db(title)
+                    is_title_in_blacklist = title_in_blacklist(title, session_instance)
+                    is_valid_content = validate_content(main_keyword, content, session_instance)
+                    is_url_in_db = url_in_db(normalized_article_url, session_instance)
+                    is_title_in_db = title_in_db(title, session_instance)
 
 
                     # if the all conditions passed then go on
