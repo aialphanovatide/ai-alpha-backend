@@ -20,7 +20,7 @@ def activate_news_bot(category_name):
             return 'Scheduler not active', 500
         
         category = session.query(Category).filter(Category.category == category_name.casefold()).first()
-
+        
         if not category:
             print(f'{category_name.capitalize()} does not match any in the database')
             return f'{category_name.capitalize()} does not match any in the database', 404
@@ -50,15 +50,17 @@ def deactivate_news_bot(category_name):
             return 'Scheduler not active', 500
 
         category = session.query(Category).filter(Category.category == category_name).first()
-
+        category.is_active = False
+        session.commit()
+        
         if not category:
             print(f'{category_name.capitalize()} does not match any in the database')
             return f'{category_name.capitalize()} does not match any in the database', 404
-
        
         scheduler.remove_job(category_name)
 
         message = f'{category_name.capitalize()} deactivated successfully'
+        print(message)
         # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Status', message='Inactive')
         return f'{category_name.capitalize()} deactivated', 200
 
