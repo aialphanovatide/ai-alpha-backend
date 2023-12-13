@@ -6,10 +6,11 @@ from routes.trendspider.index import trendspider_notification_bp
 from routes.tradingview.index import tradingview_notification_bp
 from routes.news_bot.index import scrapper_bp
 from routes.telegram.index import telegram_bp 
+from routes.slack.slack_actions import slack_events_bp
 from flask_cors import CORS
 from flask import Flask, render_template, session as flask_session
 from flask import request, redirect, url_for
-from config import engine, Session as DBSession  # Cambia el nombre aquí también
+from config import Session as DBSession 
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -24,6 +25,7 @@ app.secret_key = os.urandom(24)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(scrapper_bp)
 app.register_blueprint(send_email_bp)
+app.register_blueprint(slack_events_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(tradingview_notification_bp)
 
@@ -86,12 +88,11 @@ def logout():
     flask_session.pop('user_id', None)
     return redirect(url_for('login'))
 
-# Resto del código ...
 
 if __name__ == '__main__':
     try:
         #send_notification_to_product_alerts_slack_channel(title_message='AI Alpha Server is running', message="Message:", sub_title="All dependencies are working")
-        print('---AI Alpha server is running---') # Once the server is ready. Add a pin message to slack
+        print('---AI Alpha server is running---') 
         app.run(threaded=True, debug=False, port=9000, use_reloader=False) 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
