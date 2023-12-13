@@ -16,9 +16,9 @@ def receive_data_from_tv():
             return 'No data sent in the request', 400
         elif request.is_json:
             print('Message from Tradingview received as JSON', request.data)
-            send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
-                                                              sub_title='Invalid request format',
-                                                              message=str(request.data))
+            # send_notification_to_product_alerts_slack_channel(title_message='Message from Tradingview received as JSON',
+            #                                                   sub_title='Invalid request format',
+            #                                                   message=str(request.data))
             return 'Invalid request format', 400
         else:
             try:

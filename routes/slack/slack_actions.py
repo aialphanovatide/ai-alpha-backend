@@ -4,6 +4,8 @@ from json import JSONDecodeError
 from urllib.parse import unquote
 from dotenv import load_dotenv
 import json
+from sqlalchemy import func
+from config import session, Article, TopStory
 import os
 
 load_dotenv()
@@ -23,6 +25,12 @@ slack_events_bp = Blueprint(
 @slack_events_bp.route("/slack/events", methods=["POST"])
 def slack_events():
     try:
+        # data = request.json
+
+        # if 'challenge' in data:
+        #     challenge = data['challenge']
+        #     return challenge, 200
+
         data = request.get_data().decode('utf-8')  # Decode the bytes to a string
         payload = unquote(data.split('payload=')[1])  # Extract and decode the payload
 
@@ -30,15 +38,22 @@ def slack_events():
         value = payload_dict['actions'][0]['value']
         
         # Decode the URL-encoded value and replace '+' with spaces
-        decoded_value = unquote(value).replace('+', ' ')
+        url = unquote(value).replace('+', ' ').strip()
+        url = url.split('linkToArticle:')[1]
+        
+        article = session.query(Article).filter(func.trim(Article.url) == url.strip()).first()
+        if not article:
+            return 'Article not found', 404
+        
+        if article:
+            new_topstory = TopStory(coin_bot_id=article.coin_bot_id,
+                     summary=article.summary,
+                     story_date=article.date)
+            
+            session.add(new_topstory)
+            session.commit()
 
-        # If you want to split the decoded value into two parts (Testing summary and 11/14/2023)
-        text, date = decoded_value.split(',')
-
-        print('text > ', text)
-        print('date > ', date)
-
-        return 'Message received', 200
+            return 'Message received', 200
 
     except JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
@@ -51,3 +66,7 @@ def slack_events():
     except Exception as e:
         print(f"Unexpected error: {e}")
         return 'Internal Server Error', 500
+
+
+    
+
