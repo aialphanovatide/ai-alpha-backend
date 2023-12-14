@@ -4,6 +4,7 @@ from json import JSONDecodeError
 from urllib.parse import unquote
 from dotenv import load_dotenv
 import json
+from websocket.socket import socketio
 from sqlalchemy import func
 from config import session, Article, TopStory
 import os
@@ -53,6 +54,7 @@ def slack_events():
             session.add(new_topstory)
             session.commit()
 
+            socketio.emit('update_topstory', namespace='/topstory')
             return 'Message received', 200
 
     except JSONDecodeError as e:
