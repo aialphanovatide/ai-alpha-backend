@@ -54,7 +54,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 					"text": "SEND",
 					"emoji": True
 				},
-				"value": f"{summary},{date_time}",
+				"value": f"linkToArticle: {url}",
 				"action_id": "button-action"
 			}
 		    },
