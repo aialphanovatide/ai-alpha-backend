@@ -137,8 +137,61 @@ def get_news_by_bot_name():
 
 
 
-# Gets all the alerts related to a category: ex Layer 0   
-def get_alerts(bot_name):
+# # Gets all the alerts related to a category: ex Layer 0   
+# def get_alerts(bot_name):
+#     try:
+#         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
+
+#         if not coin_bot:
+#             return {'error': f'Bot "{bot_name}" not found'}, 404
+
+#         coin_bot_id = coin_bot.bot_id
+
+#         alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).all()
+
+#         if alerts:
+#             # Convert alerts to a list of dictionaries
+#             alerts_list = []
+
+#             for alert in alerts:
+#                 alert_dict = {
+#                     'alert_id': alert.alert_id,
+#                     'alert_name': alert.alert_name,
+#                     'alert_message': alert.alert_message,
+#                     'symbol': alert.symbol,
+#                     'price': alert.price,
+#                     'coin_bot_id': alert.coin_bot_id,
+#                     'created_at': alert.created_at.isoformat()  # Convert to ISO format
+#                 }
+
+#                 alerts_list.append(alert_dict)
+
+#             return {'alerts': alerts_list}, 200
+#         else:
+#             return {'message': f'No alerts found for {bot_name}'}, 404
+   
+#     except Exception as e:
+#         traceback.print_exc()  # Log the full stack trace
+#         return {'error': f'An error occurred getting the alerts for {bot_name}: {str(e)}'}, 500
+    
+# @scrapper_bp.route('/api/get/alerts', methods=['GET'])
+# def get_alerts_route():
+#     try:
+#         data = request.json
+#         bot_name = data.get('botName')
+
+#         if not bot_name:
+#             return {'error': 'Bot name is required in the request'}, 400
+
+#         result, status_code = get_alerts(bot_name=bot_name)
+
+#         return result, status_code
+#     except Exception as e:
+#         return {'error': f'An error occurred: {str(e)}'}, 500
+    
+from datetime import datetime, timedelta
+
+def get_alerts(bot_name, date_option='today'):
     try:
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
@@ -147,7 +200,28 @@ def get_alerts(bot_name):
 
         coin_bot_id = coin_bot.bot_id
 
-        alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).all()
+        # Determine the date range based on the provided option
+        if date_option == 'today':
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            print('start_date: ', start_date)
+        elif date_option == 'this week':
+            today = datetime.now()
+            start_date = today - timedelta(days=today.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            print('start_date: ', start_date)
+        elif date_option == 'last week':
+            today = datetime.now()
+            start_date = today - timedelta(days=(today.weekday() + 7))
+            print('start_date: ', start_date)
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            start_date = None
+
+        # Filter alerts based on date range
+        if start_date:
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).all()
+        else:
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).all()
 
         if alerts:
             # Convert alerts to a list of dictionaries
@@ -168,26 +242,29 @@ def get_alerts(bot_name):
 
             return {'alerts': alerts_list}, 200
         else:
-            return {'message': f'No alerts found for {bot_name}'}, 404
-   
+            return {'message': f'No alerts found for {bot_name} on {date_option}'}, 404
+
     except Exception as e:
         traceback.print_exc()  # Log the full stack trace
         return {'error': f'An error occurred getting the alerts for {bot_name}: {str(e)}'}, 500
-    
+
+
 @scrapper_bp.route('/api/get/alerts', methods=['GET'])
 def get_alerts_route():
     try:
         data = request.json
         bot_name = data.get('botName')
+        date_option = data.get('dateOption', None)
 
         if not bot_name:
             return {'error': 'Bot name is required in the request'}, 400
 
-        result, status_code = get_alerts(bot_name=bot_name)
+        result, status_code = get_alerts(bot_name=bot_name, date_option=date_option)
 
         return result, status_code
     except Exception as e:
         return {'error': f'An error occurred: {str(e)}'}, 500
+
 
 
 @scrapper_bp.route('/get_categories', methods=['GET'])
