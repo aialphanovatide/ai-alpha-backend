@@ -3,6 +3,8 @@ from config import session, CoinBot, Alert
 from dotenv import load_dotenv
 import requests
 import os
+from websocket.socket import socketio
+
 
 
 load_dotenv()
@@ -122,6 +124,7 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
                     session.add(new_alert)
                     session.commit()
+                    socketio.emit('update_alerts', namespace='/alerts')
             
                 return 'Alert message sent from Tradingview to Telegram successfully', 200
             else:

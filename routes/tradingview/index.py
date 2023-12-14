@@ -1,12 +1,82 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from .alert_strategy import send_alert_strategy_to_slack, send_alert_strategy_to_telegram
 from flask import request, Blueprint
+from config import TopStory, session, CoinBot
+from websocket.socket import socketio
+
 
 tradingview_notification_bp = Blueprint(
     'tradingview_notification_bp', __name__,
     template_folder='templates',
     static_folder='static'
 )
+
+def get_top_stories(bot_name):
+    try:
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
+
+        if not coin_bot:
+            return {'error': f'Bot "{bot_name}" not found'}, 404
+
+        coin_bot_id = coin_bot.bot_id
+
+        
+        top_stories = session.query(TopStory).filter(TopStory.coin_bot_id == coin_bot_id).all()
+
+        # top_stories = (
+        #     session.query(TopStory)
+        #     .options(session.joinedload(TopStory.images))
+        #     .filter(TopStory.coin_bot_id == coin_bot_id)
+        #     .all()
+        # )
+
+        if top_stories:
+            top_stories_list = []
+
+            for top_story in top_stories:
+                top_story_dict = {
+                    'top_story_id': top_story.top_story_id,
+                    'story_date': top_story.story_date,
+                    'summary': top_story.summary,
+                    'created_at': top_story.created_at.isoformat(),  # Convert to ISO format
+                    'coin_bot_id': top_story.coin_bot_id,
+                    'images': []
+                }
+
+                for image in top_story.images:
+                    top_story_dict['images'].append({
+                        'image_id': image.image_id,
+                        'image': image.image,
+                        'created_at': image.created_at.isoformat(),  # Convert to ISO format
+                        'top_story_id': image.top_story_id
+                    })
+
+                top_stories_list.append(top_story_dict)
+
+            return {'top_stories': top_stories_list}, 200
+        else:
+            return {'message': f'No top stories found for {bot_name}'}, 404
+
+    except Exception as e:
+        return {'error': f'An error occurred getting the top stories for {bot_name}: {str(e)}'}, 500
+
+
+@tradingview_notification_bp.route('/api/get/topStotries', methods=['GET'])
+def get_topstories_by_bot_name():
+    try:
+        data = request.json
+        bot_name = data.get('botName')
+
+        if not bot_name:
+            return {'error': 'Bot name is required in the request'}, 400
+
+        result, status_code = get_top_stories(bot_name)
+
+        return result, status_code
+
+    except Exception as e:
+        return {'error': f'An error occurred getting the news: {str(e)}'}, 500
+
 
 
 @tradingview_notification_bp.route('/api/alert/tv', methods=['GET', 'POST'])

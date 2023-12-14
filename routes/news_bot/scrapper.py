@@ -22,6 +22,7 @@ from routes.twitter.index import send_tweets_to_twitter
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
 from sqlalchemy.orm import joinedload
+from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
 from config import Session, CoinBot, AnalyzedArticle, Article, Category, Site
@@ -362,10 +363,10 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             coin_bot_id=coin_bot_id
                             )
 
-                            print('new_article: ', new_article)
-
                             session.add(new_article)
                             session.commit()
+
+                            socketio.emit('update_news', namespace='/news')
                             counter_articles_saved +=1
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
                         else:

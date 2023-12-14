@@ -123,6 +123,7 @@ def get_news_by_bot_name():
             return {'error': 'Bot name is required in the request'}, 400
 
         res, status = get_news(bot_name=bot_name)
+
         return res, status
     except Exception as e:
         traceback.print_exc() 
@@ -175,6 +176,7 @@ def get_alerts_route():
             return {'error': 'Bot name is required in the request'}, 400
 
         result, status_code = get_alerts(bot_name=bot_name)
+
         return result, status_code
     except Exception as e:
         return {'error': f'An error occurred: {str(e)}'}, 500
