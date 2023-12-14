@@ -5,6 +5,7 @@ from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
+from websocket.socket import socketio
 import traceback
 
 scrapper_bp = Blueprint(
@@ -32,6 +33,7 @@ def activate_news_bot(category_name):
             
         job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=1)
         if job:
+            # socketio.emit('update_categories', namespace='/active_category')
             print(f'{category_name.capitalize()} activated successfully')
         
         message = f'{category_name.capitalize()} activated successfully'
@@ -56,8 +58,10 @@ def deactivate_news_bot(category_name):
             print(f'{category_name.capitalize()} does not match any in the database')
             return f'{category_name.capitalize()} does not match any in the database', 404
 
-       
+
         scheduler.remove_job(category_name)
+        category.is_active = False
+        session.commit()
 
         message = f'{category_name.capitalize()} deactivated successfully'
         # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Status', message='Inactive')
@@ -68,6 +72,8 @@ def deactivate_news_bot(category_name):
         return f'Error while deactivating {category_name.capitalize()}: {str(e)}', 500
 
 
+
+# Gets all the news related to a category: ex Layer 0 
 def get_news(bot_name):
     try:
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
@@ -128,7 +134,10 @@ def get_news_by_bot_name():
     except Exception as e:
         traceback.print_exc() 
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
-    
+
+
+
+# Gets all the alerts related to a category: ex Layer 0   
 def get_alerts(bot_name):
     try:
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
@@ -165,7 +174,6 @@ def get_alerts(bot_name):
         traceback.print_exc()  # Log the full stack trace
         return {'error': f'An error occurred getting the alerts for {bot_name}: {str(e)}'}, 500
     
-
 @scrapper_bp.route('/api/get/alerts', methods=['GET'])
 def get_alerts_route():
     try:
@@ -182,7 +190,35 @@ def get_alerts_route():
         return {'error': f'An error occurred: {str(e)}'}, 500
 
 
-# Activates or desactivates a bot by the param target
+@scrapper_bp.route('/get_categories', methods=['GET'])
+def get_categories():
+    try:
+        categories = session.query(Category).filter(Category.category != 'hacks').order_by(Category.category_id).all()
+        category_data = []
+
+        for category in categories:
+            category_data.append({
+                'category_id': category.category_id,
+                'category': category.category,
+                'time_interval': category.time_interval,
+                'is_active': category.is_active,
+                'image': category.image,
+                'created_at': category.created_at.isoformat(),
+                'coin_bots': [{
+                    'bot_id': bot.bot_id,
+                    'bot_name': bot.bot_name,
+                    'image': bot.image,
+                    'created_at': bot.created_at.isoformat()
+                } for bot in category.coin_bot]
+            })
+
+        return {'categories': category_data}, 200
+
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
+# Activates or desactivates a category: ex Layer 0  
 @scrapper_bp.route('/api/news/bot', methods=['POST'])
 def news_bot_commands():
         try:

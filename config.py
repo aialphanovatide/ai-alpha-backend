@@ -223,6 +223,63 @@ session = Session()
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
+# Check if the user with the given email already exists
+existing_user = session.query(User).filter_by(email='testuser@example.com').first()
+
+# Creates the user if not exist
+if existing_user is None:
+    new_user = User(
+        nickname='TestUser',
+        email='testuser@example.com',
+        email_verified=False,
+        picture='https://example.com/testuser.jpg',
+    )
+
+    session.add(new_user)
+    session.commit()
+    print("---TestUser created successfully---")
+
+
+# Creates the suscription plan
+TestUser = session.query(User).filter_by(email='testuser@example.com').first()
+
+if TestUser:
+    # Check if a subscription plan with 'layer 1 lmc' already exists for the user
+    existing_plan1 = session.query(PurchasedPlan).filter_by(
+        user_id=TestUser.user_id, reference_name='layer 1 lmc').first()
+
+    if not existing_plan1:
+        subscription_plan1 = PurchasedPlan(
+            reference_name='layer 1 lmc',
+            price=10,
+            is_subscribed=True,
+            user_id=TestUser.user_id,
+            created_at=datetime.utcnow()
+        )
+        session.add(subscription_plan1)
+
+    # Check if a subscription plan with 'bitcoin' already exists for the user
+    existing_plan2 = session.query(PurchasedPlan).filter_by(
+        user_id=TestUser.user_id, reference_name='bitcoin').first()
+
+    if not existing_plan2:
+        subscription_plan2 = PurchasedPlan(
+            reference_name='bitcoin',
+            price=10,
+            is_subscribed=True,
+            user_id=TestUser.user_id,
+            created_at=datetime.utcnow()
+        )
+        session.add(subscription_plan2)
+
+    session.commit()
+    if not existing_plan1 and not existing_plan2:
+        print(f"---Subscription plans created successfully---")
+else:
+    print("---TestUser not found---")
+
+
+
 with session:
     try:
         if not session.query(Category).first():

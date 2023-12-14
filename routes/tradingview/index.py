@@ -23,13 +23,6 @@ def get_top_stories(bot_name):
         
         top_stories = session.query(TopStory).filter(TopStory.coin_bot_id == coin_bot_id).all()
 
-        # top_stories = (
-        #     session.query(TopStory)
-        #     .options(session.joinedload(TopStory.images))
-        #     .filter(TopStory.coin_bot_id == coin_bot_id)
-        #     .all()
-        # )
-
         if top_stories:
             top_stories_list = []
 
