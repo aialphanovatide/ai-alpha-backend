@@ -3,6 +3,8 @@ from config import session, CoinBot, Alert
 from dotenv import load_dotenv
 import requests
 import os
+from websocket.socket import socketio
+
 
 
 load_dotenv()
@@ -77,46 +79,58 @@ def send_alert_strategy_to_slack(price, alert_name, message):
 
 def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
-    alert_message = str(message).capitalize()
-    formatted_symbol = str(symbol).upper()
-    alert_Name = str(alert_name).upper()
-    formatted_price = str(price)
-  
-    send_alert_strategy_to_slack(price=formatted_price,
-                                alert_name=alert_Name,
-                                message=alert_message)
 
-
-
-    content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
-   
-
-    text_payload = {
-            'text': content,
-            'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
-            'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
-            'protect_content': False,
-            }
-    
     try:
-       
-        response = requests.post(telegram_text_url, data=text_payload)
 
-        if response.status_code == 200:
-            # with session:
-            #     scrapping_data_object = session.query(CoinBot).filter(CoinBot.bot_name == formatted_symbol.casefold()).first()
-            #     new_alert = Alert(alert_name=alert_Name,
-            #                 alert_message = alert_message,
-            #                 symbol=formatted_symbol,
-            #                 price=formatted_price
-            #                 )
+        alert_message = str(message).capitalize()
+        formatted_symbol = str(symbol).casefold()
+        alert_Name = str(alert_name).upper()
+        formatted_price = str(price)
 
-            #     session.add(new_alert)
-            #     session.commit()
+        parts = formatted_symbol.split("usdt")
+        bot_name = parts[0]
+    
+        send_alert_strategy_to_slack(price=formatted_price,
+                                    alert_name=alert_Name,
+                                    message=alert_message)
+
+
+        content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
+    
+
+        text_payload = {
+                'text': content,
+                'chat_id': CHANNEL_ID_AI_ALPHA_FOUNDERS,
+                'message_thread_id': CALL_TO_TRADE_TOPIC_ID,
+                'protect_content': False,
+                }
         
-            return 'Alert message sent from Tradingview to Telegram successfully', 200
-        else:
-            return f'Error while sending message from Tradingview to Telegram {str(response.content)}', 500 
+        try:
+        
+            response = requests.post(telegram_text_url, data=text_payload)
+
+            if response.status_code == 200:
+             
+                with session:
+                    coinBot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name).first()
+                    coin_bot_id = coinBot.bot_id
+                    
+                    new_alert = Alert(alert_name=alert_Name,
+                                    alert_message = alert_message,
+                                    symbol=formatted_symbol,
+                                    price=formatted_price,
+                                    coin_bot_id=coin_bot_id
+                                    )
+
+                    session.add(new_alert)
+                    session.commit()
+                    socketio.emit('update_alerts', namespace='/alerts')
+            
+                return 'Alert message sent from Tradingview to Telegram successfully', 200
+            else:
+                return f'Error while sending message from Tradingview to Telegram {str(response.content)}', 500 
+        except Exception as e:
+            return f'Error sending message from Tradingview to Telegram. Reason: {e}', 500
     except Exception as e:
-        return f'Error sending message from Tradingview to Telegram. Reason: {e}', 500
+        return f'An error occured in send_alert_strategy_to_telegram ' + str(e)
     
