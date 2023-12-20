@@ -2,6 +2,7 @@ from routes.news_bot.validations import validate_content, title_in_blacklist, ur
 from config import AnalyzedArticle as ANALIZED_ARTICLE
 from datetime import datetime
 from bs4 import BeautifulSoup
+from config import session
 import requests
 import re
 
@@ -55,7 +56,7 @@ def extract_image_urls_coindesk(soup):
         return []
 
 
-def validate_coindesk_article(article_link, main_keyword, session_instance):
+def validate_coindesk_article(article_link, main_keyword):
 
     normalized_article_url = article_link.strip().casefold()
 
@@ -67,12 +68,11 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
         article_response = requests.get(normalized_article_url, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
-        if not 'text/html' in article_content_type or article_response.status_code != 200:
-            return None, None, None, None
-        else:
+        if article_response.status_code == 200 and 'text/html' in article_content_type:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
             #Firstly extract the title and content
+
             content = ""
             a_elements = article_soup.find_all("p")
             for a in a_elements:
@@ -82,18 +82,17 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
             title = title_element.text.strip() if title_element else None
 
 
-            is_url_analized = session_instance.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
-
+            is_url_analized = session.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
             if is_url_analized:
-                is_url_analized.is_analyzed = True
-                session_instance.commit()
+                is_url_analized.is_analized = True
+                session.commit()
 
             try:
                 if title and content:
-                    is_title_in_blacklist = title_in_blacklist(title, session_instance)
-                    is_valid_content = validate_content(main_keyword, content, session_instance)
-                    is_url_in_db = url_in_db(normalized_article_url, session_instance)
-                    is_title_in_db = title_in_db(title, session_instance)
+                    is_title_in_blacklist = title_in_blacklist(title)
+                    is_valid_content = validate_content(main_keyword, content)
+                    is_url_in_db = url_in_db(article_link)
+                    is_title_in_db = title_in_db(title)
 
 
                     # if the all conditions passed then go on
@@ -114,3 +113,5 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
         print(f"Error in Coindesk" + str(e))
         return None, None, None, None
       
+
+

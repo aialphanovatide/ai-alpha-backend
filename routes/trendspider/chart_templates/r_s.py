@@ -24,11 +24,9 @@ def get_kline_data(symbol: str, interval: str) -> Dict[str, Any]:
     except requests.exceptions.RequestException as e:
         print(f"Failed to retrieve data: {e}")
         return f"Failed to retrieve data: {e}"
-    
 
 
 def generate_chart_with_support_resistance(symbol, interval, resistance_lines, support_lines, num_candles=50):
-
 
     data = get_kline_data(symbol, interval)
     df = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'CloseTimestamp', 'QuoteAssetVolume', 'NumberofTrades', 'TakerBuyBaseAssetVolume', 'TakerBuyQuoteAssetVolume', 'Ignore'])
@@ -44,13 +42,12 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
         high=df['High'],
         low=df['Low'],
         close=df['Close'],
-        increasing_line_color= '#3adf00', decreasing_line_color= '#fc5404'
-        ))
+        increasing_line_color='#3adf00', decreasing_line_color='#fc5404'
+    ))
 
-    # Configures the main layout
     fig.update_layout(
         yaxis_title='',
-        xaxis_title=f'',
+        xaxis_title='',
         xaxis_rangeslider_visible=True,
         font=dict(family='Arial', size=15, color='#fff'),
         autosize=True,
@@ -58,11 +55,11 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
         plot_bgcolor='#fff',
 
         xaxis=dict(
-        showline=True,
-        showgrid=True,
-        color="#282828",
-        linecolor="#B8BBBC",
-        linewidth=2,
+            showline=True,
+            showgrid=True,
+            color="#282828",
+            linecolor="#B8BBBC",
+            linewidth=2,
         ),
 
         yaxis=dict(
@@ -71,21 +68,28 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
             side='right',
             color="#282828",
             linecolor="#B8BBBC",
-            linewidth=2,
-            tickprefix="$"
-        ),    
+            linewidth=2,    
+            tickprefix="$",
+            showticklabels=False,  # Desactiva las etiquetas del eje y
+        ),
+
+        xaxis_rangeslider=dict(
+            visible=True,
+            thickness=0.05,  # Ajusta el grosor del control deslizante de rango
+            bgcolor='rgba(0,0,0,0)',  # Configura el fondo del control deslizante de rango
+        ),
     )
 
     for support in support_lines:
         # Adds 4 support lines to the chart
         fig.add_annotation(
             go.layout.Annotation(
-                x=df['Timestamp'].iloc[0],
+                x=df['Timestamp'].iloc[-1] + pd.Timedelta(minutes=15),  # Ajuste de posición a la derecha del gráfico
                 y=support,
                 xref="x",
                 align="right",
                 yref="y",
-                xanchor="right",  
+                xanchor="right",
                 yanchor="middle",
                 text=f"${support}",
                 showarrow=False,
@@ -105,17 +109,16 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
                 line=dict(color='#FC5404', width=2),
             )
         )
-  
+
     for resistance in resistance_lines:
         # Adds 4 resistance lines to the chart
         fig.add_annotation(
             go.layout.Annotation(
-                x=df['Timestamp'].iloc[0],
+                x=df['Timestamp'].iloc[-1] + pd.Timedelta(minutes=15),  # Ajuste de posición a la derecha del gráfico
                 y=resistance,
                 xref="x",
                 yref="y",
-                xshift=1,
-                xanchor="left",  
+                xanchor="left",  # Cambiado a la izquierda
                 yanchor="middle",
                 text=f"${resistance}",
                 showarrow=False,
@@ -133,10 +136,9 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
                 x1=df['Timestamp'].iloc[-1],
                 y1=resistance,
                 line=dict(color='#F9B208', width=2),
-            
             )
         )
-    
+
     fig.show()
 
 
@@ -145,18 +147,3 @@ generate_chart_with_support_resistance(symbol='ETHUSDT',
                                        interval='1h',
                                        resistance_lines=[2300, 2350, 2400, 2450],
                                        support_lines=[2050, 2100, 2150, 2200])
-
-
-
-
-      # images=[dict(
-        #     source=url_for('static', filename='static/logo.png'), 
-        #     x=0,
-        #     y=1,
-        #     xref="paper",
-        #     yref="paper",
-        #     sizex=1,
-        #     sizey=1,
-        #     opacity=0.5,
-        #     layer="below"
-        # )]
