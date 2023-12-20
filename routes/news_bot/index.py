@@ -1,10 +1,12 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from config import CoinBot, Blacklist, session, Keyword, Category
+from config import CoinBot, Blacklist, session, Alert, Category, Article
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
+from websocket.socket import socketio
+import traceback
 
 scrapper_bp = Blueprint(
     'scrapper_bp', __name__,
@@ -31,6 +33,7 @@ def activate_news_bot(category_name):
             
         job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=1)
         if job:
+            # socketio.emit('update_categories', namespace='/active_category')
             print(f'{category_name.capitalize()} activated successfully')
         
         message = f'{category_name.capitalize()} activated successfully'
@@ -56,8 +59,11 @@ def deactivate_news_bot(category_name):
         if not category:
             print(f'{category_name.capitalize()} does not match any in the database')
             return f'{category_name.capitalize()} does not match any in the database', 404
-       
+
+
         scheduler.remove_job(category_name)
+        category.is_active = False
+        session.commit()
 
         message = f'{category_name.capitalize()} deactivated successfully'
         print(message)
@@ -70,7 +76,178 @@ def deactivate_news_bot(category_name):
 
 
 
-# Activates or desactivates a bot by the param target
+# Gets all the news related to a category: ex Layer 0 
+def get_news(bot_name):
+    try:
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
+
+        if not coin_bot:
+            return {'error': f'Bot "{bot_name}" not found'}, 404
+
+        coin_bot_id = coin_bot.bot_id
+
+        articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).all()
+
+        if articles:
+            articles_list = []
+
+            for article in articles:
+                article_dict = {
+                    'article_id': article.article_id,
+                    'date': article.date,
+                    'title': article.title,
+                    'url': article.url,
+                    'summary': article.summary,
+                    'created_at': article.created_at.isoformat(),  # Convert to ISO format
+                    'coin_bot_id': article.coin_bot_id,
+                    'images': []
+                }
+
+                # Include image information
+                for image in article.images:
+                    article_dict['images'].append({
+                        'image_id': image.image_id,
+                        'image': image.image,
+                        'created_at': image.created_at.isoformat(),  # Convert to ISO format
+                        'article_id': image.article_id
+                    })
+
+                articles_list.append(article_dict)
+
+            return {'articles': articles_list}, 200
+        else:
+            return {'message': f'No articles found for {bot_name}'}, 404
+ 
+    except Exception as e:
+        traceback.print_exc()
+        return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
+
+@scrapper_bp.route('/api/get/news', methods=['GET'])  
+def get_news_by_bot_name():
+    try:
+        data = request.json
+        bot_name = data.get('botName')
+
+        if not bot_name:
+            return {'error': 'Bot name is required in the request'}, 400
+
+        res, status = get_news(bot_name=bot_name)
+
+        return res, status
+    except Exception as e:
+        traceback.print_exc() 
+        return {'error': f'An error occurred getting the news: {str(e)}'}, 500
+
+
+
+    
+from datetime import datetime, timedelta
+
+def get_alerts(bot_name, date_option='today'):
+    try:
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
+
+        if not coin_bot:
+            return {'error': f'Bot "{bot_name}" not found'}, 404
+
+        coin_bot_id = coin_bot.bot_id
+
+        # Determine the date range based on the provided option
+        if date_option == 'today':
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            print('start_date: ', start_date)
+        elif date_option == 'this week':
+            today = datetime.now()
+            start_date = today - timedelta(days=today.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            print('start_date: ', start_date)
+        elif date_option == 'last week':
+            today = datetime.now()
+            start_date = today - timedelta(days=(today.weekday() + 7))
+            print('start_date: ', start_date)
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            start_date = None
+
+        # Filter alerts based on date range
+        if start_date:
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).all()
+        else:
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).all()
+
+        if alerts:
+            # Convert alerts to a list of dictionaries
+            alerts_list = []
+
+            for alert in alerts:
+                alert_dict = {
+                    'alert_id': alert.alert_id,
+                    'alert_name': alert.alert_name,
+                    'alert_message': alert.alert_message,
+                    'symbol': alert.symbol,
+                    'price': alert.price,
+                    'coin_bot_id': alert.coin_bot_id,
+                    'created_at': alert.created_at.isoformat()  # Convert to ISO format
+                }
+
+                alerts_list.append(alert_dict)
+
+            return {'alerts': alerts_list}, 200
+        else:
+            return {'message': f'No alerts found for {bot_name} on {date_option}'}, 404
+
+    except Exception as e:
+        traceback.print_exc()  # Log the full stack trace
+        return {'error': f'An error occurred getting the alerts for {bot_name}: {str(e)}'}, 500
+
+
+@scrapper_bp.route('/api/get/alerts', methods=['GET'])
+def get_alerts_route():
+    try:
+        data = request.json
+        bot_name = data.get('botName')
+        date_option = data.get('dateOption', None)
+
+        if not bot_name:
+            return {'error': 'Bot name is required in the request'}, 400
+
+        result, status_code = get_alerts(bot_name=bot_name, date_option=date_option)
+
+        return result, status_code
+    except Exception as e:
+        return {'error': f'An error occurred: {str(e)}'}, 500
+
+
+
+@scrapper_bp.route('/get_categories', methods=['GET'])
+def get_categories():
+    try:
+        categories = session.query(Category).filter(Category.category != 'hacks').order_by(Category.category_id).all()
+        category_data = []
+
+        for category in categories:
+            category_data.append({
+                'category_id': category.category_id,
+                'category': category.category,
+                'time_interval': category.time_interval,
+                'is_active': category.is_active,
+                'image': category.image,
+                'created_at': category.created_at.isoformat(),
+                'coin_bots': [{
+                    'bot_id': bot.bot_id,
+                    'bot_name': bot.bot_name,
+                    'image': bot.image,
+                    'created_at': bot.created_at.isoformat()
+                } for bot in category.coin_bot]
+            })
+
+        return {'categories': category_data}, 200
+
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
+# Activates or desactivates a category: ex Layer 0  
 @scrapper_bp.route('/api/news/bot', methods=['POST'])
 def news_bot_commands():
         try:

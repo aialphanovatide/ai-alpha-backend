@@ -45,7 +45,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*Send to AI Alpha App*"
+				"text": f"*Send to AI Alpha App - {category_name}*"
 			},
 			"accessory": {
 				"type": "button",
@@ -54,7 +54,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 					"text": "SEND",
 					"emoji": True
 				},
-				"value": f"{summary},{date_time}",
+				"value": f"linkToArticle: {url}",
 				"action_id": "button-action"
 			}
 		    },
@@ -82,17 +82,9 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
             print(f"Error posting message: {e}")
             return f'Error sending message to Slack channel {category_name}', 500
         
-# send_NEWS_message_to_slack(channel_id="C05RM0DF8J3",
-#                            title="Testing interactive button",
-#                            date_time="11/14/2023",
-#                            url="Testing URL",
-#                            summary="Testing summary",
-#                            main_keyword="News Bot Testing",
-#                            images_list=[]
-#                            )
         
-# send_NEWS_message_to_slack(channel_id="C05RK7CCDEK",
-#                             title="Just how bullish is the Bitcoin halving for BTC price? Experts debate",
+# send_NEWS_message_to_slack(channel_id="C05RM0DF8J3",
+#                             title="Testing sending top story to AI Alpha",
 #                             date_time="2023-10-18",
 #                             summary="""
 #                             *Experts debate the impact of Bitcoin halving*
@@ -106,7 +98,8 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 #                             - Liquidity is seen as the future price catalyst for Bitcoin.
 #                             - Signs indicate a potential return to quantitative easing by the Federal Reserve.
 #                             """,
-#                             url="https://cointelegraph.com/news/how-bullish-is-bitcoin-halving-for-btc-price",
+#                             category_name='Bitcoin',
+#                             url="https://cointelegraph.com/news/btc-price-41k-bitcoin-us-macro-data-fed-fomc-day",
 #                             images_list=['width=960/https://s3.cointelegraph.com/uploads/2023-10/0ea71b33-960f-4f8a-8c07-d6220712f9c8.jpg', 'https://s3.cointelegraph.com/uploads/2023-10/e3827d5a-4314-4b0e-8623-115f77e93c6b.png', 'https://s3.cointelegraph.com/storage/uploads/view/ac4d2a4d9ba9a9aa006aa37b33355665.png', 'https://s3.cointelegraph.com/storage/uploads/view/8e7b3440d419145826674bf2b2f93b0f.png', 'https://s3.cointelegraph.com/storage/uploads/view/e2016155533b827e6ad467da1c82bb1c.png', 'https://s3.cointelegraph.com/storage/uploads/view/08f722b45add8b11cfdeba3cee7060c6.svg', 'https://s3.cointelegraph.com/storage/uploads/view/b89166f724b3e5aec098ebf13cab6531.png', 'https://s3.cointelegraph.com/storage/uploads/view/a5fbd88645e2124aaf525b2a56a6cc4d.png', 'https://s3.cointelegraph.com/storage/uploads/view/c3bc0490407720f59d1c058d0a2788ce.png', 'https://s3.cointelegraph.com/storage/uploads/view/639362c27648354dc8b0a2e252b741eb.png', 'https://s3.cointelegraph.com/storage/uploads/view/b24d0875e4ad164da08a655f1deea30b.png', 'https://s3.cointelegraph.com/storage/uploads/view/3ff6797c69a564da563746ed0253bc76.png', 'https://s3.cointelegraph.com/storage/uploads/view/1d52c58c28980f7d1b5ae59007b66b6d.png', 'https://s3.cointelegraph.com/storage/uploads/view/e4445a81770a9da4f177e000eb71ff11.png', 'https://s3.cointelegraph.com/storage/uploads/view/43688dd5428f7fa573e42458351d152f.png', 'https://s3.cointelegraph.com/storage/uploads/view/41d8e0dda58a5047a7f53db98a2edb3c.png', 'https://s3.cointelegraph.com/storage/uploads/view/172fab437bae754ebe42e7a23b48232a.png', 'https://s3.cointelegraph.com/storage/uploads/view/5886af490e0311fa1838e13f042f28e5.png', 'https://zoa.cointelegraph.com/pixel?postId=118445&regionId=1']
 #                             )
 

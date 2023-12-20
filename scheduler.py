@@ -19,43 +19,31 @@ def job_executed(event):
 
 def job_error(event):
     job_id = str(event.job_id).capitalize()
-    message = f'{job_id} has an internal error: {event.retval}'
-                                                # layer 0           layer 0
-    category = session.query(Category).filter(Category.category == job_id.casefold()).first()
-
-    category.is_active = False
-    session.commit()
-
     # send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot has an internal error on the last scrapped', 
     #                                                   sub_title="Response", 
     #                                                   message=f"{event.retval}")
-    print(message)
 
 def job_max_instances_reached(event): 
     job_id = str(event.job_id).capitalize() # layer 0 
     message = f'Maximum number of running instances reached, *Upgrade* the time interval'
     
-    # send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot - Execution error', 
-    #                                                   sub_title="Response", 
-    #                                                   message=message)
-    print(message)
+    send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot - Execution error', 
+                                                      sub_title="Response", 
+                                                      message=message)
     try:
         target = event.job_id
-        scheduler.remove_job(job_id=target)
-
         with session:
+            category = session.query(Category).filter(Category.category == job_id.casefold()).first()
 
-            coin_bots = session.query(CoinBot).filter(CoinBot.bot_name == target.casefold()).first()
-            if coin_bots:
+            if category:
 
-                time_interval = coin_bots.time_interval
-                bot_name = coin_bots.bot_name
-
+                bot_name= category.category
+                time_interval = category.time_interval
+              
                 new_time_interval = int(time_interval) + 5
-                coin_bots.time_interval = new_time_interval
+                category.time_interval = new_time_interval
                 session.commit()
-
-
+                
                 job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=(new_time_interval), id=target, replace_existing=True, args=[bot_name], max_instances=1)
                 if job:
                     # send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot restarted', 
@@ -65,7 +53,7 @@ def job_max_instances_reached(event):
                     print(f"""---{job_id} News Bot restarted: An interval of *{new_time_interval} Minutes* has been set for scrapping data---""")
                     
     except Exception as e:
-        print(f'Error while restarting {job_id} News Bot: {str(e)}')
+        print(f'---Error while restarting {job_id} News Bot: {str(e)}---')
         # send_notification_to_product_alerts_slack_channel(title_message=f'Error while restarting {job_id} News Bot', 
         #                                                   sub_title="Response", 
         #                                                   message=f"{str(e)}")
