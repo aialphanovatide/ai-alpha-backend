@@ -13,6 +13,7 @@ if scheduler.state != 1:
     scheduler.start()
 
 def job_executed(event): 
+    
     print(f'\n{event.job_id} was executed successfully at {event.scheduled_run_time}, response: {event.retval}')
     
 
