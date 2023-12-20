@@ -2,119 +2,161 @@ import requests
 import pandas as pd
 from typing import Dict, Any
 import plotly.graph_objs as go
+from flask import url_for
 
 binance_base_url = 'https://api3.binance.com'
 
+
 # Gets historical data from Binance API
-def get_kline_data(symbol: str, interval) -> Dict[str, Any]:
+def get_kline_data(symbol: str, interval: str) -> Dict[str, Any]:
 
     formatted_symbol = symbol.upper()
     formatted_interval = interval.casefold()
 
     base_url = f"{binance_base_url}/api/v3/klines"
-    params = {"symbol": formatted_symbol, "limit": 50, "interval": formatted_interval}
+    params = {"symbol": formatted_symbol, "limit": 200, "interval": formatted_interval}
     
     try:
         response = requests.get(base_url, params=params)
-        response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
+        response.raise_for_status()
         data = response.json()
         return data
     except requests.exceptions.RequestException as e:
         print(f"Failed to retrieve data: {e}")
         return f"Failed to retrieve data: {e}"
+    
 
-def generate_chart_with_support_resistance(symbol, interval, resistance, support):
+
+def generate_chart_with_support_resistance(symbol, interval, resistance_lines, support_lines, num_candles=50):
 
 
-    binance_data = get_kline_data(symbol, interval)
-    df = pd.DataFrame(binance_data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'CloseTimestamp', 'QuoteAssetVolume', 'NumberofTrades', 'TakerBuyBaseAssetVolume', 'TakerBuyQuoteAssetVolume', 'Ignore'])
+    data = get_kline_data(symbol, interval)
+    df = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'CloseTimestamp', 'QuoteAssetVolume', 'NumberofTrades', 'TakerBuyBaseAssetVolume', 'TakerBuyQuoteAssetVolume', 'Ignore'])
     df['Timestamp'] = pd.to_datetime(df['Timestamp'], unit='ms')
     df['Close'] = pd.to_numeric(df['Close'])
 
-    # Crea un gráfico con líneas de resistencia y soporte
     fig = go.Figure()
 
-    # Agrega el gráfico de velas (candlestick)
+    # Creates the candlestick chart
     fig.add_trace(go.Candlestick(
         x=df['Timestamp'],
         open=df['Open'],
         high=df['High'],
         low=df['Low'],
         close=df['Close'],
-        name='Candlestick'))
+        increasing_line_color= '#3adf00', decreasing_line_color= '#fc5404'
+        ))
 
-    # Agrega una línea de resistencia al gráfico
-    fig.add_shape(
-        go.layout.Shape(
-            type='line',
-            x0=df['Timestamp'].iloc[0],
-            y0=resistance,
-            x1=df['Timestamp'].iloc[-1],
-            y1=resistance,
-            line=dict(color='red', width=2),
-        )
-    )
-
-    # Agrega una etiqueta a la línea de resistencia
-    fig.add_annotation(
-        go.layout.Annotation(
-            x=df['Timestamp'].iloc[-1],
-            y=resistance,
-            text=f'Resistance - ${resistance}',
-            showarrow=True,
-            arrowhead=2,
-        )
-    )
-
-    # Agrega una línea de soporte al gráfico
-    fig.add_shape(
-        go.layout.Shape(
-            type='line',
-            x0=df['Timestamp'].iloc[0],
-            y0=support,
-            x1=df['Timestamp'].iloc[-1],
-            y1=support,
-            line=dict(color='blue', width=2),
-           
-        )
-    )
-
-    # Agrega una etiqueta a la línea de soporte
-    fig.add_annotation(
-        go.layout.Annotation(
-            x=df['Timestamp'].iloc[-1],
-            y=support,
-            text=f'Support - ${support}',
-            showarrow=True,
-            arrowhead=2,
-        )
-    )
-
-    # Configura el diseño del gráfico
+    # Configures the main layout
     fig.update_layout(
-        
-        title=dict(text=f'{symbol.upper()} - Support and Resistance'),
-        yaxis_title='Price (USD)',
-        xaxis_title=f'Time Frames ({str(interval).upper()})',
-        xaxis_rangeslider_visible=False,
+        yaxis_title='',
+        xaxis_title=f'',
+        xaxis_rangeslider_visible=True,
         font=dict(family='Arial', size=15, color='#fff'),
         autosize=True,
-        paper_bgcolor='#0E1E25',
-        plot_bgcolor='#0E1E25',
-        
+        paper_bgcolor='#fff',
+        plot_bgcolor='#fff',
+
+        xaxis=dict(
+        showline=True,
+        showgrid=True,
+        color="#282828",
+        linecolor="#B8BBBC",
+        linewidth=2,
+        ),
+
+        yaxis=dict(
+            showline=True,
+            showgrid=True,
+            side='right',
+            color="#282828",
+            linecolor="#B8BBBC",
+            linewidth=2,
+            tickprefix="$"
+        ),    
     )
-    # Change grid color and axis colors
-    fig.update_xaxes(showline=True, linewidth=1, linecolor='#0E1E25', gridcolor='#0E1E25')
-    fig.update_yaxes(showline=True, linewidth=1, linecolor='#0E1E25', gridcolor='#0E1E25')
+
+    for support in support_lines:
+        # Adds 4 support lines to the chart
+        fig.add_annotation(
+            go.layout.Annotation(
+                x=df['Timestamp'].iloc[0],
+                y=support,
+                xref="x",
+                align="right",
+                yref="y",
+                xanchor="right",  
+                yanchor="middle",
+                text=f"${support}",
+                showarrow=False,
+                font=dict(color="#FC5404", size=12),
+                bordercolor="#FC5404",
+                borderwidth=2,
+                bgcolor="#fff",
+            )
+        )
+        fig.add_shape(
+            go.layout.Shape(
+                type='line',
+                x0=df['Timestamp'].iloc[0],
+                y0=support,
+                x1=df['Timestamp'].iloc[-1],
+                y1=support,
+                line=dict(color='#FC5404', width=2),
+            )
+        )
+  
+    for resistance in resistance_lines:
+        # Adds 4 resistance lines to the chart
+        fig.add_annotation(
+            go.layout.Annotation(
+                x=df['Timestamp'].iloc[0],
+                y=resistance,
+                xref="x",
+                yref="y",
+                xshift=1,
+                xanchor="left",  
+                yanchor="middle",
+                text=f"${resistance}",
+                showarrow=False,
+                font=dict(color="#F9B208", size=12),
+                bordercolor="#F9B208",
+                borderwidth=2,
+                bgcolor="#fff",
+            )
+        )
+        fig.add_shape(
+            go.layout.Shape(
+                type='line',
+                x0=df['Timestamp'].iloc[0],
+                y0=resistance,
+                x1=df['Timestamp'].iloc[-1],
+                y1=resistance,
+                line=dict(color='#F9B208', width=2),
+            
+            )
+        )
     
-    # Muestra el gráfico
-    # fig.show()
-    image_bytes = fig.to_image(format="png")
-    return image_bytes
+    fig.show()
 
 
 # Usage
-# generate_chart_with_support_resistance(symbol='ETHUSDT',
-#                                        interval='1d',
-#                                        resistance=1863,
-#                                        support=1653)
+generate_chart_with_support_resistance(symbol='ETHUSDT',
+                                       interval='1h',
+                                       resistance_lines=[2300, 2350, 2400, 2450],
+                                       support_lines=[2050, 2100, 2150, 2200])
+
+
+
+
+      # images=[dict(
+        #     source=url_for('static', filename='static/logo.png'), 
+        #     x=0,
+        #     y=1,
+        #     xref="paper",
+        #     yref="paper",
+        #     sizex=1,
+        #     sizey=1,
+        #     opacity=0.5,
+        #     layer="below"
+        # )]

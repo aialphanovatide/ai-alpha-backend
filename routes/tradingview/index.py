@@ -1,7 +1,7 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from .alert_strategy import send_alert_strategy_to_slack, send_alert_strategy_to_telegram
 from flask import request, Blueprint
-from config import TopStory, session, CoinBot
+from config import TopStory, session, CoinBot, Category
 from websocket.socket import socketio
 
 
@@ -52,6 +52,8 @@ def get_all_top_stories():
 
     except Exception as e:
         return {'error': f'An error occurred getting the top stories: {str(e)}'}, 500
+    
+
 
 
 @tradingview_notification_bp.route('/api/get/allTopStories', methods=['GET'])
@@ -62,9 +64,56 @@ def get_all_top_stories_route():
 
     except Exception as e:
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
+    
 
 
 
+
+
+
+## Function to get alerts by category
+@tradingview_notification_bp.route('/api/get/allAlerts', methods=['GET'])  
+def get_all_alerts():
+    try:
+        category = request.args.get('category')
+        category_obj = session.query(Category).filter(Category.category == category).first()
+
+        alerts_list = []
+
+        if not category_obj:
+            return alerts_list, 404
+
+        if category_obj:
+            coin_bots = category_obj.coin_bot
+
+            for coin_bot in coin_bots:
+                alerts = coin_bot.alerts
+                for alert in alerts:
+                    for alert in alerts:
+                        alert_dict = {
+                            'alert_id': alert.alert_id,
+                            'alert_name': alert.alert_name,
+                            'alert_message': alert.alert_message,
+                            'symbol': alert.symbol,
+                            'price': alert.price,
+                            'coin_bot_id': alert.coin_bot_id,
+                            'created_at': alert.created_at.isoformat()  # Convert to ISO format
+                        }
+
+                    alerts_list.append(alert_dict)
+
+
+        return alerts_list, 200
+    except Exception as e:
+        return 'Error in getting all alerts ' + str(e), 500
+
+
+
+
+
+
+
+## Receives all alert from Tradingview and does three things: Send data to Slack, Store the data in the DB and send the data to Telegram 
 @tradingview_notification_bp.route('/api/alert/tv', methods=['GET', 'POST'])
 def receive_data_from_tv():
     try:
