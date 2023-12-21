@@ -257,8 +257,8 @@ def news_bot_commands():
             category = str(category).casefold()
 
             if command == 'activate': 
-                res, status = activate_news_bot(category)
-                # res, status = start_periodic_scraping(category)
+                #res, status = activate_news_bot(category)
+                res, status = start_periodic_scraping(category)
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(category)
