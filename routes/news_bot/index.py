@@ -1,3 +1,4 @@
+import time
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from config import CoinBot, Blacklist, session, Alert, Category, Article
 from routes.news_bot.scrapper import start_periodic_scraping
@@ -31,7 +32,7 @@ def activate_news_bot(category_name):
         category.is_active = True
         session.commit()
             
-        job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=1)
+        job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=2)
         if job:
             # socketio.emit('update_categories', namespace='/active_category')
             print(f'{category_name.capitalize()} activated successfully')
@@ -257,8 +258,13 @@ def news_bot_commands():
             category = str(category).casefold()
 
             if command == 'activate': 
+                initial_time = time.time()
                 #res, status = activate_news_bot(category)
                 res, status = start_periodic_scraping(category)
+                final_time = time.time()
+                final_scrapping_time = final_time - initial_time
+                minutes, seconds = divmod(final_scrapping_time, 60)
+                print(f"Final time: {minutes:.0f} minutes and {seconds:.2f} seconds")
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(category)
