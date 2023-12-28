@@ -44,6 +44,7 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
         close=df['Close'],
         increasing_line_color='#3adf00', decreasing_line_color='#fc5404'
     ))
+        
 
     fig.update_layout(
         yaxis_title='',
@@ -53,13 +54,16 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
         autosize=True,
         paper_bgcolor='#fff',
         plot_bgcolor='#fff',
-
+        
+    
+        
         xaxis=dict(
             showline=True,
             showgrid=True,
             color="#282828",
             linecolor="#B8BBBC",
             linewidth=2,
+  
         ),
 
         yaxis=dict(
@@ -70,10 +74,10 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
             linecolor="#B8BBBC",
             linewidth=2,    
             tickprefix="$",
-            showticklabels=False,  # Desactiva las etiquetas del eje y
+            #showticklabels=False,  # Desactiva las etiquetas del eje y
         ),
 
-        xaxis_rangeslider=dict(
+        xaxis_rangeslider=dict( 
             visible=True,
             thickness=0.05,  # Ajusta el grosor del control deslizante de rango
             bgcolor='rgba(0,0,0,0)',  # Configura el fondo del control deslizante de rango
@@ -104,7 +108,7 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
                 type='line',
                 x0=df['Timestamp'].iloc[0],
                 y0=support,
-                x1=df['Timestamp'].iloc[-1],
+                x1=df['Timestamp'].iloc[-2],
                 y1=support,
                 line=dict(color='#FC5404', width=2),
             )
@@ -114,7 +118,7 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
         # Adds 4 resistance lines to the chart
         fig.add_annotation(
             go.layout.Annotation(
-                x=df['Timestamp'].iloc[-1] + pd.Timedelta(minutes=15),  # Ajuste de posición a la derecha del gráfico
+                x=df['Timestamp'].iloc[-7] + pd.Timedelta(minutes=15),  # Ajuste de posición a la derecha del gráfico
                 y=resistance,
                 xref="x",
                 yref="y",
@@ -145,5 +149,5 @@ def generate_chart_with_support_resistance(symbol, interval, resistance_lines, s
 # Usage
 generate_chart_with_support_resistance(symbol='ETHUSDT',
                                        interval='1h',
-                                       resistance_lines=[2300, 2350, 2400, 2450],
+                                       resistance_lines=[2320, 2356, 2424, 2550],
                                        support_lines=[2050, 2100, 2150, 2200])
