@@ -67,12 +67,11 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
         article_response = requests.get(normalized_article_url, headers=headers)
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
-        if not 'text/html' in article_content_type or article_response.status_code != 200:
-            return None, None, None, None
-        else:
+        if article_response.status_code == 200 and 'text/html' in article_content_type:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
             #Firstly extract the title and content
+
             content = ""
             a_elements = article_soup.find_all("p")
             for a in a_elements:
@@ -83,18 +82,17 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
 
 
             is_url_analized = session_instance.query(ANALIZED_ARTICLE).filter(ANALIZED_ARTICLE.url == normalized_article_url).first()
-
             if is_url_analized:
-                is_url_analized.is_analyzed = True
+                is_url_analized.is_analized = True
                 session_instance.commit()
 
             try:
                 if title and content:
                     is_title_in_blacklist = title_in_blacklist(title, session_instance)
                     is_valid_content = validate_content(main_keyword, content, session_instance)
-                    is_url_in_db = url_in_db(normalized_article_url, session_instance)
+                    is_url_in_db = url_in_db(article_link, session_instance)
                     is_title_in_db = title_in_db(title, session_instance)
-
+                    
 
                     # if the all conditions passed then go on
                     if not is_title_in_blacklist and is_valid_content and not is_url_in_db and not is_title_in_db:
@@ -114,3 +112,5 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
         print(f"Error in Coindesk" + str(e))
         return None, None, None, None
       
+
+

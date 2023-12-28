@@ -27,6 +27,7 @@ CALL_TO_TRADE_TOPIC_ID = os.getenv('CALL_TO_TRADE_TOPIC_ID')
 send_message_url = f'https://api.telegram.org/bot{TOKEN}/sendMessage?parse_mode=HTML'
 send_photo_url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto?parse_mode=HTML'
 
+
 def send_signal_strategy_to_slack(data, accuracy, position, formatted_entry_range):
 
     strategy_name = data['bot_name']  
@@ -36,9 +37,9 @@ def send_signal_strategy_to_slack(data, accuracy, position, formatted_entry_rang
     formatted_type_of_signal = str(type).capitalize()
 
     if starts_with_test(strategy_name):
-        text = 'Signal sent to Test channel on Telegram successfully:'
+        text = 'Trendspider signal sent to Test channel on Telegram successfully'
     else:
-        text = 'Signal sent to Telegram successfully:'
+        text = 'Trendspider signal sent to Telegram successfully'
 
     payload = {
                     "blocks": [
@@ -86,21 +87,20 @@ def send_signal_strategy_to_slack(data, accuracy, position, formatted_entry_rang
     try:
         response = requests.post(SLACK_PRODUCT_ALERTS, json=payload)
         if response.status_code == 200:
-            print('Signal message sent to Slack successfully')
-            return 'Signal message sent to Slack successfully', 200
+            print('Trendspider signal sent to Slack successfully')
+            return 'Trendspider signal sent to Slack successfully', 200
         else:
-            print(f'Error while sending Signal message to Slack {response.content}')
-            return 'Error while sending Signal message to Slack', 500 
+            print(f'Error while sending Trendspider signal to Slack {response.content}')
+            return 'Error while sending Trendspider signal to Slack', 500 
     except Exception as e:
-        print(f'Error sending message to Slack channel. Reason: {e}')
-        return f'Error sending message to Slack channel. Reason: {e}', 500
+        print(f'Error sending Trendspider signal to Slack channel. Reason: {e}')
+        return f'Error sending Trendspider signal to Slack channel. Reason: {e}', 500
 
 
 
 def send_signal_strategy_to_telegram(data):
 
     
-
     strategy_name = data['bot_name']  
     symbol = data['symbol']
     last_price = data["last_price"] 
@@ -210,7 +210,7 @@ def send_signal_strategy_to_telegram(data):
 
             strategy_text = f"""<b>Breakout Strategy - {symbol_with_usdt.upper()}</b>\nStrategy: Breakout Entry for {symbol_with_usdt.upper()}\nSignal Accuracy: <b>{accuracy}%</b>\n\nHello! AI Alpha's algorithm has identified a trigger to enter a potential trading position for {symbol_with_usdt.upper()}.\n\nAccording to our <b>breakout</b> strategy, we recommend entering a <b>{position}</b> position for {symbol_with_usdt.upper()} <b>Potential entry point ${formatted_entry_range}.</b>\n\nTake Profit Target 1: ${TP_1} \nTake Profit Target 2: ${TP_2}\nTake Profit Target 3: ${TP_3}\nTake Profit Target 4: ${TP_4}\nRecommended Stop Loss 1: ${stop_loss_1}\nRecommended Stop Loss 2: ${stop_loss_2}\n\nAI Alpha https://aialpha.ai/"""
             photo_payload = {'chat_id': group_id, 'caption': strategy_text, 'message_thread_id': topic_id}
-
+         
             send_signal_strategy_to_slack(data=data,
                                           accuracy=accuracy,
                                           position=position,
@@ -218,16 +218,17 @@ def send_signal_strategy_to_telegram(data):
                                           )
             
             response = requests.post(send_photo_url, data=photo_payload, files=files)
-
+        
             if response.status_code == 200:
-                return 'Signal sent to Telegram successfully', 200
+                return 'Trendspider signal sent to Telegram successfully', 200
             else:
-                return 'Error while sending signal to Telegram', 400
+                return 'Error while sending Trendspider signal to Telegram', 400
         else: 
-            return 'Accuracy too low', 400
+            return 'Trendspider signal strategy - Accuracy too low', 400
     else:
-        return 'Strategy not found on the Signals Spreadhsheet', 400
+        return 'Trendspider signal strategy not found in the signals Spreadhsheet', 400
     
+
 
 def starts_with_test(strategy_name):
     pattern = re.compile(r'^test', re.IGNORECASE)
