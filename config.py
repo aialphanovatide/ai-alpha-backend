@@ -60,7 +60,7 @@ class Category(Base):
     __tablename__ = 'category'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     category = Column(String, nullable=False)
-    time_interval = Column(Integer, default=40)
+    time_interval = Column(Integer, default=50)
     is_active = Column(Boolean, default=False)
     image = Column(String, default='No Image')
     created_at = Column(TIMESTAMP, default=datetime.utcnow)

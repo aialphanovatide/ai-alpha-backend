@@ -1,6 +1,5 @@
 import os
 from config import Admin, Category
-#from routes.slack.templates.product_alert_notification import send_notification_to_product_alerts_slack_channel
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.trendspider.index import trendspider_notification_bp
 from routes.tradingview.index import tradingview_notification_bp
@@ -12,6 +11,7 @@ from websocket.socket import socketio
 from flask import Flask, jsonify, render_template, session as flask_session
 from flask import request, redirect, url_for
 from config import Session as DBSession 
+
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -43,8 +43,6 @@ def dashboard():
     ## Antes de renderizar la plantilla, verifica si hay algún bot inactivo
     any_inactive = any(not category.is_active for category in categories)
     return render_template('home/index.html', categories=categories, any_inactive=any_inactive)
-
-
 
 @app.route('/activate_bot', methods=['POST'])
 def activate_bot():
@@ -147,6 +145,7 @@ def logout():
     flask_session.pop('user_id', None)
     return redirect(url_for('login'))
 
+
 if __name__ == '__main__':
     try:
         print('---AI Alpha server is running---') 
@@ -156,17 +155,3 @@ if __name__ == '__main__':
     finally:
         print('---AI Alpha server was stopped---')
 
-
-
-
-# OLD CODE FOR STARTING THE SERVER # CHANGED ON 13/12 BECAUSE NEEDED TO EMIT MESSAGES TO THE APP
-
-# if __name__ == '__main__':
-#     try:
-#         #send_notification_to_product_alerts_slack_channel(title_message='AI Alpha Server is running', message="Message:", sub_title="All dependencies are working")
-#         print('---AI Alpha server is running---') 
-#         app.run(threaded=True, debug=False, port=9000, use_reloader=False) 
-#     except Exception as e:
-#         print(f"Failed to start the AI Alpha server: {e}")
-
-# print('---AI Alpha server was stopped---')

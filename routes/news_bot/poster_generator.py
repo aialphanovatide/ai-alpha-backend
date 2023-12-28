@@ -67,4 +67,4 @@ prompt=""" Anticipation Rises for 2024 Bitcoin ETF Approval
 Additional Points:
 - The SEC has a narrow window between January 8 and 10 to decide on the ETF proposals.
 - It is possible that the agency might approve filings from a select few companies initially and later follow up with the remaining firms, or all the ETF filers could be given the same launch date for the ETFs."""
-generate_poster_prompt(prompt)
+# generate_poster_prompt(prompt)
