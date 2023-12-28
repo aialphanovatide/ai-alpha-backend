@@ -105,7 +105,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/category/news/bitcoin-news",
@@ -394,7 +394,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/category/ethereum-news/",
@@ -517,7 +517,59 @@
           "Jesse Coghlan",
           "Yashu Gola",
           "Anatol Hooper",
-          "Derek Andersen"
+          "Derek Andersen",
+          "BTC",
+          "bitcoin news",
+          "Bitcoin",
+          "Bitcoin",
+"BTC",
+"cryptocurrency",
+"altcoin",
+"blockchain",
+"Litecoin",
+"Ripple",
+"XRP",
+"Cardano",
+"ADA",
+"Polkadot",
+"DOT",
+"Stellar",
+"XLM",
+"Chainlink",
+"LINK",
+"Monero",
+"XMR",
+"Dogecoin",
+"DOGE",
+"ICO",
+"initial coin offering",
+"mining",
+"proof-of-work",
+"proof-of-stake",
+"decentralized finance",
+"DeFi",
+"non-fungible token",
+"NFT",
+"smart contract",
+"peer-to-peer",
+"wallet",
+"exchange",
+"mining pool",
+"segwit",
+"lightning network",
+"block reward",
+"hash function",
+"double spend",
+"private key",
+"public key",
+"centralized",
+"pump and dump",
+"p2p",
+"p2p network",
+"initial exchange offering",
+"IEO"
+
+
         ]
       }
     ]
@@ -668,7 +720,152 @@
           "effect",
           "bridge",
           "frozen",
-          "cross-chain"
+          "cross-chain",
+          "exploitability",
+"firewall",
+"cryptocurrency regulations",
+"blockchain laws",
+"crypto compliance",
+"AML regulations",
+"KYC requirements",
+"virtual asset regulations",
+"cryptocurrency legislation",
+"crypto policy",
+"regulatory framework",
+"financial regulatory authorities",
+"crypto licensing",
+"taxation on cryptocurrencies",
+"anti-money laundering laws",
+"know your customer",
+"AML/CFT regulations",
+"financial surveillance",
+"legal framework for crypto",
+"crypto regulatory updates",
+"national cryptocurrency laws",
+"compliance standards",
+"regulatory compliance",
+"cryptocurrency reporting",
+"securities regulations",
+"privacy laws for crypto",
+"cross-border regulations",
+"international crypto laws",
+"cryptocurrency restrictions",
+"cryptocurrency ban",
+"regulatory guidelines",
+"crypto enforcement actions",
+"cryptojacking",
+"compromised",
+"sandbox",
+"double-spending",
+"ransomware",
+"permissionless",
+"hashing",
+"encryption",
+"security breach",
+"nonce",
+"tamper-proof",
+"zero-day",
+"decentralized",
+"consensus",
+"immutable",
+"hard fork",
+"soft fork",
+"zero-knowledge",
+"trustless",
+"peer-to-peer",
+"elliptic curve",
+"zero-trust",
+"elliptic curve cryptography",
+"tokenomics",
+"crypto",
+"cryptographic",
+"quantum-resistant",
+"zero-knowledge proofs",
+"side channel",
+"replay attack",
+"fork resistance",
+"smart contract audit",
+"atomic swap",
+"address collision",
+"DDoS (Distributed Denial of Service)",
+"hardware wallet",
+"passphrase",
+"on-chain",
+"off-chain",
+"deterministic wallet",
+"permissioned",
+"nonce reuse",
+"permissioned blockchain",
+"sharding",
+"Merkle tree",
+"ring signature",
+"hardening",
+"key management",
+"elliptic curve digital signature algorithm (ECDSA)",
+"interoperability",
+"sybil attack",
+"pegged",
+"consortium blockchain",
+"multisig",
+"gas fees",
+"zk-SNARKs",
+"privacy coin",
+"tumbling",
+"whitepaper",
+"block reward",
+"delegated proof-of-stake (DPoS)",
+"liquid democracy",
+"multisignature",
+"off-chain scaling",
+"permissionless innovation",
+"plasma",
+"soft consensus",
+"stablecoin",
+"token issuance",
+"token swap",
+"staking",
+"voting power",
+"premine",
+"quantum computing resistance",
+"cross-border transactions",
+"token standard",
+"state channel",
+"scalability",
+"ring confidential transactions (RingCT)",
+"expoit",
+"crypto crime",
+"law enforcement",
+"blockchain analytics",
+"hacks",
+"bad actors",
+"stolen",
+"bridge exploitation",
+"crypto assets",
+"Poloniex",
+"unauthorized withdrawals",
+"Internal Revenue Service (IRS)",
+"cryptocurrency cases",
+"TRM Labs",
+"survey",
+"investigations",
+"crypto studies",
+"law enforcement professionals",
+"crypto training",
+"blockchain regulations",
+"market value",
+"stablecoins",
+"Tether (USDT)",
+"USDC",
+"tickers",
+"regulatory framework",
+"Anti-Money Laundering (AML)",
+"Financial Action Task Force (FATF)",
+"PwC Global Crypto Regulation Report",
+"stablecoin legislation",
+"regulatory assessment"
+
+
+
         ],
         "sites": [
           {
@@ -676,7 +873,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://www.coindesk.com/tag/hacks/",
@@ -697,7 +894,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": "w-full"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=hacks",
@@ -1253,7 +1450,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://www.coindesk.com/search?s=ldo",
@@ -1288,14 +1485,14 @@
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=ldo",
             "base_url": "https://cryptoslate.com",
             "website_name": "Cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://decrypt.co/search/all/ldo",
@@ -1809,7 +2006,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://www.coindesk.com/search?s=RPL",
@@ -1844,14 +2041,14 @@
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=RPL",
             "base_url": "https://cryptoslate.com",
             "website_name": "Cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://decrypt.co/search/all/RPL",
@@ -2158,7 +2355,21 @@
           "Frax Share Price Forecast",
           "Frax Share Bearish",
           "Frax Share Community collaboration",
-          "Frax Share Ribbit Capital"
+          "Frax Share Ribbit Capital",
+          "fiat-crypto",
+          "virtual",
+          "stake",
+          "policy",
+          "volatility",
+          "limit",
+          "resistance",
+          "strength",
+          "staking",
+          "overbought",
+          "signals",
+          "grayscale",
+          "tokenization",
+          "upgrade"
         ],
         "sites": [
           {
@@ -2166,7 +2377,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://www.coindesk.com/search?s=FXS",
@@ -2208,7 +2419,7 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "Cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://decrypt.co/search/all/FXS",
@@ -3105,7 +3316,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": ".search-page__posts-list"
           },
           {
             "site": "https://beincrypto.com/?s=atom",
@@ -3147,14 +3358,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=atom",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=atom",
@@ -3203,7 +3414,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=atom",
@@ -3701,7 +3912,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": ".search-page__posts-list"
           },
           {
             "site": "https://beincrypto.com/?s=dot",
@@ -3743,14 +3954,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=dot",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=dot",
@@ -3799,7 +4010,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=dot",
@@ -4373,7 +4584,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": ".search-page__posts-list"
           },
           {
             "site": "https://beincrypto.com/?s=qnt",
@@ -4415,14 +4626,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=qnt",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=qnt",
@@ -4471,7 +4682,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=qnt",
@@ -4981,7 +5192,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=ada",
@@ -4995,7 +5206,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=ada#gsc.tab=0&gsc.q=ada&gsc.page=1",
@@ -5023,14 +5234,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=ada",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=ada",
@@ -5079,7 +5290,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=ada",
@@ -5667,7 +5878,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=SOL",
@@ -5681,7 +5892,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=SOL#gsc.tab=0&gsc.q=SOL&gsc.page=1",
@@ -5709,14 +5920,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=SOL",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=SOL",
@@ -5765,7 +5976,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=SOL",
@@ -6478,7 +6689,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=avax",
@@ -6492,7 +6703,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=avax#gsc.tab=0&gsc.q=avax&gsc.page=1",
@@ -6520,14 +6731,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=avax",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=avax",
@@ -6576,7 +6787,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=avax",
@@ -6929,7 +7140,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=near",
@@ -6943,7 +7154,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=near#gsc.tab=0&gsc.q=near&gsc.page=1",
@@ -6971,14 +7182,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=near",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=near",
@@ -7027,7 +7238,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=near",
@@ -7679,7 +7890,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=ftm",
@@ -7693,7 +7904,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=ftm#gsc.tab=0&gsc.q=ftm&gsc.page=1",
@@ -7721,14 +7932,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=ftm",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=ftm",
@@ -7777,7 +7988,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=ftm",
@@ -8500,7 +8711,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=kas",
@@ -8514,7 +8725,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=kas#gsc.tab=0&gsc.q=kas&gsc.page=1",
@@ -8542,14 +8753,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=kas",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=kas",
@@ -8598,7 +8809,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=kas",
@@ -9361,7 +9572,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=matic",
@@ -10067,7 +10278,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=arb",
@@ -10834,7 +11045,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=op",
@@ -11122,7 +11333,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=LINK+chainlink",
@@ -11594,7 +11805,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=BAND",
@@ -12066,7 +12277,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=BAND",
@@ -12362,7 +12573,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=xlm",
@@ -12376,7 +12587,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=xlm#gsc.tab=0&gsc.q=xlm&gsc.page=1",
@@ -12404,14 +12615,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=xlm",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=xlm",
@@ -12460,7 +12671,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=xlm",
@@ -12847,7 +13058,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=ALGO",
@@ -12861,7 +13072,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=ALGO#gsc.tab=0&gsc.q=ALGO&gsc.page=1",
@@ -12889,14 +13100,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=ALGO",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=ALGO",
@@ -12945,7 +13156,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=ALGO",
@@ -13641,7 +13852,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=xrp",
@@ -13732,7 +13943,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/ripple/",
@@ -14144,7 +14355,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=dydx",
@@ -14158,7 +14369,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=dydx#gsc.tab=0&gsc.q=dydx&gsc.page=1",
@@ -14186,14 +14397,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=dydx",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=dydx",
@@ -14242,7 +14453,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=dydx",
@@ -14682,7 +14893,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=velo",
@@ -14696,7 +14907,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=velo#gsc.tab=0&gsc.q=velo&gsc.page=1",
@@ -14724,14 +14935,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=velo",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=velo",
@@ -14780,7 +14991,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=velo",
@@ -15228,7 +15439,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=gmx",
@@ -15319,7 +15530,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=gmx",
@@ -15430,7 +15641,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=uni",
@@ -15444,7 +15655,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=uni#gsc.tab=0&gsc.q=uni&gsc.page=1",
@@ -15472,14 +15683,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=uni",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=uni",
@@ -15528,7 +15739,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=uni",
@@ -15886,7 +16097,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=sushi",
@@ -15900,7 +16111,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=sushi#gsc.tab=0&gsc.q=sushi&gsc.page=1",
@@ -15928,14 +16139,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=sushi",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=sushi",
@@ -15984,7 +16195,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=sushi",
@@ -16196,7 +16407,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=cake",
@@ -16287,7 +16498,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=cake",
@@ -16789,7 +17000,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=aave",
@@ -16803,7 +17014,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=aave#gsc.tab=0&gsc.q=aave&gsc.page=1",
@@ -16831,14 +17042,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=aave",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=aave",
@@ -16887,7 +17098,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=aave",
@@ -17274,7 +17485,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=pendle",
@@ -17288,7 +17499,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=pendle#gsc.tab=0&gsc.q=pendle&gsc.page=1",
@@ -17316,14 +17527,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=pendle",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=pendle",
@@ -17372,7 +17583,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=pendle",
@@ -17664,7 +17875,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=1inch",
@@ -17755,7 +17966,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=1inch",
@@ -17903,7 +18114,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=OCEAN",
@@ -17917,7 +18128,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=OCEAN#gsc.tab=0&gsc.q=OCEAN&gsc.page=1",
@@ -17945,14 +18156,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=OCEAN",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=OCEAN",
@@ -18001,7 +18212,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=OCEAN",
@@ -18412,7 +18623,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=fet",
@@ -18426,7 +18637,7 @@
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": ".jnews_category_content_wrapper"
+            "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=fet#gsc.tab=0&gsc.q=fet&gsc.page=1",
@@ -18454,14 +18665,14 @@
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": ".main-news-search"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=fet",
             "base_url": "https://cryptopotato.com",
             "website_name": "cryptopotato",
             "is_URL_complete": true,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=fet",
@@ -18510,7 +18721,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=fet",
@@ -18795,7 +19006,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
+            "main_container": "None"
           },
           {
             "site": "https://beincrypto.com/?s=rndr",
@@ -18886,7 +19097,7 @@
             "base_url": "https://blockworks.co",
             "website_name": "Blockworks",
             "is_URL_complete": false,
-            "main_container": ".w-full"
+            "main_container": "None"
           },
           {
             "site": "https://coinpedia.org/?s=rndr",
