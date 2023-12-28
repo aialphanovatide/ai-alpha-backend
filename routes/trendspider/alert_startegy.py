@@ -37,7 +37,7 @@ def send_alert_strategy_to_slack(price, alert_name, message):
                             "type": "section",
                             "text": {
                                 "type": "mrkdwn",
-                                "text": f"*Alert from TradingView*"
+                                "text": f"*Alert from Trendspider*"
                             }
                         },
                         {
@@ -61,17 +61,18 @@ def send_alert_strategy_to_slack(price, alert_name, message):
     try:
         response = requests.post(SLACK_PRODUCT_ALERTS, json=payload)
         if response.status_code == 200:
-            print('Alert message from Tradingview sent to Slack successfully')
-            return 'Alert message from Tradingview sent to Slack successfully', 200
+            print('Trendspider alert sent to telegram')
+            return 'Trendspider alert sent to telegram', 200
         else:
-            print(f'Error while sending alert message from Tradingview to Slack {response.content}')
-            return 'Error while sending alert message from Tradingview to Slack', 500 
+            print(f'Error while sending Trendspider alert to Slack {response.content}')
+            return 'Error while sending Trendspider alert to Slack', 500 
     except Exception as e:
-        print(f'Error sending message from Tradingview to Slack channel. Reason: {e}')
-        return f'Error sending message from Tradingview to Slack channel. Reason: {e}', 500
+        print(f'Error while sending Trendspider alert to Slack. Reason: {e}')
+        return f'Error while sending Trendspider alert to Slack. Reason: {e}', 500
     
 
-def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
+def send_alert_strategy_to_telegram(message, symbol, alert_name, price):
+
 
     alert_message = str(message).capitalize()
     formatted_symbol = str(symbol).upper()

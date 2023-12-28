@@ -27,6 +27,12 @@ python3 -m venv venv
 pip install -r requirements.txt
 ```
 
+### To write all used libraries into a txt file run:
+
+```bash
+pip freeze > requirements.txt
+```
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

@@ -2,6 +2,7 @@ from routes.news_bot.sites.ambcrypto import validate_ambcrypto_article
 from routes.news_bot.sites.blockworks import validate_blockworks_article
 from routes.news_bot.sites.coincodex import validate_coincodex_article
 from routes.news_bot.sites.coinpedia import validate_coinpedia_article
+from routes.news_bot.sites.criptonews import validate_cryptonews_article
 from routes.news_bot.sites.cryptodaily import validate_cryptodaily_article
 from routes.news_bot.sites.cryptopotato import validate_cryptopotato_article
 from routes.news_bot.sites.cryptoslate import validate_cryptoslate_article
@@ -51,8 +52,8 @@ def get_links(site, main_container):
                 browser = p.chromium.launch()
                 page = browser.new_page()
 
-                page.goto(site, timeout=100000)
-                page.wait_for_load_state("domcontentloaded", timeout=50000)
+                page.goto(site, timeout=70000)
+                page.wait_for_load_state("domcontentloaded", timeout=70000)
 
                 elements = []
 
@@ -247,14 +248,10 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls))
                     
                     if site_name == 'Cryptonews':
-                        title, content, valid_date, image_urls = validate_coindesk_article(article_link, coin_bot_name, session)
+                        title, content, valid_date, image_urls = validate_cryptonews_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls))
                             
-                    if site_name == 'Coincodex':
-                        title, content, valid_date, image_urls = validate_coindesk_article(article_link, coin_bot_name, session)
-                        if title and content and valid_date:
-                            article_to_save.append((title, content, valid_date, article_link, site_name, image_urls))
                     
                     if site_name == 'Cryptopotato':
                         title, content, valid_date, image_urls = validate_cryptopotato_article(article_link, coin_bot_name, session)
