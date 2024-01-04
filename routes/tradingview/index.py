@@ -11,67 +11,8 @@ tradingview_notification_bp = Blueprint(
     static_folder='static'
 )
 
-def get_all_top_stories():
-    try:
-        coin_bots = session.query(CoinBot).all()
 
-        if not coin_bots:
-            return {'message': 'No CoinBots found'}, 404
-
-        top_stories_list = []
-
-        for coin_bot in coin_bots:
-            coin_bot_id = coin_bot.bot_id
-
-            top_stories = session.query(TopStory).filter(TopStory.coin_bot_id == coin_bot_id).all()
-
-            for top_story in top_stories:
-                top_story_dict = {
-                    'top_story_id': top_story.top_story_id,
-                    'story_date': top_story.story_date,
-                    'summary': top_story.summary,
-                    'created_at': top_story.created_at.isoformat(),
-                    'coin_bot_id': top_story.coin_bot_id,
-                    'images': []
-                }
-
-                for image in top_story.images:
-                    top_story_dict['images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image,
-                        'created_at': image.created_at.isoformat(),
-                        'top_story_id': image.top_story_id
-                    })
-
-                top_stories_list.append(top_story_dict)
-
-        if top_stories_list:
-            return {'top_stories': top_stories_list}, 200
-        else:
-            return {'message': 'No top stories found'}, 404
-
-    except Exception as e:
-        return {'error': f'An error occurred getting the top stories: {str(e)}'}, 500
-    
-
-
-
-@tradingview_notification_bp.route('/api/get/allTopStories', methods=['GET'])
-def get_all_top_stories_route():
-    try:
-        result, status_code = get_all_top_stories()
-        return result, status_code
-
-    except Exception as e:
-        return {'error': f'An error occurred getting the news: {str(e)}'}, 500
-    
-
-
-
-
-
-
-## Function to get alerts by category
+# Function to get alerts by category
 @tradingview_notification_bp.route('/api/get/allAlerts', methods=['GET'])  
 def get_all_alerts():
     try:
@@ -105,15 +46,12 @@ def get_all_alerts():
 
         return alerts_list, 200
     except Exception as e:
-        return 'Error in getting all alerts ' + str(e), 500
+        return f'Error in getting all alerts: {str(e)}', 500
 
 
 
-
-
-
-
-## Receives all alert from Tradingview and does three things: Send data to Slack, Store the data in the DB and send the data to Telegram 
+# Receives all alert from Tradingview and does three things: Send data to Slack, 
+# Store the data in the DB and send the data to Telegram 
 @tradingview_notification_bp.route('/api/alert/tv', methods=['GET', 'POST'])
 def receive_data_from_tv():
     try:
