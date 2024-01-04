@@ -1,4 +1,6 @@
 import os
+
+import bcrypt
 from config import Admin, Category
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.trendspider.index import trendspider_notification_bp
@@ -74,28 +76,35 @@ def deactivate_bot():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
-        # Obtener datos del formulario  
+        # Obtener datos del formulario
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
 
+        # Hash de la contraseña antes de almacenarla
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
         # Crear un nuevo objeto Admin y guardar en la base de datos
-        new_admin = Admin(username=username, mail=email, password=password)
+        new_admin = Admin(username=username, mail=email, password=hashed_password)
 
         # Utiliza la sesión de SQLAlchemy que has definido en config.py
-        with DBSession() as db_session:  # Cambia el nombre aquí también
+        with DBSession() as db_session:
             db_session.add(new_admin)
             db_session.commit()
 
-        # Redirigir a la página de inicio de sesión u otra página después del registro
-        return redirect(url_for('login'))
+        # Puedes devolver un JSON indicando el éxito del registro
+        return jsonify({'success': True, 'message': 'Registration successful'})
 
-    return render_template('home/register.html')
+    # Si la solicitud no es POST, devolver un mensaje de error
+    return jsonify({'success': False, 'message': 'Invalid request'})
 
-@app.route('/login', methods=['GET', 'POST'])
+
+# ...
+
+@app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         print("try login")
@@ -104,23 +113,19 @@ def login():
 
         # Verifica las credenciales en la base de datos
         with DBSession() as db_session:
-            user = db_session.query(Admin).filter_by(username=username, password=password).first()
+            user = db_session.query(Admin).filter_by(username=username).first()
             categories = db_session.query(Category).all()
-        if user:
-            # Autenticación exitosa, inicia sesión
-            flask_session['user_id'] = user.admin_id
-            flask_session['user'] = {'admin_id': user.admin_id, 'username': user.username, 'email': user.mail}
-            
-            any_inactive = any(not category.is_active for category in categories)
+        
+        if user and bcrypt.check_password_hash(user.password, password):
+            # Autenticación exitosa, puedes devolver datos del usuario y otras cosas que puedas necesitar en el cliente
+            return jsonify({'success': True, 'user': {'admin_id': user.admin_id, 'username': user.username, 'email': user.mail}})
 
-            return render_template('home/index.html', admin=flask_session['user'], categories=categories, any_inactive=any_inactive)
-        else:
-            # Credenciales incorrectas
-            print("Account access denied")
-            return render_template('home/login.html', error='Invalid username or password')
+        # Credenciales incorrectas
+        return jsonify({'success': False, 'message': 'Invalid username or password'})
 
-    # Si la solicitud es GET, simplemente renderiza el formulario de inicio de sesión
-    return render_template('home/login.html')
+    # Si la solicitud no es POST, devolver un mensaje de error
+    return jsonify({'success': False, 'message': 'Invalid request'})
+
 
 @app.route('/bots')
 def bots():
