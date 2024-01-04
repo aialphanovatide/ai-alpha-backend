@@ -11,7 +11,6 @@ load_dotenv()
 OPENAI_KEY = os.getenv('OPENAI_KEY')
 
 client = OpenAI(
-   
     api_key=OPENAI_KEY,
 )
 btc_prompt = """
