@@ -4,7 +4,7 @@ import json
 import os
 
 
-OPENAI_API_KEY = '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'
+
 
 from dotenv import load_dotenv
 
@@ -19,7 +19,7 @@ client = OpenAI(
 
 def generate_poster_prompt(article):
     
-    prompt=f'Please generate a DALL-E prompt related to this {article}, no more than 1 line longer'
+    prompt=f'Please generate a DALL-E prompt exactly related to this {article}, no more than 1 line longer'
     response = client.chat.completions.create(
             model="gpt-4",
             messages=[ {"role": "system", "content": prompt},
@@ -38,11 +38,11 @@ def generate_article_poster(final_prompt):
     
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {OPENAI_API_KEY}'
+        'Authorization': f'Bearer {OPENAI_KEY}'
     }
     data = {
         "model": "dall-e-3",
-        "prompt": final_prompt,
+        "prompt": f'{final_prompt} - using an anime style',
         "n": 1,
         "size": "1024x1024"
     }
@@ -57,7 +57,6 @@ def generate_article_poster(final_prompt):
         print("Error:", response.status_code, response.text)
         
         
-        
 prompt=""" Anticipation Rises for 2024 Bitcoin ETF Approval
 - The likelihood of a spot Bitcoin ETF approval before the deadline of January 10, 2024, is growing, resulting in a surge of Bitcoin's price to as high as $44,000.
 - ETF filers, including investment manager Blackrock, are having ongoing discussions with the U.S. Securities and Exchange Commission (SEC).
@@ -68,3 +67,4 @@ Additional Points:
 - The SEC has a narrow window between January 8 and 10 to decide on the ETF proposals.
 - It is possible that the agency might approve filings from a select few companies initially and later follow up with the remaining firms, or all the ETF filers could be given the same launch date for the ETFs."""
 # generate_poster_prompt(prompt)
+

@@ -1,3 +1,4 @@
+from routes.news_bot.poster_generator import generate_poster_prompt
 from routes.news_bot.sites.ambcrypto import validate_ambcrypto_article
 from routes.news_bot.sites.blockworks import validate_blockworks_article
 from routes.news_bot.sites.coincodex import validate_coincodex_article
@@ -26,7 +27,7 @@ from sqlalchemy.orm import joinedload
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
-from config import Session, CoinBot, AnalyzedArticle, Article, Category, Site
+from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -329,38 +330,51 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         channel_id = channel_mapping.get(coin_bot_name, None)
 
                         if summary:
+                            image = generate_poster_prompt(summary)
+
                             send_NEWS_message_to_slack(channel_id=channel_id, 
                                                 title=title,
                                                 date_time=valid_date,
                                                 url=article_link,
                                                 summary=summary,
-                                                images_list=image_urls,
+
+                                                image=image,
+
                                                 category_name=category_name
                                                 )
 
 
-                            if category_name == 'bitcoin':
-                                response, status = send_tweets_to_twitter(content=summary,
-                                                                        title=title)
 
-                                if status == 200:
-                                    send_INFO_message_to_slack_channel(channel_id=channel_id,
-                                                                    title_message="New Notification from AI Alpha",
-                                                                    sub_title="Response",
-                                                                    message=response
-                                                                    )
+                            # if category_name == 'bitcoin':
+                            #     response, status = send_tweets_to_twitter(content=summary,
+                            #                                             title=title)
+
+                            #     if status == 200:
+                            #         send_INFO_message_to_slack_channel(channel_id=channel_id,
+                            #                                         title_message="New Notification from AI Alpha",
+                            #                                         sub_title="Response",
+                            #                                         message=response
+                            #                                         )
+
                            
                             site_source = session.query(Site).filter(Site.site_name == site_name).first()
                             coin_bot_id = site_source.coin_bot_id
                             
-                            new_article = Article(title=title,
-                            summary=summary,
-                            date=valid_date,
-                            url=article_link,
-                            coin_bot_id=coin_bot_id
+                            new_article = Article(
+                                title=title,
+                                summary=summary,
+                                date=valid_date,
+                                url=article_link,
+                                coin_bot_id=coin_bot_id
                             )
-
                             session.add(new_article)
+                            session.commit()
+
+                            # Ahora, new_article.article_id contiene el article_id recién generado
+
+                            # Crear una instancia de ArticleImage relacionada con el Article
+                            new_article_image = ArticleImage(article_id=new_article.article_id, image=image)
+                            session.add(new_article_image)
                             session.commit()
 
                             socketio.emit('update_news', namespace='/news')
