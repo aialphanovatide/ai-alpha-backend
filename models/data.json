@@ -11329,7 +11329,7 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=LINK%2520chainlink",
+            "site": "https://cointelegraph.com/search?query=chainlink",
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
@@ -11343,14 +11343,14 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=LINK+chainlink#gsc.tab=0&gsc.q=LINK%20chainlink&gsc.page=1",
+            "site": "https://coingape.com/search_gcse/?q=LINK#gsc.tab=0&gsc.q=link&gsc.sort=date",
             "base_url": "https://coingape.com",
             "website_name": "Coingape",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".gsc-control-wrapper-cse"
           },
           {
-            "site": "https://www.coindesk.com/search?s=chainlink%20LINK&cf=Markets",
+            "site": "https://www.coindesk.com/search?s=chainlink%20",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
             "is_URL_complete": false,
