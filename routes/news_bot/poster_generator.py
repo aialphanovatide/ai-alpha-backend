@@ -42,7 +42,7 @@ def generate_article_poster(final_prompt):
     }
     data = {
         "model": "dall-e-3",
-        "prompt": f'{final_prompt} - using an anime style',
+        "prompt": f'{final_prompt} - using an anime style, only in English, ',
         "n": 1,
         "size": "1024x1024"
     }
@@ -68,3 +68,7 @@ Additional Points:
 - It is possible that the agency might approve filings from a select few companies initially and later follow up with the remaining firms, or all the ETF filers could be given the same launch date for the ETFs."""
 # generate_poster_prompt(prompt)
 
+<<<<<<< HEAD
+#generate_poster_prompt(prompt)
+=======
+>>>>>>> de7da41ee4ba334a688155ae3963566f9633f369
