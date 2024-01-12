@@ -42,7 +42,7 @@ def generate_article_poster(final_prompt):
     }
     data = {
         "model": "dall-e-3",
-        "prompt": f'{final_prompt} - using an anime style',
+        "prompt": f'{final_prompt} - using an anime style, only in English, ',
         "n": 1,
         "size": "1024x1024"
     }
@@ -73,4 +73,4 @@ Additional points:
 """
 
 
-generate_poster_prompt(prompt)
+#generate_poster_prompt(prompt)
