@@ -3,7 +3,6 @@ from difflib import SequenceMatcher
 import ahocorasick
 
 
-
 def title_in_db(article_title, session_instance): # True if Title already in DB  
     try:
         existing_title =session_instance.query(Article).filter(Article.title.ilike(article_title)).first()

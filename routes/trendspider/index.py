@@ -21,13 +21,14 @@ def get_data_from_trendspider_to_telegram(data):
         response, status = send_signal_strategy_to_telegram(data)
         return response, status
     else:
-        response, status = send_alert_strategy_to_telegram(data)
-        return response, status
+        send_notification_to_product_alerts_slack_channel(title_message='Trendspider alert - for reviewing', sub_title='Message:', message=str(data))
+        return 'Trendspider alert sent to Product-alerts channel for reviewing', 200
+        # response, status = send_alert_strategy_to_telegram(data)
+        # return response, status
 
 @trendspider_notification_bp.route('/webhook', methods=['POST'])
 def receive_data():
         data_length = len(request.data)
-        print('Data from Trenspider: ', request.data)
         if data_length > 0:
             if request.is_json:
                 try:
