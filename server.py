@@ -1,12 +1,8 @@
 import os
 
 import bcrypt
-<<<<<<< HEAD
 from config import Admin, Category, Chart, CoinBot, Keyword
 #from routes.slack.templates.product_alert_notification import send_notification_to_product_alerts_slack_channel
-=======
-from config import Admin, Category
->>>>>>> de7da41ee4ba334a688155ae3963566f9633f369
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.trendspider.index import trendspider_notification_bp
 from routes.tradingview.index import tradingview_notification_bp
@@ -20,7 +16,6 @@ from flask import request, redirect, url_for
 from config import Session as DBSession 
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
-
 
 
 app = Flask(__name__)
@@ -295,7 +290,6 @@ def logout():
         # Si el usuario no está autenticado, lanzar una excepción Unauthorized
         raise Unauthorized()
 
-
 if __name__ == '__main__':
     try:
         print('---AI Alpha server is running---') 
@@ -305,3 +299,17 @@ if __name__ == '__main__':
     finally:
         print('---AI Alpha server was stopped---')
 
+
+
+
+# OLD CODE FOR STARTING THE SERVER # CHANGED ON 13/12 BECAUSE NEEDED TO EMIT MESSAGES TO THE APP
+
+# if __name__ == '__main__':
+#     try:
+#         #send_notification_to_product_alerts_slack_channel(title_message='AI Alpha Server is running', message="Message:", sub_title="All dependencies are working")
+#         print('---AI Alpha server is running---') 
+#         app.run(threaded=True, debug=False, port=9000, use_reloader=False) 
+#     except Exception as e:
+#         print(f"Failed to start the AI Alpha server: {e}")
+
+# print('---AI Alpha server was stopped---')
