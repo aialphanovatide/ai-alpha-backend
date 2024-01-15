@@ -286,7 +286,6 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         title, content, valid_date, article_link, site_name, image_urls = article_data
 
                         summary = summary_generator(content, category_name)
-                        # summary = True
                         
                         channel_mapping = {
                             'btc': btc_slack_channel_id,
@@ -331,18 +330,14 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                         if summary:
                             image = generate_poster_prompt(summary)
-
-                            send_NEWS_message_to_slack(channel_id=channel_id, 
-                                                title=title,
-                                                date_time=valid_date,
-                                                url=article_link,
-                                                summary=summary,
-
-                                                image=image,
-
-                                                category_name=category_name
-                                                )
-
+                            # send_NEWS_message_to_slack(channel_id=channel_id, 
+                            #                     title=title,
+                            #                     date_time=valid_date,
+                            #                     url=article_link,
+                            #                     summary=summary,
+                            #                     image=image,
+                            #                     category_name=category_name
+                            #                     )
 
 
                             # if category_name == 'bitcoin':
@@ -355,7 +350,6 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             #                                         sub_title="Response",
                             #                                         message=response
                             #                                         )
-
                            
                             site_source = session.query(Site).filter(Site.site_name == site_name).first()
                             coin_bot_id = site_source.coin_bot_id
@@ -370,9 +364,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             session.add(new_article)
                             session.commit()
 
-                            # Ahora, new_article.article_id contiene el article_id recién generado
-
-                            # Crear una instancia de ArticleImage relacionada con el Article
+   
                             new_article_image = ArticleImage(article_id=new_article.article_id, image=image)
                             session.add(new_article_image)
                             session.commit()
