@@ -16,7 +16,7 @@ from flask import request, redirect, url_for
 from config import Session as DBSession 
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
-
+from routes.analysis.google_docs import analysis_bp
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -35,6 +35,7 @@ app.register_blueprint(send_email_bp)
 app.register_blueprint(slack_events_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(tradingview_notification_bp)
+app.register_blueprint(analysis_bp)
 
 @app.route('/home')
 def dashboard():
