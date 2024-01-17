@@ -179,6 +179,13 @@ class Analysis(Base):
     
     images = relationship('AnalysisImage', back_populates='analysis')
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'analysis_id': self.analysis_id,
+            'analysis': self.analysis,
+            'created_at': str(self.created_at)}
+            
 
 class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
