@@ -1,7 +1,7 @@
 import os
 
 import bcrypt
-from config import Admin, Category, Chart, CoinBot, Keyword
+from config import Admin, Analysis, AnalysisImage, Category, Chart, CoinBot, Keyword
 #from routes.slack.templates.product_alert_notification import send_notification_to_product_alerts_slack_channel
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.trendspider.index import trendspider_notification_bp
@@ -16,7 +16,8 @@ from flask import request, redirect, url_for
 from config import Session as DBSession 
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
-
+from routes.analysis.google_docs import analysis_bp
+from sqlalchemy.orm import joinedload
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -35,6 +36,7 @@ app.register_blueprint(send_email_bp)
 app.register_blueprint(slack_events_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(tradingview_notification_bp)
+app.register_blueprint(analysis_bp)
 
 @app.route('/home')
 def dashboard():
@@ -49,7 +51,7 @@ def dashboard():
     any_inactive = any(not category.is_active for category in categories)
     return render_template('home/index.html', categories=categories, any_inactive=any_inactive)
 
-@app.route('/activate_bot', methods=['POST'])
+@app.route('/activate_all_bots', methods=['POST'])
 def activate_bot():
     try:
         with DBSession() as db_session:
@@ -64,7 +66,7 @@ def activate_bot():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/deactivate_bot', methods=['POST'])
+@app.route('/deactivate_all_bots', methods=['POST'])
 def deactivate_bot():
     try:
         with DBSession() as db_session:
@@ -289,6 +291,39 @@ def logout():
     else:
         # Si el usuario no está autenticado, lanzar una excepción Unauthorized
         raise Unauthorized()
+
+
+from sqlalchemy.orm import joinedload
+
+@app.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
+def get_analysis(coin_bot_id):
+    with DBSession() as db_session:
+        # Filtra los resultados por el coin_bot_id proporcionado en la URL
+        analysis_objects = db_session.query(Analysis).filter_by(coin_bot_id=coin_bot_id).all()
+
+        # Convertir cada objeto Analysis a un diccionario con las imágenes asociadas
+        analysis_data = []
+        for analy in analysis_objects:
+            analysis_dict = analy.to_dict()  # Utiliza el método to_dict que definimos anteriormente
+
+            # Obtén las imágenes asociadas al análisis actual
+            images_objects = db_session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
+            images_data = [{'image_id': img.image_id, 'image': img.image} for img in images_objects]
+
+            analysis_dict['analysis_images'] = images_data
+            analysis_data.append(analysis_dict)
+
+        # Imprime cada análisis encontrado con sus imágenes
+        for analy in analysis_data:
+            print(f"Analysis ID: {analy['analysis_id']}, Analysis: {analy['analysis']}, Created At: {analy['created_at']}")
+            for img in analy['analysis_images']:
+                print(f"  Image ID: {img['image_id']}, Image: {img['image']}")
+
+        return jsonify(analysis_data)
+
+
+
+
 
 if __name__ == '__main__':
     try:
