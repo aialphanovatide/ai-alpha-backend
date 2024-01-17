@@ -2,7 +2,7 @@ from routes.slack.index import client
 from slack_sdk.errors import SlackApiError
 
 
-def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, images_list, category_name):
+def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name):
 
         blocks=[
             {
@@ -34,7 +34,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 			},
 			"accessory": {
 				"type": "image",
-				"image_url": f"Unavailable",
+				"image_url": {image},
 				"alt_text": "alt text for image"
 			}
             },

@@ -118,7 +118,7 @@ def get_news(bot_name):
         traceback.print_exc()
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
 
-@scrapper_bp.route('/api/get/news', methods=['GET'])  
+@scrapper_bp.route('/api/get/news', methods=['GET', 'POST'])  
 def get_news_by_bot_name():
     try:
         data = request.json
@@ -193,7 +193,7 @@ def get_alerts(bot_name, date_option='today'):
         return {'error': f'An error occurred getting the alerts for {bot_name}: {str(e)}'}, 500
 
 
-@scrapper_bp.route('/api/get/alerts', methods=['GET'])
+@scrapper_bp.route('/api/get/alerts', methods=['GET', 'POST'])
 def get_alerts_route():
     try:
         data = request.json
@@ -308,7 +308,8 @@ def news_bot_commands():
             category = str(category).casefold()
 
             if command == 'activate': 
-                res, status = activate_news_bot(category)
+                res, status = start_periodic_scraping(category)
+                #res, status = activate_news_bot(category)
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(category)
