@@ -1,6 +1,8 @@
 [
   {
     "main_keyword": "bitcoin",
+    "alias": "Bitcoin",
+    "icon": "/static/icons-topmenu/bitcoin.png",
     "coins": [
       {
         "coin_keyword": "BTC",
@@ -184,6 +186,8 @@
   },
   {
     "main_keyword": "ethereum",
+    "alias": "Ethereum",
+    "icon": "/static/icons-topmenu/ethereum.png",
     "coins": [
       {
         "coin_keyword": "ETH",
@@ -468,7 +472,7 @@
           "Ethereum Price Index",
           "Ethereum$1,",
           "RSS Logo",
-          "Facebook icon",
+          "Facebook",
           "stock appreciation rights",
           "privacy policy",
           "terms of use",
@@ -576,6 +580,8 @@
   },
   {
     "main_keyword": "hacks",
+    "alias": "Hacks",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "HACKS",
@@ -956,7 +962,7 @@
           "Ethereum Price Index",
           "Ethereum$1,",
           "RSS Logo",
-          "Facebook icon",
+          "Facebook",
           "stock appreciation rights",
           "privacy policy",
           "terms of use",
@@ -1012,6 +1018,8 @@
   },
   {
     "main_keyword": "lsd",
+    "alias": "Lsd",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "LDO",
@@ -1535,7 +1543,7 @@
           "Ethereum Price Index",
           "Ethereum$1,",
           "RSS Logo",
-          "Facebook icon",
+          "Facebook",
           "stock appreciation rights",
           "privacy policy",
           "terms of use",
@@ -2091,7 +2099,7 @@
           "Ethereum Price Index",
           "Ethereum$1,",
           "RSS Logo",
-          "Facebook icon",
+          "Facebook",
           "stock appreciation rights",
           "privacy policy",
           "terms of use",
@@ -2462,7 +2470,7 @@
           "Ethereum Price Index",
           "Ethereum$1,",
           "RSS Logo",
-          "Facebook icon",
+          "Facebook",
           "stock appreciation rights",
           "privacy policy",
           "terms of use",
@@ -2518,6 +2526,8 @@
   },
   {
     "main_keyword": "layer 0",
+    "alias": "RootLink",
+    "icon": "/static/icons-topmenu/rootlink.png",
     "coins": [
       {
         "coin_keyword": "ATOM",
@@ -4700,6 +4710,8 @@
   },
   {
     "main_keyword": "layer 1 lmc",
+    "alias": "BaseBlock",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "ADA",
@@ -6805,6 +6817,8 @@
   },
   {
     "main_keyword": "layer 1 mmc",
+    "alias": "CoreChain",
+    "icon": "/static/icons-topmenu/corechain.png",
     "coins": [
       {
         "coin_keyword": "NEAR",
@@ -8827,6 +8841,8 @@
   },
   {
     "main_keyword": "layer 2",
+    "alias": "BoostLayer",
+    "icon": "/static/icons-topmenu/boostlayer.png",
     "coins": [
       {
         "coin_keyword": "MATIC",
@@ -11124,6 +11140,8 @@
   },
   {
     "main_keyword": "oracle",
+    "alias": "TruthNodes",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "LINK",
@@ -12351,6 +12369,8 @@
   },
   {
     "main_keyword": "cross border payments",
+    "alias": "X Payments",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "XLM",
@@ -13961,6 +13981,8 @@
   },
   {
     "main_keyword": "defip",
+    "alias": "",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "DYDX",
@@ -15548,6 +15570,8 @@
   },
   {
     "main_keyword": "defi",
+    "alias": "",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "UNI",
@@ -16516,6 +16540,8 @@
   },
   {
     "main_keyword": "defio",
+    "alias": "",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "AAVE",
@@ -17984,6 +18010,8 @@
   },
   {
     "main_keyword": "ai",
+    "alias": "IntelliChain",
+    "icon": "/static/icons-topmenu/baseblock.png",
     "coins": [
       {
         "coin_keyword": "OCEAN",
