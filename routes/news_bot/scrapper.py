@@ -285,7 +285,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, site_name, image_urls = article_data
 
-                        summary = summary_generator(content, category_name)
+                        # summary = summary_generator(content, category_name)
+                        summary = True
                         
                         channel_mapping = {
                             'btc': btc_slack_channel_id,
@@ -329,7 +330,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         channel_id = channel_mapping.get(coin_bot_name, None)
 
                         if summary:
-                            image = generate_poster_prompt(summary)
+                            # image = generate_poster_prompt(summary)
                             # send_NEWS_message_to_slack(channel_id=channel_id, 
                             #                     title=title,
                             #                     date_time=valid_date,
@@ -365,9 +366,9 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             session.commit()
 
    
-                            new_article_image = ArticleImage(article_id=new_article.article_id, image=image)
-                            session.add(new_article_image)
-                            session.commit()
+                            # new_article_image = ArticleImage(article_id=new_article.article_id, image=image)
+                            # session.add(new_article_image)
+                            # session.commit()
 
                             socketio.emit('update_news', namespace='/news')
                             counter_articles_saved +=1

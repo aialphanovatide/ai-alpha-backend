@@ -9,7 +9,7 @@ import os
 
 load_dotenv()
 
-DB_PORT = os.getenv('DB_PORT_MAC')
+DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
@@ -60,6 +60,7 @@ class Category(Base):
     __tablename__ = 'category'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     category = Column(String, nullable=False)
+    category_name = Column(String)
     time_interval = Column(Integer, default=50)
     is_active = Column(Boolean, default=False)
     image = Column(String, default='No Image')
@@ -288,9 +289,14 @@ with session:
             
                 for item in config:   
                     main_keyword = item['main_keyword']
+                    alias = item['alias']
+                    icon = item['icon']
                     coins = item['coins']
 
-                    new_category = Category(category=main_keyword)
+                    new_category = Category(category=main_keyword,
+                                            category_name=alias,
+                                            image=icon
+                                            )
 
                     for coin in coins:
                         coin_keyword = coin['coin_keyword']

@@ -1,6 +1,4 @@
 import os
-
-import bcrypt
 from config import Admin, Category, Chart, CoinBot, Keyword
 #from routes.slack.templates.product_alert_notification import send_notification_to_product_alerts_slack_channel
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
@@ -24,8 +22,7 @@ CORS(app, origins='*')
 socketio.init_app(app)
 
 # Configure Flask to look for templates in the 'dashboard/templates' folder
-app.template_folder = 'dashboard/apps/templates'
-app.static_folder = 'dashboard/apps/static'
+app.static_folder = 'static'
 app.secret_key = os.urandom(24)
 
 # Register blueprints
@@ -302,14 +299,3 @@ if __name__ == '__main__':
 
 
 
-# OLD CODE FOR STARTING THE SERVER # CHANGED ON 13/12 BECAUSE NEEDED TO EMIT MESSAGES TO THE APP
-
-# if __name__ == '__main__':
-#     try:
-#         #send_notification_to_product_alerts_slack_channel(title_message='AI Alpha Server is running', message="Message:", sub_title="All dependencies are working")
-#         print('---AI Alpha server is running---') 
-#         app.run(threaded=True, debug=False, port=9000, use_reloader=False) 
-#     except Exception as e:
-#         print(f"Failed to start the AI Alpha server: {e}")
-
-# print('---AI Alpha server was stopped---')
