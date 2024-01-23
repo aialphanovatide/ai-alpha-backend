@@ -14362,35 +14362,35 @@
             "base_url": "https://beincrypto.com",
             "website_name": "Beincrypto",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://bitcoinist.com/?s=dydx",
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".jnews_search_content_wrapper"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=dydx#gsc.tab=0&gsc.q=dydx&gsc.page=1",
+            "site": "https://coingape.com/search_gcse/?q=dydx#gsc.tab=0&gsc.q=dydx&gsc.sort=date",
             "base_url": "https://coingape.com",
             "website_name": "Coingape",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".gsc-expansionArea"
           },
           {
-            "site": "https://www.coindesk.com/search?s=dydx",
+            "site": "https://www.coindesk.com/search?s=dydx&df=24",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
             "is_URL_complete": false,
-            "main_container": "None"
+            "main_container": ".layout-container"
           },
           {
             "site": "https://cryptonews.com/?s=dydx",
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": ".container"
           },
           {
             "site": "https://cryptoslate.com/?s=dydx",
@@ -14425,21 +14425,21 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
-            "site": "https://cryptonews.net/?q=dydx&rubricId=-1",
+            "site": "https://cryptonews.net/?q=dydx&rubricId=-1&time=past_day",
             "base_url": "https://cryptonews.net",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
             "main_container": ".container"
           },
           {
-            "site": "https://www.investing.com/search/?q=dydx",
+            "site": "https://www.investing.com/search/?q=dydx&tab=news",
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
-            "main_container": "None"
+            "main_container": ".searchSectionMain"
           },
           {
             "site": "https://u.today/search/node?keys=dydx",
@@ -14460,7 +14460,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -14900,28 +14900,28 @@
             "base_url": "https://beincrypto.com",
             "website_name": "Beincrypto",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://bitcoinist.com/?s=velo",
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".jnews_search_content_wrapper"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=velo#gsc.tab=0&gsc.q=velo&gsc.page=1",
+            "site": "https://coingape.com/search_gcse/?q=velo#gsc.tab=0&gsc.q=velo&gsc.sort=date",
             "base_url": "https://coingape.com",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
           },
           {
-            "site": "https://www.coindesk.com/search?s=velo",
+            "site": "https://www.coindesk.com/search?s=velo&df=24",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
             "is_URL_complete": false,
-            "main_container": "None"
+            "main_container": ".layout-container"
           },
           {
             "site": "https://cryptonews.com/?s=velo",
@@ -14963,17 +14963,17 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
-            "site": "https://cryptonews.net/?q=velo&rubricId=-1",
+            "site": "https://cryptonews.net/?q=velo&rubricId=-1&time=past_day",
             "base_url": "https://cryptonews.net",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
             "main_container": ".container"
           },
           {
-            "site": "https://www.investing.com/search/?q=velo",
+            "site": "https://www.investing.com/search/?q=velo&tab=news",
             "base_url": "https://www.investing.com",
             "website_name": "Investing",
             "is_URL_complete": false,
@@ -14984,7 +14984,7 @@
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".search-result"
           },
           {
             "site": "https://blockworks.co/news",
@@ -14998,7 +14998,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -15446,17 +15446,17 @@
             "base_url": "https://beincrypto.com",
             "website_name": "Beincrypto",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=gmx#gsc.tab=0&gsc.q=gmx&gsc.page=1",
+            "site": "https://coingape.com/search_gcse/?q=gmx#gsc.tab=0&gsc.q=gmx&gsc.sort=date",
             "base_url": "https://coingape.com",
             "website_name": "Coingape",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".gsc-expansionArea"
           },
           {
-            "site": "https://www.coindesk.com/search?s=gmx&cf=Markets",
+            "site": "https://www.coindesk.com/search?s=gmx&df=720",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
             "is_URL_complete": false,
@@ -15467,10 +15467,10 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": ".container"
           },
           {
-            "site": "https://cryptoslate.com/news/gmx/",
+            "site": "https://cryptoslate.com/?s=GMX",
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
@@ -15498,14 +15498,14 @@
             "main_container": "None"
           },
           {
-            "site": "https://dailyhodl.com/ripple-and-gmx/",
+            "site": "https://dailyhodl.com/?s=gmx",
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_section"
+            "main_container": ".jeg_inner_content"
           },
           {
-            "site": "https://cryptonews.net/?q=gmx&rubricId=-1",
+            "site": "https://cryptonews.net/?q=gmx&rubricId=-1&time=past_day",
             "base_url": "https://cryptonews.net",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
@@ -15537,7 +15537,7 @@
             "base_url": "https://coinpedia.org",
             "website_name": "Coinpedia",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
