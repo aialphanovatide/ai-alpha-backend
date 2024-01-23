@@ -27,7 +27,7 @@ from sqlalchemy.orm import joinedload
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
-from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site
+from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -330,7 +330,32 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         channel_id = channel_mapping.get(coin_bot_name, None)
 
                         if summary:
-                            # image = generate_poster_prompt(summary)
+                            # keywords = (
+                            #     session.query(Keyword.word, Keyword.coin_bot_id)
+                            #     .filter(Keyword.coin_bot_id.in_([25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]))
+                            #     .all()
+                            # )
+
+                            # if keywords:
+                            #     # Crear una lista para almacenar las palabras clave coincidentes
+                            #     matching_keywords = []
+
+                            #     # Comparar cada palabra clave con el contenido del summary
+                            #     for keyword, coin_bot_id in keywords:
+                            #         keyword_in_summary = f" {keyword} "
+                            #         if keyword_in_summary.lower() in summary.lower():
+                            #             matching_keywords.append(f'"{keyword}" - coin_bot {coin_bot_id}')
+
+                            #     if matching_keywords:
+                            #         # Guardar las palabras clave coincidentes en un archivo
+                            #         file_path = "keywords_used_by_bot.txt"
+                            #         with open(file_path, "w") as file:
+                            #             file.write("Palabras clave coincidentes:\n")
+                            #             for matching_keyword in matching_keywords:
+                            #                 file.write(matching_keyword + "\n")
+
+                            
+                            image = generate_poster_prompt(summary)
                             # send_NEWS_message_to_slack(channel_id=channel_id, 
                             #                     title=title,
                             #                     date_time=valid_date,
@@ -388,7 +413,6 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
     
 
 def start_periodic_scraping(category_name):
-
     with Session() as session:
         category = session.query(Category).filter(Category.category == category_name).first()
     

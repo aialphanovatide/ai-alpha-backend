@@ -13981,8 +13981,8 @@
   },
   {
     "main_keyword": "defip",
-    "alias": "",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "alias": "CycleSwap",
+    "icon": "/static/icons-topmenu/CycleSwap.png",
     "coins": [
       {
         "coin_keyword": "DYDX",
@@ -15570,8 +15570,8 @@
   },
   {
     "main_keyword": "defi",
-    "alias": "",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "alias": "NexTrade",
+    "icon": "/static/icons-topmenu/NexTrade.png",
     "coins": [
       {
         "coin_keyword": "UNI",
@@ -16540,8 +16540,8 @@
   },
   {
     "main_keyword": "defio",
-    "alias": "",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "alias": "DiverseFi",
+    "icon": "/static/icons-topmenu/DiverseFi.png",
     "coins": [
       {
         "coin_keyword": "AAVE",
