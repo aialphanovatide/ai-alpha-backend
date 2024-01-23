@@ -1,7 +1,7 @@
 import os
 
 import bcrypt
-from config import Admin, Analysis, AnalysisImage, Category, Chart, CoinBot, Keyword
+from config import Admin, Analysis, AnalysisImage, Category, Chart, CoinBot, Keyword, Session
 #from routes.slack.templates.product_alert_notification import send_notification_to_product_alerts_slack_channel
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.trendspider.index import trendspider_notification_bp
@@ -16,7 +16,6 @@ from flask import request, redirect, url_for
 from config import Session as DBSession 
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
-from routes.analysis.google_docs import analysis_bp
 from routes.dashboard.activate_all_bots import bots_activator
 from routes.dashboard.deactivate_all_bots import bots_deactivator
 from routes.dashboard.bots import bots_route
@@ -51,7 +50,6 @@ app.register_blueprint(send_email_bp)
 app.register_blueprint(slack_events_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(tradingview_notification_bp)
-app.register_blueprint(analysis_bp)
 app.register_blueprint(bots_activator)
 app.register_blueprint(bots_deactivator)
 app.register_blueprint(bots_route)
@@ -67,6 +65,41 @@ app.register_blueprint(sign_in)
 app.register_blueprint(get_analysis_by_id)
 app.register_blueprint(total_bots)
 app.register_blueprint(get_chart_values)
+
+
+@app.route('/post_analysis', methods=['POST'])
+def post_analysis():
+    try:
+        coin_bot_id = request.form.get('coinBot')
+        content = request.form.get('content')
+        image_file = request.files.get('image')
+
+        print(f'Coin Bot ID: {coin_bot_id}')
+        print(f'Content: {content}')
+
+        with DBSession() as db_session:
+            new_analysis = Analysis(
+                analysis=content,
+                coin_bot_id=coin_bot_id 
+            )
+            db_session.add(new_analysis)
+            db_session.commit()
+
+            if image_file:
+                image_data = image_file.read()
+                new_analysis_image = AnalysisImage(
+                    image=image_data,
+                    analysis_id=new_analysis.analysis_id,
+                )
+                db_session.add(new_analysis_image)
+                db_session.commit()
+
+        return 'Analysis sent successfully', 200
+
+    except Exception as e:
+        print(f'Error found: {str(e)}')
+        return f'Error found: {str(e)}', 500
+
 
 if __name__ == '__main__':
     try:
