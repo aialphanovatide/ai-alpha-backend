@@ -86,6 +86,7 @@ class CoinBot(Base):
     top_story = relationship('TopStory', back_populates='coin_bot')
     category = relationship('Category', back_populates='coin_bot')
 
+
 class Keyword(Base):
     __tablename__ = 'keyword'
     keyword_id = Column(Integer, primary_key=True, autoincrement=True)
