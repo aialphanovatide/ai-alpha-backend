@@ -63,10 +63,8 @@ class Category(Base):
     category_name = Column(String)
     time_interval = Column(Integer, default=50)
     is_active = Column(Boolean, default=False)
-    active_dark_icon = Column(String, default='No Image')
-    inactive_dark_icon = Column(String, default='No Image')
-    active_light_icon = Column(String, default='No Image')
-    inactive_light_icon = Column(String, default='No Image')
+    border_color = Column(String, default='No Color')
+    icon = Column(String, default='No Image')
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
@@ -305,10 +303,8 @@ with session:
 
                     new_category = Category(category=main_keyword,
                                             category_name=alias,
-                                            active_dark_icon=item['active_dark_icon'],
-                                            inactive_dark_icon=item['inactive_dark_icon'],
-                                            active_light_icon=item['active_light_icon'],
-                                            inactive_light_icon=item['inactive_light_icon']
+                                            icon=item['icon'],
+                                            border_color=item['borderColor'],
                                             )
 
                     for coin in coins:

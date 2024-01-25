@@ -24,7 +24,7 @@ def get_all_top_stories():
         top_stories = session.query(TopStory).order_by(TopStory.created_at).all()
 
         if not top_stories:
-            return {'message': 'No top stories found'}, 404
+            return {'message': 'No top stories found'}, 204
         else:
             for top_story in top_stories:
                 top_story_dict = {
@@ -60,7 +60,7 @@ def get_news(bot_name):
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
         if not coin_bot:
-            return {'error': f'Coin {bot_name} not found'}, 404
+            return {'error': f'Coin {bot_name} not found'}, 400
 
         coin_bot_id = coin_bot.bot_id
 
@@ -95,7 +95,7 @@ def get_news(bot_name):
 
             return {'articles': articles_list}, 200
         else:
-            return {'message': f'No articles found for {bot_name}'}, 404
+            return {'message': f'No articles found for {bot_name}'}, 204
  
     except Exception as e:
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
@@ -126,12 +126,11 @@ def get_categories():
             category_data.append({
                 'category_id': category.category_id,
                 'category': category.category,
+                'category_name': category.category_name,
                 'time_interval': category.time_interval,
                 'is_active': category.is_active,
-                'active_dark_icon': category.active_dark_icon,
-                'inactive_dark_icon': category.inactive_dark_icon,
-                'active_light_icon': category.active_light_icon,
-                'inactive_light_icon': category.inactive_light_icon,
+                'icon': category.icon,
+                'borderColor': category.border_color,
                 'created_at': category.created_at.isoformat(),
                 'coin_bots': [{
                     'bot_id': bot.bot_id,
