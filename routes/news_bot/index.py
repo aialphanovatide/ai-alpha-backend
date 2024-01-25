@@ -126,6 +126,7 @@ def get_categories():
             category_data.append({
                 'category_id': category.category_id,
                 'category': category.category,
+                'category_name': category.category_name,
                 'time_interval': category.time_interval,
                 'is_active': category.is_active,
                 'active_dark_icon': category.active_dark_icon,
