@@ -1,15 +1,17 @@
-import os
-import json
-import requests
 from openai import OpenAI
+import requests
+import json
+import os
+
 from dotenv import load_dotenv
-from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+OPENAI_KEY = os.getenv('OPENAI_KEY')
 
 client = OpenAI(
-    api_key=OPENAI_API_KEY,
+   
+    api_key=OPENAI_KEY,
 )
 
 def generate_poster_prompt(article):
@@ -23,13 +25,14 @@ def generate_poster_prompt(article):
             max_tokens=1024,
         )
     final_prompt = response.choices[0].message.content
+    print(final_prompt)
 
     api_url = 'https://api.openai.com/v1/images/generations'
     
     
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {OPENAI_API_KEY}'
+        'Authorization': f'Bearer {OPENAI_KEY}'
     }
     data = {
         "model": "dall-e-3",
@@ -40,21 +43,16 @@ def generate_poster_prompt(article):
 
     response = requests.post(api_url, headers=headers, data=json.dumps(data))
 
+
     if response.status_code == 200:
         result = response.json()
-        return result['data'][0]['url']
+
     else:
         print("Error:", response.status_code, response.text)
-        send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
-                                           title_message=F"Unable to generate image for this ARTICLE: {article}",
-                                           sub_title="Reason",
-                                           message=f"{response.content}"
-                                           )
-        return "No image"
 
     
     
-    
+    return result['data'][0]['url']
         
 
 
