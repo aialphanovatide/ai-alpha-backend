@@ -1,9 +1,16 @@
+import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+WP_API_KEY = os.getenv('WP_API_KEY')
+
 
 def send_post_request(post_title, post_date, post_content, post_status="publish"):
 
 
-    url = "https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key=5fjtogfdmtjbdljfnvmqt2och2fl3ppvjd9nkxdoa0jt1vkp9ri81nwm1lbfgfrn&action=create_post"
+    url = f"https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key={WP_API_KEY}&action=create_post"
     
     data = {
         "post_title": post_title, 

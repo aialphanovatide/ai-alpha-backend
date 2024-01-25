@@ -1,9 +1,15 @@
+import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+WP_API_KEY = os.getenv('WP_API_KEY')
 
 def delete_post(post_id):
 
 
-    url = "https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key=5fjtogfdmtjbdljfnvmqt2och2fl3ppvjd9nkxdoa0jt1vkp9ri81nwm1lbfgfrn&action=delete_post"
+    url = f"https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key={WP_API_KEY}&action=delete_post"
 
     headers = {
         "Accept": "*/*",
@@ -44,8 +50,9 @@ def delete_post(post_id):
         print(f"Error deleting post_id: {post_id}, response: {e}")
         return {"success": False, "msg": str(e)}, 500
 
-# Example usage
-post_id_to_delete = 57
-result = delete_post(post_id_to_delete)
 
-print(result)
+# Example usage
+# post_id_to_delete = 57
+# result = delete_post(post_id_to_delete)
+
+# print(result)
