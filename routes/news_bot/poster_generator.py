@@ -7,11 +7,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OPENAI_KEY = os.getenv('OPENAI_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 client = OpenAI(
-   
-    api_key=OPENAI_KEY,
+    api_key=OPENAI_API_KEY,
 )
 
 def generate_poster_prompt(article):
@@ -25,14 +24,13 @@ def generate_poster_prompt(article):
             max_tokens=1024,
         )
     final_prompt = response.choices[0].message.content
-    print(final_prompt)
 
     api_url = 'https://api.openai.com/v1/images/generations'
     
     
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {OPENAI_KEY}'
+        'Authorization': f'Bearer {OPENAI_API_KEY}'
     }
     data = {
         "model": "dall-e-3",
@@ -46,13 +44,14 @@ def generate_poster_prompt(article):
 
     if response.status_code == 200:
         result = response.json()
-
+        return result['data'][0]['url']
     else:
         print("Error:", response.status_code, response.text)
+        return 'No Image'
 
     
     
-    return result['data'][0]['url']
+    
         
 
 

@@ -3,6 +3,7 @@ from slack_sdk.errors import SlackApiError
 
 # Sends an article to Slack
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name):
+    
 
         blocks=[
             {
@@ -34,8 +35,8 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 			},
 			"accessory": {
 				"type": "image",
-				"image_url": {image},
-				"alt_text": "alt text for image"
+				"image_url": f"{image}",
+				"alt_text": f"{title}"
 			}
             },
             {
@@ -65,14 +66,14 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
                 "type": "divider"
             }
         ]
-    
+
         try:
             result = client.chat_postMessage(
                 channel=channel_id,
                 text=f'New Notification from {str(category_name).capitalize()}', 
                 blocks=blocks
             )
-         
+            
             response = result['ok']
             if response == True:
                 print(f'Article {title} sent successfully to Slack channel {category_name}')
@@ -145,13 +146,13 @@ def delete_messages_in_channel(messages_list, channel_id="C06FTS38JRX"):
 
 
 
-# Test delete slack message
-# messages_to_delete = ["1706124993.854939"]
+# # Test delete slack message
+# messages_to_delete = ["1706204718.731639"]
 # delete_messages_in_channel(messages_to_delete)
 
 
 # Test send news
-# send_NEWS_message_to_slack(channel_id="C05RM0DF8J3",
+# send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
 #                             title="Testing sending top story to AI Alpha",
 #                             date_time="2023-10-18",
 #                             summary="""
@@ -168,5 +169,5 @@ def delete_messages_in_channel(messages_list, channel_id="C06FTS38JRX"):
 #                             """,
 #                             category_name='Bitcoin',
 #                             url="https://cointelegraph.com/news/btc-price-41k-bitcoin-us-macro-data-fed-fomc-day",
-#                             images_list=['width=960/https://s3.cointelegraph.com/uploads/2023-10/0ea71b33-960f-4f8a-8c07-d6220712f9c8.jpg', 'https://s3.cointelegraph.com/uploads/2023-10/e3827d5a-4314-4b0e-8623-115f77e93c6b.png', 'https://s3.cointelegraph.com/storage/uploads/view/ac4d2a4d9ba9a9aa006aa37b33355665.png', 'https://s3.cointelegraph.com/storage/uploads/view/8e7b3440d419145826674bf2b2f93b0f.png', 'https://s3.cointelegraph.com/storage/uploads/view/e2016155533b827e6ad467da1c82bb1c.png', 'https://s3.cointelegraph.com/storage/uploads/view/08f722b45add8b11cfdeba3cee7060c6.svg', 'https://s3.cointelegraph.com/storage/uploads/view/b89166f724b3e5aec098ebf13cab6531.png', 'https://s3.cointelegraph.com/storage/uploads/view/a5fbd88645e2124aaf525b2a56a6cc4d.png', 'https://s3.cointelegraph.com/storage/uploads/view/c3bc0490407720f59d1c058d0a2788ce.png', 'https://s3.cointelegraph.com/storage/uploads/view/639362c27648354dc8b0a2e252b741eb.png', 'https://s3.cointelegraph.com/storage/uploads/view/b24d0875e4ad164da08a655f1deea30b.png', 'https://s3.cointelegraph.com/storage/uploads/view/3ff6797c69a564da563746ed0253bc76.png', 'https://s3.cointelegraph.com/storage/uploads/view/1d52c58c28980f7d1b5ae59007b66b6d.png', 'https://s3.cointelegraph.com/storage/uploads/view/e4445a81770a9da4f177e000eb71ff11.png', 'https://s3.cointelegraph.com/storage/uploads/view/43688dd5428f7fa573e42458351d152f.png', 'https://s3.cointelegraph.com/storage/uploads/view/41d8e0dda58a5047a7f53db98a2edb3c.png', 'https://s3.cointelegraph.com/storage/uploads/view/172fab437bae754ebe42e7a23b48232a.png', 'https://s3.cointelegraph.com/storage/uploads/view/5886af490e0311fa1838e13f042f28e5.png', 'https://zoa.cointelegraph.com/pixel?postId=118445&regionId=1']
+#                             image="https://oaidalleapiprodscus.blob.core.windows.net/private/org-V3grKfdUrUQTVzr4Y6MaGKAA/user-4aQgDraRZsqDNNzTjEvtdLJD/img-ylKRuEbd9e9xWc1o6RwVOw9C.png?st=2024-01-25T16%3A08%3A37Z&se=2024-01-25T18%3A08%3A37Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-24T22%3A02%3A06Z&ske=2024-01-25T22%3A02%3A06Z&sks=b&skv=2021-08-06&sig=naEtkOnSFIzRNoUwLfBSj2pMR3SbBIlSSjq6MwX%2BMDw%3D"
 #                             )

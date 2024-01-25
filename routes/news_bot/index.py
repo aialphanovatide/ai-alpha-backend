@@ -1,13 +1,11 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from config import CoinBot, session, Alert, Category, Article, TopStory
+from config import CoinBot, session, Category, Article, TopStory
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
-from datetime import datetime, timedelta
 from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
 from sqlalchemy import desc
-import traceback
 
 scrapper_bp = Blueprint(
     'scrapper_bp', __name__,
@@ -21,7 +19,7 @@ scrapper_bp = Blueprint(
 def get_all_top_stories():
     try:
         top_stories_list = []
-        top_stories = session.query(TopStory).order_by(TopStory.created_at).all()
+        top_stories = session.query(TopStory).order_by(desc(TopStory.created_at)).all()
 
         if not top_stories:
             return {'message': 'No top stories found'}, 204
@@ -52,7 +50,6 @@ def get_all_top_stories():
     except Exception as e:
         return {'error': f'An error occurred getting the top stories: {str(e)}'}, 500
     
-
 
 # Gets all the news related to a category: ex Layer 0 
 def get_news(bot_name):
