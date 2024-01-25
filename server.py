@@ -66,7 +66,7 @@ app.register_blueprint(get_analysis_by_id)
 app.register_blueprint(total_bots)
 app.register_blueprint(get_chart_values)
 
-
+#route to post analysis
 @app.route('/post_analysis', methods=['POST'])
 def post_analysis():
     try:
