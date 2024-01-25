@@ -14,7 +14,6 @@ from flask import request, redirect, url_for
 from config import Session as DBSession 
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
-from routes.analysis.analysis import analysis_bp
 from routes.dashboard.activate_all_bots import bots_activator
 from routes.dashboard.deactivate_all_bots import bots_deactivator
 from sqlalchemy.orm import joinedload
