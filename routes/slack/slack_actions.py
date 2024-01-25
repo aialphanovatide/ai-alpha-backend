@@ -6,7 +6,8 @@ from urllib.parse import unquote
 from json import JSONDecodeError
 from flask import request, Blueprint
 from slackeventsapi import SlackEventAdapter
-from config import session, Article, TopStory
+from config import session, Article, TopStory, TopStoryImage, ArticleImage
+from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ slack_events_bp = Blueprint(
     static_folder='static'
 )
 
-
+# RESERVED ROUTE - DO NOT USE
 # This route receives all relevant articles that needs to go to the Top Stories
 @slack_events_bp.route("/slack/events", methods=["POST"])
 def slack_events():
@@ -45,28 +46,52 @@ def slack_events():
         
         article = session.query(Article).filter(func.trim(Article.url) == url.strip()).first()
         if not article:
+            print('Article not found')
+            send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                               title_message="Error saving article in top story section",
+                                               sub_title="Response",
+                                               message=f"Article with link: {url} - not found")
             return 'Article not found', 404
         
         if article:
+            article_image = session.query(ArticleImage).filter(ArticleImage.article_id == article.article_id).first()
             new_topstory = TopStory(coin_bot_id=article.coin_bot_id,
-                     summary=article.summary,
-                     story_date=article.date)
-            
+                                    summary=article.summary,
+                                    story_date=article.date)
+                            
             session.add(new_topstory)
+            session.commit()
+            
+            image = article_image.image if article_image else "No image"
+            new_topstory_image = TopStoryImage(image=image,
+                                                top_story_id=new_topstory)
+            session.add(new_topstory_image)
             session.commit()
 
             return 'Message received', 200
 
     except JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
+        send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                               title_message="Error saving article in top story section",
+                                               sub_title="Response",
+                                               message=f"Error decoding JSON: {e}")
         return 'Bad Request: Invalid JSON', 400
 
     except KeyError as e:
         print(f"Error accessing key in JSON: {e}")
+        send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                               title_message="Error saving article in top story section",
+                                               sub_title="Response",
+                                               message=f"Error accessing key in JSON: {e}")
         return 'Bad Request: Missing key in JSON', 400
 
     except Exception as e:
         print(f"Unexpected error: {e}")
+        send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                               title_message="Error saving article in top story section",
+                                               sub_title="Response",
+                                               message=f"Unexpected error: {e}")
         return 'Internal Server Error', 500
 
 

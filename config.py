@@ -171,7 +171,7 @@ class TopStoryImage(Base):
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    top_story_id = Column(Integer, ForeignKey('top_story.top_story_id'))
+    top_story_id = Column(Integer, ForeignKey('top_story.top_story_id'), nullable=False)
 
     top_story = relationship('TopStory', back_populates='images')
 
