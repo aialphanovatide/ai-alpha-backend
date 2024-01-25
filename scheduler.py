@@ -2,8 +2,8 @@ from config import Category
 from config import db_url, session
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.schedulers.background import BackgroundScheduler
+from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_EXECUTED
-from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 
 
 scheduler = BackgroundScheduler(executors={'default': {'type': 'threadpool', 'max_workers': 50}})
@@ -13,19 +13,26 @@ if scheduler.state != 1:
     scheduler.start()
 
 def job_executed(event): 
-    print(f'\n{event.job_id} was executed successfully at {event.scheduled_run_time}, response: {event.retval}')
+    message = f"{event.job_id} was executed successfully at {event.scheduled_run_time}, response: {event.retval}"
+    print(f'\n{message}')
+    send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                       title_message=F"{str(event.job_id).capitalize} was executed successfully",
+                                       sub_title="Response",
+                                       message=f"Job executed at {event.scheduled_run_time}"
+                                       )
     
 
 def job_error(event):
     job_id = str(event.job_id).capitalize()
-    send_notification_to_product_alerts_slack_channel(title_message=f'{job_id} News Bot has an internal error on the last scrapped', 
-                                                      sub_title="Response", 
-                                                      message=f"{event.retval}")
+    send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                       title_message=f'{job_id} News Bot has an internal error in the last execution', 
+                                        sub_title="Response", 
+                                        message=f"{event.retval}")
 
 
 def job_max_instances_reached(event): 
 
-    send_notification_to_product_alerts_slack_channel(
+    send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
     title_message=f'{str(event.job_id).capitalize()} News Bot - Execution error', 
     sub_title="Response", 
     message='Maximum number of running instances reached, *Upgrade* the time interval')
@@ -46,17 +53,19 @@ def job_max_instances_reached(event):
                 
                 job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=(new_time_interval), id=target, replace_existing=True, args=[bot_name], max_instances=2)
                 if job:
-                    send_notification_to_product_alerts_slack_channel(title_message=f'{target} News Bot restarted', 
-                                                                    sub_title="Response", 
-                                                                    message=f"An interval of *{new_time_interval} Minutes* has been set")
+                    send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                                        title_message=f'{target} News Bot restarted', 
+                                                        sub_title="Response", 
+                                                        message=f"An interval of *{new_time_interval} Minutes* has been set")
                     
                     print(f"""---{target} News Bot restarted: An interval of *{new_time_interval} Minutes* has been set for scrapping data---""")
                     
     except Exception as e:
         print(f'---Error while restarting {target} News Bot: {str(e)}---')
-        send_notification_to_product_alerts_slack_channel(title_message=f'Error while restarting {target} News Bot', 
-                                                          sub_title="Response", 
-                                                          message=f"{str(e)}")
+        send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
+                                        title_message=f'Error while restarting {target} News Bot', 
+                                        sub_title="Response", 
+                                        message=f"{str(e)}")
    
 
    

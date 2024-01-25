@@ -40,11 +40,6 @@ ENV/
 .idea/
 
 
-
-# Static files (you might need to adjust this if your static folder is different)
-static/
-
-
 service_account.json
 __pycache__/
 *.pyc
