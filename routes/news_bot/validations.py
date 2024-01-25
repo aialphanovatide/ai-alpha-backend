@@ -44,7 +44,7 @@ def validate_content(bot_name, content, session_instance):
         for _, keyword in A.iter(content.casefold()):
             # If a match is found, return True
             savedKeyword = {'keyword: ':  keyword, 'coin Bot: ': bot_name}
-            print(savedKeyword)
+            # print('Found Keyword:', savedKeyword)
             return True
 
         # No matches found

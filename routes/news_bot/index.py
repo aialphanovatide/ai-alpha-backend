@@ -17,21 +17,15 @@ scrapper_bp = Blueprint(
 
 
 # Gets all top stories 
+@scrapper_bp.route('/api/get/allTopStories', methods=['GET'])
 def get_all_top_stories():
     try:
-        coin_bots = session.query(CoinBot).all()
-
-        if not coin_bots:
-            return {'message': 'No CoinBots found'}, 404
-
         top_stories_list = []
+        top_stories = session.query(TopStory).order_by(TopStory.created_at).all()
 
-        for coin_bot in coin_bots:
-            coin_bot_id = coin_bot.bot_id
-
-            # Sort the top stories by creation date in descending order
-            top_stories = session.query(TopStory).filter(TopStory.coin_bot_id == coin_bot_id).order_by(desc(TopStory.created_at)).all()
-
+        if not top_stories:
+            return {'message': 'No top stories found'}, 404
+        else:
             for top_story in top_stories:
                 top_story_dict = {
                     'top_story_id': top_story.top_story_id,
@@ -52,22 +46,11 @@ def get_all_top_stories():
 
                 top_stories_list.append(top_story_dict)
 
-        if top_stories_list:
-            return {'top_stories': top_stories_list}, 200
-        else:
-            return {'message': 'No top stories found'}, 404
-
+        
+            return {'top stories': top_stories_list}, 200
+           
     except Exception as e:
         return {'error': f'An error occurred getting the top stories: {str(e)}'}, 500
-
-@scrapper_bp.route('/api/get/allTopStories', methods=['GET'])
-def get_all_top_stories_route():
-    try:
-        result, status_code = get_all_top_stories()
-        return result, status_code
-
-    except Exception as e:
-        return {'error': f'An error occurred getting the news: {str(e)}'}, 500
     
 
 
@@ -77,12 +60,12 @@ def get_news(bot_name):
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
         if not coin_bot:
-            return {'error': f'Bot "{bot_name}" not found'}, 404
+            return {'error': f'Coin {bot_name} not found'}, 404
 
         coin_bot_id = coin_bot.bot_id
 
         # Sort the articles by date in descending order
-        articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.date)).all()
+        articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.created_at)).all()
 
         if articles:
             articles_list = []
@@ -115,7 +98,6 @@ def get_news(bot_name):
             return {'message': f'No articles found for {bot_name}'}, 404
  
     except Exception as e:
-        traceback.print_exc()
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
 
 @scrapper_bp.route('/api/get/news', methods=['GET', 'POST'])  
@@ -125,17 +107,15 @@ def get_news_by_bot_name():
         bot_name = data.get('botName')
 
         if not bot_name:
-            return {'error': 'Bot name is required in the request'}, 400
-
-        res, status = get_news(bot_name=bot_name)
-
-        return res, status
+            return {'error': 'Coin is required'}, 400
+        else:
+            res, status = get_news(bot_name=bot_name)
+            return res, status
     except Exception as e:
-        traceback.print_exc() 
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
 
 
-
+# Gets all categories
 @scrapper_bp.route('/get_categories', methods=['GET'])
 def get_categories():
     try:
@@ -148,7 +128,10 @@ def get_categories():
                 'category': category.category,
                 'time_interval': category.time_interval,
                 'is_active': category.is_active,
-                'image': category.image,
+                'active_dark_icon': category.active_dark_icon,
+                'inactive_dark_icon': category.inactive_dark_icon,
+                'active_light_icon': category.active_light_icon,
+                'inactive_light_icon': category.inactive_light_icon,
                 'created_at': category.created_at.isoformat(),
                 'coin_bots': [{
                     'bot_id': bot.bot_id,
@@ -194,7 +177,6 @@ def activate_news_bot(category_name):
         return f'Error while activating the {category_name.capitalize()} News Bot', 500
 
 
-    
 def deactivate_news_bot(category_name):
 
     try:

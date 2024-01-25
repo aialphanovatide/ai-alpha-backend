@@ -77,6 +77,8 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
             if response == True:
                 print(f'Article {title} sent successfully to Slack channel {category_name}')
                 return f'Article {title} sent successfully to Slack channel {category_name}', 200
+            else:
+                print(f'Article {title} was not sent: {response}')
 
         except SlackApiError as e:
             print(f"Error posting message: {e}")
