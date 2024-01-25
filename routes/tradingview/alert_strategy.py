@@ -1,10 +1,7 @@
-from routes.trendspider.create_chart import generate_alert_chart
-from config import session, CoinBot, Alert 
-from dotenv import load_dotenv
-import requests
 import os
-from websocket.socket import socketio
-
+import requests
+from dotenv import load_dotenv
+from config import session, CoinBot, Alert 
 
 
 load_dotenv()
@@ -21,17 +18,6 @@ CALL_TO_TRADE_TOPIC_ID = os.getenv('CALL_TO_TRADE_TOPIC_ID')
 
 telegram_text_url = f'https://api.telegram.org/bot{TOKEN}/sendMessage?parse_mode=HTML'
 send_photo_url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto?parse_mode=HTML'
-
-
-# example incoming string: 3M chart - Price cross and close over Resistance 3
-def formatted_alert_name(input_string):
-
-    components = input_string.split(' - ')
-    
-    time_frame = components[0].casefold()
-    alert_message = components[1]
-
-    return time_frame, alert_message
 
 
 def send_alert_strategy_to_slack(price, alert_name, message):
@@ -87,6 +73,11 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
         alert_Name = str(alert_name).upper()
         formatted_price = str(price)
 
+        # Remove any dot or point at the end of the price
+        if formatted_price.endswith('.') or formatted_price.endswith(','):
+            formatted_price = formatted_price[:-1]
+
+
         parts = formatted_symbol.split("usdt")
         bot_name = parts[0]
     
@@ -96,7 +87,6 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
 
         content = f"""<b>{alert_Name}</b>\n\n{alert_message}\nLast Price: ${formatted_price}\n"""
-    
 
         text_payload = {
                 'text': content,
@@ -124,13 +114,12 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
                     session.add(new_alert)
                     session.commit()
-                    socketio.emit('update_alerts', namespace='/alerts')
             
                 return 'Alert message sent from Tradingview to Telegram successfully', 200
             else:
                 return f'Error while sending message from Tradingview to Telegram {str(response.content)}', 500 
         except Exception as e:
-            return f'Error sending message from Tradingview to Telegram. Reason: {e}', 500
+            return f'Error sending message from Tradingview to Telegram. Reason: {str(e)}', 500
     except Exception as e:
-        return f'An error occured in send_alert_strategy_to_telegram ' + str(e)
+        return f'An error occured in send_alert_strategy_to_telegram: {str(e)}', 500
     

@@ -2,7 +2,10 @@
   {
     "main_keyword": "bitcoin",
     "alias": "Bitcoin",
-    "icon": "/static/icons-topmenu/bitcoin.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/bitcoin.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/bitcoin.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/bitcoin.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/bitcoin.png",
     "coins": [
       {
         "coin_keyword": "BTC",
@@ -187,7 +190,10 @@
   {
     "main_keyword": "ethereum",
     "alias": "Ethereum",
-    "icon": "/static/icons-topmenu/ethereum.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/ethereum.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/ethereum.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/ethereum.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/ethereum.png",
     "coins": [
       {
         "coin_keyword": "ETH",
@@ -581,7 +587,10 @@
   {
     "main_keyword": "hacks",
     "alias": "Hacks",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/baseblock.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/baseblock.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/baseblock.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/baseblock.png",
     "coins": [
       {
         "coin_keyword": "HACKS",
@@ -1019,7 +1028,10 @@
   {
     "main_keyword": "lsd",
     "alias": "Lsd",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/lsds.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/lsds.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/lsds.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/lsds.png",
     "coins": [
       {
         "coin_keyword": "LDO",
@@ -2527,7 +2539,10 @@
   {
     "main_keyword": "layer 0",
     "alias": "RootLink",
-    "icon": "/static/icons-topmenu/rootlink.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/rootlink.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/rootlink.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/rootlink.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/rootlink.png",
     "coins": [
       {
         "coin_keyword": "ATOM",
@@ -4711,7 +4726,10 @@
   {
     "main_keyword": "layer 1 lmc",
     "alias": "BaseBlock",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/baseblock.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/baseblock.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/baseblock.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/baseblock.png",
     "coins": [
       {
         "coin_keyword": "ADA",
@@ -6818,7 +6836,10 @@
   {
     "main_keyword": "layer 1 mmc",
     "alias": "CoreChain",
-    "icon": "/static/icons-topmenu/corechain.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/corechain.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/corechain.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/corechain.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/corechain.png",
     "coins": [
       {
         "coin_keyword": "NEAR",
@@ -8842,7 +8863,10 @@
   {
     "main_keyword": "layer 2",
     "alias": "BoostLayer",
-    "icon": "/static/icons-topmenu/boostlayer.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/boostlayer.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/boostlayer.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/boostlayer.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/boostlayer.png",
     "coins": [
       {
         "coin_keyword": "MATIC",
@@ -11141,7 +11165,10 @@
   {
     "main_keyword": "oracle",
     "alias": "TruthNodes",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/truthnodes.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/truthnodes.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/truthnodes.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/truthnodes.png",
     "coins": [
       {
         "coin_keyword": "LINK",
@@ -12370,7 +12397,10 @@
   {
     "main_keyword": "cross border payments",
     "alias": "X Payments",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/x_payments.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/x_payments.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/x_payments.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/x_payments.png",
     "coins": [
       {
         "coin_keyword": "XLM",
@@ -13982,7 +14012,10 @@
   {
     "main_keyword": "defip",
     "alias": "CycleSwap",
-    "icon": "/static/icons-topmenu/CycleSwap.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/cycle_swap.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/cycle_swap.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/cycle_swap.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/cycle_swap.png",
     "coins": [
       {
         "coin_keyword": "DYDX",
@@ -15571,7 +15604,10 @@
   {
     "main_keyword": "defi",
     "alias": "NexTrade",
-    "icon": "/static/icons-topmenu/NexTrade.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/nextrade.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/nextrade.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/nextrade.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/nextrade.png",
     "coins": [
       {
         "coin_keyword": "UNI",
@@ -16541,7 +16577,10 @@
   {
     "main_keyword": "defio",
     "alias": "DiverseFi",
-    "icon": "/static/icons-topmenu/DiverseFi.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/diverse_fi.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/diverse_fi.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/diverse_fi.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/diverse_fi.png",
     "coins": [
       {
         "coin_keyword": "AAVE",
@@ -18011,7 +18050,10 @@
   {
     "main_keyword": "ai",
     "alias": "IntelliChain",
-    "icon": "/static/icons-topmenu/baseblock.png",
+    "active_dark_icon": "/static/topmenu_icons/dark/active/intellichain.png",
+    "inactive_dark_icon": "/static/topmenu_icons/dark/inactive/intellichain.png",
+    "active_light_icon": "/static/topmenu_icons/light/active/intellichain.png",
+    "inactive_light_icon": "/static/topmenu_icons/light/inactive/intellichain.png",
     "coins": [
       {
         "coin_keyword": "OCEAN",
