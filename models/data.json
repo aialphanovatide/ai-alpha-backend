@@ -112,7 +112,7 @@
           },
           {
             "site": "https://coingape.com/category/news/bitcoin-news",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": ".covergaelist"
@@ -129,7 +129,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://ambcrypto.com/category/bitcoin-news/",
@@ -404,7 +404,7 @@
           },
           {
             "site": "https://coingape.com/category/ethereum-news/",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": ".covergaelist"
@@ -421,7 +421,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://ambcrypto.com/search/ethereum",
@@ -896,7 +896,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://blockworks.co/news",
@@ -931,14 +931,14 @@
             "base_url": "https://www.newsbtc.com",
             "website_name": "Newsbtc",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://www.theblock.co/search?query=crypto%20hack",
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           }
         ],
         "black_list": [
@@ -1476,7 +1476,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://ambcrypto.com/search/ldo",
@@ -1490,7 +1490,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=ldo",
@@ -2032,7 +2032,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://ambcrypto.com/search/RPL",
@@ -2046,7 +2046,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=RPL",
@@ -2403,7 +2403,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://ambcrypto.com/search/FXS",
@@ -2417,7 +2417,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptopotato.com/?s=FXS",
@@ -3349,14 +3349,14 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=atom#gsc.tab=0&gsc.q=atom&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=atom&gsc.sort=",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -3387,7 +3387,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=atom",
@@ -3401,7 +3401,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=atom&rubricId=-1",
@@ -3945,14 +3945,14 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=dot#gsc.tab=0&gsc.q=dot&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=dot&gsc.sort=",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -3983,7 +3983,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=dot",
@@ -3997,7 +3997,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=dot&rubricId=-1",
@@ -4617,14 +4617,14 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=qnt#gsc.tab=0&gsc.q=qnt&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
           },
           {
             "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=qnt&gsc.sort=",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -4655,7 +4655,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=qnt",
@@ -4669,7 +4669,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=qnt&rubricId=-1",
@@ -5228,7 +5228,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=ada#gsc.tab=0&gsc.q=ada&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -5245,7 +5245,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=ada",
@@ -5266,7 +5266,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=ada",
@@ -5280,7 +5280,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=ada&rubricId=-1",
@@ -5914,7 +5914,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=SOL#gsc.tab=0&gsc.q=SOL&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -5931,7 +5931,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=SOL",
@@ -5952,7 +5952,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=SOL",
@@ -5966,7 +5966,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=SOL&rubricId=-1",
@@ -6725,7 +6725,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=avax#gsc.tab=0&gsc.q=avax&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -6742,7 +6742,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=avax",
@@ -6763,7 +6763,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=avax",
@@ -6777,7 +6777,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=avax&rubricId=-1",
@@ -7179,7 +7179,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=near#gsc.tab=0&gsc.q=near&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -7196,7 +7196,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=near",
@@ -7217,7 +7217,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=near",
@@ -7231,7 +7231,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=near&rubricId=-1",
@@ -7929,7 +7929,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=ftm#gsc.tab=0&gsc.q=ftm&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -7946,7 +7946,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=ftm",
@@ -7967,7 +7967,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=ftm",
@@ -7981,7 +7981,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=ftm&rubricId=-1",
@@ -8750,7 +8750,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=kas#gsc.tab=0&gsc.q=kas&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -8767,7 +8767,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=kas",
@@ -8788,7 +8788,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=kas",
@@ -8802,7 +8802,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=kas&rubricId=-1",
@@ -9607,7 +9607,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=matic#gsc.tab=0&gsc.q=matic&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -9638,7 +9638,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://dailyhodl.com/?s=matic",
@@ -10313,7 +10313,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=arb#gsc.tab=0&gsc.q=arb&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -10344,7 +10344,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://dailyhodl.com/?s=arb",
@@ -11080,7 +11080,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=op#gsc.tab=0&gsc.q=op&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -11111,7 +11111,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://dailyhodl.com/?s=op",
@@ -11371,7 +11371,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=LINK#gsc.tab=0&gsc.q=link&gsc.sort=date",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": ".gsc-control-wrapper-cse"
@@ -11402,7 +11402,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://dailyhodl.com/?s=chainlink+LINK",
@@ -11843,7 +11843,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=LINK+chainlink#gsc.tab=0&gsc.q=api%203&gsc.sort=",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -12621,7 +12621,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=xlm#gsc.tab=0&gsc.q=xlm&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -12638,7 +12638,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=xlm",
@@ -12659,7 +12659,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=xlm",
@@ -12673,7 +12673,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=xlm&rubricId=-1",
@@ -13106,7 +13106,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=ALGO#gsc.tab=0&gsc.q=ALGO&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -13123,7 +13123,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=ALGO",
@@ -13144,7 +13144,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=ALGO",
@@ -13158,7 +13158,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=ALGO&rubricId=-1",
@@ -13893,7 +13893,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=xrp#gsc.tab=0&gsc.q=xrp&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -13910,7 +13910,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/news/xrp/",
@@ -13931,7 +13931,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=xrp",
@@ -14406,7 +14406,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=dydx#gsc.tab=0&gsc.q=dydx&gsc.sort=date",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": ".gsc-expansionArea"
@@ -14444,7 +14444,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=dydx",
@@ -14944,7 +14944,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=velo#gsc.tab=0&gsc.q=velo&gsc.sort=date",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -14961,7 +14961,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=velo",
@@ -14982,7 +14982,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=velo",
@@ -15483,7 +15483,7 @@
           },
           {
             "site": "https://coingape.com/search_gcse/?q=gmx#gsc.tab=0&gsc.q=gmx&gsc.sort=date",
-            "base_url": "https://coingape.com",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": ".gsc-expansionArea"
@@ -15521,7 +15521,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=gmx",
@@ -15535,7 +15535,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=gmx&rubricId=-1&time=past_day",
@@ -15684,24 +15684,24 @@
             "base_url": "https://beincrypto.com",
             "website_name": "Beincrypto",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://bitcoinist.com/?s=uni",
             "base_url": "https://bitcoinist.com",
             "website_name": "Bitcoinist",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".jeg_block_container"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=uni#gsc.tab=0&gsc.q=uni&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=uni#gsc.tab=0&gsc.q=uni&gsc.sort=date",
+            "base_url": "https://www.google.com/url?client=internal",
             "website_name": "Coingape",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".gsc-expansionArea"
           },
           {
-            "site": "https://www.coindesk.com/search?s=uni",
+            "site": "https://www.coindesk.com/search?s=uni&sort=1&cf=Markets",
             "base_url": "https://www.coindesk.com",
             "website_name": "Coindesk",
             "is_URL_complete": false,
@@ -15712,7 +15712,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=uni",
@@ -15733,7 +15733,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=uni",
@@ -15747,14 +15747,14 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=uni&rubricId=-1",
             "base_url": "https://cryptonews.net",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".container"
+            "main_container": "None"
           },
           {
             "site": "https://www.investing.com/search/?q=uni",
@@ -16150,8 +16150,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=sushi#gsc.tab=0&gsc.q=sushi&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=sushi#gsc.tab=0&gsc.q=sushi&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -16168,7 +16168,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=sushi",
@@ -16189,7 +16189,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=sushi",
@@ -16203,7 +16203,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=sushi&rubricId=-1",
@@ -16453,8 +16453,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=cake#gsc.tab=0&gsc.q=cake&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=cake#gsc.tab=0&gsc.q=cake&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -16471,7 +16471,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/news/cake/",
@@ -16492,7 +16492,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=cake",
@@ -17056,8 +17056,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=aave#gsc.tab=0&gsc.q=aave&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=aave#gsc.tab=0&gsc.q=aave&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -17074,7 +17074,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=aave",
@@ -17095,7 +17095,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=aave",
@@ -17109,7 +17109,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=aave&rubricId=-1",
@@ -17541,8 +17541,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=pendle#gsc.tab=0&gsc.q=pendle&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=pendle#gsc.tab=0&gsc.q=pendle&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -17559,7 +17559,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=pendle",
@@ -17580,7 +17580,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=pendle",
@@ -17594,7 +17594,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=pendle&rubricId=-1",
@@ -17924,8 +17924,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=1inch#gsc.tab=0&gsc.q=1inch&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=1inch#gsc.tab=0&gsc.q=1inch&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -17942,7 +17942,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/news/1inch/",
@@ -17963,7 +17963,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=1inch",
@@ -18173,8 +18173,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=OCEAN#gsc.tab=0&gsc.q=OCEAN&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=OCEAN#gsc.tab=0&gsc.q=OCEAN&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -18191,7 +18191,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=OCEAN",
@@ -18212,7 +18212,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=OCEAN",
@@ -18226,7 +18226,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=OCEAN&rubricId=-1",
@@ -18682,8 +18682,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=fet#gsc.tab=0&gsc.q=fet&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=fet#gsc.tab=0&gsc.q=fet&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -18700,7 +18700,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/?s=fet",
@@ -18721,7 +18721,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=fet",
@@ -18735,7 +18735,7 @@
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
-            "main_container": ".jeg_inner_content"
+            "main_container": "None"
           },
           {
             "site": "https://cryptonews.net/?q=fet&rubricId=-1",
@@ -19058,8 +19058,8 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=rndr#gsc.tab=0&gsc.q=rndr&gsc.page=1",
-            "base_url": "https://coingape.com",
+            "site": "https://coingape.com/search_gcse/?q=rndr#gsc.tab=0&gsc.q=rndr&gsc.sort=date",
+            "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
             "main_container": "None"
@@ -19076,7 +19076,7 @@
             "base_url": "https://cryptonews.com",
             "website_name": "Cryptonews",
             "is_URL_complete": false,
-            "main_container": ".mb-80"
+            "main_container": "None"
           },
           {
             "site": "https://cryptoslate.com/news/rndr/",
@@ -19097,7 +19097,7 @@
             "base_url": "https://www.theblock.co",
             "website_name": "Theblock",
             "is_URL_complete": false,
-            "main_container": ".collectionFeed"
+            "main_container": "None"
           },
           {
             "site": "https://cryptodaily.co.uk/search?q=rndr",
