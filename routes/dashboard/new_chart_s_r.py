@@ -49,8 +49,12 @@ def save_chart():
             # Puedes agregar más campos según sea necesario
         )
 
-        # Guardar el nuevo objeto Chart en la base de datos
+        # Eliminar todas las filas donde coin_bot_id sea igual al proporcionado
         with DBSession() as db_session:
+            delete_last_chart = db_session.query(Chart).filter_by(coin_bot_id=data.get('coin_bot_id')).delete()
+            print(f"{delete_last_chart} rows deleted")
+
+            # Guardar el nuevo objeto Chart en la base de datos
             db_session.add(new_chart)
             db_session.commit()
 
@@ -58,4 +62,3 @@ def save_chart():
 
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
-    
