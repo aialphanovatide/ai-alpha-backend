@@ -1,13 +1,12 @@
-from slackeventsapi import SlackEventAdapter
-from flask import request, Blueprint
-from json import JSONDecodeError
-from urllib.parse import unquote
-from dotenv import load_dotenv
-import json
-from websocket.socket import socketio
-from sqlalchemy import func
-from config import session, Article, TopStory
 import os
+import json
+from sqlalchemy import func
+from dotenv import load_dotenv
+from urllib.parse import unquote
+from json import JSONDecodeError
+from flask import request, Blueprint
+from slackeventsapi import SlackEventAdapter
+from config import session, Article, TopStory
 
 load_dotenv()
 
@@ -23,6 +22,8 @@ slack_events_bp = Blueprint(
     static_folder='static'
 )
 
+
+# This route receives all relevant articles that needs to go to the Top Stories
 @slack_events_bp.route("/slack/events", methods=["POST"])
 def slack_events():
     try:
@@ -54,7 +55,6 @@ def slack_events():
             session.add(new_topstory)
             session.commit()
 
-            socketio.emit('update_topstory', namespace='/topstory')
             return 'Message received', 200
 
     except JSONDecodeError as e:

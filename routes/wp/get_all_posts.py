@@ -1,8 +1,14 @@
+import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+WP_API_KEY = os.getenv('WP_API_KEY')
 
 def get_all_posts():
 
-    url = "https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key=5fjtogfdmtjbdljfnvmqt2och2fl3ppvjd9nkxdoa0jt1vkp9ri81nwm1lbfgfrn&action=get_posts"
+    url = f"https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key={WP_API_KEY}&action=get_posts"
 
     headers = {
         "Accept": "*/*",

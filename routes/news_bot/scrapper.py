@@ -341,6 +341,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             #                     )
 
 
+                            # # The following code is commented out temporarily (DEFINITEFILT) 
+                            # # Until we can ensure that the tweet displays correctly on the platform.
                             # if category_name == 'bitcoin':
                             #     response, status = send_tweets_to_twitter(content=summary,
                             #                                             title=title)
@@ -370,7 +372,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             # session.add(new_article_image)
                             # session.commit()
 
-                            socketio.emit('update_news', namespace='/news')
+                          
                             counter_articles_saved +=1
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
                         else:
