@@ -27,7 +27,7 @@ from sqlalchemy.orm import joinedload
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
-from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site
+from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -284,9 +284,9 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                     
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, site_name, image_urls = article_data
+                        image_urls_list = list(image_urls)
 
                         summary = summary_generator(content, category_name)
-                        # summary = True
                         
                         channel_mapping = {
                             'btc': btc_slack_channel_id,
@@ -331,18 +331,16 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                         if summary:
                             image = generate_poster_prompt(summary)
-                            send_NEWS_message_to_slack(channel_id="C06FTS38JRX", 
-                                                title=title,
-                                                date_time=valid_date,
-                                                url=article_link,
-                                                summary=summary,
-                                                image=image,
-                                                category_name=category_name
-                                                )
+                            # send_NEWS_message_to_slack(channel_id=channel_id, 
+                            #                     title=title,
+                            #                     date_time=valid_date,
+                            #                     url=article_link,
+                            #                     summary=summary,
+                            #                     image=image,
+                            #                     category_name=category_name
+                            #                     )
 
 
-                            # # The following code is commented out temporarily (DEFINITEFILT) 
-                            # # Until we can ensure that the tweet displays correctly on the platform.
                             # if category_name == 'bitcoin':
                             #     response, status = send_tweets_to_twitter(content=summary,
                             #                                             title=title)
@@ -372,6 +370,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             session.add(new_article_image)
                             session.commit()
 
+                            socketio.emit('update_news', namespace='/news')
                             counter_articles_saved +=1
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
                         else:
@@ -381,7 +380,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                 
                 print(f'\n--- {len(article_urls)} article were analized for {site_name} and {counter_articles_saved} were SAVED\n ---')       
 
-                return f'Web scrapping of {site_name} finished', 200
+                return list(article_urls), 200
             
             except Exception as e:
                 print(f'Error scraping the article link in {site_name}: {str(e)}')
@@ -437,8 +436,6 @@ def start_periodic_scraping(category_name):
                                                         )
                                 
                                 print('RESULT:', result)
-                        else:
-                            print(result)
                    
                 return f'All {category_name.capitalize()} sites were analized', 200
                   

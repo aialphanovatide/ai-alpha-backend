@@ -5,7 +5,6 @@ from config import Admin, Analysis, AnalysisImage, Category, Chart, CoinBot, Key
 #from routes.slack.templates.product_alert_notification import send_notification_to_product_alerts_slack_channel
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.trendspider.index import trendspider_notification_bp
-from routes.tradingview.index import tradingview_notification_bp
 from routes.news_bot.index import activate_news_bot, deactivate_news_bot, scrapper_bp
 from routes.telegram.index import telegram_bp 
 from routes.slack.slack_actions import slack_events_bp
@@ -64,7 +63,6 @@ app.register_blueprint(scrapper_bp)
 app.register_blueprint(send_email_bp)
 app.register_blueprint(slack_events_bp)
 app.register_blueprint(trendspider_notification_bp)
-app.register_blueprint(tradingview_notification_bp)
 app.register_blueprint(bots_activator)
 app.register_blueprint(bots_deactivator)
 app.register_blueprint(bots_route)
