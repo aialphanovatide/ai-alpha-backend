@@ -136,7 +136,7 @@ def get_categories():
                     'created_at': bot.created_at.isoformat()
                 } for bot in category.coin_bot]
             })
-
+        print("coin bots: ", category_data.coin_bot.bot_name)
         return {'categories': category_data}, 200
 
     except Exception as e:

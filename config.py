@@ -56,6 +56,29 @@ class PurchasedPlan(Base):
 
     user = relationship('User', back_populates='purchased_plans')
 
+
+class Introduction(Base):
+    __tablename__ = 'introduction'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(String)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot = relationship('CoinBot', back_populates='introduction', lazy=True)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+
+class Tokenomics(Base):
+    __tablename__ = 'tokenomics'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    total_supply = Column(Integer)
+    circulating_supply = Column(Integer)
+    percent_circulating_supply = Column(Integer)
+    max_supply = Column(Integer)
+    supply_model = Column(Integer)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+
+    coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
+
+
 class Category(Base):
     __tablename__ = 'category'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -86,6 +109,8 @@ class CoinBot(Base):
     analysis = relationship('Analysis', back_populates='coin_bot')
     top_story = relationship('TopStory', back_populates='coin_bot')
     category = relationship('Category', back_populates='coin_bot')
+    introduction = relationship('Introduction', back_populates='coin_bot', lazy=True)
+    tokenomics = relationship('Tokenomics', back_populates='coin_bot', lazy=True)
 
 
 class Keyword(Base):
