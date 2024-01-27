@@ -8,13 +8,6 @@ from flask import Flask, jsonify
 from flask import request
 from config import Session as DBSession 
 
-
-app = Flask(__name__)
-app.name = 'AI Alpha'
-CORS(app, origins='*')
-socketio.init_app(app)
-
-
 post_new_introduction = Blueprint('postNewIntroduction', __name__)
 
 @post_new_introduction.route('/post_introduction', methods=['POST'])
