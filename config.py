@@ -1,5 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from models.fa_model import Fa
 from dotenv import load_dotenv
 from datetime import datetime
 from pathlib import Path
@@ -228,6 +229,8 @@ class Chart(Base):
 
 # Export the sql session
 Base.metadata.create_all(engine)
+Fa.metadata.create_all(engine) # Creates the FA tables
+
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session() 
 

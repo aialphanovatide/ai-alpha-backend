@@ -76,7 +76,6 @@ def get_news(bot_name, time_range):
         else:
             start_date = None
 
-        print('start_date: ', start_date)
          # Filter news based on time range
         if start_date:
             articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id, Article.created_at >= start_date).order_by(desc(Article.created_at)).all()
@@ -116,20 +115,20 @@ def get_news(bot_name, time_range):
     except Exception as e:
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
 
-@scrapper_bp.route('/api/get/news', methods=['GET', 'POST'])  
+@scrapper_bp.route('/api/get/news', methods=['GET'])  
 def get_news_by_bot_name():
     try:
         data = request.json
-        bot_name = data.get('botName')
+        coin = data.get('coin')
         time_range = data.get('time_range')
 
         if time_range and time_range not in ["today", "this week", "last month"]:
             return {'error': "Time range isn't valid"}, 400
 
-        if not bot_name:
+        if not coin:
             return {'error': 'Coin is required'}, 400
         else:
-            res, status = get_news(bot_name=bot_name, time_range=time_range)
+            res, status = get_news(bot_name=coin, time_range=time_range)
             return res, status
     except Exception as e:
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
