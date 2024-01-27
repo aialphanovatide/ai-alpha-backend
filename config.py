@@ -1,6 +1,5 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from models.fa_model import Fa
 from dotenv import load_dotenv
 from datetime import datetime
 from pathlib import Path
@@ -58,28 +57,6 @@ class PurchasedPlan(Base):
     user = relationship('User', back_populates='purchased_plans')
 
 
-class Introduction(Base):
-    __tablename__ = 'introduction'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    content = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    coin_bot = relationship('CoinBot', back_populates='introduction', lazy=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-
-class Tokenomics(Base):
-    __tablename__ = 'tokenomics'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    total_supply = Column(Integer)
-    circulating_supply = Column(Integer)
-    percent_circulating_supply = Column(Integer)
-    max_supply = Column(Integer)
-    supply_model = Column(Integer)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-
-    coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
-
-
 class Category(Base):
     __tablename__ = 'category'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -110,8 +87,12 @@ class CoinBot(Base):
     analysis = relationship('Analysis', back_populates='coin_bot')
     top_story = relationship('TopStory', back_populates='coin_bot')
     category = relationship('Category', back_populates='coin_bot')
-    introduction = relationship('Introduction', back_populates='coin_bot', lazy=True)
-    tokenomics = relationship('Tokenomics', back_populates='coin_bot', lazy=True)
+    introduction = relationship("Introduction", back_populates="coin_bot", lazy=True)
+    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True)
+    token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True)
+    token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True)
+    value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
+    competitor = relationship("Competitor", back_populates="coin_bot", lazy=True)
 
 
 class Keyword(Base):
@@ -252,9 +233,99 @@ class Chart(Base):
     coin_bot = relationship('CoinBot', back_populates='chart', lazy=True)
 
 
+# ----------------------------------------
+    
+class Introduction(Base):
+    __tablename__ = 'introduction'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(String)
+    dynamic = Column(Boolean, default=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+
+    coin_bot = relationship('CoinBot', back_populates='introduction', lazy=True)
+
+class Tokenomics(Base):
+    __tablename__ = 'tokenomics'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    total_supply = Column(String)
+    circulating_supply = Column(String)
+    percentage_circulating_supply = Column(String)
+    max_supply = Column(String)
+    supply_model = Column(String)
+    dynamic = Column(Boolean, default=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    
+    coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
+
+class Token_distribution(Base):
+    __tablename__ = 'token_distribution'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    holder_category = Column(String)
+    percentage_held = Column(String)
+    dynamic = Column(Boolean, default=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    
+    coin_bot = relationship('CoinBot', back_populates='token_distribution', lazy=True)
+
+class Token_utility(Base):
+    __tablename__ = 'token_utility'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    gas_fees_and_transaction_settlement = Column(String)
+    dynamic = Column(Boolean, default=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    
+    coin_bot = relationship('CoinBot', back_populates='token_utility', lazy=True)
+
+class Value_accrual_mechanisms(Base):
+    __tablename__ = 'value_accrual_mechanisms'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    token_burning = Column(String)
+    token_buyback = Column(String)
+    dynamic = Column(Boolean, default=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    
+    coin_bot = relationship('CoinBot', back_populates='value_accrual_mechanisms', lazy=True)
+
+class Competitor(Base):
+    __tablename__ = 'competitor'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    token = Column(String)
+    circulating_supply = Column(String)
+    token_supply_model = Column(String)
+    current_market_cap = Column(String)
+    tvl = Column(String)
+    daily_active_users = Column(String)
+    transaction_fees = Column(String)
+    transaction_speed = Column(String)
+    Inflation_rate = Column(String)
+    apr = Column(String)
+    active_developers = Column(Integer)
+    revenue = Column(Integer)
+    dynamic = Column(Boolean, default=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    
+    coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
+
+
+
+# ----------------------------------------
+
+
 # Export the sql session
 Base.metadata.create_all(engine)
-Fa.metadata.create_all(engine) # Creates the FA tables
+# Fa.metadata.create_all(engine) # Creates the FA tables
 
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session() 
