@@ -1,8 +1,10 @@
-from openai import OpenAI
-import requests
-import json
 import os
 import base64
+import json
+import requests
+from openai import OpenAI
+from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -47,5 +49,9 @@ def generate_poster_prompt(article):
         return image_data
     else:
         print("Error:", response.status_code, response.text)
+        send_INFO_message_to_slack_channel(title_message="Error generating Image",
+                                           sub_title="Reason",
+                                           message=f"{response.text} - Article: {article}"
+                                           )
         return 'No Image'
 

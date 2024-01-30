@@ -61,13 +61,12 @@ app.register_blueprint(tradingview_bp)
 app.register_blueprint(slack_events_bp)
 app.register_blueprint(bots_deactivator)
 app.register_blueprint(get_chart_values)
-app.register_blueprint(get_analysis_by_id)
-app.register_blueprint(get_coin_bot_tokenomics)
-app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(post_new_analysis)
+app.register_blueprint(get_analysis_by_id)
 app.register_blueprint(post_new_introduction)
 app.register_blueprint(get_coin_bot_tokenomics)
 app.register_blueprint(save_site_bp)
+app.register_blueprint(trendspider_notification_bp)
 
 if __name__ == '__main__':
     try:
