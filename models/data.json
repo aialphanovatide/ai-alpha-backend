@@ -11374,7 +11374,7 @@
             "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
-            "main_container": ".gsc-control-wrapper-cse"
+            "main_container": "None"
           },
           {
             "site": "https://www.coindesk.com/search?s=chainlink%20",
