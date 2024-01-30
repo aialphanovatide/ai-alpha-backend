@@ -87,7 +87,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
         
 
 # Send an info message to slack
-def send_INFO_message_to_slack_channel(channel_id, title_message, sub_title, message):
+def send_INFO_message_to_slack_channel(title_message, sub_title, message, channel_id="C06FTS38JRX"):
         blocks=[
                 {
                     "type": "section",

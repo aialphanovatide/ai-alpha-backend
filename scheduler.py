@@ -16,7 +16,7 @@ def job_executed(event):
     message = f"{event.job_id} was executed successfully at {event.scheduled_run_time}, response: {event.retval}"
     print(f'\n{message}')
     send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
-                                       title_message=F"{str(event.job_id).capitalize} was executed successfully",
+                                       title_message=F"{str(event.job_id).capitalize()} was executed successfully",
                                        sub_title="Response",
                                        message=f"Job executed at {event.scheduled_run_time}"
                                        )

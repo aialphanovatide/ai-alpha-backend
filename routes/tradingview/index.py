@@ -17,12 +17,16 @@ tradingview_bp = Blueprint(
 def get_all_alerts():
     try:
         category = request.args.get('category')
+
+        if not category:
+            return 'Category is required', 400
+        
         category_obj = session.query(Category).filter(Category.category == category).first()
 
         alerts_list = []
 
         if not category_obj:
-            return alerts_list, 400
+            return f"Category {category} doesn't exist", 404
 
         if category_obj:
             # gets all coin_bot related to this category
@@ -60,13 +64,13 @@ def get_filtered_alerts():
         if not coin or not date:
             return {'message': "Coin and date are required"}, 400
 
-        if date not in ["today", "this week", "last week"]:
+        if date not in ["today", "this week", "last week"]: 
             return {'message': "Date not valid"}, 400
         else:
             coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == coin.casefold().strip()).first()
 
             if not coin_bot:
-                return {'message': f'{coin} not found'}, 400
+                return {'message': f'{coin} not found'}, 404
             else:
                 coin_bot_id = coin_bot.bot_id
 
@@ -80,7 +84,6 @@ def get_filtered_alerts():
                 elif date == 'last week':
                     today = datetime.now()
                     start_date = today - timedelta(days=(today.weekday() + 7))
-                    print('start_date: ', start_date)
                     start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
                 else:
                     start_date = None
@@ -159,7 +162,7 @@ def receive_data_from_tv():
                     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
                                                         title_message='Error seding Tradingview Alert',
                                                         sub_title='Reason',
-                                                        message=str(response))
+                                                        message=f"{str(response)} - Data: {str(request.data)}")
 
 
                 return response, status
@@ -169,7 +172,7 @@ def receive_data_from_tv():
                 send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
                                                     title_message='Error receiving Tradingview message',
                                                     sub_title='Reason',
-                                                    message=str(e))
+                                                    message=f"{str(e)} - Data: {str(request.data)}")
                 return f'Error sending message to Slack channel. Reason: {e}', 500
             
     except Exception as e:
