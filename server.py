@@ -16,18 +16,19 @@ from routes.slack.slack_actions import slack_events_bp
 from routes.dashboard.all_keywords import all_keywords
 from routes.dashboard.get_total_bots import total_bots
 from routes.chart.get_s_r_chart import get_chart_values
+from routes.dashboard.create_new_site import save_site_bp
 from routes.dashboard.new_chart_s_r import save_new_chart
+from routes.fundamentals.competitors import competitor_bp
 from routes.dashboard_access.sign_in_session import sign_in
 from routes.dashboard.create_new_keyword import new_keyword
 from routes.dashboard.activate_all_bots import bots_activator
+from routes.analysis.new_analysis_post import post_new_analysis
 from routes.trendspider.index import trendspider_notification_bp
 from routes.dashboard.deactivate_all_bots import bots_deactivator
+from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
+from routes.fundamentals.post_new_introduction import post_new_introduction
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
-from routes.analysis.new_analysis_post import post_new_analysis
-from routes.fundamentals.post_new_introduction import post_new_introduction
-from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
-from routes.dashboard.create_new_site import save_site_bp
 
 
 app = Flask(__name__)
@@ -55,6 +56,7 @@ app.register_blueprint(telegram_bp)
 app.register_blueprint(new_keyword)
 app.register_blueprint(all_keywords)
 app.register_blueprint(send_email_bp)
+app.register_blueprint(competitor_bp)
 app.register_blueprint(save_new_chart)
 app.register_blueprint(bots_activator)
 app.register_blueprint(tradingview_bp)
