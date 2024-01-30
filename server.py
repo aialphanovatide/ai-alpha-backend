@@ -27,7 +27,7 @@ from routes.slack.templates.news_message import send_INFO_message_to_slack_chann
 from routes.analysis.new_analysis_post import post_new_analysis
 from routes.fundamentals.post_new_introduction import post_new_introduction
 from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
-
+from routes.dashboard.create_new_site import save_site_bp
 
 
 app = Flask(__name__)
@@ -65,6 +65,7 @@ app.register_blueprint(post_new_analysis)
 app.register_blueprint(get_analysis_by_id)
 app.register_blueprint(post_new_introduction)
 app.register_blueprint(get_coin_bot_tokenomics)
+app.register_blueprint(save_site_bp)
 app.register_blueprint(trendspider_notification_bp)
 
 if __name__ == '__main__':
