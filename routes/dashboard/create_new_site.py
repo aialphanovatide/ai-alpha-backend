@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request, Blueprint
 from config import Session as DBSession, Site
 
-
 save_site_bp = Blueprint('save_site', __name__)
 
 @save_site_bp.route('/save_site', methods=['POST'])

@@ -3,7 +3,6 @@ from flask import jsonify
 from config import Session as DBSession 
 from flask import Blueprint
 
-
 bots_status = Blueprint('get_bots_status', __name__)
 
 @bots_status.route('/get_bot_status')
