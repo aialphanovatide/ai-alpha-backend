@@ -1,6 +1,8 @@
 import os
-from flask import Flask
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS
+from config import Token_distribution, Token_utility, Tokenomics, Value_accrual_mechanisms
+from config import Session as DBSession 
 from websocket.socket import socketio
 from routes.dashboard.bots import bots_route
 from routes.news_bot.index import scrapper_bp
@@ -28,6 +30,7 @@ from routes.dashboard.deactivate_all_bots import bots_deactivator
 from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
 from routes.fundamentals.post_new_introduction import post_new_introduction
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
+from routes.fundamentals.edit_tokenomics import edit_tokenomics_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 
@@ -41,6 +44,7 @@ socketio.init_app(app)
 
 app.static_folder = 'static'
 app.secret_key = os.urandom(24)
+
 
 # Register blueprints -  routes
 app.register_blueprint(sign_up)
@@ -69,6 +73,9 @@ app.register_blueprint(post_new_introduction)
 app.register_blueprint(get_coin_bot_tokenomics)
 app.register_blueprint(save_site_bp)
 app.register_blueprint(trendspider_notification_bp)
+app.register_blueprint(edit_tokenomics_bp)
+
+
 
 if __name__ == '__main__':
     try:

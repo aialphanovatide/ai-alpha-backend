@@ -1,20 +1,9 @@
-import os
 from config import Analysis, AnalysisImage
-from flask_cors import CORS
-from websocket.socket import socketio
-from flask import Flask, session as flask_session
 from flask import request
 from config import Session as DBSession 
 from flask import Blueprint
 
-
 post_new_analysis = Blueprint('postNewAnalysis', __name__)
-
-app = Flask(__name__)
-app.name = 'AI Alpha'
-CORS(app, origins='*')
-socketio.init_app(app)
-
 
 #route to post analysis
 @post_new_analysis.route('/post_analysis', methods=['POST'])

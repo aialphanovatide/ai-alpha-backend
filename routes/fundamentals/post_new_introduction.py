@@ -1,12 +1,8 @@
-import datetime
 from flask import Blueprint, request
 from config import Introduction, Session
-import os
-from flask_cors import CORS
-from websocket.socket import socketio
-from flask import Flask, jsonify
+from flask import jsonify
 from flask import request
-from config import Session as DBSession 
+from config import Session
 
 post_new_introduction = Blueprint('postNewIntroduction', __name__)
 

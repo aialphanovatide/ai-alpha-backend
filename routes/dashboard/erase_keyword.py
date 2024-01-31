@@ -17,15 +17,6 @@ from flask import Blueprint
 
 delete_kw = Blueprint('delete_keyword', __name__)
 
-app = Flask(__name__)
-app.name = 'AI Alpha'
-CORS(app, origins='*')
-socketio.init_app(app)
-
-# Configure Flask to look for templates in the 'dashboard/templates' folder
-app.template_folder = 'dashboard/apps/templates'
-app.static_folder = 'dashboard/apps/static'
-app.secret_key = os.urandom(24)
 
 
 @delete_kw.route('/delete_keyword', methods=['POST'])
