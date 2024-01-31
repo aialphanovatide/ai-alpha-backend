@@ -35,7 +35,7 @@ def save_tokenomics():
         # Actualizar la fila en la tabla TokenDistribution
         token_distribution_data = {
             'holder_category': data.get('tokenDistribution').get('holderCategory'),
-            'percentage_held': data.get('tokenDistribution', {}).get('percentageHeld'),
+            'percentage_held': data.get('tokenDistribution').get('percentageHeld'),
             'coin_bot_id': coin_bot_id
         }
 
