@@ -1,25 +1,10 @@
-import os
-import bcrypt
 from config import Admin
-from flask_cors import CORS
-from websocket.socket import socketio
-from flask import Flask, jsonify, render_template, session as flask_session
-from flask import request, redirect, url_for
+from flask import jsonify, session as flask_session
+from flask import request
 from config import Session as DBSession 
 from flask import Blueprint
 
-
 sign_in = Blueprint('signIn', __name__)
-
-app = Flask(__name__)
-app.name = 'AI Alpha'
-CORS(app, origins='*')
-socketio.init_app(app)
-
-# Configure Flask to look for templates in the 'dashboard/templates' folder
-app.template_folder = 'dashboard/apps/templates'
-app.static_folder = 'dashboard/apps/static'
-app.secret_key = os.urandom(24)
 
 @sign_in.route('/login', methods=['POST'])
 def login():
