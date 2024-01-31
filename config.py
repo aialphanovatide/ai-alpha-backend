@@ -260,6 +260,9 @@ class Tokenomics(Base):
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     
     coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Token_distribution(Base):
     __tablename__ = 'token_distribution'
@@ -272,6 +275,9 @@ class Token_distribution(Base):
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     
     coin_bot = relationship('CoinBot', back_populates='token_distribution', lazy=True)
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Token_utility(Base):
     __tablename__ = 'token_utility'
@@ -283,6 +289,9 @@ class Token_utility(Base):
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     
     coin_bot = relationship('CoinBot', back_populates='token_utility', lazy=True)
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Value_accrual_mechanisms(Base):
     __tablename__ = 'value_accrual_mechanisms'
@@ -295,6 +304,9 @@ class Value_accrual_mechanisms(Base):
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     
     coin_bot = relationship('CoinBot', back_populates='value_accrual_mechanisms', lazy=True)
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Competitor(Base):
     __tablename__ = 'competitor'
@@ -307,7 +319,7 @@ class Competitor(Base):
     daily_active_users = Column(String)
     transaction_fees = Column(String)
     transaction_speed = Column(String)
-    Inflation_rate = Column(String)
+    inflation_rate = Column(String)
     apr = Column(String)
     active_developers = Column(Integer)
     revenue = Column(Integer)
@@ -318,6 +330,8 @@ class Competitor(Base):
     
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
 
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
 # ----------------------------------------
