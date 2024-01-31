@@ -56,7 +56,6 @@ def edit_competitor_data():
 def get_competitor_data():
     try:
         coin_bot_id = request.args.get('coin_bot_id')
-        print(coin_bot_id)
         if coin_bot_id is None or not coin_bot_id.isdigit():
             return 'Coin is required and must be a non-empty string containing only digits', 400
 
@@ -67,7 +66,6 @@ def get_competitor_data():
 
         # Utiliza el método as_dict para convertir cada Competitor a un diccionario
         competitors_list = [competitor.as_dict() for competitor in coin_data]
-        print('coin_data: ', competitors_list)
         return {'competitors': competitors_list}, 200
     except Exception as e:
         return f'Error getting competitor data: {str(e)}', 500
@@ -77,9 +75,6 @@ def create_competitor():
     try:
         data = request.json  # Obtén todo el cuerpo JSON
         coin_bot_id = data.get('coin_bot_id')  # Obtén coin_bot_id del cuerpo JSON
-
-        print('coinbot recibido', coin_bot_id)
-        print('data recibida', data)
         
         # Crear un nuevo competidor asociado al coin_bot_id
         new_competitor = Competitor(

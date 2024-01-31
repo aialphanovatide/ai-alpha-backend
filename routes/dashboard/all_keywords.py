@@ -3,7 +3,6 @@ from flask import jsonify
 from config import Session as DBSession 
 from flask import Blueprint
 
-
 all_keywords = Blueprint('getAllKeywords', __name__)
 
 @all_keywords.route('/get_keywords_for_coin_bot/<int:coin_bot_id>', methods=['GET'])
