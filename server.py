@@ -1,8 +1,6 @@
 import os
-from flask import Flask, jsonify, request, session
+from flask import Flask
 from flask_cors import CORS
-from config import Token_distribution, Token_utility, Tokenomics, Value_accrual_mechanisms
-from config import Session as DBSession 
 from websocket.socket import socketio
 from routes.dashboard.bots import bots_route
 from routes.news_bot.index import scrapper_bp
@@ -27,10 +25,10 @@ from routes.dashboard.activate_all_bots import bots_activator
 from routes.analysis.new_analysis_post import post_new_analysis
 from routes.trendspider.index import trendspider_notification_bp
 from routes.dashboard.deactivate_all_bots import bots_deactivator
+from routes.fundamentals.edit_tokenomics import edit_tokenomics_bp
 from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
 from routes.fundamentals.post_new_introduction import post_new_introduction
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
-from routes.fundamentals.edit_tokenomics import edit_tokenomics_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 
