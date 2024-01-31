@@ -1,13 +1,11 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from config import CoinBot, session, Alert, Category, Article, TopStory
+from config import CoinBot, session, Category, Article, TopStory
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
-from datetime import datetime, timedelta
 from flask import request, Blueprint
 from scheduler import scheduler
 from sqlalchemy import exists
 from sqlalchemy import desc
-import traceback
 
 scrapper_bp = Blueprint(
     'scrapper_bp', __name__,
@@ -21,10 +19,10 @@ scrapper_bp = Blueprint(
 def get_all_top_stories():
     try:
         top_stories_list = []
-        top_stories = session.query(TopStory).order_by(TopStory.created_at).all()
+        top_stories = session.query(TopStory).order_by(desc(TopStory.created_at)).all()
 
         if not top_stories:
-            return {'message': 'No top stories found'}, 404
+            return {'message': 'No top stories found'}, 204
         else:
             for top_story in top_stories:
                 top_story_dict = {
@@ -53,14 +51,13 @@ def get_all_top_stories():
         return {'error': f'An error occurred getting the top stories: {str(e)}'}, 500
     
 
-
 # Gets all the news related to a category: ex Layer 0 
 def get_news(bot_name):
     try:
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
         if not coin_bot:
-            return {'error': f'Coin {bot_name} not found'}, 404
+            return {'error': f'Coin {bot_name} not found'}, 400
 
         coin_bot_id = coin_bot.bot_id
 
@@ -95,7 +92,7 @@ def get_news(bot_name):
 
             return {'articles': articles_list}, 200
         else:
-            return {'message': f'No articles found for {bot_name}'}, 404
+            return {'message': f'No articles found for {bot_name}'}, 204
  
     except Exception as e:
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
@@ -129,10 +126,8 @@ def get_categories():
                 'category_name': category.category_name,
                 'time_interval': category.time_interval,
                 'is_active': category.is_active,
-                'active_dark_icon': category.active_dark_icon,
-                'inactive_dark_icon': category.inactive_dark_icon,
-                'active_light_icon': category.active_light_icon,
-                'inactive_light_icon': category.inactive_light_icon,
+                'icon': category.icon,
+                'borderColor': category.border_color,
                 'created_at': category.created_at.isoformat(),
                 'coin_bots': [{
                     'bot_id': bot.bot_id,
@@ -216,8 +211,8 @@ def news_bot_commands():
             category = str(category).casefold()
 
             if command == 'activate': 
-                res, status = start_periodic_scraping(category)
-                #res, status = activate_news_bot(category)
+                # res, status = start_periodic_scraping(category)
+                res, status = activate_news_bot(category)
                 return res, status
             elif command == 'deactivate':
                 response, status = deactivate_news_bot(category)

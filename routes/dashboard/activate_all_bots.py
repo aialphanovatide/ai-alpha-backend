@@ -17,7 +17,6 @@ from flask import request, redirect, url_for
 from config import Session as DBSession 
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
-from routes.analysis.google_docs import analysis_bp
 from sqlalchemy.orm import joinedload
 
 app = Flask(__name__)

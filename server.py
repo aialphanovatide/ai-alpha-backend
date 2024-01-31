@@ -7,7 +7,6 @@ from routes.news_bot.index import scrapper_bp
 from routes.telegram.index import telegram_bp 
 from routes.tradingview.index import tradingview_bp
 from routes.dashboard.bot_status import bots_status
-from routes.analysis.google_docs import analysis_bp
 from routes.dashboard.all_coin_bots import coin_bots
 from routes.dashboard.erase_keyword import delete_kw
 from routes.dashboard_access.register import sign_up 
@@ -46,7 +45,6 @@ app.register_blueprint(bots_route)
 app.register_blueprint(last_chart)
 app.register_blueprint(total_bots)
 app.register_blueprint(scrapper_bp)
-app.register_blueprint(analysis_bp)
 app.register_blueprint(bots_status)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(new_keyword)
@@ -62,6 +60,41 @@ app.register_blueprint(get_analysis_by_id)
 app.register_blueprint(trendspider_notification_bp)
 
 
+# #route to post analysis
+# @app.route('/post_analysis', methods=['POST'])
+# def post_analysis():
+#     try:
+#         coin_bot_id = request.form.get('coinBot')
+#         content = request.form.get('content')
+#         image_file = request.files.get('image')
+
+#         print(f'Coin Bot ID: {coin_bot_id}')
+#         print(f'Content: {content}')
+
+#         with DBSession() as db_session:
+#             new_analysis = Analysis(
+#                 analysis=content,
+#                 coin_bot_id=coin_bot_id 
+#             )
+#             db_session.add(new_analysis)
+#             db_session.commit()
+
+#             if image_file:
+#                 image_data = image_file.read()
+#                 new_analysis_image = AnalysisImage(
+#                     image=image_data,
+#                     analysis_id=new_analysis.analysis_id,
+#                 )
+#                 db_session.add(new_analysis_image)
+#                 db_session.commit()
+
+#         return 'Analysis sent successfully', 200
+
+#     except Exception as e:
+#         print(f'Error found: {str(e)}')
+#         return f'Error found: {str(e)}', 500
+
+
 
 if __name__ == '__main__':
     try:
@@ -75,7 +108,6 @@ if __name__ == '__main__':
         #                                     sub_title="AI Alpha server has stop running",
         #                                     message="@David P. - Check this error on the Mac mini immediately")
         print('---AI Alpha server was stopped---')
-
 
 
 

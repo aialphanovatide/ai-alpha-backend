@@ -64,7 +64,7 @@ def slack_events():
             
             image = article_image.image if article_image else "No image"
             new_topstory_image = TopStoryImage(image=image,
-                                                top_story_id=new_topstory)
+                                                top_story_id=new_topstory.top_story_id)
             session.add(new_topstory_image)
             session.commit()
 

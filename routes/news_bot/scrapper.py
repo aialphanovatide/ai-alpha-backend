@@ -27,7 +27,7 @@ from sqlalchemy.orm import joinedload
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
-from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site
+from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -53,13 +53,13 @@ def get_links(site, main_container):
                 browser = p.chromium.launch()
                 page = browser.new_page()
 
-                page.goto(site, timeout=70000)
-                page.wait_for_load_state("domcontentloaded", timeout=70000)
+                page.goto(site, timeout=10000)
+                page.wait_for_load_state("domcontentloaded", timeout=10000)
 
                 elements = []
 
                 if main_container != "None":
-                    container = page.wait_for_selector(main_container)
+                    container = page.wait_for_selector(main_container, timeout=10000)
                     a_elements = container.query_selector_all('a')
 
                     for link in a_elements:
@@ -160,11 +160,11 @@ def scrape_sites(data_source_url, base_url, site_name, category_name, main_conta
     
     except InternalError as e:
         print('Internal error: ' + str(e))
-        return 'Internal error: ' + str(e), 400
+        return 'Internal error: ' + str(e), 500
 
     except IllegalStateChangeError as e:
         print('Illegal state change: ' + str(e))
-        return 'Illegal state change: ' + str(e), 400
+        return 'Illegal state change: ' + str(e), 500
 
     except InvalidRequestError as e:
         print('Invalid request: ' + str(e))
@@ -176,7 +176,7 @@ def scrape_sites(data_source_url, base_url, site_name, category_name, main_conta
         
     except Exception as e:
         print(f'An error occurred in scrape_sites ' + str(e))
-        return f'An error occurred in scrape_sites ' + str(e), 400
+        return f'An error occurred in scrape_sites ' + str(e), 500
                  
 
 def scrape_articles(article_urls, site_name,category_name, coin_bot_name, session):
@@ -253,7 +253,6 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls))
                             
-                    
                     if site_name == 'Cryptopotato':
                         title, content, valid_date, image_urls = validate_cryptopotato_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
@@ -284,9 +283,9 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                     
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, site_name, image_urls = article_data
+                        image_urls_list = list(image_urls)
 
                         summary = summary_generator(content, category_name)
-                        # summary = True
                         
                         channel_mapping = {
                             'btc': btc_slack_channel_id,
@@ -331,7 +330,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                         if summary:
                             image = generate_poster_prompt(summary)
-                            send_NEWS_message_to_slack(channel_id="C06FTS38JRX", 
+                          
+                            send_NEWS_message_to_slack(channel_id=channel_id, 
                                                 title=title,
                                                 date_time=valid_date,
                                                 url=article_link,
@@ -341,8 +341,6 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                                                 )
 
 
-                            # # The following code is commented out temporarily (DEFINITEFILT) 
-                            # # Until we can ensure that the tweet displays correctly on the platform.
                             # if category_name == 'bitcoin':
                             #     response, status = send_tweets_to_twitter(content=summary,
                             #                                             title=title)
@@ -356,7 +354,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                            
                             site_source = session.query(Site).filter(Site.site_name == site_name).first()
                             coin_bot_id = site_source.coin_bot_id
-                            
+                          
                             new_article = Article(
                                 title=title,
                                 summary=summary,
@@ -364,6 +362,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                                 url=article_link,
                                 coin_bot_id=coin_bot_id
                             )
+                            
                             session.add(new_article)
                             session.commit()
 
@@ -380,8 +379,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                 
                 print(f'\n--- {len(article_urls)} article were analized for {site_name} and {counter_articles_saved} were SAVED\n ---')       
-
-                return f'Web scrapping of {site_name} finished', 200
+                return list(article_urls), 200
             
             except Exception as e:
                 print(f'Error scraping the article link in {site_name}: {str(e)}')
@@ -425,26 +423,27 @@ def start_periodic_scraping(category_name):
                                                             main_container=main_container,
                                                             session_instance = session
                                                             )
-                       
+                        # print('RESULT:', result)
+                   
                         if status == 200:
                                 article_urls, site_name = result
                                 print(f'--- {len(article_urls)} ARTICLES TO ANALYZE FOR {site_name} --- \n', 'Truncated data...' if len(article_urls) > 20 else article_urls)
-                                result = scrape_articles(article_urls=article_urls,
+                                result, status = scrape_articles(article_urls=article_urls,
                                                         site_name=site_name,
                                                         category_name=category_name,
                                                         coin_bot_name=coin_bot_name,
                                                         session=session
                                                         )
-                                
-                                print('RESULT:', result)
+                                if status != 200:
+                                    continue
                         else:
-                            print(result)
-                   
+                            continue      
+                      
                 return f'All {category_name.capitalize()} sites were analized', 200
                   
             else:
                 print(f"No coin bots found for category: {category_name}")
-                return f"No coin bots found for category: {category_name}", 404
+                return f"No coin bots found for category: {category_name}", 204
         else:
             print(f"No category found with name: {category_name}")
             return f"No category found with name: {category_name}", 404
