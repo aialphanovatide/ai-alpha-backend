@@ -2,8 +2,7 @@ from flask import Blueprint
 from config import Category
 from routes.news_bot.index import activate_news_bot
 from flask import jsonify
-from config import Session as DBSession 
-
+from config import Session as DBSession
 
 bots_activator = Blueprint('activator', __name__)
 
