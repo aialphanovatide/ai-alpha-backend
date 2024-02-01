@@ -98,13 +98,13 @@ def get_news(bot_name, time_range):
                 }
 
                 # Include image information
-                for image in article.images:
-                    article_dict['images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image,
-                        'created_at': image.created_at.isoformat(),
-                        'article_id': image.article_id
-                    })
+                # for image in article.images:
+                #     article_dict['images'].append({
+                #         'image_id': image.image_id,
+                #         'image': image.image,
+                #         'created_at': image.created_at.isoformat(),
+                #         'article_id': image.article_id
+                #     })
 
                 articles_list.append(article_dict)
 
@@ -118,9 +118,8 @@ def get_news(bot_name, time_range):
 @scrapper_bp.route('/api/get/news', methods=['GET'])  
 def get_news_by_bot_name():
     try:
-        data = request.json
-        coin = data.get('coin')
-        time_range = data.get('time_range')
+        coin = request.args.get('coin')
+        time_range = request.args.get('time_range')
 
         if time_range and time_range not in ["today", "this week", "last month"]:
             return {'error': "Time range isn't valid"}, 400
