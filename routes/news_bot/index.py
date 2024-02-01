@@ -35,13 +35,13 @@ def get_all_top_stories():
                     'images': []
                 }
 
-                for image in top_story.images:
-                    top_story_dict['images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image,
-                        'created_at': image.created_at.isoformat(),
-                        'top_story_id': image.top_story_id
-                    })
+                # for image in top_story.images:
+                #     top_story_dict['images'].append({
+                #         'image_id': image.image_id,
+                #         'image': image.image,
+                #         'created_at': image.created_at.isoformat(),
+                #         'top_story_id': image.top_story_id
+                #     })
 
                 top_stories_list.append(top_story_dict)
 
