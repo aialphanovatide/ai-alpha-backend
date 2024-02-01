@@ -49,8 +49,8 @@ def get_tokenomics(coin_bot_id):
                             'gasFeesAndTransactionSettlement': token_utility_info.gas_fees_and_transaction_settlement
                         },
                         'valueAccrualMechanisms': {
-                            'tokenBurning': value_accrual_mechanisms_info.token_burning,
-                            'tokenBuyback': value_accrual_mechanisms_info.token_buyback
+                            'mechanism': value_accrual_mechanisms_info.mechanism,
+                            'description': value_accrual_mechanisms_info.description
                         }
                     }
                 })
