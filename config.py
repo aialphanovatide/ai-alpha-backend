@@ -88,7 +88,7 @@ class CoinBot(Base):
     top_story = relationship('TopStory', back_populates='coin_bot')
     category = relationship('Category', back_populates='coin_bot')
     introduction = relationship("Introduction", back_populates="coin_bot", lazy=True)
-    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True)
+    # tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True)
     token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True)
     token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True)
     value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
@@ -251,24 +251,27 @@ class Introduction(Base):
 
     coin_bot = relationship('CoinBot', back_populates='introduction', lazy=True)
 
-class Tokenomics(Base):
-    __tablename__ = 'tokenomics'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    token = Column(String)
-    total_supply = Column(String)
-    circulating_supply = Column(String)
-    percentage_circulating_supply = Column(String)
-    max_supply = Column(String)
-    supply_model = Column(String)
-    dynamic = Column(Boolean, default=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
-    coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+# class Tokenomics(Base):
+#     __tablename__ = 'tokenomics'
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+#     token = Column(String)
+#     total_supply = Column(String)
+#     circulating_supply = Column(String)
+#     percentage_circulating_supply = Column(String)
+#     max_supply = Column(String)
+#     supply_model = Column(String)
+#     dynamic = Column(Boolean, default=False)
+#     created_at = Column(TIMESTAMP, default=datetime.utcnow)
+#     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    
+#     coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
+    
+#     def as_dict(self):
+#         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Token_distribution(Base):
     __tablename__ = 'token_distribution'
@@ -374,8 +377,26 @@ class Competitor(Base):
     
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
 
-    def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    # def competitors(self):
+    #     return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    def tokenomics(self):
+        selected_columns = [
+            'token','total_supply', 'circulating_supply', 'percentage_circulating_supply',
+            'max_supply', 'token_supply_model'
+        ]
+        return {column: getattr(self, column) for column in selected_columns}
+
+    def competitors(self):
+        excluded_columns = [
+            'token','circulating_supply', 'token_supply_model', 'current_market_cap',
+            'tvl', 'daily_active_users', 'transaction_fees', 'transaction_speed' , 'inflation_rate_2022',
+            'inflation_rate_2023', 'apr', 'active_developers', 'revenue'
+        ]
+        all_columns = [column.name for column in self.__table__.columns]
+        remaining_columns = set(all_columns) - set(excluded_columns)
+
+        return {column: getattr(self, column) for column in remaining_columns}
 
 
 class DApps(Base):
@@ -525,17 +546,7 @@ with session:
 
                             session.add(new_coin)
                             print('-----CoinBot data saved-----')
-                            session.commit()\
-                                
-                    new_tokenomics = Tokenomics(coin_bot_id=new_coin.bot_id)
-                    try:
-                        print('NT: ', new_tokenomics)
-                        session.add(new_tokenomics)
-                        session.commit()
-                        print("Commit successful!")
-                    except Exception as e:
-                        print(f"Error during commit: {str(e)}")
-                        session.rollback()        
+                            session.commit()       
 
                     session.add(new_category)
                     print('-----Category table populated-----')
