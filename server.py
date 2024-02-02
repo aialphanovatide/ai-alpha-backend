@@ -16,6 +16,7 @@ from routes.slack.slack_actions import slack_events_bp
 from routes.dashboard.all_keywords import all_keywords
 from routes.dashboard.get_total_bots import total_bots
 from routes.chart.get_s_r_chart import get_chart_values
+from routes.fundamentals.introduction import introduction
 from routes.dashboard.create_new_site import save_site_bp
 from routes.dashboard.new_chart_s_r import save_new_chart
 from routes.fundamentals.competitors import competitor_bp
@@ -30,7 +31,8 @@ from routes.dashboard.erase_site import erase_site
 from routes.fundamentals.hacks import hacks_bp
 #from routes.fundamentals.edit_tokenomics import edit_tokenomics_bp
 #from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
-from routes.fundamentals.post_new_introduction import post_new_introduction
+#from routes.fundamentals.post_new_introduction import post_new_introduction
+from routes.fundamentals.tokenomics import tokenomics
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
@@ -71,7 +73,7 @@ app.register_blueprint(bots_deactivator)
 app.register_blueprint(get_chart_values)
 app.register_blueprint(post_new_analysis)
 app.register_blueprint(get_analysis_by_id)
-app.register_blueprint(post_new_introduction)
+#app.register_blueprint(post_new_introduction)
 #app.register_blueprint(get_coin_bot_tokenomics)
 app.register_blueprint(save_site_bp)
 app.register_blueprint(trendspider_notification_bp)
@@ -80,6 +82,11 @@ app.register_blueprint(all_sites)
 app.register_blueprint(erase_site)
 app.register_blueprint(hacks_bp)
 app.register_blueprint(revenue_model_bp)
+app.register_blueprint(introduction)
+app.register_blueprint(tokenomics)
+app.register_blueprint(save_site_bp)
+app.register_blueprint(trendspider_notification_bp)
+
 
 
 if __name__ == '__main__':
