@@ -93,7 +93,10 @@ class CoinBot(Base):
     token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True)
     value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
     competitor = relationship("Competitor", back_populates="coin_bot", lazy=True)
-
+    revenue_model = relationship('Revenue_model', back_populates='coin_bot', lazy=True)
+    hacks = relationship('Hacks', back_populates='coin_bot', lazy=True)
+    dapps = relationship('DApps', back_populates='coin_bot', lazy=True)
+    upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True)
 
 class Keyword(Base):
     __tablename__ = 'keyword'
