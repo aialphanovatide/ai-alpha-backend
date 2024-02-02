@@ -32,6 +32,7 @@ from routes.fundamentals.hacks import hacks_bp
 #from routes.fundamentals.get_tokenomics import get_coin_bot_tokenomics
 from routes.fundamentals.post_new_introduction import post_new_introduction
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
+from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 
@@ -78,7 +79,7 @@ app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(all_sites)
 app.register_blueprint(erase_site)
 app.register_blueprint(hacks_bp)
-
+app.register_blueprint(revenue_model_bp)
 
 
 if __name__ == '__main__':
