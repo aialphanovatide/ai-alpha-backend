@@ -119,7 +119,7 @@ def create_value_accrual_mechanisms():
 
 @tokenomics.route('/edit_tokenomics/<int:tokenomics_id>', methods=['PUT'])  
 def edit_competitor_data(tokenomics_id):
-    try:
+    try: 
         data = request.json
         token_distribution_data = session.query(Token_distribution).filter(Token_distribution.id == tokenomics_id).first()
         token_utility_data = session.query(Token_utility).filter(Token_utility.id == tokenomics_id).first()
