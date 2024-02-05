@@ -64,7 +64,6 @@ def create_competitor():
             return jsonify({'error': 'Competitor data is required', 'status': 400}), 400
         
         token = competitor_data.get('token', None)
-        print('token: ', token)
         if not token:
             return jsonify({'error': 'Token name is required', 'status': 400}), 400
  
