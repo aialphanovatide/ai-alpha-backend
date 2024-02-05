@@ -236,7 +236,6 @@ class Chart(Base):
 
 
 # ----------------------------------------
-    
 class Introduction(Base):
     __tablename__ = 'introduction'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -247,12 +246,10 @@ class Introduction(Base):
     dynamic = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-
     coin_bot = relationship('CoinBot', back_populates='introduction', lazy=True)
-
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 # class Tokenomics(Base):
 #     __tablename__ = 'tokenomics'
 #     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -266,9 +263,7 @@ class Introduction(Base):
 #     dynamic = Column(Boolean, default=False)
 #     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 #     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
 #     coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
-    
 #     def as_dict(self):
 #         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
@@ -281,41 +276,36 @@ class Token_distribution(Base):
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='token_distribution', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 class Token_utility(Base):
     __tablename__ = 'token_utility'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    gas_fees_and_transaction_settlement = Column(String)
-    dynamic = Column(Boolean, default=True)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    token_application = Column(String)
+    description = Column(Boolean, default=True)
+    dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='token_utility', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 class Value_accrual_mechanisms(Base):
     __tablename__ = 'value_accrual_mechanisms'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     mechanism = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='value_accrual_mechanisms', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 class Revenue_model(Base):
     __tablename__ = 'revenue_model'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -325,12 +315,10 @@ class Revenue_model(Base):
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='revenue_model', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 class Hacks(Base):
     __tablename__ = 'hacks'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -343,15 +331,14 @@ class Hacks(Base):
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='hacks', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 class Competitor(Base):
     __tablename__ = 'competitor'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     token = Column(String)
     circulating_supply = Column(String)
     token_supply_model = Column(String)
@@ -360,18 +347,18 @@ class Competitor(Base):
     daily_active_users = Column(String)
     transaction_fees = Column(String)
     transaction_speed = Column(String)
-    inflation_rate = Column(String)
+    inflation_rate_2022 = Column(String)
+    inflation_rate_2023 = Column(String)
     apr = Column(String)
     active_developers = Column(Integer)
     revenue = Column(Integer)
+    total_supply = Column(Integer)
+    percentage_circulating_supply = Column(Integer)
+    max_supply = Column(Integer)
     dynamic = Column(Boolean, default=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-
-
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
-
     # def competitors(self):
     #     return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
@@ -381,7 +368,7 @@ class Competitor(Base):
             'max_supply', 'token_supply_model'
         ]
         return {column: getattr(self, column) for column in selected_columns}
-
+        
     def competitors(self):
         excluded_columns = [
             'token','circulating_supply', 'token_supply_model', 'current_market_cap',
@@ -390,10 +377,8 @@ class Competitor(Base):
         ]
         all_columns = [column.name for column in self.__table__.columns]
         remaining_columns = set(all_columns) - set(excluded_columns)
-
         return {column: getattr(self, column) for column in remaining_columns}
-
-
+        
 class DApps(Base):
     __tablename__ = 'dapps'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -404,12 +389,10 @@ class DApps(Base):
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='dapps', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 class Upgrades(Base):
     __tablename__ = 'upgrades'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -421,12 +404,10 @@ class Upgrades(Base):
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
     coin_bot = relationship('CoinBot', back_populates='upgrades', lazy=True)
-    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+        
 
 # ----------------------------------------
 

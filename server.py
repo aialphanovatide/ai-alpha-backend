@@ -37,7 +37,7 @@ from routes.fundamentals.upgrades import upgrades_bp
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
-
+from routes.fundamentals.dapps import dapps_bp
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -88,7 +88,7 @@ app.register_blueprint(tokenomics)
 app.register_blueprint(upgrades_bp)
 app.register_blueprint(save_site_bp)
 app.register_blueprint(trendspider_notification_bp)
-
+app.register_blueprint(dapps_bp)
 
 
 if __name__ == '__main__':
