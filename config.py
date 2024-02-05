@@ -235,7 +235,7 @@ class Chart(Base):
     coin_bot = relationship('CoinBot', back_populates='chart', lazy=True)
 
 
-# ----------------------------------------
+# -----------------------------------------------------------------------------------
     
 class Introduction(Base):
     __tablename__ = 'introduction'
@@ -290,9 +290,10 @@ class Token_distribution(Base):
 class Token_utility(Base):
     __tablename__ = 'token_utility'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    gas_fees_and_transaction_settlement = Column(String)
-    dynamic = Column(Boolean, default=True)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    token_application = Column(String)
+    description = Column(String, default=True)
+    dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     
@@ -304,10 +305,10 @@ class Token_utility(Base):
 class Value_accrual_mechanisms(Base):
     __tablename__ = 'value_accrual_mechanisms'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     mechanism = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     
@@ -352,6 +353,7 @@ class Hacks(Base):
 class Competitor(Base):
     __tablename__ = 'competitor'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     token = Column(String)
     circulating_supply = Column(String)
     token_supply_model = Column(String)
@@ -360,38 +362,35 @@ class Competitor(Base):
     daily_active_users = Column(String)
     transaction_fees = Column(String)
     transaction_speed = Column(String)
-    inflation_rate = Column(String)
+    inflation_rate_2022 = Column(String)
+    inflation_rate_2023 = Column(String)
     apr = Column(String)
     active_developers = Column(Integer)
     revenue = Column(Integer)
+    total_supply = Column(Integer)
+    percentage_circulating_supply = Column(Integer)
+    max_supply = Column(Integer)
     dynamic = Column(Boolean, default=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-
-
+    
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
-
-    # def competitors(self):
-    #     return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
     def tokenomics(self):
         selected_columns = [
-            'token','total_supply', 'circulating_supply', 'percentage_circulating_supply',
+            'id','token','total_supply', 'circulating_supply', 'percentage_circulating_supply',
             'max_supply', 'token_supply_model'
         ]
         return {column: getattr(self, column) for column in selected_columns}
 
     def competitors(self):
         excluded_columns = [
-            'token','circulating_supply', 'token_supply_model', 'current_market_cap',
+            'id', 'token','circulating_supply', 'token_supply_model', 'current_market_cap',
             'tvl', 'daily_active_users', 'transaction_fees', 'transaction_speed' , 'inflation_rate_2022',
             'inflation_rate_2023', 'apr', 'active_developers', 'revenue'
         ]
-        all_columns = [column.name for column in self.__table__.columns]
-        remaining_columns = set(all_columns) - set(excluded_columns)
 
-        return {column: getattr(self, column) for column in remaining_columns}
+        return {column: getattr(self, column) for column in excluded_columns}
 
 
 class DApps(Base):

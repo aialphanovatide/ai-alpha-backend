@@ -53,7 +53,7 @@ def get_competitor_data(coin_bot_id):
 def create_competitor():
     try:
         data = request.json
-        coin_bot_id = data.get('coin_bot_id')
+        coin_bot_id = data.get('coin_bot_id') 
 
         if coin_bot_id is None:
             return jsonify({'error': 'Coin ID is required', 'status': 400}), 400
