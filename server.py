@@ -27,6 +27,7 @@ from routes.analysis.new_analysis_post import post_new_analysis
 from routes.trendspider.index import trendspider_notification_bp
 from routes.dashboard.deactivate_all_bots import bots_deactivator
 from routes.fundamentals.tokenomics import tokenomics
+from routes.fundamentals.upgrades import upgrades_bp
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
@@ -68,6 +69,7 @@ app.register_blueprint(post_new_analysis)
 app.register_blueprint(get_analysis_by_id)
 app.register_blueprint(introduction)
 app.register_blueprint(tokenomics)
+app.register_blueprint(upgrades_bp)
 app.register_blueprint(save_site_bp)
 app.register_blueprint(trendspider_notification_bp)
 
