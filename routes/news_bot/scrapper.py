@@ -331,7 +331,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         if summary:
                             image = generate_poster_prompt(summary)
                           
-                            send_NEWS_message_to_slack(channel_id="C06FTS38JRX", 
+# Line to send news to LOGS # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",  
+                            send_NEWS_message_to_slack(channel_id=channel_id, 
                                                 title=title,
                                                 date_time=valid_date,
                                                 url=article_link,
@@ -438,7 +439,8 @@ def start_periodic_scraping(category_name):
                                     continue
                         else:
                             continue      
-                      
+                    print(f'All {coin_bot_name} sites scrapped')
+
                 return f'All {category_name.capitalize()} sites were analized', 200
                   
             else:

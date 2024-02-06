@@ -16,7 +16,7 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
 
 db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-engine = create_engine(db_url)
+engine = create_engine(db_url, pool_size=30, max_overflow=20)
 
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
 from sqlalchemy.orm import relationship
