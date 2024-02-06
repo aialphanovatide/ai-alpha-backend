@@ -438,7 +438,8 @@ def start_periodic_scraping(category_name):
                                     continue
                         else:
                             continue      
-                      
+                    print(f'All {coin_bot_name} sites scrapped')
+
                 return f'All {category_name.capitalize()} sites were analized', 200
                   
             else:
