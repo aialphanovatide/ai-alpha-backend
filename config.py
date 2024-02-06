@@ -235,12 +235,8 @@ class Chart(Base):
     coin_bot = relationship('CoinBot', back_populates='chart', lazy=True)
 
 
-<<<<<<< HEAD
-# ----------------------------------------
-=======
 # -----------------------------------------------------------------------------------
     
->>>>>>> 054d2134c5557cfb6d66d2bf0dda117b0427d520
 class Introduction(Base):
     __tablename__ = 'introduction'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -290,11 +286,7 @@ class Token_utility(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     token_application = Column(String)
-<<<<<<< HEAD
-    description = Column(Boolean, default=True)
-=======
     description = Column(String, default=True)
->>>>>>> 054d2134c5557cfb6d66d2bf0dda117b0427d520
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
@@ -367,14 +359,8 @@ class Competitor(Base):
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-<<<<<<< HEAD
-    coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
-    # def competitors(self):
-    #     return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-=======
     
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
->>>>>>> 054d2134c5557cfb6d66d2bf0dda117b0427d520
     
     def tokenomics(self):
         selected_columns = [
@@ -389,17 +375,10 @@ class Competitor(Base):
             'tvl', 'daily_active_users', 'transaction_fees', 'transaction_speed' , 'inflation_rate_2022',
             'inflation_rate_2023', 'apr', 'active_developers', 'revenue'
         ]
-<<<<<<< HEAD
-        all_columns = [column.name for column in self.__table__.columns]
-        remaining_columns = set(all_columns) - set(excluded_columns)
-        return {column: getattr(self, column) for column in remaining_columns}
-        
-=======
 
         return {column: getattr(self, column) for column in excluded_columns}
 
 
->>>>>>> 054d2134c5557cfb6d66d2bf0dda117b0427d520
 class DApps(Base):
     __tablename__ = 'dapps'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -413,7 +392,7 @@ class DApps(Base):
     coin_bot = relationship('CoinBot', back_populates='dapps', lazy=True)
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
 class Upgrades(Base):
     __tablename__ = 'upgrades'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -428,7 +407,7 @@ class Upgrades(Base):
     coin_bot = relationship('CoinBot', back_populates='upgrades', lazy=True)
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
 
 # ----------------------------------------
 
