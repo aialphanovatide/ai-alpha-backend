@@ -1,4 +1,4 @@
-from config import Analysis, AnalysisImage, session
+from config import Analysis, AnalysisImage, session, CoinBot
 from flask import jsonify, Blueprint, request
 from PIL import Image
 from io import BytesIO
@@ -147,6 +147,33 @@ def edit_analysis(analysis_id):
         session.commit()
 
         return jsonify({'message': 'Analysis edited successfully', 'status': 200, 'success': True}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+
+
+
+
+@analysis_bp.route('/get_last_analysis', methods=['GET'])
+def get_last_analysis():
+    try:
+        # Retrieve the last analysis created
+        last_analysis = session.query(Analysis).order_by(Analysis.created_at.desc()).first()
+        coin = session.query(CoinBot).filter(CoinBot.bot_id==last_analysis.coin_bot_id).first()
+
+        if last_analysis is None:
+            return jsonify({'error': 'No analysis found', 'status': 404, 'success': False}), 404
+
+        # Extract relevant information, such as analysis content and creation date
+        analysis_data = {
+            'analysis_id': last_analysis.analysis_id,
+            'content': last_analysis.analysis,
+            'coin_name': coin.bot_name,
+            'created_at': last_analysis.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        return jsonify({'last_analysis': analysis_data, 'status': 200, 'success': True}), 200
 
     except Exception as e:
         session.rollback()
