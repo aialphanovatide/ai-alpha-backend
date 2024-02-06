@@ -1,83 +1,77 @@
-import plotly.graph_objects as go
-import pandas as pd
-from datetime import datetime, timedelta
-import numpy as np
-import requests
-from typing import Dict, Any
+from config import Chart, session, CoinBot
+from flask import jsonify, request, Blueprint, jsonify
 
-# Generate random financial data
-np.random.seed(42)
-num_days = 100
-date_today = datetime.now()
-dates = [date_today - timedelta(days=i) for i in range(num_days)]
-open_prices = np.random.uniform(150, 200, num_days)
-close_prices = np.random.uniform(150, 200, num_days)
-high_prices = np.maximum(open_prices, close_prices) + np.random.uniform(0, 10, num_days)
-low_prices = np.minimum(open_prices, close_prices) - np.random.uniform(0, 10, num_days)
+chart_bp = Blueprint('chart', __name__)
 
-# Create a DataFrame
-df_random = pd.DataFrame({'Date': dates, 'Open': open_prices, 'High': high_prices, 'Low': low_prices, 'Close': close_prices})
 
-# Sort DataFrame by date
-df_random = df_random.sort_values('Date')
-
-binance_base_url = 'https://api3.binance.com'
-
-# Gets historical data from Binance API
-def get_kline_data(symbol: str, interval) -> Dict[str, Any]:
-
-    formatted_symbol = symbol.upper()
-    formatted_interval = interval.casefold()
-
-    base_url = f"{binance_base_url}/api/v3/klines"
-    params = {"symbol": formatted_symbol, "limit": 50, "interval": formatted_interval}
-    
+# ----- ROUTE FOR THE DASHBOARD -------------------------------------------
+# Deletes the last support and resistance lines of a coin and adds new ones.
+@chart_bp.route('/save_chart', methods=['POST'])
+def save_chart():
     try:
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
-        data = response.json()
-        return data
-    except requests.exceptions.RequestException as e:
-        print(f"Failed to retrieve data: {e}")
-        return f"Failed to retrieve data: {e}"
+        data = request.json
+
+        coin_bot_id = data.get('coin_bot_id')
+
+        if not coin_bot_id:
+            return jsonify({'success': False, 'message': 'Coin ID required'}), 400
+
+        print('coin_bot_id: ', coin_bot_id)
+        delete_last_chart = session.query(Chart).filter_by(coin_bot_id=coin_bot_id).delete()
+        print(f"{delete_last_chart} rows deleted")
+
+        new_chart = Chart(
+            support_1=data.get('support_1'),
+            support_2=data.get('support_2'),
+            support_3=data.get('support_3'),
+            support_4=data.get('support_4'),
+            resistance_1=data.get('resistance_1'),
+            resistance_2=data.get('resistance_2'),
+            resistance_3=data.get('resistance_3'),
+            resistance_4=data.get('resistance_4'),
+            coin_bot_id=coin_bot_id
+        )
+
+        session.add(new_chart)
+        session.commit()
+
+        return jsonify({'success': True, 'message': 'Chart saved successfully'}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
 
 
-def create_chart():
-    fig = go.Figure(data=[go.Candlestick(x=df_random['Date'],
-                    open=df_random['Open'],
-                    high=df_random['High'],
-                    low=df_random['Low'],
-                    close=df_random['Close'])],
-                    Increasing=dict(
-                        fillcolor="mediumblue"
-                    ),
-                   
-                    )
+# ----- ROUTE FOR THE DASHBOARD ---------------------------
+# Gets the support and resistance lines of a requested coin
+@chart_bp.route('/api/coin-support-resistance/<coin_bot_name>', methods=['GET'])
+def get_chart_values_by_coin_bot_id(coin_bot_name):
 
-    fig.update_layout(title='',
-                    xaxis_title='',
-                    yaxis_title='',
-                    xaxis_rangeslider_visible=False,
-                    paper_bgcolor="#282828",
-                    plot_bgcolor="#282828",
-                    xaxis=dict(
-                    showline=True,
-                    showgrid=False,
-                    tickfont=dict(
-                            color='#fff'  
-                    )
-                    ),
-                    yaxis=dict(
-                        showline=True,
-                        showgrid=False,
-                        side='right',
-                        tickfont=dict(
-                            color='#fff'  
-                        )
-                    ),
-                    )
+    try:
+           
+        coinbot = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
+        chart = session.query(Chart).filter_by(coin_bot_id=coinbot.bot_id).first()
 
-    fig.show()
+        if chart:
+            chart_values = {
+                'support_1': chart.support_1,
+                'support_2': chart.support_2,
+                'support_3': chart.support_3,
+                'support_4': chart.support_4,
+                'resistance_1': chart.resistance_1,
+                'resistance_2': chart.resistance_2,
+                'resistance_3': chart.resistance_3,
+                'resistance_4': chart.resistance_4
+            }
+
+            return jsonify({'success': True, 'chart_values': chart_values})
+        else:
+            return jsonify({'success': False, 'message': 'Chart not found for the given coin ID'})
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+    
 
 
-create_chart()
