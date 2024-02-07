@@ -101,19 +101,19 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
 
             if response.status_code == 200:
              
-                with session:
-                    coinBot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name).first()
-                    coin_bot_id = coinBot.bot_id
+                
+                coinBot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name).first()
+                coin_bot_id = coinBot.bot_id
                     
-                    new_alert = Alert(alert_name=alert_Name,
+                new_alert = Alert(alert_name=alert_Name,
                                     alert_message = alert_message,
                                     symbol=formatted_symbol,
                                     price=formatted_price,
                                     coin_bot_id=coin_bot_id
                                     )
 
-                    session.add(new_alert)
-                    session.commit()
+                session.add(new_alert)
+                session.commit()
             
                 return 'Alert message sent from Tradingview to Telegram successfully', 200
             else:

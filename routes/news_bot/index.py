@@ -3,6 +3,7 @@ from config import CoinBot, session, Category, Article, TopStory
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint
+from datetime import datetime, timedelta
 from scheduler import scheduler
 from sqlalchemy import exists
 from sqlalchemy import desc
@@ -34,13 +35,13 @@ def get_all_top_stories():
                     'images': []
                 }
 
-                for image in top_story.images:
-                    top_story_dict['images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image,
-                        'created_at': image.created_at.isoformat(),
-                        'top_story_id': image.top_story_id
-                    })
+                # for image in top_story.images:
+                #    top_story_dict['images'].append({
+                #        'image_id': image.image_id,
+                #        'image': image.image,
+                #        'created_at': image.created_at.isoformat(),
+                #        'top_story_id': image.top_story_id
+                #    })
 
                 top_stories_list.append(top_story_dict)
 
@@ -52,17 +53,34 @@ def get_all_top_stories():
     
 
 # Gets all the news related to a category: ex Layer 0 
-def get_news(bot_name):
+def get_news(bot_name, time_range):
     try:
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
         if not coin_bot:
-            return {'error': f'Coin {bot_name} not found'}, 400
+            return {'error': f'Coin {bot_name} not found'}, 404
 
         coin_bot_id = coin_bot.bot_id
 
-        # Sort the articles by date in descending order
-        articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.created_at)).all()
+        # Determine the time range based on the provided option
+        if time_range == 'today':
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        elif time_range == 'this week':
+            today = datetime.now()
+            start_date = today - timedelta(days=today.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif time_range == 'last month':
+            today = datetime.now()
+            start_date = today - timedelta(days=(today.weekday() + 30))
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            start_date = None
+
+         # Filter news based on time range
+        if start_date:
+            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id, Article.created_at >= start_date).order_by(desc(Article.created_at)).all()
+        else:
+            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.created_at)).all()
 
         if articles:
             articles_list = []
@@ -80,13 +98,13 @@ def get_news(bot_name):
                 }
 
                 # Include image information
-                for image in article.images:
-                    article_dict['images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image,
-                        'created_at': image.created_at.isoformat(),
-                        'article_id': image.article_id
-                    })
+                # for image in article.images:
+                #    article_dict['images'].append({
+                #       'image_id': image.image_id,
+                #        'image': image.image,
+                #        'created_at': image.created_at.isoformat(),
+                #        'article_id': image.article_id
+                #    })
 
                 articles_list.append(article_dict)
 
@@ -97,16 +115,19 @@ def get_news(bot_name):
     except Exception as e:
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
 
-@scrapper_bp.route('/api/get/news', methods=['GET', 'POST'])  
+@scrapper_bp.route('/api/get/news', methods=['GET'])  
 def get_news_by_bot_name():
     try:
-        data = request.json
-        bot_name = data.get('botName')
+        coin = request.args.get('coin')
+        time_range = request.args.get('time_range')
+        
+        if time_range and time_range not in ["today", "this week", "last month"]:
+            return {'error': "Time range isn't valid"}, 400
 
-        if not bot_name:
+        if not coin:
             return {'error': 'Coin is required'}, 400
         else:
-            res, status = get_news(bot_name=bot_name)
+            res, status = get_news(bot_name=coin, time_range=time_range)
             return res, status
     except Exception as e:
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
@@ -116,6 +137,7 @@ def get_news_by_bot_name():
 @scrapper_bp.route('/get_categories', methods=['GET'])
 def get_categories():
     try:
+
         categories = session.query(Category).filter(Category.category != 'hacks').order_by(Category.category_id).all()
         category_data = []
 
@@ -136,11 +158,11 @@ def get_categories():
                     'created_at': bot.created_at.isoformat()
                 } for bot in category.coin_bot]
             })
-
+        
         return {'categories': category_data}, 200
 
     except Exception as e:
-        return {'error': str(e)}, 500
+        return {'Error ': f'Error getting the categories: {str(e)}'}, 500
 
 
 

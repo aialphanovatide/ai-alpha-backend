@@ -329,7 +329,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         channel_id = channel_mapping.get(coin_bot_name, None)
 
                         if summary:
-                            image = generate_poster_prompt(summary)
+                            #image = generate_poster_prompt(summary)
+                            image = "no image"
                           
                             send_NEWS_message_to_slack(channel_id=channel_id, 
                                                 title=title,
