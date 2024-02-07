@@ -66,6 +66,8 @@ def edit_upgrade_data(upgrate_id):
         data = request.json
         coin_data = session.query(Upgrades).filter(
             Upgrades.id == upgrate_id).first()
+        print(data)
+        print(coin_data)
 
         if not coin_data:
             return jsonify({'message': 'No data found for the requested coin', 'status': 404}), 404

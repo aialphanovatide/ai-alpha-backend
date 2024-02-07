@@ -42,3 +42,29 @@ def get_revenue_models():
         return {'revenue_models': revenue_models_list}, 200
     except Exception as e:
         return f'Error getting revenue models: {str(e)}', 500
+
+
+
+@revenue_model_bp.route('/api/edit_revenue_model/<int:model_id>', methods=['PUT'])
+def edit_revenue_model(model_id):
+    try:
+        data = request.json
+        updated_analized_revenue = data.get('analized_revenue')
+        updated_fees_1ys = data.get('fees_1ys')
+
+        # Busca el modelo de ingresos por su ID
+        with Session() as session:
+            revenue_model = session.query(Revenue_model).filter_by(id=model_id).first()
+
+            # Verifica si el modelo de ingresos existe
+            if revenue_model:
+                # Actualiza los campos del modelo de ingresos con los nuevos valores
+                revenue_model.analized_revenue = updated_analized_revenue
+                revenue_model.fees_1ys = updated_fees_1ys
+                session.commit()
+                return jsonify({'message': 'Revenue model updated successfully'}), 200
+            else:
+                return jsonify({'error': 'Revenue model not found'}), 404
+
+    except Exception as e:
+        return jsonify({'error': f'Error editing revenue model: {str(e)}'}), 500
