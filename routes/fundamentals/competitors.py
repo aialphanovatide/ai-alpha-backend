@@ -42,6 +42,7 @@ def get_competitor_data(coin_bot_id):
             'tokenomics': competitor.tokenomics(),
             'competitors': competitor.competitors()
         } for competitor in coin_data]
+        
         return jsonify({'competitors': competitors_list, 'status': 200}), 200
     
     except Exception as e:
@@ -53,38 +54,34 @@ def get_competitor_data(coin_bot_id):
 def create_competitor():
     try:
         data = request.json
-        coin_bot_id = data.get('coin_bot_id') 
+        coin_bot_id = data.get('coin_bot_id')
 
         if coin_bot_id is None:
             return jsonify({'error': 'Coin ID is required', 'status': 400}), 400
-        
+
         competitor_data = data.get('competitor_data')
-        
+
         if not competitor_data:
             return jsonify({'error': 'Competitor data is required', 'status': 400}), 400
-        
-        token = competitor_data.get('token', None)
-        if not token:
-            return jsonify({'error': 'Token name is required', 'status': 400}), 400
- 
 
+        # Crea una nueva instancia de Competitor con los datos recibidos
         new_competitor = Competitor(
-            token = competitor_data.get('token', None),
-            circulating_supply = competitor_data.get('circulating_supply', None),
-            token_supply_model = competitor_data.get('token_supply_model', None),
-            current_market_cap = competitor_data.get('current_market_cap', None),
-            tvl = competitor_data.get('tvl', None),
-            daily_active_users = competitor_data.get('daily_active_users', None),
-            transaction_fees = competitor_data.get('transaction_fees', None),
-            transaction_speed = competitor_data.get('transaction_speed', None),
-            inflation_rate_2022 = competitor_data.get('inflation_rate_2022', None),
-            inflation_rate_2023 = competitor_data.get('inflation_rate_2023', None),
-            apr = competitor_data.get('apr', None),
-            active_developers = competitor_data.get('active_developers', None),
-            revenue = competitor_data.get('revenue', None),
-            total_supply = competitor_data.get('total_supply', None),
-            percentage_circulating_supply = competitor_data.get('percentage_circulating_supply', None),
-            max_supply = competitor_data.get('max_supply', None),
+            token=competitor_data.get('token', None),
+            circulating_supply=competitor_data.get('circulating_supply', None),
+            token_supply_model=competitor_data.get('token_supply_model', None),
+            current_market_cap=competitor_data.get('current_market_cap', None),
+            tvl=competitor_data.get('tvl', None),
+            daily_active_users=competitor_data.get('daily_active_users', None),
+            transaction_fees=competitor_data.get('transaction_fees', None),
+            transaction_speed=competitor_data.get('transaction_speed', None),
+            inflation_rate_2022=competitor_data.get('inflation_rate_2022', None),
+            inflation_rate_2023=competitor_data.get('inflation_rate_2023', None),
+            apr=competitor_data.get('apr', None),
+            active_developers=competitor_data.get('active_developers', None),
+            revenue=competitor_data.get('revenue', None),
+            total_supply=competitor_data.get('total_supply', None),
+            percentage_circulating_supply=competitor_data.get('percentage_circulating_supply', None),
+            max_supply=competitor_data.get('max_supply', None),
             coin_bot_id=coin_bot_id
         )
 
