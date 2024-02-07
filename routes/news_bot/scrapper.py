@@ -50,7 +50,7 @@ def get_links(site, main_container):
 
     try:
         with sync_playwright() as p:
-                browser = p.chromium.launch()
+                browser = p.chromium.launch(slow_mo=20, headless=False)
                 page = browser.new_page()
 
                 page.goto(site, timeout=10000)
@@ -59,7 +59,7 @@ def get_links(site, main_container):
                 elements = []
 
                 if main_container != "None":
-                    container = page.wait_for_selector(main_container, timeout=10000)
+                    container = page.wait_for_selector(main_container, timeout=20000)
                     a_elements = container.query_selector_all('a')
 
                     for link in a_elements:
@@ -330,14 +330,17 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                         if summary:
                             image = generate_poster_prompt(summary)
+
+                            article_image = image[0] if image else 'No image'
+                            salck_image = image[1] if image else 'No image'
                           
-# Line to send news to LOGS # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",  
+                            # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",   # to debug
                             send_NEWS_message_to_slack(channel_id=channel_id, 
                                                 title=title,
                                                 date_time=valid_date,
                                                 url=article_link,
                                                 summary=summary,
-                                                image=image,
+                                                image=salck_image,
                                                 category_name=category_name
                                                 )
 
@@ -368,7 +371,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             session.commit()
 
    
-                            new_article_image = ArticleImage(article_id=new_article.article_id, image=image)
+                            new_article_image = ArticleImage(article_id=new_article.article_id, image=article_image)
                             session.add(new_article_image)
                             session.commit()
 
@@ -452,3 +455,4 @@ def start_periodic_scraping(category_name):
 
 
 
+# print(get_links(site="https://cointelegraph.com/tags/bitcoin", main_container=".tag-page__posts-col"))
