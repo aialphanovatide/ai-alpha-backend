@@ -10,7 +10,7 @@ chart_bp = Blueprint('chart', __name__)
 def save_chart():
     try:
         data = request.json
-
+        print('data: ', data)
         coin_bot_id = data.get('coin_bot_id')
 
         if not coin_bot_id:
@@ -35,7 +35,7 @@ def save_chart():
         session.add(new_chart)
         session.commit()
 
-        return jsonify({'success': True, 'message': 'Chart saved successfully'}), 200
+        return jsonify({'success': True, 'message': 'Chart updated successfully'}), 200
 
     except Exception as e:
         session.rollback()
@@ -50,7 +50,7 @@ def get_chart_values_by_coin_bot_id(coin_bot_name):
 
     try:
            
-        coinbot = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
+        coinbot = session.query(CoinBot).filter(CoinBot.bot_id==coin_bot_name).first()
         chart = session.query(Chart).filter_by(coin_bot_id=coinbot.bot_id).first()
 
         if chart:
