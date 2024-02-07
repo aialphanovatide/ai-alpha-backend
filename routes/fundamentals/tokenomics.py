@@ -25,13 +25,13 @@ def get_tokenomics(coin_bot_id):
             'value_accrual_mechanisms': value_accrual_mechanisms.as_dict(),
         } for value_accrual_mechanisms in value_accrual_mechanisms_obj]
 
-        final_obj = {
+        data = {
             'token_distribution': token_distribution_data,
             'token_utility': token_utility_data,
             'value_accrual_mechanisms': value_accrual_mechanisms_data,
         }
-        
-        return jsonify({'message': final_obj}), 200
+        print('Objeto Global', data)
+        return jsonify({'message': data}), 200
          
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -44,12 +44,9 @@ def create_token_utility():
 
     try:
         data = request.get_json()
-        coin_bot_id = data['coin_bot_id']
-        token_application = data['token_application']
-        description = data['description']
-
-        if coin_bot_id is None or (coin_bot_id is not None and not isinstance(coin_bot_id, int)):
-            return jsonify({'message': 'Coin ID is required', 'status': 400}), 400
+        coin_bot_id = data.get('coin_bot_id')
+        token_application = data.get('token_application')
+        description = data.get('description')
         
         new_token_utility = Token_utility(
             token_application=token_application,
@@ -69,12 +66,11 @@ def create_token_distribution():
 
     try:
         data = request.get_json()
-        coin_bot_id = data['coin_bot_id']
-        holder_category = data['holder_category']
-        percentage_held = data['percentage_held']
+        coin_bot_id = data.get('coin_bot_id')
+        holder_category = data.get('holder_category')
+        percentage_held = data.get('percentage_held')
+        print("coin_bot_id", coin_bot_id)
 
-        if coin_bot_id is None or (coin_bot_id is not None and not isinstance(coin_bot_id, int)):
-            return jsonify({'message': 'Coin ID is required', 'status': 400}), 400
         
         new_token_distribution = Token_distribution(
             holder_category=holder_category,
@@ -88,20 +84,17 @@ def create_token_distribution():
     except Exception as e:
         return jsonify({'error': f'Error creating a token distribution: {str(e)}', 'status': 500}), 500
 
-
 @tokenomics.route('/post_value_accrual_mechanisms', methods=['POST'])
 def create_value_accrual_mechanisms():
-
     try:
         data = request.get_json()
-        coin_bot_id = data['coin_bot_id']
-        mechanism = data['mechanism']
-        description = data['description']
-
-        if coin_bot_id is None or (coin_bot_id is not None and not isinstance(coin_bot_id, int)):
-            return jsonify({'message': 'Coin ID is required', 'status': 400}), 400
+        coin_bot_id = data.get('coin_bot_id')
+        mechanism = data.get('mechanism')
+        description = data.get('description')
         
-        new_value_accrual_mechanisms = Token_distribution(
+        print('Value of mechanism:', mechanism)  # Agrega este print para registrar el valor de 'mechanism'
+
+        new_value_accrual_mechanisms = Value_accrual_mechanisms(
             mechanism=mechanism,
             description=description,
             coin_bot_id=coin_bot_id
@@ -112,7 +105,6 @@ def create_value_accrual_mechanisms():
        
     except Exception as e:
         return jsonify({'error': f'Error creating a value accrual mechanisms: {str(e)}', 'status': 500}), 500
-
 
 # ------- PUT ---------- EDITS AN INSTANCE OF THE TABLE ----------------------------------------
     
