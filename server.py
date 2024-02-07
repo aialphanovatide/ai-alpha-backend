@@ -33,6 +33,7 @@ from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from routes.fundamentals.dapps import dapps_bp
 
+
 app = Flask(__name__)
 app.name = 'AI Alpha'
 
