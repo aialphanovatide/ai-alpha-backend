@@ -221,14 +221,14 @@ class AnalyzedArticle(Base):
 class Chart(Base):
     __tablename__ = 'chart'
     chart_id = Column(Integer, primary_key=True, autoincrement=True)
-    support_1 = Column(Integer)
-    support_2 = Column(Integer)
-    support_3 = Column(Integer)
-    support_4 = Column(Integer)
-    resistance_1 = Column(Integer)
-    resistance_2 = Column(Integer)
-    resistance_3 = Column(Integer)
-    resistance_4 = Column(Integer)
+    support_1 = Column(Float)
+    support_2 = Column(Float)
+    support_3 = Column(Float)
+    support_4 = Column(Float)
+    resistance_1 = Column(Float)
+    resistance_2 = Column(Float)
+    resistance_3 = Column(Float)
+    resistance_4 = Column(Float)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
@@ -532,3 +532,17 @@ with session:
         print(f'---Error populating the database: {str(e)}---')
         session.rollback()
 
+
+# --------- CREATE AN ADMIN USER ----------------------------------------
+
+try:
+    if not session.query(Admin).first():
+        new_admin = Admin(mail='team@novatide.io', username='novatideteam', password='Novatide2023!')
+        session.add(new_admin)
+        session.commit()
+        print('---- Admin user created------')
+    else:
+        print('---- Admin user already exist------')
+except Exception as e:
+    print(f'---Error creating the admin user: {str(e)}---')
+    session.rollback()
