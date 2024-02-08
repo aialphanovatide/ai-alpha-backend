@@ -2,7 +2,7 @@ from routes.slack.templates.poduct_alert_notification import send_notification_t
 from config import CoinBot, session, Category, Article, TopStory
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
-from flask import request, Blueprint
+from flask import request, Blueprint, jsonify
 from datetime import datetime, timedelta
 from scheduler import scheduler
 from sqlalchemy import exists
@@ -23,7 +23,7 @@ def get_all_top_stories():
         top_stories = session.query(TopStory).order_by(desc(TopStory.created_at)).all()
 
         if not top_stories:
-            return {'message': 'No top stories found'}, 204
+            return jsonify({'top_stories': 'No top stories found'}), 204
         else:
             for top_story in top_stories:
                 top_story_dict = {
@@ -46,10 +46,29 @@ def get_all_top_stories():
                 top_stories_list.append(top_story_dict)
 
         
-            return {'top stories': top_stories_list}, 200
+            return jsonify({'top_stories': top_stories_list}), 200
            
     except Exception as e:
-        return {'error': f'An error occurred getting the top stories: {str(e)}'}, 500
+        return jsonify({'error': f'An error occurred getting the top stories: {str(e)}'}), 500
+
+# Delete a top stories 
+@scrapper_bp.route('/api/delete/top-story/<int:top_story_id>', methods=['DELETE'])
+def delete_top_story(top_story_id):
+    try:
+        top_story = session.query(TopStory).filter(TopStory.top_story_id == top_story_id).first()
+
+        if not top_story:
+            return jsonify({'message': 'No top story found'}), 404
+
+        # Delete the top story
+        session.delete(top_story)
+        session.commit()
+
+        return jsonify({'message': 'Top story deleted'}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'error': f'An error occurred deleting the top story: {str(e)}'}), 500
     
 
 # Gets all the news related to a category: ex Layer 0 
