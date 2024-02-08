@@ -98,19 +98,18 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
         try:
         
             response = requests.post(telegram_text_url, data=text_payload)
-
+                
             if response.status_code == 200:
              
-                
                 coinBot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name).first()
                 coin_bot_id = coinBot.bot_id
-                    
+                
                 new_alert = Alert(alert_name=alert_Name,
-                                    alert_message = alert_message,
-                                    symbol=formatted_symbol,
-                                    price=formatted_price,
-                                    coin_bot_id=coin_bot_id
-                                    )
+                                alert_message = alert_message,
+                                symbol=formatted_symbol,
+                                price=formatted_price,
+                                coin_bot_id=coin_bot_id
+                                )
 
                 session.add(new_alert)
                 session.commit()
