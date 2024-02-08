@@ -1,5 +1,6 @@
 from config import Analysis, AnalysisImage, session, CoinBot
 from flask import jsonify, Blueprint, request
+from sqlalchemy import desc
 from PIL import Image
 from io import BytesIO
 import base64
@@ -12,7 +13,7 @@ analysis_bp = Blueprint('analysis', __name__)
 def get_analysis(coin_bot_id):
 
     try:
-        analysis_objects = session.query(Analysis).filter_by(coin_bot_id=coin_bot_id).all()
+        analysis_objects = session.query(Analysis).filter_by(coin_bot_id=coin_bot_id).order_by(desc(Analysis.created_at)).all()
         analysis_data = []
         
         # Iterates over the analysis dict and gets the images related to each analysis
@@ -36,9 +37,34 @@ def get_analysis(coin_bot_id):
     except Exception as e:
         session.rollback()
         return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
+
+
+# Gets all the analysis from all coins
+@analysis_bp.route('/get_analysis', methods=['GET'])
+def get_all_analysis():
+
+    try:
+        analysis_objects = session.query(Analysis).order_by(desc(Analysis.created_at)).all()
+        analysis_data = []
+        
+        # Iterates over the analysis dict and gets the images related to each analysis
+        for analy in analysis_objects:
+            analysis_dict = analy.to_dict() 
+
+            images_objects = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
+            images_data = [{'image_id': img.image_id, 'image': img.image} for img in images_objects]
+
+            analysis_dict['analysis_images'] = images_data
+            analysis_dict['coin_bot_id'] = analy.coin_bot_id
+            analysis_data.append(analysis_dict)
+  
+
+        return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
     
-
-
 
 # Creates an analysis
 @analysis_bp.route('/post_analysis', methods=['POST'])
@@ -51,9 +77,13 @@ def post_analysis():
         print(f'Coin Bot ID: {coin_bot_id}')
         print(f'Content: {content}')
         print(f'image_file: {image_file}')
+        
+        # Check if any of the required values is missing
+        if content == 'null' or coin_bot_id == 'null' or image_file == 'null':
+            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
         # Check if any of the required values is missing
-        if coin_bot_id is None or content is None or image_file is None:
+        if coin_bot_id is None or not coin_bot_id or content is None or not content or image_file is None or not image_file:
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
         new_analysis = Analysis(
@@ -155,16 +185,17 @@ def edit_analysis(analysis_id):
 
 
 
-
+# Gets the name and date of the last analysis created
 @analysis_bp.route('/get_last_analysis', methods=['GET'])
 def get_last_analysis():
     try:
         # Retrieve the last analysis created
         last_analysis = session.query(Analysis).order_by(Analysis.created_at.desc()).first()
-        coin = session.query(CoinBot).filter(CoinBot.bot_id==last_analysis.coin_bot_id).first()
 
         if last_analysis is None:
             return jsonify({'error': 'No analysis found', 'status': 404, 'success': False}), 404
+        
+        coin = session.query(CoinBot).filter(CoinBot.bot_id==last_analysis.coin_bot_id).first()
 
         # Extract relevant information, such as analysis content and creation date
         analysis_data = {
