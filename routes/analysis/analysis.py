@@ -50,6 +50,7 @@ def post_analysis():
 
         print(f'Coin Bot ID: {coin_bot_id}')
         print(f'Content: {content}')
+        print(f'image_file: {image_file}')
 
         # Check if any of the required values is missing
         if coin_bot_id is None or content is None or image_file is None:
