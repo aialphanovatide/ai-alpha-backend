@@ -30,7 +30,6 @@ def get_tokenomics(coin_bot_id):
             'token_utility': token_utility_data,
             'value_accrual_mechanisms': value_accrual_mechanisms_data,
         }
-        print('Objeto Global', data)
         return jsonify({'message': data}), 200
          
     except Exception as e:
@@ -141,3 +140,5 @@ def edit_competitor_data(tokenomics_id):
     except Exception as e:
         return jsonify({'error': f'Error editing Tokenomics data: {str(e)}', 'status': 500}), 500
    
+
+
