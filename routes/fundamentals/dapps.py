@@ -39,3 +39,26 @@ def create_dapp():
         return {'message': f'DApp for coin_bot_id {coin_bot_id} created successfully'}, 200
     except Exception as e:
         return {'error': f'Error creating DApp: {str(e)}'}, 500
+
+@dapps_bp.route('/api/dapps/edit/<int:dapp_id>', methods=['PUT'])
+def edit_dapp(dapp_id):
+    try:
+        data = request.json
+
+        session = Session()
+        dapp = session.query(DApps).filter_by(id=dapp_id).first()
+
+        if not dapp:
+            return {'error': 'DApp not found'}, 404
+
+        # Actualizar los campos de la DApp con los nuevos datos
+        dapp.dapps = data.get('dapps', dapp.dapps)
+        dapp.description = data.get('description', dapp.description)
+        dapp.tvl = data.get('tvl', dapp.tvl)
+
+        session.commit()
+
+        return {'message': 'DApp updated successfully'}, 200  
+
+    except Exception as e:
+        return {'error': f'Error updating DApp: {str(e)}'}, 500
