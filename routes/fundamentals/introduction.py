@@ -16,9 +16,6 @@ def create_content():
         website = data.get('website', None)
         whitepaper = data.get('whitepaper', None)
 
-        if coin_bot_id is None or (coin_bot_id is not None and not isinstance(coin_bot_id, int)) or content is None:
-            return jsonify({'error': 'ID and content are required', 'status': 400}), 400
-        
         existing_introduction = session.query(Introduction).filter_by(coin_bot_id=int(coin_bot_id)).first()
 
         if existing_introduction:
