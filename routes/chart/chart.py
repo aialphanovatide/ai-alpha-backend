@@ -43,10 +43,43 @@ def save_chart():
     
 
 
-# ----- ROUTE FOR THE DASHBOARD ---------------------------
+# ----- ROUTE FOR THE APP ---------------------------
 # Gets the support and resistance lines of a requested coin
 @chart_bp.route('/api/coin-support-resistance/<coin_bot_name>', methods=['GET'])
 def get_chart_values_by_coin_bot_id(coin_bot_name):
+
+    try:
+           
+        coinbot = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
+        chart = session.query(Chart).filter_by(coin_bot_id=coinbot.bot_id).first()
+
+        if chart:
+            chart_values = {
+                'support_1': chart.support_1,
+                'support_2': chart.support_2,
+                'support_3': chart.support_3,
+                'support_4': chart.support_4,
+                'resistance_1': chart.resistance_1,
+                'resistance_2': chart.resistance_2,
+                'resistance_3': chart.resistance_3,
+                'resistance_4': chart.resistance_4
+            }
+
+            return jsonify({'success': True, 'chart_values': chart_values})
+        else:
+            return jsonify({'success': False, 'message': 'Chart not found for the given coin ID'})
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+    
+
+
+# ----- ROUTE FOR THE DASHBOARD ---------------------------
+# Gets the support and resistance lines of a requested coin
+# this route is duplicated with the previous one, just for convenience, as the dashboard is passing the ID of the coin.
+@chart_bp.route('/api/coin-support-resistance/dashboard/<coin_bot_name>', methods=['GET'])
+def get_s_and_r(coin_bot_name):
 
     try:
            
