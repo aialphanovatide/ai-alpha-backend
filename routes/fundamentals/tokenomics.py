@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from config import Token_distribution, Token_utility, Value_accrual_mechanisms, session
+from config import Token_distribution, Token_utility, Value_accrual_mechanisms, session, Tokenomics
 from sqlalchemy.orm import joinedload
 
 tokenomics = Blueprint('tokenomics', __name__)
@@ -12,10 +12,15 @@ def get_tokenomics(coin_bot_id):
         token_distribution_obj = session.query(Token_distribution).filter(Token_distribution.coin_bot_id == coin_bot_id).all()
         token_utility_obj = session.query(Token_utility).filter(Token_utility.coin_bot_id == coin_bot_id).all()
         value_accrual_mechanisms_obj = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.coin_bot_id == coin_bot_id).all()
+        tokenomics = session.query(Tokenomics).filter(Tokenomics.coin_bot_id == coin_bot_id).all()
 
         token_distribution_data = [{
             'token_distributions': token_distribution.as_dict(),
         } for token_distribution in token_distribution_obj]
+
+        tokenomics_data = [{
+            'tokenomics': tokenomic.as_dict(),
+        } for tokenomic in tokenomics]
 
         token_utility_data = [{
             'token_utilities': token_utility.as_dict(),
@@ -29,6 +34,7 @@ def get_tokenomics(coin_bot_id):
             'token_distribution': token_distribution_data,
             'token_utility': token_utility_data,
             'value_accrual_mechanisms': value_accrual_mechanisms_data,
+            'tokenomics_data': tokenomics_data,
         }
         return jsonify({'message': data}), 200
          
@@ -104,9 +110,55 @@ def create_value_accrual_mechanisms():
        
     except Exception as e:
         return jsonify({'error': f'Error creating a value accrual mechanisms: {str(e)}', 'status': 500}), 500
+    
+
+@tokenomics.route('/post_tokenomics', methods=['POST'])
+def create_tokenomics():
+    try:
+        data = request.get_json()
+        coin_bot_id = data.get('coin_bot_id')
+        token = data.get('token')
+        total_supply = data.get('total_supply')
+        circulating_supply = data.get('circulating_supply')
+        percentage_circulating_supply = data.get('percentage_circulating_supply')
+        max_supply = data.get('max_supply')
+        supply_model = data.get('supply_model')
+
+        existance_tokenomics = session.query(Tokenomics).filter(Tokenomics.token==token.lower()).first()
+
+        if existance_tokenomics:
+            return jsonify({'message': 'Tokenomics already exist for this token', 'status': 409}), 409
+
+        if not coin_bot_id:
+            return jsonify({'message': 'Coin ID required', 'status': 400}), 400
+        
+        if token:
+            new_tokenomics = Tokenomics(
+                token=token,
+                total_supply=total_supply,
+                coin_bot_id=coin_bot_id,
+                circulating_supply=circulating_supply,
+                percentage_circulating_supply=percentage_circulating_supply,
+                max_supply=max_supply,
+                supply_model=supply_model
+            )
+
+            session.add(new_tokenomics)
+            session.commit()
+            return jsonify({'message': 'tokenomics added successfully', 'status': 200}), 200
+        else:
+            return jsonify({'error': f'Token name required', 'status': 400}), 400
+       
+    except Exception as e:
+        return jsonify({'error': f'Error creating tokenomics mechanisms: {str(e)}', 'status': 500}), 500
+    
 
 # ------- PUT ---------- EDITS AN INSTANCE OF THE TABLE ----------------------------------------
     
+# Create the edit route for editing a already created tokenomics
+    
+
+
 
 @tokenomics.route('/edit_tokenomics/<int:tokenomics_id>', methods=['PUT'])  
 def edit_competitor_data(tokenomics_id):
