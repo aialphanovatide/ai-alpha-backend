@@ -1,5 +1,5 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from config import CoinBot, session, Category, Article, TopStory
+from config import CoinBot, session, Category, Article, TopStory, TopStoryImage
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint, jsonify
@@ -59,9 +59,12 @@ def delete_top_story(top_story_id):
 
         if not top_story:
             return jsonify({'message': 'No top story found'}), 404
+        
+        top_story_image = session.query(TopStoryImage).filter(TopStoryImage.top_story_id==top_story.top_story_id).first()
 
         # Delete the top story
         session.delete(top_story)
+        session.delete(top_story_image)
         session.commit()
 
         return jsonify({'message': 'Top story deleted'}), 200
