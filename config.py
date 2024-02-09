@@ -229,6 +229,9 @@ class Chart(Base):
     resistance_2 = Column(Float)
     resistance_3 = Column(Float)
     resistance_4 = Column(Float)
+    token = Column(String)
+    pair = Column(String)
+    temporality = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
