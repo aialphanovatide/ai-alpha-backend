@@ -59,6 +59,8 @@ def delete_top_story(top_story_id):
 
         if not top_story:
             return jsonify({'message': 'No top story found'}), 404
+        
+        top_story_image = session.query(TopStoryImage).filter(TopStoryImage.top_story_id==top_story.top_story_id).first()
 
         top_story_image = session.query(TopStoryImage).filter(TopStoryImage.top_story_id==top_story.top_story_id).first()
 

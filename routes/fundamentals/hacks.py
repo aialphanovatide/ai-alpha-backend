@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from config import Session, session
+from config import Session, session, CoinBot
 from config import Hacks
 
 hacks_bp = Blueprint('hacksRoutes', __name__)
@@ -8,14 +8,31 @@ hacks_bp = Blueprint('hacksRoutes', __name__)
 def get_hacks():
     try:
         coin_bot_id = request.args.get('coin_bot_id')
-        hacks_data = session.query(Hacks).filter_by(coin_bot_id=coin_bot_id).all()
-        if not hacks_data:
-            return {'error': 'No data found for the requested coin'}, 404
+        coin_bot_name = request.args.get('coin_bot_name')
 
-        hacks_list = [hack.as_dict() for hack in hacks_data]
+        print('coin_bot_id: ', coin_bot_id)
+        print('coin_bot_name: ', coin_bot_name)
+
+        if coin_bot_name is None and coin_bot_id is None:
+            return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
+
+        coin_data = None
+
+        if coin_bot_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
+            coin_data = session.query(Hacks).filter_by(coin_bot_id=coin.bot_id).all()
+
+        if coin_bot_id:
+            coin_data = session.query(Hacks).filter_by(coin_bot_id=coin_bot_id).all()
+        
+        if coin_data is None:
+            return {'message': 'No hacks found for the requested coin', 'status': 404}, 404
+
+        hacks_list = [hack.as_dict() for hack in coin_data]
         return jsonify({'message': hacks_list}), 200
     except Exception as e:
-        return {'error': f'Error getting hacks data: {str(e)}'}, 500
+        return jsonify({'error': f'Error getting hacks data: {str(e)}', 'status': 500}), 500
+    
 
 @hacks_bp.route('/api/hacks/create', methods=['POST'])
 def create_hack():

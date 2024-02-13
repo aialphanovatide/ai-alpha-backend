@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from config import Introduction, session
+from config import Introduction, session, CoinBot
 from datetime import datetime
 
 introduction = Blueprint('introduction', __name__)
@@ -16,9 +16,6 @@ def create_content():
         website = data.get('website', None)
         whitepaper = data.get('whitepaper', None)
 
-        if coin_bot_id is None or (coin_bot_id is not None and not isinstance(coin_bot_id, int)) or content is None:
-            return jsonify({'error': 'ID and content are required', 'status': 400}), 400
-        
         existing_introduction = session.query(Introduction).filter_by(coin_bot_id=int(coin_bot_id)).first()
 
         if existing_introduction:
@@ -39,14 +36,18 @@ def create_content():
 
 
 # Gets the introduction data of a coin
-@introduction.route('/get_introduction/<int:coin_bot_id>', methods=['GET'])
-def get_content(coin_bot_id):
+@introduction.route('/get_introduction/<string:coin_name>', methods=['GET'])
+def get_content(coin_name):
     try:
-        introduction = session.query(Introduction).filter_by(coin_bot_id=coin_bot_id).first()
+        coin_data = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+
+        if coin_data == None:
+            return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404
+        
+        introduction = session.query(Introduction).filter_by(coin_bot_id=coin_data.bot_id).first()
 
         if introduction:
             introduction_data = introduction.as_dict()
-
             return jsonify({'message': introduction_data, 'status': 200}), 200
         else:
             return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404

@@ -72,11 +72,10 @@ app.register_blueprint(erase_site)
 app.register_blueprint(hacks_bp)
 app.register_blueprint(revenue_model_bp)
 app.register_blueprint(introduction)
-app.register_blueprint(tokenomics)
 app.register_blueprint(upgrades_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
-
+app.register_blueprint(tokenomics)
 
 if __name__ == '__main__':
     try:
