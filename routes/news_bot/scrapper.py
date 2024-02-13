@@ -332,7 +332,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             image = generate_poster_prompt(summary)
 
                             article_image = image[0] if image else 'No image'
-                            salck_image = image[1] if image else 'No image'
+                            slack_image = image[1] if image else 'No image'
                           
                             # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",   # to debug
                             send_NEWS_message_to_slack(channel_id=channel_id, 
@@ -340,7 +340,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                                                 date_time=valid_date,
                                                 url=article_link,
                                                 summary=summary,
-                                                image=salck_image,
+                                                image=slack_image,
                                                 category_name=category_name
                                                 )
 

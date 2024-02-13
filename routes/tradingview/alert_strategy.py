@@ -118,6 +118,7 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
             else:
                 return f'Error while sending message from Tradingview to Telegram {str(response.content)}', 500 
         except Exception as e:
+            session.rollback()
             return f'Error sending message from Tradingview to Telegram. Reason: {str(e)}', 500
     except Exception as e:
         return f'An error occured in send_alert_strategy_to_telegram: {str(e)}', 500
