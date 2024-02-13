@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from config import Chart, session, CoinBot
 from flask import jsonify, request, Blueprint, jsonify
 
@@ -13,42 +14,63 @@ def save_chart():
         coin_bot_id = data.get('coin_bot_id')
         pair = data.get('pair')
         temporality = data.get('temporality')
-
-        if not coin_bot_id or not pair or not temporality:
-            return jsonify({'success': False, 'message': 'One or more fields are missing'}), 400
-        
         token = data.get('token')
-        pair=data.get('pair')
 
-        if token.casefold() == 'btc' and pair == 'btc':
+        print('temporality: ', temporality)
+
+        if not coin_bot_id or not pair or not temporality or not token:
+            return jsonify({'success': False, 'message': 'One or more fields are missing'}), 400
+
+        if token.casefold() == 'btc' and pair.casefold() == 'btc':
             return jsonify({'success': False, 'message': 'Coin/pair not valid'}), 400
         
-        delete_last_chart = session.query(Chart).filter_by(coin_bot_id=coin_bot_id).delete()
-        print(f"{delete_last_chart} rows deleted")
+        existing_chart = session.query(Chart).filter(Chart.coin_bot_id==coin_bot_id, 
+                                                     Chart.pair==pair.casefold(), 
+                                                     Chart.temporality==temporality.casefold(),
+                                                     Chart.token==token.casefold()).first()
 
-        new_chart = Chart(
-            support_1=data.get('support_1'),
-            support_2=data.get('support_2'),
-            support_3=data.get('support_3'),
-            support_4=data.get('support_4'),
-            resistance_1=data.get('resistance_1'),
-            resistance_2=data.get('resistance_2'),
-            resistance_3=data.get('resistance_3'),
-            resistance_4=data.get('resistance_4'),
-            token=token,
-            pair=pair,
-            temporality=data.get('temporality'),
-            coin_bot_id=coin_bot_id
-        )
 
-        session.add(new_chart)
-        session.commit()
+        if existing_chart:
+            # Update existing chart values
+            existing_chart.support_1 = data.get('support_1')
+            existing_chart.support_2 = data.get('support_2')
+            existing_chart.support_3 = data.get('support_3')
+            existing_chart.support_4 = data.get('support_4')
+            existing_chart.resistance_1 = data.get('resistance_1')
+            existing_chart.resistance_2 = data.get('resistance_2')
+            existing_chart.resistance_3 = data.get('resistance_3')
+            existing_chart.resistance_4 = data.get('resistance_4')
 
-        return jsonify({'success': True, 'message': 'Chart updated successfully'}), 200
+            session.commit()
+
+            return jsonify({'success': True, 'message': 'Chart updated successfully'}), 200
+        else:
+            # Create a new chart
+            print('chart to create')
+            new_chart = Chart(
+                support_1=data.get('support_1'),
+                support_2=data.get('support_2'),
+                support_3=data.get('support_3'),
+                support_4=data.get('support_4'),
+                resistance_1=data.get('resistance_1'),
+                resistance_2=data.get('resistance_2'),
+                resistance_3=data.get('resistance_3'),
+                resistance_4=data.get('resistance_4'),
+                token=token,
+                pair=pair,
+                temporality=data.get('temporality'),
+                coin_bot_id=coin_bot_id
+            )
+
+            session.add(new_chart)
+            session.commit()
+
+            return jsonify({'success': True, 'message': 'Chart created successfully'}), 200
 
     except Exception as e:
         session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
+
     
 
 
