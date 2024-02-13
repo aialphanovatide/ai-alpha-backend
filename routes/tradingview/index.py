@@ -177,5 +177,6 @@ def receive_data_from_tv():
             
     except Exception as e:
         print(f'Error receiving Tradingview message: {str(e)}')
+        session.rollback()
         return f'Error receiving Tradingview message: {str(e)}', 500    
         

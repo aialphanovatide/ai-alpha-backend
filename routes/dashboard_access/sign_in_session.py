@@ -34,6 +34,8 @@ def login():
                 return jsonify({'success': False, 'message': 'Invalid password'}), 401
         
         except SQLAlchemyError as exc:
+             session.rollback()
              return jsonify({'success': False, 'message': f'Database error: {str(exc)}'}), 500
         except Exception as e:
+            session.rollback()
             return jsonify({'success': False, 'message': f'{str(e)}'}), 500
