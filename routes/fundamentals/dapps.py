@@ -10,7 +10,7 @@ def get_dapps():
         coin_bot_id = request.args.get('coin_bot_id')
         coin_bot_name = request.args.get('coin_bot_name')
 
-        if coin_bot_name is None and coin_bot_id is None:
+        if coin_bot_name is None or coin_bot_id is None:
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
         coin_data = None
