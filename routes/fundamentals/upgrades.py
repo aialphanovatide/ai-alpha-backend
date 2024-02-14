@@ -1,5 +1,5 @@
 from sqlalchemy import desc
-from config import Upgrades, session
+from config import Upgrades, session, CoinBot
 from flask import Blueprint, request, jsonify
 
 
@@ -14,20 +14,27 @@ def get_upgrades():
         coin_bot_id = request.args.get('coin_bot_id')
         coin_name = request.args.get('coin_name')
 
+        if not coin_bot_id and not coin_name:
+            return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
-        upgrades_data = session.query(Upgrades).filter(
-            Upgrades.coin_bot_id == coin_bot_id).order_by(desc(Upgrades.created_at)).all()
-        if not upgrades_data:
-            return jsonify({'message': 'No upgrades found', 'status': 404}), 404
+        coin_data = None
 
-        upgrades = [{
-            'upgrade': upgrade.as_dict(),
-        } for upgrade in upgrades_data]
+        if coin_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+            coin_data = session.query(Upgrades).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
+        if coin_bot_id:
+            coin_data_id = session.query(Upgrades).filter_by(coin_bot_id=coin_bot_id).all()
+            coin_data = coin_data_id if coin_data_id else None
+        
+        if coin_data is None:
+            return jsonify({'message': 'No upgrades found for the requested coin', 'status': 404}), 404
+       
+        upgrades = [{'upgrade': upgrade.as_dict()} for upgrade in coin_data]
         return jsonify({'message': upgrades, 'status': 200}), 200
 
     except Exception as e:
-        return jsonify({'error': f'Error getting the upgrades data, {str(e)}', 'status': 500}), 500
+        return jsonify({'message': f'Error getting the upgrades data, {str(e)}', 'status': 500}), 500
 
 
 # Post a new upgrade record
@@ -39,12 +46,12 @@ def post_upgrades():
         coin_bot_id = data.get('coin_bot_id')
 
         if coin_bot_id is None:
-            return jsonify({'error': 'Coin ID is required', 'status': 400}), 400
+            return jsonify({'message': 'Coin ID is required', 'status': 400}), 400
 
         upgrade_data = data.get('upgrade_data')
 
         if not upgrade_data:
-            return jsonify({'error': 'Upgrade data is required', 'status': 400}), 400
+            return jsonify({'message': 'Upgrade data is required', 'status': 400}), 400
 
         new_upgrade = Upgrades(
             coin_bot_id=coin_bot_id,
@@ -60,7 +67,7 @@ def post_upgrades():
         return jsonify({'message': 'Upgrade data added', 'status': 200}), 200
 
     except Exception as e:
-        return jsonify({'error': f'Error getting the upgrades data, {str(e)}', 'status': 500}), 500
+        return jsonify({'message': f'Error getting the upgrades data, {str(e)}', 'status': 500}), 500
 
 
 # Edits an upgrade record
@@ -70,9 +77,7 @@ def edit_upgrade_data(upgrate_id):
         data = request.json
         coin_data = session.query(Upgrades).filter(
             Upgrades.id == upgrate_id).first()
-        print(data)
-        print(coin_data)
-
+      
         if not coin_data:
             return jsonify({'message': 'No data found for the requested coin', 'status': 404}), 404
 
@@ -87,4 +92,5 @@ def edit_upgrade_data(upgrate_id):
         return jsonify({'message': f'Upgrade edited successfully', 'status': 200}), 200
 
     except Exception as e:
-        return jsonify({'error': f'Error editing competitor data: {str(e)}', 'status': 500}), 500
+        session.rollback()
+        return jsonify({'message': f'Error editing competitor data: {str(e)}', 'status': 500}), 500
