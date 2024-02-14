@@ -13,7 +13,6 @@ def activate_bot():
             categories = db_session.query(Category).all()
 
         for category in categories:
-            print(category.category)
             activate_news_bot(category.category)
         any_inactive = any(not category.is_active for category in categories)
         return jsonify({"bots": [{"category": category.category, "isActive": category.is_active} for category in categories], "any_inactive": any_inactive})
