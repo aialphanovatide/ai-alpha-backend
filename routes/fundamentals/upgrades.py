@@ -7,10 +7,14 @@ upgrades_bp = Blueprint('upgrades_bp', __name__)
 
 
 # Gets the upgrades data related to a coin
-@upgrades_bp.route('/get_upgrades/<int:coin_bot_id>', methods=['GET'])
-def get_upgrades(coin_bot_id):
+@upgrades_bp.route('/get_upgrades', methods=['GET'])
+def get_upgrades():
 
     try:
+        coin_bot_id = request.args.get('coin_bot_id')
+        coin_name = request.args.get('coin_name')
+
+
         upgrades_data = session.query(Upgrades).filter(
             Upgrades.coin_bot_id == coin_bot_id).order_by(desc(Upgrades.created_at)).all()
         if not upgrades_data:

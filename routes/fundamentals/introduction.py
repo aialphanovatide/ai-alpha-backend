@@ -97,6 +97,7 @@ def edit_content(coin_bot_id):
             return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404
 
     except Exception as e:
+        session.rollback()
         return jsonify({'error': str(e), 'status': 500}), 500
 
 
