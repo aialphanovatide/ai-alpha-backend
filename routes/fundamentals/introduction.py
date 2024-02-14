@@ -63,6 +63,7 @@ def get_content():
         return jsonify({'message': introduction_data, 'status': 200}), 200
        
     except Exception as e:
+        session.rollback()
         return jsonify({'error': str(e), 'status': 500}), 500
     
 
