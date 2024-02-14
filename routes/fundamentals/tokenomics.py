@@ -175,7 +175,8 @@ def edit_competitor_data(tokenomics_id):
             for key, value in data['token_distribution'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
                     setattr(token_distribution_data, key, value)
-        
+                    print('correct added')
+                    
         if token_utility_data and data['token_utility'].items():
             for key, value in data['token_utility'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
