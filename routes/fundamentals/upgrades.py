@@ -14,7 +14,6 @@ def get_upgrades():
         coin_bot_id = request.args.get('coin_bot_id')
         coin_name = request.args.get('coin_name')
 
-
         upgrades_data = session.query(Upgrades).filter(
             Upgrades.coin_bot_id == coin_bot_id).order_by(desc(Upgrades.created_at)).all()
         if not upgrades_data:
