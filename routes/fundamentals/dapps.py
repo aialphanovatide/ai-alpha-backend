@@ -1,29 +1,47 @@
 from flask import Blueprint, jsonify, request
-from config import Session, DApps
+from config import Session, DApps, session, CoinBot
 
 dapps_bp = Blueprint('dappsRoutes', __name__)
 
+# Gets all the dapps data of a coin
 @dapps_bp.route('/api/dapps', methods=['GET'])
 def get_dapps():
     try:
         coin_bot_id = request.args.get('coin_bot_id')
+        coin_bot_name = request.args.get('coin_bot_name')
 
-        session = Session()
-        dapps_data = session.query(DApps).filter_by(coin_bot_id=coin_bot_id).all()
+        if coin_bot_name is None and coin_bot_id is None:
+            return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
-        if not dapps_data:
-            return {'error': 'No data found for the requested coinbot'}, 404
+        coin_data = None
 
-        dapps_list = [dapp.as_dict() for dapp in dapps_data]
-        return jsonify({'message': dapps_list}), 200
+        if coin_bot_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
+            coin_data = session.query(DApps).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
+
+        if coin_bot_id:
+            dapps = session.query(DApps).filter_by(coin_bot_id=coin_bot_id).all()
+            coin_data = dapps if dapps else None
+
+        if coin_data is None:
+            return jsonify({'message': 'No hacks found for the requested coin', 'status': 404}), 404
+
+        dapps_list = [dapp.as_dict() for dapp in coin_data]
+        return jsonify({'message': dapps_list, 'status': 200}), 200
+    
     except Exception as e:
-        return {'error': f'Error getting DApps data: {str(e)}'}, 500
+        session.rollback()
+        return jsonify({'error': f'Error getting DApps data: {str(e)}', 'status': 500}), 500
 
+# Creates a new dapps record for a coin
 @dapps_bp.route('/api/dapps/create', methods=['POST'])
 def create_dapp():
     try:
         data = request.json
         coin_bot_id = data.get('coin_bot_id')
+
+        if not coin_bot_id:
+            return jsonify({'message': 'Coin ID is missing', 'status': 400}), 400
 
         new_dapp = DApps(
             dapps=data.get('dapps'),
@@ -32,33 +50,30 @@ def create_dapp():
             coin_bot_id=coin_bot_id
         )
 
-        session = Session()
         session.add(new_dapp)
         session.commit()
-
-        return {'message': f'DApp for coin_bot_id {coin_bot_id} created successfully'}, 200
+        return jsonify({'message': f'DApp for coin_bot_id {coin_bot_id} created successfully', 'status': 201}), 201
+    
     except Exception as e:
-        return {'error': f'Error creating DApp: {str(e)}'}, 500
+        session.rollback()
+        return jsonify({'error': f'Error creating DApp: {str(e)}', 'status': 500}), 500
 
+# Edits a dapss record of a coin
 @dapps_bp.route('/api/dapps/edit/<int:dapp_id>', methods=['PUT'])
 def edit_dapp(dapp_id):
     try:
         data = request.json
-
-        session = Session()
         dapp = session.query(DApps).filter_by(id=dapp_id).first()
 
         if not dapp:
-            return {'error': 'DApp not found'}, 404
+            return jsonify({'message': 'DApp not found', 'status': 404}), 404
 
-        # Actualizar los campos de la DApp con los nuevos datos
         dapp.dapps = data.get('dapps', dapp.dapps)
         dapp.description = data.get('description', dapp.description)
         dapp.tvl = data.get('tvl', dapp.tvl)
 
         session.commit()
-
-        return {'message': 'DApp updated successfully'}, 200  
+        return jsonify({'message': 'DApp updated successfully', 'status': 200}), 200  
 
     except Exception as e:
-        return {'error': f'Error updating DApp: {str(e)}'}, 500
+        return jsonify({'error': f'Error updating DApp: {str(e)}', 'status': 500}), 500
