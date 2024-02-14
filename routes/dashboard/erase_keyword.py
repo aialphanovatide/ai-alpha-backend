@@ -23,16 +23,15 @@ delete_kw = Blueprint('delete_keyword', __name__)
 def delete_keyword():
     try:
         keyword_id = request.json.get('keyword_id')
-        print('keyword_id', keyword_id)
+
         with DBSession() as db_session:
             keyword = db_session.query(Keyword).filter_by(keyword_id=keyword_id).first()
-            print('keyword :', keyword)
-
+        
             if keyword:
                 db_session.delete(keyword)
                 db_session.commit()
-                return jsonify({'success': True, 'message': 'Keyword deleted successfully'})
+                return jsonify({'success': True, 'message': f'Keyword {keyword.word} deleted successfully'})
             else:
                 return jsonify({'success': False, 'message': 'Keyword not found'})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({'success': False, 'message': str(e)})

@@ -10,9 +10,6 @@ def get_hacks():
         coin_bot_id = request.args.get('coin_bot_id')
         coin_bot_name = request.args.get('coin_bot_name')
 
-        print('coin_bot_id: ', coin_bot_id)
-        print('coin_bot_name: ', coin_bot_name)
-
         if coin_bot_name is None and coin_bot_id is None:
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 

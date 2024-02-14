@@ -10,10 +10,9 @@ def get_keywords_for_coin_bot(coin_bot_id):
     print(coin_bot_id)
     try:
         with DBSession() as db_session:
-            # Obtener las palabras clave para el coinBot específico
             keywords = db_session.query(Keyword).filter_by(coin_bot_id=coin_bot_id).all()
             keywords_data = [{'id': keyword.keyword_id, 'word': keyword.word} for keyword in keywords]
-            return jsonify({'success': True, 'keywords': keywords_data})
+            return jsonify({'success': True, 'keywords': keywords_data}), 200
 
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({'success': False, 'error': str(e)}), 500
