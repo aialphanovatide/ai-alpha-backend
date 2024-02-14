@@ -19,13 +19,12 @@ def post_revenue_model():
             fees_1ys=data.get('fees_1ys'),
             coin_bot_id=coin_bot_id
         )
-        with Session() as session:
-            session.add(new_revenue)
-            session.commit()
-
+        session.add(new_revenue)
+        session.commit()
         return jsonify({'message': 'Revenue model created successfully', 'status': 200}), 200
         
     except Exception as e:
+        session.rollback()
         return jsonify({'message': f'Error creating revenue model: {str(e)}', 'status': 500}), 500
 
 
@@ -66,15 +65,12 @@ def edit_revenue_model(model_id):
     try:
         data = request.json
         updated_analized_revenue = data.get('analized_revenue')
-        updated_fees_1ys = data.get('fees_1ys')
+        updated_fees_1ys = data.get('fees_1ys', None)
 
-        # Busca el modelo de ingresos por su ID
         with Session() as session:
             revenue_model = session.query(Revenue_model).filter_by(coin_bot_id=model_id).first()
 
-            # Verifica si el modelo de ingresos existe
             if revenue_model:
-                # Actualiza los campos del modelo de ingresos con los nuevos valores
                 revenue_model.analized_revenue = updated_analized_revenue
                 revenue_model.fees_1ys = updated_fees_1ys
                 session.commit()
