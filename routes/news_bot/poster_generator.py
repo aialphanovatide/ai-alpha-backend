@@ -60,22 +60,22 @@ def generate_poster_prompt(article):
         return image_data, image_url
     else:
         print("Error:", response.status_code, response.text)
-        # Si la solicitud falla, intenta con un nuevo prompt
+      
         return generate_poster_prompt(article)
 
-content='''
-- Article: Step One: "Trump's Re-election: Implications for Bitcoin"
-Step Two:
-- DWS Group, managing $924.5 billion assets, expresses concerns about the potential impact of Trump's re-election on US treasury bonds and Bitcoin.
-- The firm recalls the 2016 election aftermath when Trump’s victory led to a sharp increase in 10-year government bond yields, hinting at possible inflationary pressures with another term.
-- CNBC’s Rick Santelli warns of high yield close for 30-year bonds in 2024, a situation that could trigger a wave of selling.
-'''
-result = generate_poster_prompt(content)
+# content='''
+# - Article: Step One: "Trump's Re-election: Implications for Bitcoin"
+# Step Two:
+# - DWS Group, managing $924.5 billion assets, expresses concerns about the potential impact of Trump's re-election on US treasury bonds and Bitcoin.
+# - The firm recalls the 2016 election aftermath when Trump’s victory led to a sharp increase in 10-year government bond yields, hinting at possible inflationary pressures with another term.
+# - CNBC’s Rick Santelli warns of high yield close for 30-year bonds in 2024, a situation that could trigger a wave of selling.
+# '''
+# result = generate_poster_prompt(content)
 
-if result is not None:
-    image_data, image_url = result
-    file_path = "image.txt"
-    with open(file_path, 'w') as file:
-        file.write(image_data)
-else:
-    print("No se pudo generar la imagen.")
+# if result is not None:
+#     image_data, image_url = result
+#     file_path = "image.txt"
+#     with open(file_path, 'w') as file:
+#         file.write(image_data)
+# else:
+#     print("No se pudo generar la imagen.")
