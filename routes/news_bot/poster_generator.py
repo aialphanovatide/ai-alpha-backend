@@ -6,7 +6,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 from dotenv import load_dotenv
-from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
+#from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 load_dotenv()
 
@@ -16,15 +16,17 @@ client = OpenAI(
     api_key=OPENAI_API_KEY,
 )
 
+
 def resize_image(image_data, target_size=(500, 500)):
     image_binary = base64.b64decode(image_data)
     image = Image.open(BytesIO(image_binary))
     resized_image = image.resize(target_size)
-    resized_image_data = base64.b64encode(resized_image.tobytes()).decode('utf-8')
+    resized_image_data = base64.b64encode(
+        resized_image.tobytes()).decode('utf-8')
     return resized_image_data
 
 def generate_poster_prompt(article):
-    prompt = f'Please generate a DALL-E prompt exactly related to this {article}, no more than 1 line longer'
+    prompt = f'Please generate a DALL-E prompt related to this {article}, no more than 1 line longer. IF THERE IS SOME WORD ABOUT TRUMP, BIDEN OR SOME PRESIDENT, PLEASE KEEP IT OFF AND MAKE A PROMPT WITHOUT THESE WORDS'
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "system", "content": prompt},
@@ -33,6 +35,7 @@ def generate_poster_prompt(article):
         max_tokens=1024,
     )
     final_prompt = response.choices[0].message.content
+    print(final_prompt)
 
     api_url = 'https://api.openai.com/v1/images/generations'
 
@@ -52,41 +55,27 @@ def generate_poster_prompt(article):
     if response.status_code == 200:
         result = response.json()
         image_url = result['data'][0]['url']
-        image_data = base64.b64encode(requests.get(image_url).content).decode('utf-8')
+        image_data = base64.b64encode(
+            requests.get(image_url).content).decode('utf-8')
         return image_data, image_url
     else:
         print("Error:", response.status_code, response.text)
-        send_INFO_message_to_slack_channel(title_message="Error generating Image",
-                                           sub_title="Reason",
-                                           message=f"{response.text} - Article: {article}"
-                                           )
-        return None
-
-
+      
+        return generate_poster_prompt(article)
 
 # content='''
-
-# Ripple co-founder and executive chairman Chris Larsen said on Jan. 31 that his personal accounts had been hacked. The news was first reported by crypto analyst ZachXBT, where it was initially thought that the company itself had been hacked.
-
-
-# According to Larsen:
-
-# “Yesterday, there was unauthorized access to a few of my personal XRP accounts (not @Ripple) — we were quickly able to catch the problem and notify exchanges to freeze the affected addresses. Law enforcement is already involved.”
-# The Ripple chairman didn’t confirm the amounts but, per ZachXBT, the breach netted 213 million XRP 
-# XRP
-# tickers down
-# $0.51
-#  worth about $112.5 million as of the time of the event.
-
-# Advertisement
-
-# BlockShow by Cointelegraph is back with a crypto festival in Hong Kong, May 8-9 - Secure Your Spot!
-
-# Ad
-# The funds were reportedly siphoned and then the perpetrator(s) attempted to launder the XRP through at least six different exchanges.
+# - Article: Step One: "Trump's Re-election: Implications for Bitcoin"
+# Step Two:
+# - DWS Group, managing $924.5 billion assets, expresses concerns about the potential impact of Trump's re-election on US treasury bonds and Bitcoin.
+# - The firm recalls the 2016 election aftermath when Trump’s victory led to a sharp increase in 10-year government bond yields, hinting at possible inflationary pressures with another term.
+# - CNBC’s Rick Santelli warns of high yield close for 30-year bonds in 2024, a situation that could trigger a wave of selling.
 # '''
 # result = generate_poster_prompt(content)
 
-# file_path = "image.txt"
-# with open(file_path, 'w') as file:
-#     file.write(result)
+# if result is not None:
+#     image_data, image_url = result
+#     file_path = "image.txt"
+#     with open(file_path, 'w') as file:
+#         file.write(image_data)
+# else:
+#     print("No se pudo generar la imagen.")
