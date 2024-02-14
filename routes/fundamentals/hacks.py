@@ -11,7 +11,7 @@ def get_hacks():
         coin_bot_id = request.args.get('coin_bot_id')
         coin_bot_name = request.args.get('coin_bot_name')
 
-        if not coin_bot_id or not coin_bot_name:
+        if not coin_bot_id and not coin_bot_name:
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
         coin_data = None
@@ -32,7 +32,7 @@ def get_hacks():
     
     except Exception as e:
         session.rollback()
-        return jsonify({'error': f'Error getting hacks data: {str(e)}', 'status': 500}), 500
+        return jsonify({'message': f'Error getting hacks data: {str(e)}', 'status': 500}), 500
     
 # Creates a new hack record to a coin
 @hacks_bp.route('/api/hacks/create', methods=['POST'])
@@ -42,7 +42,7 @@ def create_hack():
         coin_bot_id = data.get('coin_bot_id')
 
         if not coin_bot_id:
-            return jsonify({'message': 'Coin ID is required', 'status': 400}), 400
+            return jsonify({'error': 'Coin ID is required', 'status': 400}), 400
         
         new_hack = Hacks(
             hack_name=data.get('hackName'),
@@ -78,8 +78,8 @@ def edit_hack(hack_id):
         hack_to_edit.mitigation_measure = data.get('mitigationMeasure', hack_to_edit.mitigation_measure)
 
         session.commit()
-        return jsonify({'message': f'Hack with ID {hack_id} updated successfully', 'status': 200}), 200
+        return jsonify({'message': f'Hack updated successfully', 'status': 200}), 200
     
     except Exception as e:
         session.rollback()
-        return jsonify({'error': f'Error editing hack: {str(e)}', 'status': 500}), 500
+        return jsonify({'message': f'Error editing hack: {str(e)}', 'status': 500}), 500
