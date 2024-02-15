@@ -32,7 +32,7 @@ from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from routes.fundamentals.dapps import dapps_bp
-
+from routes.dashboard.individual_bot import individual_bot
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -76,6 +76,7 @@ app.register_blueprint(upgrades_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
+app.register_blueprint(individual_bot)
 
 if __name__ == '__main__':
     try:
