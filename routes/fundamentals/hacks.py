@@ -25,7 +25,8 @@ def get_hacks():
             coin_data = coin_data_id if coin_data_id else None
         
         if coin_data is None:
-            return jsonify({'message': 'No hacks found for the requested coin', 'status': 404}), 404
+            # Si no se encuentran hacks para la moneda solicitada, devolver un array vacío en lugar de un mensaje de error.
+            return jsonify({'message': [], 'status': 400}), 400
 
         hacks_list = [hack.as_dict() for hack in coin_data]
         return jsonify({'message': hacks_list, 'status': 200}), 200
