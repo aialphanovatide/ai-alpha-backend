@@ -59,7 +59,7 @@ def get_revenue_models():
         return jsonify({'message': f'Error getting revenue models: {str(e)}', 'status': 500}), 500
 
 
-
+# Edits a revenue model
 @revenue_model_bp.route('/api/edit_revenue_model/<int:model_id>', methods=['PUT'])
 def edit_revenue_model(model_id):
     try:

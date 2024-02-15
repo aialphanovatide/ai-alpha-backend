@@ -10,7 +10,11 @@ def get_dapps():
         coin_bot_id = request.args.get('coin_bot_id')
         coin_bot_name = request.args.get('coin_bot_name')
 
+<<<<<<< HEAD
         if coin_bot_name is None or coin_bot_id is None:
+=======
+        if not coin_bot_id and not coin_bot_name:
+>>>>>>> 81f2b8c53a404a5a7aa9c578fc1bc8ac3762c0cb
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
         coin_data = None
@@ -52,11 +56,11 @@ def create_dapp():
 
         session.add(new_dapp)
         session.commit()
-        return jsonify({'message': f'DApp for coin_bot_id {coin_bot_id} created successfully', 'status': 201}), 201
+        return jsonify({'message': f'DApp record created successfully', 'status': 201}), 201
     
     except Exception as e:
         session.rollback()
-        return jsonify({'error': f'Error creating DApp: {str(e)}', 'status': 500}), 500
+        return jsonify({'message': f'Error creating DApp: {str(e)}', 'status': 500}), 500
 
 # Edits a dapss record of a coin
 @dapps_bp.route('/api/dapps/edit/<int:dapp_id>', methods=['PUT'])
@@ -76,4 +80,4 @@ def edit_dapp(dapp_id):
         return jsonify({'message': 'DApp updated successfully', 'status': 200}), 200  
 
     except Exception as e:
-        return jsonify({'error': f'Error updating DApp: {str(e)}', 'status': 500}), 500
+        return jsonify({'message': f'Error updating DApp: {str(e)}', 'status': 500}), 500
