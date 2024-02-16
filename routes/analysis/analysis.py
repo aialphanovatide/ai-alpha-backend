@@ -9,8 +9,6 @@ import base64
 analysis_bp = Blueprint('analysis', __name__)
 
 # Gets all the analysis related to a coin
-
-
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
 def get_analysis(coin_bot_id):
 
@@ -123,10 +121,6 @@ def post_analysis():
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         image_file = request.files.get('image')
-
-        print(f'Coin Bot ID: {coin_bot_id}')
-        print(f'Content: {content}')
-        print(f'image_file: {image_file}')
 
         # Check if any of the required values is missing
         if content == 'null' or coin_bot_id == 'null' or image_file == 'null':
