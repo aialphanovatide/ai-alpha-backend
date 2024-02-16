@@ -1,4 +1,4 @@
-from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from routes.news_bot.validations import find_matched_keywords, validate_content, title_in_blacklist, url_in_db, title_in_db
 from config import AnalyzedArticle as ANALIZED_ARTICLE
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
@@ -58,7 +58,7 @@ def validate_beincrypto_article(article_link, main_keyword, session_instance):
         article_content_type = article_response.headers.get("Content-Type", "").lower() 
 
         if not 'text/html' in article_content_type or article_response.status_code != 200:
-            return None, None, None, None
+            return None, None, None, None, None
         else:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
@@ -100,17 +100,18 @@ def validate_beincrypto_article(article_link, main_keyword, session_instance):
                         image_urls = extract_image_urls(article_soup)
                        
                         if valid_date:
-                            return title, content, valid_date, image_urls
+                            matched_keywords = find_matched_keywords(main_keyword, content, session_instance)
+                            return title, content, valid_date, image_urls, matched_keywords
                         
-                return None, None, None, None
+                return None, None, None, None, None
                         
             except Exception as e:
                 print("Inner Error in Beincrypto" + str(e))
-                return None, None, None, None
+                return None, None, None, None, None
 
     except Exception as e:
         print(f"Error in Beincrypto" + str(e))
-        return None, None, None, None
+        return None, None, None, None, None
         
 
 # result_title, result_content, result_valid_date, result_image_urls = validate_beincrypto_article('https://servedbyadbutler.com/redirect.spark?mid=177750&plid=2144261&setid=609748&channelid=0&cid=786862&banid=521184991&pid=0&textadid=0&tc=1&scheduleid=2067757&adsize=0x0&mt=1700511831918366&sw=1280&sh=720&spr=1&referrer=https%3a%2f%2fbeincrypto.com%2f&hc=1d5c1abe79f03a66926c52de792c314d7f6e9069&location=https://track.youhodler.app/32d78590-62e2-4a0b-b3b4-778ad9160f88?utm_source=bic&utm_medium=fixed&utm_campaign=aff_eng_toppage_youhodler_cloudmining', 'layer 1')
