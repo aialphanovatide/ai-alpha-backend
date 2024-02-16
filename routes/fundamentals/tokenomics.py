@@ -212,40 +212,41 @@ def create_tokenomics():
     
 
 
-
 @tokenomics.route('/edit_tokenomics/<int:tokenomics_id>', methods=['PUT'])  
 def edit_competitor_data(tokenomics_id):
     try: 
         data = request.json
         token_distribution_data = session.query(Token_distribution).filter(Token_distribution.id == tokenomics_id).first()
         token_utility_data = session.query(Token_utility).filter(Token_utility.id == tokenomics_id).first()
-        Value_accrual_mechanisms_data = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.id == tokenomics_id).first()
+        value_accrual_mechanisms_data = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.id == tokenomics_id).first()
         
-        print('data: ', data)
         if not data['token_distribution'] or not data['token_utility'] or not data['value_accrual_mechanisms']:
             return jsonify({'message': f'Tokenomics data required', 'status': 400}), 400
 
-        if token_distribution_data and data['token_distribution'].items():
+        if token_distribution_data and any(value != '' for value in data['token_distribution'].values()):
+            print('in token distribution')
             for key, value in data['token_distribution'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
                     setattr(token_distribution_data, key, value)
-                   
-                    
-        if token_utility_data and data['token_utility'].items():
+
+        if token_utility_data and any(value != '' for value in data['token_utility'].values()):
+            print('in token utility')
             for key, value in data['token_utility'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
                     setattr(token_utility_data, key, value)
         
-        if Value_accrual_mechanisms_data and data['value_accrual_mechanisms'].items():
+        if value_accrual_mechanisms_data and any(value != '' for value in data['value_accrual_mechanisms'].values()):
+            print('value accrual')
             for key, value in data['value_accrual_mechanisms'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
-                    setattr(Value_accrual_mechanisms_data, key, value)
-
+                    setattr(value_accrual_mechanisms_data, key, value)
+        
         session.commit()
         return jsonify({'message': f'Data edited successfully', 'status': 200}), 200
-    
+        
     except Exception as e:
         return jsonify({'error': f'Error editing Tokenomics data: {str(e)}', 'status': 500}), 500
+
    
 
 
