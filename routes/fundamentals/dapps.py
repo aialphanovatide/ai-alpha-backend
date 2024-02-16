@@ -14,7 +14,6 @@ def get_dapps():
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
         coin_data = None
-
         if coin_bot_name:
             coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
             coin_data = session.query(DApps).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
