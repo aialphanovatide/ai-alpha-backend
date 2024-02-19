@@ -2,7 +2,7 @@ import re
 import requests
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from routes.news_bot.validations import find_matched_keywords, validate_content, title_in_blacklist, url_in_db, title_in_db
 from config import AnalyzedArticle as ANALIZED_ARTICLE
 
 
@@ -62,7 +62,7 @@ def validate_cointelegraph_article(article_link, main_keyword, session_instance)
         article_content_type = article_response.headers.get("Content-Type", "").lower() 
 
         if not 'text/html' in article_content_type or article_response.status_code != 200:
-            return None, None, None, None
+            return None, None, None, None, None
         else:
             article_soup = BeautifulSoup(article_response.text, 'html.parser')
 
@@ -76,7 +76,7 @@ def validate_cointelegraph_article(article_link, main_keyword, session_instance)
         
 
             if not title or not content:
-                return None, None, None, None
+                return None, None, None, None, None
             else:
                 # These three following lines change the status of the article to ANALYZED.
                 normalized_article_url = article_link.strip().casefold()
@@ -91,7 +91,7 @@ def validate_cointelegraph_article(article_link, main_keyword, session_instance)
                 is_title_in_db = title_in_db(title, session_instance)
 
                 if is_title_in_blacklist or not is_valid_content or is_url_in_db or is_title_in_db:
-                    return None, None, None, None
+                    return None, None, None, None, None
 
                 date_time_element = article_soup.find('time')
                 date = date_time_element['datetime'].strip() if date_time_element and 'datetime' in date_time_element.attrs else None
@@ -99,14 +99,11 @@ def validate_cointelegraph_article(article_link, main_keyword, session_instance)
 
                 image_urls = extract_image_urls(article_response.text)
 
-                if  is_valid_content and valid_date and title:
-                    print("date ", valid_date)
-                    print("title ", title)
-                    print("content ", content)
-                    print("imgs ", image_urls)
-                    return title, content, valid_date, image_urls
+                if is_valid_content and valid_date and title:
+                    matched_keywords = find_matched_keywords(main_keyword, content, session_instance)
+                    return title, content, valid_date, image_urls, matched_keywords
                 else:
-                    return None, None, None, None
+                    return None, None, None, None, None
     except Exception as e:
         print("Error in Cointelegraph:", str(e))
-        return None, None, None, None
+        return None, None, None, None, None

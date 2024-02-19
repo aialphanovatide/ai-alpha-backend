@@ -2,133 +2,149 @@ from routes.slack.index import client
 from slack_sdk.errors import SlackApiError
 
 # Sends an article to Slack
-def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name):
-    
 
-        blocks=[
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": f"{title}",
-                    "emoji": True
-                }
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Date:*\n{date_time}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*URL:*\n{url}"
-                    }
-                ]
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*Summary*\n{summary}"
-			},
-			"accessory": {
-				"type": "image",
-				"image_url": f"{image}",
-				"alt_text": f"{title}"
-			}
-            },
-            {
-                "type": "divider"
-            },
-            {
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f"*Send to AI Alpha App - {category_name}*"
-			},
-			"accessory": {
-				"type": "button",
-				"text": {
-					"type": "plain_text",
-					"text": "SEND",
-					"emoji": True
-				},
-				"value": f"linkToArticle: {url}",
-				"action_id": "button-action"
-			}
-		    },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "divider"
+
+def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name, extra_info):
+    print('matched keywords:', extra_info)
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f"{title}",
+                "emoji": True
             }
-        ]
+        },
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Date:*\n{date_time}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": f"*URL:*\n{url}"
+                }
+            ]
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*Matched Keywords:*\n{extra_info}"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*Summary*\n{summary}"
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": f"{image}",
+                "alt_text": f"{title}"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Send to AI Alpha App - {category_name}*"
+                    },
+            "accessory": {
+                        "type": "button",
+                        "text": {
+                                "type": "plain_text",
+                            "text": "SEND",
+                                    "emoji": True
+                        },
+                        "value": f"linkToArticle: {url}",
+                        "action_id": "button-action"
+                    }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "divider"
+        }
+    ]
 
-        try:
-            result = client.chat_postMessage(
-                channel=channel_id,
-                text=f'New Notification from {str(category_name).capitalize()}', 
-                blocks=blocks
-            )
-            
-            response = result['ok']
-            if response == True:
-                print(f'Article {title} sent successfully to Slack channel {category_name}')
-                return f'Article {title} sent successfully to Slack channel {category_name}', 200
-            else:
-                print(f'Article {title} was not sent: {response}')
+    try:
+        result = client.chat_postMessage(
+            channel=channel_id,
+            text=f'New Notification from {str(category_name).capitalize()}',
+            blocks=blocks
+        )
 
-        except SlackApiError as e:
-            print(f"Error posting message: {e}")
-            return f'Error sending message to Slack channel {category_name}', 500
-        
+        response = result['ok']
+        print('Slack Response: ', response)
+        if response == True:
+            print(
+                f'Article {title} sent successfully to Slack channel {category_name}')
+            return f'Article {title} sent successfully to Slack channel {category_name}', 200
+        else:
+            print(f'Article {title} was not sent: {response}')
+
+    except SlackApiError as e:
+        print(f"Error posting message: {e}")
+        return f'Error sending message to Slack channel {category_name}', 500
+
 
 # Send an info message to slack
 def send_INFO_message_to_slack_channel(title_message, sub_title, message, channel_id="C06FTS38JRX"):
-        blocks=[
-                {
-                    "type": "section",
-                    "text": {
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                    "type": "mrkdwn",
+                    "text": f"*{title_message}*"
+            }
+        },
+        {
+            "type": "section",
+            "fields": [
+                    {
                         "type": "mrkdwn",
-                        "text": f"*{title_message}*"
+                        "text": f"*{sub_title}:*\n{message}"
                     }
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*{sub_title}:*\n{message}"
-                        }
-                    ]
-                },
-                {
-                "type": "divider"
-                }
             ]
-    
-        try:
-            result = client.chat_postMessage(
-                channel=channel_id,
-                text=title_message, 
-                blocks=blocks
-            )
-            response = result['ok']
-            print('\nTS:', result['ts'])
-            if response == True:
-                return f'Message sent successfully to Slack channel {channel_id}', 200
-            else:
-                return f'Unable to send message to slack: {str(response)}'
+        },
+        {
+            "type": "divider"
+        }
+    ]
 
-        except SlackApiError as e:
-            print(f"Error posting message: {e}")
-            return f'Error sending this message: "{title_message}" to Slack channel, Reason:\n{str(e)}', 500
+    try:
+        result = client.chat_postMessage(
+            channel=channel_id,
+            text=title_message,
+            blocks=blocks
+        )
+        response = result['ok']
+        print('\nTS:', result['ts'])
+        if response == True:
+            return f'Message sent successfully to Slack channel {channel_id}', 200
+        else:
+            return f'Unable to send message to slack: {str(response)}'
+
+    except SlackApiError as e:
+        print(f"Error posting message: {e}")
+        return f'Error sending this message: "{title_message}" to Slack channel, Reason:\n{str(e)}', 500
 
 
-# Deletes a message in slack by TS - timestamp 
+# Deletes a message in slack by TS - timestamp
 def delete_messages_in_channel(messages_list, channel_id="C06FTS38JRX"):
     try:
         for message in messages_list:
@@ -141,9 +157,6 @@ def delete_messages_in_channel(messages_list, channel_id="C06FTS38JRX"):
         return 'All messages deleted in Slack', 200
     except Exception as e:
         return f'Error while deleting messages in Slack: {str(e)}', 500
-
-
-
 
 
 # # Test delete slack message
