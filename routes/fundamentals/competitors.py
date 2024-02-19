@@ -51,6 +51,8 @@ def get_competitor_data(coin_bot_id):
 
 
 # Builder to create competitor table
+
+
 @competitor_bp.route('/create_competitor', methods=['POST'])
 def create_competitor_table():
     try:
@@ -72,21 +74,21 @@ def create_competitor_table():
             return jsonify({'error': 'Token or data is missing', 'status': 400}), 400
         
         for obj in data:
-            key = obj['key']
-            value = obj['value']
+            key = obj['key'].lower()  
+            value = obj['value'].lower()  
             new_competitor = Competitor(
-                token=token,
-                key = key,
-                value = value,
+                token=token.lower(),  
+                key=key,
+                value=value,
                 coin_bot_id=coin_bot_id
             )
+
             session.add(new_competitor)
             session.commit()
 
         return jsonify({'message': f'Competitor for coin_bot_id {coin_bot_id} created successfully', 'status': 201}), 201
     
     except Exception as e:
-        session.rollback()
         return jsonify({'error': f'Error creating competitor: {str(e)}', 'status': 500}), 500
 
 
