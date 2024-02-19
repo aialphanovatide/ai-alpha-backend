@@ -210,7 +210,7 @@ def activate_news_bot(category_name):
             print(f'{category_name.capitalize()} activated successfully')
         
         message = f'{category_name.capitalize()} activated successfully'
-        send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Message', message=f'An interval of *{time_interval} Minutes* has been set for scrapping data')
+        # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Message', message=f'An interval of *{time_interval} Minutes* has been set for scrapping data')
         return f'{category_name.capitalize()} News Bot activated', 200
 
     except Exception as e:
@@ -233,7 +233,7 @@ def deactivate_news_bot(category_name):
         session.commit()
 
         message = f'{category_name.capitalize()} deactivated successfully'
-        send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Status', message='Inactive')
+        # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Status', message='Inactive')
         return f'{category_name.capitalize()} deactivated', 200
     
     except JobLookupError as e:

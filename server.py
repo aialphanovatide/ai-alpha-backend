@@ -14,7 +14,7 @@ from routes.dashboard.erase_keyword import delete_kw
 from routes.dashboard_access.register import sign_up 
 from routes.slack.slack_actions import slack_events_bp
 from routes.dashboard.all_keywords import all_keywords
-from routes.dashboard.get_total_bots import total_bots
+from routes.dashboard.get_bots import getBots
 from routes.fundamentals.introduction import introduction
 from routes.dashboard.create_new_site import save_site_bp
 from routes.fundamentals.competitors import competitor_bp
@@ -32,7 +32,7 @@ from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from routes.fundamentals.dapps import dapps_bp
-
+from routes.dashboard.individual_bot import individual_bot
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -53,7 +53,7 @@ app.register_blueprint(chart_bp)
 app.register_blueprint(coin_bots)
 app.register_blueprint(delete_kw)
 app.register_blueprint(bots_route)
-app.register_blueprint(total_bots)
+app.register_blueprint(getBots)
 app.register_blueprint(scrapper_bp)
 app.register_blueprint(bots_status)
 app.register_blueprint(telegram_bp)
@@ -76,6 +76,7 @@ app.register_blueprint(upgrades_bp)
 app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
+app.register_blueprint(individual_bot)
 
 if __name__ == '__main__':
     try:

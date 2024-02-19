@@ -55,6 +55,37 @@ def validate_content(bot_name, content, session_instance):
         print(f'Error in validate_content: {str(e)}')
         return False
 
+def find_matched_keywords(bot_name, content, session_instance):
+    try:
+        coin_name = session_instance.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
+
+        if not coin_name:
+            # Handle the case where no matching SCRAPPING_DATA object is found
+            return set()
+
+        keywords = coin_name.keywords
+        keyword_values = {keyword.word.casefold() for keyword in keywords}  # Set of case-folded keywords for faster lookup
+
+        # Build Aho-Corasick automaton
+        A = ahocorasick.Automaton()
+        for idx, keyword in enumerate(keyword_values):
+            A.add_word(keyword, (idx, keyword))
+        A.make_automaton()
+
+        # Keep track of matched keywords
+        matched_keywords = set()
+
+        # Iterate through matches in content
+        for _, keyword in A.iter(content.casefold()):
+            matched_keywords.add(keyword)
+
+        return matched_keywords
+
+    except Exception as e:
+        print(f'Error in find_matched_keywords: {str(e)}')
+        return set()
+
+
 
 def title_in_blacklist(input_title_formatted, session_instance): # True if Title in blacklist
     

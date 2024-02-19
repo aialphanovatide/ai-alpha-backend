@@ -128,6 +128,7 @@ def create_competitor_table():
         return jsonify({'message': f'Competitor for coin_bot_id {coin_bot_id} created successfully', 'status': 201}), 201
     
     except Exception as e:
+        session.rollback()
         return jsonify({'error': f'Error creating competitor: {str(e)}', 'status': 500}), 500
 
 

@@ -1,18 +1,33 @@
 from flask import Blueprint, request, jsonify
-from config import Token_distribution, Token_utility, Value_accrual_mechanisms, session, Tokenomics
-from sqlalchemy.orm import joinedload
+from config import Token_distribution, Token_utility, Value_accrual_mechanisms, session, Tokenomics, CoinBot
 
 tokenomics = Blueprint('tokenomics', __name__)
 
 # ------- GET ------------ GETS THREE TOKENOMICS, Token_distribution, Token_utility AND Value_accrual_mechanisms ------------------------
 
-@tokenomics.route('/get_tokenomics/<int:coin_bot_id>', methods=['GET'])
-def get_tokenomics(coin_bot_id):
+@tokenomics.route('/get_tokenomics', methods=['GET'])
+def get_tokenomics():
     try:
-        token_distribution_obj = session.query(Token_distribution).filter(Token_distribution.coin_bot_id == coin_bot_id).all()
-        token_utility_obj = session.query(Token_utility).filter(Token_utility.coin_bot_id == coin_bot_id).all()
-        value_accrual_mechanisms_obj = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.coin_bot_id == coin_bot_id).all()
-        tokenomics = session.query(Tokenomics).filter(Tokenomics.coin_bot_id == coin_bot_id).all()
+        coin_name = request.args.get('coin_name')
+        coin_bot_id = request.args.get('coin_bot_id')
+
+        if not coin_bot_id and not coin_name:
+            return jsonify({'error': 'Coin ID or name is missing', 'status': 400}), 400
+
+        coin_bot_id = coin_bot_id
+
+        if coin_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+            coin_bot_id = coin.bot_id if coin else None
+
+        
+        if coin_bot_id is None:
+            return jsonify({'error': 'No tokenomics found for the requested coin', 'status': 404}), 404
+
+        token_distribution_obj = session.query(Token_distribution).filter(Token_distribution.coin_bot_id == coin_bot_id).order_by(Token_distribution.created_at).all()
+        token_utility_obj = session.query(Token_utility).filter(Token_utility.coin_bot_id == coin_bot_id).order_by(Token_utility.created_at).all()
+        value_accrual_mechanisms_obj = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.coin_bot_id == coin_bot_id).order_by(Value_accrual_mechanisms.created_at).all()
+        tokenomics = session.query(Tokenomics).filter(Tokenomics.coin_bot_id == coin_bot_id).order_by(Tokenomics.created_at).all()
 
         token_distribution_data = [{
             'token_distributions': token_distribution.as_dict(),
@@ -36,11 +51,53 @@ def get_tokenomics(coin_bot_id):
             'value_accrual_mechanisms': value_accrual_mechanisms_data,
             'tokenomics_data': tokenomics_data,
         }
-        return jsonify({'message': data}), 200
+        return jsonify({'message': data, 'status': 200}), 200 
          
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'status': 500}), 500
     
+
+# Get a token distribution
+@tokenomics.route('/get_token_distribution/<int:id>', methods=['GET'])
+def get_token_distribution(id):
+    try:
+        data = session.query(Token_distribution).filter(Token_distribution.id==id).first()
+        
+        if not data:
+            return jsonify({'data': 'No token distribution found', 'status': 404}), 404
+        if data:
+            token_data = data.as_dict()
+            return jsonify({'data': token_data, 'status': 200}), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500}), 500
+
+# Get a token utility
+@tokenomics.route('/get_token_utility/<int:id>', methods=['GET'])
+def get_token_utility(id):
+    try:
+        data = session.query(Token_utility).filter(Token_utility.id==id).first()
+        
+        if not data:
+            return jsonify({'data': 'No token utility found', 'status': 404}), 404
+        if data:
+            token_data = data.as_dict()
+            return jsonify({'data': token_data, 'status': 200}), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500}), 500
+
+# Get a value accrual mechanism
+@tokenomics.route('/get_value_accrual/<int:id>', methods=['GET'])
+def get_value_accrual(id):
+    try:
+        data = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.id==id).first()
+        
+        if not data:
+            return jsonify({'data': 'No value accrual found', 'status': 404}), 404
+        if data:
+            token_data = data.as_dict()
+            return jsonify({'data': token_data, 'status': 200}), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500}), 500
 
 # ------- POST ---------- CREATES A NEW INSTANCE OF THE TABLE ----------------------------------
 
@@ -74,8 +131,6 @@ def create_token_distribution():
         coin_bot_id = data.get('coin_bot_id')
         holder_category = data.get('holder_category')
         percentage_held = data.get('percentage_held')
-        print("coin_bot_id", coin_bot_id)
-
         
         new_token_distribution = Token_distribution(
             holder_category=holder_category,
@@ -97,8 +152,6 @@ def create_value_accrual_mechanisms():
         mechanism = data.get('mechanism')
         description = data.get('description')
         
-        print('Value of mechanism:', mechanism)  # Agrega este print para registrar el valor de 'mechanism'
-
         new_value_accrual_mechanisms = Value_accrual_mechanisms(
             mechanism=mechanism,
             description=description,
@@ -127,10 +180,10 @@ def create_tokenomics():
         existance_tokenomics = session.query(Tokenomics).filter(Tokenomics.token==token.lower()).first()
 
         if existance_tokenomics:
-            return jsonify({'message': 'Tokenomics already exist for this token', 'status': 409}), 409
+            return jsonify({'error': 'Tokenomics already exist for this token', 'status': 409}), 409
 
         if not coin_bot_id:
-            return jsonify({'message': 'Coin ID required', 'status': 400}), 400
+            return jsonify({'error': 'Coin ID required', 'status': 400}), 400
         
         if token:
             new_tokenomics = Tokenomics(
@@ -159,38 +212,41 @@ def create_tokenomics():
     
 
 
-
 @tokenomics.route('/edit_tokenomics/<int:tokenomics_id>', methods=['PUT'])  
 def edit_competitor_data(tokenomics_id):
     try: 
         data = request.json
         token_distribution_data = session.query(Token_distribution).filter(Token_distribution.id == tokenomics_id).first()
         token_utility_data = session.query(Token_utility).filter(Token_utility.id == tokenomics_id).first()
-        Value_accrual_mechanisms_data = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.id == tokenomics_id).first()
-
+        value_accrual_mechanisms_data = session.query(Value_accrual_mechanisms).filter(Value_accrual_mechanisms.id == tokenomics_id).first()
+        
         if not data['token_distribution'] or not data['token_utility'] or not data['value_accrual_mechanisms']:
             return jsonify({'message': f'Tokenomics data required', 'status': 400}), 400
 
-        if token_distribution_data and data['token_distribution'].items():
+        if token_distribution_data and any(value != '' for value in data['token_distribution'].values()):
+            print('in token distribution')
             for key, value in data['token_distribution'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
                     setattr(token_distribution_data, key, value)
-        
-        if token_utility_data and data['token_utility'].items():
+
+        if token_utility_data and any(value != '' for value in data['token_utility'].values()):
+            print('in token utility')
             for key, value in data['token_utility'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
                     setattr(token_utility_data, key, value)
         
-        if Value_accrual_mechanisms_data and data['value_accrual_mechanisms'].items():
+        if value_accrual_mechanisms_data and any(value != '' for value in data['value_accrual_mechanisms'].values()):
+            print('value accrual')
             for key, value in data['value_accrual_mechanisms'].items():
                 if key not in ['coin_bot_id', 'updated_at', 'created_at', 'dynamic']:
-                    setattr(Value_accrual_mechanisms_data, key, value)
-
+                    setattr(value_accrual_mechanisms_data, key, value)
+        
         session.commit()
-        return jsonify({'message': f'Tokenomics edited successfully', 'status': 200}), 200
-    
+        return jsonify({'message': f'Data edited successfully', 'status': 200}), 200
+        
     except Exception as e:
         return jsonify({'error': f'Error editing Tokenomics data: {str(e)}', 'status': 500}), 500
+
    
 
 

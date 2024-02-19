@@ -28,31 +28,42 @@ def create_content():
                                         )
         session.add(new_introduction)
         session.commit()
-        return jsonify({'message': 'Content created successfully', 'status': 200}), 200
+        return jsonify({'message': 'Introduction created successfully', 'status': 200}), 200
         
     except Exception as e:
-        return jsonify({'error': str(e), 'status': 500}), 500
+        session.rollback()
+        return jsonify({'message': str(e), 'status': 500}), 500
     
 
 
-# Gets the introduction data of a coin
-@introduction.route('/get_introduction/<string:coin_name>', methods=['GET'])
-def get_content(coin_name):
+# Gets the introduction data of a coin by ID or name
+@introduction.route('/get_introduction', methods=['GET'])
+def get_content():
     try:
-        coin_data = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+        coin_id = request.args.get('id')
+        coin_name = request.args.get('name')
+
+        if not coin_id and not coin_name:
+            return jsonify({'message': 'ID or coin name is required', 'status': 400}), 400
+        
+        coin_data = None
+
+        if coin_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+            coin_data = session.query(Introduction).filter_by(coin_bot_id=coin.bot_id).first() if coin else None
+
+        if coin_id:
+            coin = session.query(Introduction).filter_by(coin_bot_id=coin_id).first()
+            coin_data = coin if coin else None
 
         if coin_data == None:
             return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404
         
-        introduction = session.query(Introduction).filter_by(coin_bot_id=coin_data.bot_id).first()
-
-        if introduction:
-            introduction_data = introduction.as_dict()
-            return jsonify({'message': introduction_data, 'status': 200}), 200
-        else:
-            return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404
-
+        introduction_data = coin_data.as_dict()
+        return jsonify({'message': introduction_data, 'status': 200}), 200
+       
     except Exception as e:
+        session.rollback()
         return jsonify({'error': str(e), 'status': 500}), 500
     
 
@@ -81,11 +92,12 @@ def edit_content(coin_bot_id):
             existing_introduction.updated_at = datetime.utcnow()
             session.commit()
 
-            return jsonify({'message': 'Content updated successfully', 'status': 200}), 200
+            return jsonify({'message': 'Introduction updated successfully', 'status': 200}), 200
         else:
             return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404
 
     except Exception as e:
+        session.rollback()
         return jsonify({'error': str(e), 'status': 500}), 500
 
 

@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from config import AnalyzedArticle as ANALIZED_ARTICLE
-from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from routes.news_bot.validations import find_matched_keywords, validate_content, title_in_blacklist, url_in_db, title_in_db
 
 
 
@@ -61,7 +61,7 @@ def validate_theblock_article(article_link, main_keyword, session_instance):
         article_content_type = article_response.headers.get("Content-Type", "").lower()
 
         if not 'text/html' in article_content_type or article_response.status_code != 200:
-            return None, None, None, None
+            return None, None, None, None, None
         else:
             html = BeautifulSoup(article_response.text, 'html.parser')
 
@@ -95,17 +95,18 @@ def validate_theblock_article(article_link, main_keyword, session_instance):
                         image_urls = extract_image_urls_theblock(html)
             
                         if valid_date:
-                            return title, content, valid_date, image_urls
+                            matched_keywords = find_matched_keywords(main_keyword, content, session_instance)
+                            return title, content, valid_date, image_urls, matched_keywords
                         
-                return None, None, None, None
+                return None, None, None, None, None
                         
             except Exception as e:
                 print("Inner Error in Theblock" + str(e))
-                return None, None, None, None
+                return None, None, None, None, None
 
     except Exception as e:
         print(f"Error in Theblock" + str(e))
-        return None, None, None, None
+        return None, None, None, None, None
             
 
 
