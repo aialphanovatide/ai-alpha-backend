@@ -5,7 +5,7 @@ from slack_sdk.errors import SlackApiError
 
 
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name, extra_info):
-    print('matched keywords:', extra_info)
+
     blocks = [
         {
             "type": "header",
