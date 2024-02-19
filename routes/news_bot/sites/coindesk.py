@@ -1,4 +1,4 @@
-from routes.news_bot.validations import validate_content, title_in_blacklist, url_in_db, title_in_db
+from routes.news_bot.validations import find_matched_keywords, validate_content, title_in_blacklist, url_in_db, title_in_db
 from config import AnalyzedArticle as ANALIZED_ARTICLE
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -100,17 +100,18 @@ def validate_coindesk_article(article_link, main_keyword, session_instance):
                         image_urls = extract_image_urls_coindesk(article_soup)
                        
                         if valid_date:
-                            return title, content, valid_date, image_urls
+                            matched_keywords = find_matched_keywords(main_keyword, content, session_instance)
+                            return title, content, valid_date, image_urls, matched_keywords
                         
-                return None, None, None, None
+                return None, None, None, None, None
                         
             except Exception as e:
                 print("Inner Error in Coindesk" + str(e))
-                return None, None, None, None
+                return None, None, None, None, None
 
     except Exception as e:
         print(f"Error in Coindesk" + str(e))
-        return None, None, None, None
+        return None, None, None, None, None
       
 
 

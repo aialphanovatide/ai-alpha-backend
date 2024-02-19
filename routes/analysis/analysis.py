@@ -9,8 +9,6 @@ import base64
 analysis_bp = Blueprint('analysis', __name__)
 
 # Gets all the analysis related to a coin
-
-
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
 def get_analysis(coin_bot_id):
 
