@@ -27,7 +27,7 @@ from sqlalchemy.orm import joinedload
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
-from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword
+from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword, Used_keywords
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -350,22 +350,25 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             article_image = image[0] if image else 'No image'
                             slack_image = image[1] if image else 'No image'
 
-            
+
                             matched_keywords = article_data[-1]
 
                             # Format the list of matched keywords as a string
                             matched_keywords_string = ', '.join(keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
-         
+                            
+
+                            print("MATCHED KEYWORDS: " + matched_keywords_string)
+                            
                             # Send the message to Slack
-                            send_NEWS_message_to_slack(channel_id=channel_id, 
-                                                        title=title,
-                                                        date_time=valid_date,
-                                                        url=article_link,
-                                                        summary=summary,
-                                                        image=slack_image,
-                                                        category_name=category_name,
-                                                        extra_info=matched_keywords_string
-                                                        )
+                            # send_NEWS_message_to_slack(channel_id=channel_id, 
+                            #                             title=title,
+                            #                             date_time=valid_date,
+                            #                             url=article_link,
+                            #                             summary=summary,
+                            #                             image=slack_image,
+                            #                             category_name=category_name,
+                            #                             extra_info=matched_keywords_string
+                            #                             )
 
 
 
@@ -382,7 +385,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                            
                             site_source = session.query(Site).filter(Site.site_name == site_name).first()
                             coin_bot_id = site_source.coin_bot_id
-                          
+                            print(coin_bot_id)
                             new_article = Article(
                                 title=title,
                                 summary=summary,
@@ -390,16 +393,33 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                                 url=article_link,
                                 coin_bot_id=coin_bot_id
                             )
+                            print('Article created')
                             
                             session.add(new_article)
                             session.commit()
 
-   
+
                             new_article_image = ArticleImage(article_id=new_article.article_id, image=article_image)
+                            print('IMAGE created')
                             session.add(new_article_image)
                             session.commit()
 
                             counter_articles_saved +=1
+                            
+                            new_used_keyword = Used_keywords(
+                                article_id=new_article.article_id,
+                                article_content=summary,
+                                article_date=valid_date,
+                                article_url=article_link,
+                                keywords=matched_keywords_string,
+                                source = article_link.split(".com")[0],
+                                coin_bot_id=coin_bot_id 
+                            )
+                            
+                            session.add(new_used_keyword)
+                            session.commit()
+                            
+                            
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
                         else:
                             print('------ THERE IS NO AN AVAILABLE SUMMARY -----')
