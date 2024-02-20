@@ -44,7 +44,6 @@ defi_perpetual_slack_channel = 'C05UU8EKME0'
 defi_others_slack_channel = 'C067HNE4V0D'
 ai_slack_channel = 'C067E1LJYKY'
 
-# Note: images_urls sometimes are a list[] and sometimes just return a single string of the a URL.
 
 def get_links(site, main_container):
 
@@ -301,7 +300,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                     
                     for article_data in article_to_save:
                         title, content, valid_date, article_link, site_name, image_urls, matched_keywords = article_data
-                        image_urls_list = list(image_urls)
+                        image_urls_list = list(image_urls) # images from the source
 
                         summary = summary_generator(content, category_name)
                         
