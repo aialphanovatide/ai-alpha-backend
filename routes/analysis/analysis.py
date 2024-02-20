@@ -121,8 +121,7 @@ def post_analysis():
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         image_file = request.files.get('image')
-        print('coin_bot_id', coin_bot_id)
-        print('content', content)
+       
         # Check if any of the required values is missing
         if content == 'null' or coin_bot_id == 'null':
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
