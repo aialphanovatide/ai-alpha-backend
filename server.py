@@ -77,7 +77,6 @@ app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(individual_bot)
-app.register_blueprint(scrapper_bp)
 
 
 if __name__ == '__main__':
