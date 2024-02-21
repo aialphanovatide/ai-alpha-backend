@@ -82,7 +82,6 @@ app.register_blueprint(tokenomics)
 app.register_blueprint(individual_bot)
 
 
-
 if __name__ == '__main__':
     try:
         print('---AI Alpha server is running---') 
