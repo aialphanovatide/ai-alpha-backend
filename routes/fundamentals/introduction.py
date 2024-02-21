@@ -41,7 +41,7 @@ def create_content():
 def get_content():
     try:
         coin_id = request.args.get('id')
-        coin_name = request.args.get('name')
+        coin_name = request.args.get('coin_name')
 
         if not coin_id and not coin_name:
             return jsonify({'message': 'ID or coin name is required', 'status': 400}), 400

@@ -23,7 +23,7 @@ def get_dapps():
             coin_data = dapps if dapps else None
 
         if coin_data is None:
-            return jsonify({'message': 'No hacks found for the requested coin', 'status': 404}), 404
+            return jsonify({'message': 'No Dapps found for the requested coin', 'status': 404}), 404
 
         dapps_list = [dapp.as_dict() for dapp in coin_data]
         return jsonify({'message': dapps_list, 'status': 200}), 200
