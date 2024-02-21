@@ -7,7 +7,7 @@ upgrades_bp = Blueprint('upgrades_bp', __name__)
 
 
 # Gets the upgrades data related to a coin
-@upgrades_bp.route('/get_upgrades', methods=['GET'])
+@upgrades_bp.route('/api/get_upgrades', methods=['GET'])
 def get_upgrades():
 
     try:

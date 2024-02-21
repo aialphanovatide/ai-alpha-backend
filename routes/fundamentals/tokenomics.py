@@ -6,7 +6,7 @@ tokenomics = Blueprint('tokenomics', __name__)
 # ------- GET ------------ GETS THREE TOKENOMICS, Token_distribution, Token_utility AND Value_accrual_mechanisms ------------------------
 
 
-@tokenomics.route('/get_tokenomics', methods=['GET'])
+@tokenomics.route('/api/get_tokenomics', methods=['GET'])
 def get_tokenomics():
     try:
         coin_name = request.args.get('coin_name')

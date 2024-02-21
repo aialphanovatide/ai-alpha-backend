@@ -37,7 +37,7 @@ def create_content():
 
 
 # Gets the introduction data of a coin by ID or name
-@introduction.route('/get_introduction', methods=['GET'])
+@introduction.route('/api/get_introduction', methods=['GET'])
 def get_content():
     try:
         coin_id = request.args.get('id')
