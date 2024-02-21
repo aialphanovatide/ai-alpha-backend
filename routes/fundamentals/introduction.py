@@ -37,11 +37,11 @@ def create_content():
 
 
 # Gets the introduction data of a coin by ID or name
-@introduction.route('/get_introduction', methods=['GET'])
+@introduction.route('/api/get_introduction', methods=['GET'])
 def get_content():
     try:
         coin_id = request.args.get('id')
-        coin_name = request.args.get('name')
+        coin_name = request.args.get('coin_name')
 
         if not coin_id and not coin_name:
             return jsonify({'message': 'ID or coin name is required', 'status': 400}), 400
