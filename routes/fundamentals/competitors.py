@@ -11,7 +11,7 @@ def edit_competitor_data(competitor_id):
     try:
         data = request.json
         coin_data = session.query(Competitor).filter(Competitor.id == competitor_id).first()
-
+        
         if not coin_data:
             return {'message': 'No data found for the requested coin'}, 404
 
@@ -93,4 +93,20 @@ def create_competitor_table():
 
 
 
-# Route to edit an already created competitor
+# Deletes a competitor record
+@competitor_bp.route('/delete_competitor/<int:competitor_id>', methods=['DELETE'])
+def delete_competitor(competitor_id):
+    try:
+        competitor_to_delete = session.query(Competitor).filter_by(id=competitor_id).first()
+
+        if not competitor_to_delete:
+            return jsonify({'message': 'Competitor not found', 'status': 404}), 404
+
+        session.delete(competitor_to_delete)
+        session.commit()
+
+        return jsonify({'message': 'Competitor deleted successfully', 'status': 200}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': f'Error deleting competitor: {str(e)}', 'status': 500}), 500
