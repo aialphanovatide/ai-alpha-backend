@@ -34,6 +34,8 @@ def get_analysis(coin_bot_id):
         #     print(f"Analysis ID: {analy['analysis_id']}, Analysis: {analy['analysis']}, Created At: {analy['created_at']}")
         #     for img in analy['analysis_images']:
         #         print(f"  Image ID: {img['image_id']}, Image: {img['image']}")
+        
+        print('analysis_data', analysis_data)
 
         return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
 
@@ -77,7 +79,8 @@ def get_analysis_by_coin():
 
         analysis_data = [{'analysis': analy.to_dict(
         ), 'analysis_images': get_analysis_images(analy)} for analy in analysis_objects]
-
+        
+        
         return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
 
     except Exception as e:
@@ -120,7 +123,7 @@ def post_analysis():
     try:
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
-        image_file = request.files.get('image')
+        # image_file = request.files.get('image')
        
         # Check if any of the required values is missing
         if content == 'null' or coin_bot_id == 'null':
@@ -137,6 +140,8 @@ def post_analysis():
         session.add(new_analysis)
         session.commit()
 
+        print('new analaysis: ' ,new_analysis.analysis)
+        
         # Return success response if everything is fine
         return jsonify({'message': 'Analysis posted successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
