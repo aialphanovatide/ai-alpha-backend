@@ -33,7 +33,8 @@ from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from routes.fundamentals.dapps import dapps_bp
 from routes.dashboard.individual_bot import individual_bot
-from routes.news_bot.used_keywords import scrapper_bp
+from routes.news_bot.used_keywords import news_bots_features_bp
+from routes.news_bot.index import scrapper_bp
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -48,6 +49,8 @@ app.secret_key = os.urandom(24)
 
 
 # Register blueprints -  routes
+app.register_blueprint(scrapper_bp)
+app.register_blueprint(news_bots_features_bp)
 app.register_blueprint(sign_up)
 app.register_blueprint(sign_in)
 app.register_blueprint(chart_bp)
@@ -77,7 +80,7 @@ app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(individual_bot)
-app.register_blueprint(scrapper_bp)
+
 
 
 if __name__ == '__main__':
