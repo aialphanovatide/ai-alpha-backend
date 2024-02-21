@@ -86,7 +86,7 @@ def create_competitor_table():
             session.add(new_competitor)
             session.commit()
 
-        return jsonify({'message': f'Competitor for coin_bot_id {coin_bot_id} created successfully', 'status': 201}), 201
+        return jsonify({'message': 'Features added successfully', 'status': 201}), 201
     
     except Exception as e:
         return jsonify({'error': f'Error creating competitor: {str(e)}', 'status': 500}), 500

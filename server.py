@@ -33,6 +33,7 @@ from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from routes.fundamentals.dapps import dapps_bp
 from routes.dashboard.individual_bot import individual_bot
+from routes.news_bot.used_keywords import scrapper_bp
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -54,7 +55,6 @@ app.register_blueprint(coin_bots)
 app.register_blueprint(delete_kw)
 app.register_blueprint(bots_route)
 app.register_blueprint(getBots)
-app.register_blueprint(scrapper_bp)
 app.register_blueprint(bots_status)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(new_keyword)
@@ -64,6 +64,7 @@ app.register_blueprint(competitor_bp)
 app.register_blueprint(bots_activator)
 app.register_blueprint(tradingview_bp)
 app.register_blueprint(slack_events_bp)
+app.register_blueprint(scrapper_bp)
 app.register_blueprint(bots_deactivator)
 app.register_blueprint(analysis_bp)
 app.register_blueprint(save_site_bp)
@@ -77,6 +78,7 @@ app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(individual_bot)
+
 
 if __name__ == '__main__':
     try:

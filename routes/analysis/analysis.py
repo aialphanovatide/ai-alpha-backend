@@ -121,13 +121,13 @@ def post_analysis():
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         image_file = request.files.get('image')
-
+       
         # Check if any of the required values is missing
-        if content == 'null' or coin_bot_id == 'null' or image_file == 'null':
+        if content == 'null' or coin_bot_id == 'null':
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
         # Check if any of the required values is missing
-        if coin_bot_id is None or not coin_bot_id or content is None or not content or image_file is None or not image_file:
+        if coin_bot_id is None or not coin_bot_id or content is None or not content:
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
         new_analysis = Analysis(
@@ -136,35 +136,6 @@ def post_analysis():
         )
         session.add(new_analysis)
         session.commit()
-
-        if image_file:
-            # Reset file pointer to the beginning
-            image_file.seek(0)
-
-            # Open the image with RGBA mode
-            original_image = Image.open(image_file)
-
-            # Convert RGBA to RGB if needed
-            if original_image.mode == 'RGBA':
-                original_image = original_image.convert('RGB')
-
-            # Resize the image
-            max_size = (300, 300)  # Set your desired maximum size
-            original_image.thumbnail(max_size)
-
-            # Convert the resized image to base64
-            buffered = BytesIO()
-            original_image.save(buffered, format='JPEG')
-            base64_image = base64.b64encode(
-                buffered.getvalue()).decode('utf-8')
-
-            # Save the base64 encoded image to the database
-            new_analysis_image = AnalysisImage(
-                image=base64_image,
-                analysis_id=new_analysis.analysis_id,
-            )
-            session.add(new_analysis_image)
-            session.commit()
 
         # Return success response if everything is fine
         return jsonify({'message': 'Analysis posted successfully', 'status': 200, 'success': True}), 200

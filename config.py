@@ -1,9 +1,12 @@
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from datetime import datetime
 from pathlib import Path
-import json  
+import json
 import os
 
 
@@ -18,11 +21,9 @@ DB_HOST = os.getenv('DB_HOST')
 db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 engine = create_engine(db_url, pool_size=30, max_overflow=20)
 
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
 
 class Admin(Base):
     __tablename__ = 'admin'
@@ -35,6 +36,7 @@ class Admin(Base):
     def to_dict(self):
         return {'admin_id': self.admin_id, 'username': self.username, 'mail': self.mail}
 
+
 class User(Base):
     __tablename__ = 'user_table'
     user_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -43,7 +45,9 @@ class User(Base):
     email_verified = Column(String)
     picture = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
+    purchased_plans = relationship(
+        'PurchasedPlan', back_populates='user', lazy=True)
+
 
 class PurchasedPlan(Base):
     __tablename__ = 'purchased_plan'
@@ -70,12 +74,14 @@ class Category(Base):
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
 
+
 class CoinBot(Base):
     __tablename__ = 'coin_bot'
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
     bot_name = Column(String)
     image = Column(String, default='No Image')
-    category_id = Column(Integer, ForeignKey('category.category_id'), nullable=False)
+    category_id = Column(Integer, ForeignKey(
+        'category.category_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     chart = relationship('Chart', back_populates='coin_bot')
     alerts = relationship('Alert', back_populates='coin_bot')
@@ -86,25 +92,57 @@ class CoinBot(Base):
     analysis = relationship('Analysis', back_populates='coin_bot')
     top_story = relationship('TopStory', back_populates='coin_bot')
     category = relationship('Category', back_populates='coin_bot')
-    introduction = relationship("Introduction", back_populates="coin_bot", lazy=True)
-    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True)
-    token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True)
-    token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True)
-    value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
-    competitor = relationship("Competitor", back_populates="coin_bot", lazy=True)
-    revenue_model = relationship('Revenue_model', back_populates='coin_bot', lazy=True)
+    introduction = relationship(
+        "Introduction", back_populates="coin_bot", lazy=True)
+    tokenomics = relationship(
+        "Tokenomics", back_populates="coin_bot", lazy=True)
+    token_distribution = relationship(
+        "Token_distribution", back_populates="coin_bot", lazy=True)
+    token_utility = relationship(
+        "Token_utility", back_populates="coin_bot", lazy=True)
+    value_accrual_mechanisms = relationship(
+        "Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
+    competitor = relationship(
+        "Competitor", back_populates="coin_bot", lazy=True)
+    revenue_model = relationship(
+        'Revenue_model', back_populates='coin_bot', lazy=True)
     hacks = relationship('Hacks', back_populates='coin_bot', lazy=True)
     dapps = relationship('DApps', back_populates='coin_bot', lazy=True)
     upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True)
+
 
 class Keyword(Base):
     __tablename__ = 'keyword'
     keyword_id = Column(Integer, primary_key=True, autoincrement=True)
     word = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     coin_bot = relationship('CoinBot', back_populates='keywords', lazy=True)
+
+
+
+class Used_keywords(Base):
+    __tablename__ = 'used_keywords'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    article_content = Column(String)
+    article_date = Column(TIMESTAMP)
+    article_url = Column(String)
+    keywords = Column(String)
+    source = Column(String)
+    article_id = Column(Integer, ForeignKey('article.article_id'))
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'))
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+
+    coin_bot = relationship('CoinBot', backref='used_keywords')
+    # article = relationship('Article', backref='used_keywords') 
+    article = relationship('Article', back_populates='Used_keywords')
+    
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 
 class Site(Base):
     __tablename__ = 'site'
@@ -119,14 +157,17 @@ class Site(Base):
 
     coin_bot = relationship('CoinBot', back_populates='sites', lazy=True)
 
+
 class Blacklist(Base):
     __tablename__ = 'blacklist'
     blacklist_id = Column(Integer, primary_key=True, autoincrement=True)
     word = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     coin_bot = relationship('CoinBot', back_populates='blacklist', lazy=True)
+
 
 class Alert(Base):
     __tablename__ = 'alert'
@@ -135,30 +176,39 @@ class Alert(Base):
     alert_message = Column(String)
     symbol = Column(String)
     price = Column(Float)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     coin_bot = relationship('CoinBot', back_populates='alerts', lazy=True)
+
 
 class Article(Base):
     __tablename__ = 'article'
     article_id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(String)
     title = Column(String)
-    url = Column(String) 
+    url = Column(String)
     summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
     images = relationship('ArticleImage', back_populates='article', lazy=True)
+    Used_keywords = relationship('Used_keywords', back_populates='article', lazy=True)
+   
+
+    
+
 
 class ArticleImage(Base):
     __tablename__ = 'article_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    article_id = Column(Integer, ForeignKey('article.article_id'), nullable=False)
+    article_id = Column(Integer, ForeignKey(
+        'article.article_id'), nullable=False)
     article = relationship('Article', back_populates='images')
 
 
@@ -168,45 +218,52 @@ class TopStory(Base):
     story_date = Column(String)
     summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='top_story', lazy=True)
     images = relationship('TopStoryImage', back_populates='top_story')
+
 
 class TopStoryImage(Base):
     __tablename__ = 'top_story_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    top_story_id = Column(Integer, ForeignKey('top_story.top_story_id'), nullable=False)
+    top_story_id = Column(Integer, ForeignKey(
+        'top_story.top_story_id'), nullable=False)
 
     top_story = relationship('TopStory', back_populates='images')
+
 
 class Analysis(Base):
     __tablename__ = 'analysis'
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
     analysis = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
-    
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
+
     images = relationship('AnalysisImage', back_populates='analysis')
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
-    
+
     def to_dict(self):
         return {
             'analysis_id': self.analysis_id,
             'analysis': self.analysis,
             'created_at': str(self.created_at)}
-            
+
 
 class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
+    analysis_id = Column(Integer, ForeignKey(
+        'analysis.analysis_id'), nullable=False)
 
     analysis = relationship('Analysis', back_populates='images')
+
 
 class AnalyzedArticle(Base):
     __tablename__ = 'analyzed_article'
@@ -215,7 +272,6 @@ class AnalyzedArticle(Base):
     url = Column(String)
     is_analyzed = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-
 
 
 class Chart(Base):
@@ -232,32 +288,38 @@ class Chart(Base):
     token = Column(String)
     pair = Column(String)
     temporality = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False) 
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     coin_bot = relationship('CoinBot', back_populates='chart', lazy=True)
 
 
 # -----------------------------------------------------------------------------------
-    
+
 class Introduction(Base):
     __tablename__ = 'introduction'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     content = Column(String)
     website = Column(String)
     whitepaper = Column(String)
     dynamic = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot = relationship('CoinBot', back_populates='introduction', lazy=True)
+    coin_bot = relationship(
+        'CoinBot', back_populates='introduction', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
+
 class Tokenomics(Base):
     __tablename__ = 'tokenomics'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     token = Column(String)
     total_supply = Column(String)
     circulating_supply = Column(String)
@@ -267,68 +329,86 @@ class Tokenomics(Base):
     dynamic = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
+
     coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
+
 class Token_distribution(Base):
     __tablename__ = 'token_distribution'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     holder_category = Column(String)
     percentage_held = Column(String)
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot = relationship('CoinBot', back_populates='token_distribution', lazy=True)
+    coin_bot = relationship(
+        'CoinBot', back_populates='token_distribution', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
+
 class Token_utility(Base):
     __tablename__ = 'token_utility'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     token_application = Column(String)
     description = Column(String, default=True)
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot = relationship('CoinBot', back_populates='token_utility', lazy=True)
+    coin_bot = relationship(
+        'CoinBot', back_populates='token_utility', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
+
 class Value_accrual_mechanisms(Base):
     __tablename__ = 'value_accrual_mechanisms'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     mechanism = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot = relationship('CoinBot', back_populates='value_accrual_mechanisms', lazy=True)
+    coin_bot = relationship(
+        'CoinBot', back_populates='value_accrual_mechanisms', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
+
 class Revenue_model(Base):
     __tablename__ = 'revenue_model'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     analized_revenue = Column(String)
     fees_1ys = Column(String)
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    coin_bot = relationship('CoinBot', back_populates='revenue_model', lazy=True)
+    coin_bot = relationship(
+        'CoinBot', back_populates='revenue_model', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
+
+
 class Hacks(Base):
     __tablename__ = 'hacks'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     hack_name = Column(String)
     date = Column(String)
     incident_description = Column(String)
@@ -338,66 +418,28 @@ class Hacks(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot = relationship('CoinBot', back_populates='hacks', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        
-# class Competitor(Base):
-#     __tablename__ = 'competitor'
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-#     token = Column(String)
-#     circulating_supply = Column(String)
-#     token_supply_model = Column(String)
-#     current_market_cap = Column(String)
-#     tvl = Column(String)
-#     daily_active_users = Column(String)
-#     transaction_fees = Column(String)
-#     transaction_speed = Column(String)
-#     inflation_rate_2022 = Column(String)
-#     inflation_rate_2023 = Column(String)
-#     apr = Column(String)
-#     active_developers = Column(Integer)
-#     revenue = Column(Integer)
-#     total_supply = Column(Integer)
-#     percentage_circulating_supply = Column(Integer)
-#     max_supply = Column(Integer)
-#     dynamic = Column(Boolean, default=True)
-#     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-#     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
-#     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
-    
-#     def tokenomics(self):
-#         selected_columns = [
-#             'id','token','total_supply', 'circulating_supply', 'percentage_circulating_supply',
-#             'max_supply', 'token_supply_model'
-#         ]
-#         return {column: getattr(self, column) for column in selected_columns}
-        
-#     def competitors(self):
-#         excluded_columns = [
-#             'id', 'token','circulating_supply', 'token_supply_model', 'current_market_cap',
-#             'tvl', 'daily_active_users', 'transaction_fees', 'transaction_speed' , 'inflation_rate_2022',
-#             'inflation_rate_2023', 'apr', 'active_developers', 'revenue'
-#         ]
 
-#         return {column: getattr(self, column) for column in excluded_columns}
 
 # -----------------------   NEW COMPETITOR TABLE ------------------------------------------------
+
 
 class Competitor(Base):
     __tablename__ = 'competitor'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     token = Column(String)
     key = Column(String, nullable=False)
     value = Column(String, nullable=False)
     dynamic = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
+
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
-    
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
@@ -407,7 +449,8 @@ class Competitor(Base):
 class DApps(Base):
     __tablename__ = 'dapps'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     dapps = Column(String)
     description = Column(String)
     tvl = Column(String)
@@ -415,13 +458,16 @@ class DApps(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot = relationship('CoinBot', back_populates='dapps', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 
 class Upgrades(Base):
     __tablename__ = 'upgrades'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
     event = Column(String)
     date = Column(String)
     event_overview = Column(String)
@@ -430,6 +476,7 @@ class Upgrades(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow)
     coin_bot = relationship('CoinBot', back_populates='upgrades', lazy=True)
+
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
@@ -442,12 +489,13 @@ Base.metadata.create_all(engine)
 # Fa.metadata.create_all(engine) # Creates the FA tables
 
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
-session = Session() 
+session = Session()
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 # Check if the user with the given email already exists
-existing_user = session.query(User).filter_by(email='testuser@example.com').first()
+existing_user = session.query(User).filter_by(
+    email='testuser@example.com').first()
 
 # Creates the user if not exist
 if existing_user is None:
@@ -502,14 +550,13 @@ else:
     print("---TestUser not found---")
 
 
-
 with session:
     try:
         if not session.query(Category).first():
             with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
-            
-                for item in config:   
+
+                for item in config:
                     main_keyword = item['main_keyword']
                     alias = item['alias']
                     coins = item['coins']
@@ -525,21 +572,24 @@ with session:
                         keywords = coin['keywords']
                         sites = coin['sites']
                         black_list = coin['black_list']
-                        
+
                         new_coin = CoinBot(bot_name=coin_keyword.casefold())
-                        
+
                         new_coin.category = new_category
                         for keyword in keywords:
-                            new_coin.keywords.append(Keyword(word=keyword.casefold()))
+                            new_coin.keywords.append(
+                                Keyword(word=keyword.casefold()))
 
                         for word in black_list:
-                            new_coin.blacklist.append(Blacklist(word=word.casefold()))
+                            new_coin.blacklist.append(
+                                Blacklist(word=word.casefold()))
 
                         for site_data in sites:
                             site = Site(
                                 site_name=str(site_data['website_name']),
                                 base_url=str(site_data['base_url']).casefold(),
-                                data_source_url=str(site_data['site']).capitalize(),
+                                data_source_url=str(
+                                    site_data['site']).capitalize(),
                                 is_URL_complete=site_data['is_URL_complete'],
                                 main_container=str(site_data['main_container'])
                             )
@@ -547,7 +597,7 @@ with session:
 
                             session.add(new_coin)
                             print('-----CoinBot data saved-----')
-                            session.commit()       
+                            session.commit()
 
                     session.add(new_category)
                     print('-----Category table populated-----')
@@ -562,7 +612,8 @@ with session:
 
 try:
     if not session.query(Admin).first():
-        new_admin = Admin(mail='team@novatide.io', username='novatideteam', password='Novatide2023!')
+        new_admin = Admin(mail='team@novatide.io',
+                          username='novatideteam', password='Novatide2023!')
         session.add(new_admin)
         session.commit()
         print('---- Admin user created------')
