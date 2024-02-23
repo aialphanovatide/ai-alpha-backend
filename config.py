@@ -137,7 +137,7 @@ class Used_keywords(Base):
 
     coin_bot = relationship('CoinBot', backref='used_keywords')
     # article = relationship('Article', backref='used_keywords') 
-    article = relationship('Article', back_populates='Used_keywords')
+    article = relationship('Article', back_populates='used_keywords')
     
     
     def as_dict(self):
@@ -196,7 +196,7 @@ class Article(Base):
 
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
     images = relationship('ArticleImage', back_populates='article', lazy=True)
-    Used_keywords = relationship('Used_keywords', back_populates='article', lazy=True)
+    used_keywords = relationship('Used_keywords', back_populates='article', lazy=True)
    
 
     

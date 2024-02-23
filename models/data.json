@@ -136,7 +136,7 @@
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
+            "main_container": ".archive-posts"
           },
           {
             "site": "https://u.today/bitcoin-news",
@@ -424,11 +424,11 @@
             "main_container": "None"
           },
           {
-            "site": "https://ambcrypto.com/search/ethereum",
+            "site": "https://ambcrypto.com/",
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
+            "main_container": ".archive-posts"
           },
           {
             "site": "https://u.today/ethereum-news",
@@ -1479,11 +1479,11 @@
             "main_container": "None"
           },
           {
-            "site": "https://ambcrypto.com/search/ldo",
+            "site": "https://ambcrypto.com/",
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
+            "main_container": ".archive-posts"
           },
           {
             "site": "https://dailyhodl.com/?s=ldo",
@@ -1497,14 +1497,14 @@
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://cryptoslate.com/?s=ldo",
             "base_url": "https://cryptoslate.com",
-            "website_name": "Cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://decrypt.co/search/all/ldo",
@@ -1521,7 +1521,7 @@
             "main_container": "None"
           },
           {
-            "site": "https://cryptodaily.co.uk/search?q=ldo",
+            "site": "https://cryptodaily.co.uk/search?q=LDO",
             "base_url": "https://cryptodaily.co.uk",
             "website_name": "Cryptodaily",
             "is_URL_complete": true,
@@ -2035,11 +2035,11 @@
             "main_container": "None"
           },
           {
-            "site": "https://ambcrypto.com/search/RPL",
+            "site": "https://ambcrypto.com/",
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
+            "main_container": ".archive-posts"
           },
           {
             "site": "https://dailyhodl.com/?s=RPL",
@@ -2053,14 +2053,14 @@
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://cryptoslate.com/?s=RPL",
             "base_url": "https://cryptoslate.com",
-            "website_name": "Cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://decrypt.co/search/all/RPL",
@@ -2368,20 +2368,241 @@
           "Frax Share Bearish",
           "Frax Share Community collaboration",
           "Frax Share Ribbit Capital",
-          "fiat-crypto",
-          "virtual",
-          "stake",
-          "policy",
-          "volatility",
-          "limit",
-          "resistance",
-          "strength",
-          "staking",
-          "overbought",
-          "signals",
-          "grayscale",
-          "tokenization",
-          "upgrade"
+"FXS Algorithmic Stablecoin",
+"FXS Token Price Analysis",
+"FXS Decentralized autonomous organization (DAO)",
+"FXS Monetary policy",
+"FXS Token Value",
+"FXS Token Pairing",
+"FXS Smart contract audit",
+"FXS Frax Finance",
+"FXS Paradigm",
+"FXS Instadapp",
+"FXS v2.0",
+"FXS EthCC 2023",
+"FXS Future",
+"FXS Lido Finance",
+"FXS Sam Bankman-Fried",
+"FXS Aave",
+"FXS Fractional Algorithm",
+"FXS Market Data",
+"FXS Securities law",
+"FXS Interest rates",
+"FXS Token Price Trends",
+"FXS/BTC",
+"FXS Bug bounty",
+"FXS FRAX USD-pegged stablecoin",
+"FXS a16z crypto",
+"FXS Zapper.fi",
+"FXS v2.0 Stability enhancement",
+"FXS Devcon 7",
+"FXS Future Outlook",
+"FXS Synthetix",
+"FXS Sam Trautman",
+"FXS dYdX",
+"FXS Liquid Staking",
+"FXS Price Charts",
+"FXS Anti-money laundering (AML) law",
+"FXS Inflation",
+"FXS Price Prediction",
+"FXS/ETH",
+"FXS Multi-signature wallet",
+"FXS FraxSwap",
+"FXS Union Square Ventures",
+"FXS Zerion",
+"FXS v2.0 Launch",
+"FXS Mondecon 2023",
+"FXS Expanding Adoption",
+"FXS Stafi",
+"FXS Dj Jones",
+"FXS Curve Finance",
+"FXS Liquidity Providers",
+"FXS Price Prediction",
+"FXS Know your customer (KYC) regulation",
+"FXS Deflation",
+"FXS Historical Price Data",
+"FXS/USDT",
+"FXS Access control",
+"FXS Fraxlend",
+"FXS 1kx",
+"FXS Debank",
+"FXS v2.0 Roadmap",
+"FXS Paris Blockchain Week",
+"FXS Liquidity Enhancement",
+"FXS Curve Finance",
+"FXS Li Zhou",
+"FXS Synthetix",
+"FXS Oracles",
+"FXS Technical Indicators",
+"FXS Taxation",
+"FXS Exchange rates",
+"FXS Price Volatility",
+"FXS/USDC",
+"FXS Oracle security",
+"FXS DeFi protocol",
+"FXS Pantera Capital",
+"FXS Dharma",
+"FXS v2.0 AMOs (Algorithmic Market Operations Controller)",
+"FXS ETH Denver 2024",
+"FXS Layer-2 Scaling Solution",
+"FXS Balancer",
+"FXS Eric Wall",
+"FXS Partnership",
+"FXS Staker",
+"FXS Price Trends",
+"FXS Sanctions",
+"FXS Economic growth",
+"FXS Market Analysis",
+"FXS Flash loan protection",
+"FXS Multi-chain stablecoin protocol FRAX",
+"FXS Alameda Research",
+"FXS Gelato Network",
+"FXS v2.0 Release",
+"FXS Community Engagement",
+"FXS Competition",
+"FXS Santiago Roelens",
+"FXS Ren Protocol",
+"FXS Decentralized Governance",
+"FXS Price Volatility",
+"FXS Data privacy laws",
+"FXS Economic stability",
+"FXS Indicator",
+"FXS Price manipulation prevention",
+"FXS Liquid staking on Ethereum (frxETH)",
+"FXS Three Arrows Capital",
+"FXS 1inch",
+"FXS Cross-Chain Bridges Development",
+"FXS Institutional Adoption",
+"FXS Linda Xie",
+"FXS Chainlink",
+"FXS Stablecoin Protocol",
+"FXS Historical Data",
+"FXS Intellectual property law",
+"FXS Global financial system",
+"FXS Performance Evaluation",
+"FXS Community monitoring",
+"FXS vetokenomics",
+"FXS Digital Currency Group",
+"FXS Paraswap",
+"FXS Cross-Chain Bridges Development Launch",
+"FXS Global Reach",
+"FXS David Hoffma",
+"FXS Gnosis Protocol",
+"FXS Security",
+"FXS Market Sentiment",
+"FXS Contract law",
+"FXS Financial inclusion",
+"FXS Market Performance",
+"FXS Transparency and disclosure",
+"FXS veFXS",
+"FXS Galaxy Digital",
+"FXS Tracer DAO",
+"FXS Cross-Chain Bridges Development Roadmap",
+"FXS long-term stability",
+"FXS Anthony Sassano",
+"FXS UMA Protocol",
+"FXS Arbitrageur",
+"FXS Trading Strategies",
+"FXS Dispute resolution",
+"FXS Central bank digital currencies (CBDCs)",
+"FXS Price Target",
+"FXS Incident response plan",
+"FXS Vitalik Buterin",
+"FXS Coinbase Ventures",
+"FXS FraxYield",
+"FXS Governance Enhancements Implementation",
+"FXS Sustainable Development",
+"FXS Vanessa Snyder",
+"FXS Yearn",
+"FXS Yield Farming",
+"FXS Exchange Listing",
+"FXS Privacy law",
+"FXS Economic policies",
+"FXS Price Forecast",
+"FXS Security audit",
+"FXS Compound Finance",
+"FXS Governance Token Design",
+"FXS Ecosystem Growth",
+"FXS Ryan Sean Adams",
+"FXS Flexa",
+"FXS Liquidity Mining",
+"FXS Exchange Integration",
+"FXS Trade secret law",
+"FXS Fiscal policy",
+"FXS Supply and Demand",
+"FXS Audit Report",
+"FXS MakerDAO",
+"FXS Governance Proposals",
+"FXS Network Expansion",
+"FXS Stani Kulechov",
+"FXS Governance",
+"FXS Staking Rewards",
+"FXS Wallet Integration",
+"FXS Employment law",
+"FXS Inflation rates",
+"FXS Tokenomics",
+"FXS Bug Bounty Program",
+"FXS Uniswap",
+"FXS Token Burn Mechanism",
+"FXS Infrastructure Development",
+"FXS Tarun Chitra",
+"FXS Monetary policy adjustment",
+"FXS Stablecoin Peg Maintenance",
+"FXS Protocol Upgrade",
+"FXS Corporate law",
+"FXS Recession",
+"FXS Valuation",
+"FXS Security Enhancement",
+"FXS SushiSwap",
+"FXS Token Allocation",
+"FXS Platform Scalability",
+"FXS Dan Robinson",
+"FXS Interest Rate Models",
+"FXS Stablecoin Reserve Management",
+"FXS New Features",
+"FXS Banking law",
+"FXS Economic indicators",
+"FXS Market Capitalization",
+"FXS Security Protocol",
+"FXS Yearn Vaults",
+"FXS Token Distribution",
+"FXS Platform Upgrade",
+"FXS Hasu",
+"FXS Liquidity Risk Management",
+"FXS Stablecoin Minting",
+"FXS User Experience Improvement",
+"FXS Competition law",
+"FXS GDP growth",
+"FXS Trading Volume",
+"FXS Security Features",
+"FXS Zapper Vaults",
+"FXS Token Generation Event",
+"FXS Development Roadmap",
+"FXS Suzhu",
+"FXS Financial Risk Management",
+"FXS Stablecoin Redemption",
+"FXS Community Feedback Incorporation",
+"FXS Consumer protection law",
+"FXS Unemployment rate",
+"FXS Market Trends",
+"FXS Security Measures",
+"FXS Zerion Integration",
+"FXS Token Sale",
+"FXS Technical Roadmap",
+"FXS Kyle Samani",
+"FXS Hedge Strategy",
+"FXS Stablecoin Supply Adjustment",
+"FXS Feedback Loop Implementation",
+"FXS Data protection law",
+"FXS Monetary policy effectiveness",
+"FXS Trading Strategy",
+"FXS Security Updates",
+"FXS DeFi Pulse Index",
+"FXS Token Swap",
+"FXS Version Update",
+"FXS Larry Cermak",
+"FXS Insurance Fund",
+"FXS Stablecoin Backing Assets"
         ],
         "sites": [
           {
@@ -2406,11 +2627,11 @@
             "main_container": "None"
           },
           {
-            "site": "https://ambcrypto.com/search/FXS",
+            "site": "https://ambcrypto.com/",
             "base_url": "https://ambcrypto.com",
             "website_name": "Ambcrypto",
             "is_URL_complete": true,
-            "main_container": ".home-blog-wrap"
+            "main_container": ".archive-posts"
           },
           {
             "site": "https://dailyhodl.com/?s=FXS",
@@ -2424,14 +2645,14 @@
             "base_url": "https://cryptopotato.com",
             "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://cryptoslate.com/?s=FXS",
             "base_url": "https://cryptoslate.com",
-            "website_name": "Cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://decrypt.co/search/all/FXS",
@@ -3348,14 +3569,7 @@
             "main_container": "None"
           },
           {
-            "site": "https://coingape.com/search_gcse/?q=atom#gsc.tab=0&gsc.q=atom&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=atom&gsc.sort=",
+            "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=atom&gsc.sort=date",
             "base_url": "https://www.google.com/url?",
             "website_name": "Coingape",
             "is_URL_complete": true,
@@ -3371,16 +3585,16 @@
           {
             "site": "https://cryptoslate.com/?s=atom",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=atom",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=atom",
@@ -3397,7 +3611,7 @@
             "main_container": "None"
           },
           {
-            "site": "https://dailyhodl.com/?s=atomo",
+            "site": "https://dailyhodl.com/?s=atom",
             "base_url": "https://dailyhodl.com",
             "website_name": "Dailyhodl",
             "is_URL_complete": true,
@@ -3967,16 +4181,16 @@
           {
             "site": "https://cryptoslate.com/?s=dot",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=dot",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=dot",
@@ -4639,16 +4853,16 @@
           {
             "site": "https://cryptoslate.com/?s=qnt",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=qnt",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=qnt",
@@ -5250,16 +5464,16 @@
           {
             "site": "https://cryptoslate.com/?s=ada",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=ada",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=ada",
@@ -5936,16 +6150,16 @@
           {
             "site": "https://cryptoslate.com/?s=SOL",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=SOL",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=SOL",
@@ -6747,16 +6961,16 @@
           {
             "site": "https://cryptoslate.com/?s=avax",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=avax",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=avax",
@@ -7201,16 +7415,16 @@
           {
             "site": "https://cryptoslate.com/?s=near",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=near",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=near",
@@ -7951,16 +8165,16 @@
           {
             "site": "https://cryptoslate.com/?s=ftm",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=ftm",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=ftm",
@@ -8772,16 +8986,16 @@
           {
             "site": "https://cryptoslate.com/?s=kas",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=kas",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=kas",
@@ -9622,16 +9836,16 @@
           {
             "site": "https://cryptoslate.com/?s=matic",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=matic",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=matic",
@@ -10328,16 +10542,16 @@
           {
             "site": "https://cryptoslate.com/?s=arb",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=arb",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=arb",
@@ -11095,16 +11309,16 @@
           {
             "site": "https://cryptoslate.com/?s=op",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=op",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=op",
@@ -11155,37 +11369,6 @@
       {
         "coin_keyword": "LINK",
         "keywords": [
-          "Oracle Crypto",
-          "Oracle Distributed ledger technology (DLT)",
-          "Oracle Smart contract",
-          "Oracle Decentralized applications (DApps)",
-          "Oracle Blockchain",
-          "Oracle Zero-knowledge proofs (ZKPs)",
-          "Oracle Public key cryptography (PKC)",
-          "Oracle Digital signatures",
-          "Oracle Key exchange",
-          "Oracle Symmetric cryptography",
-          "Oracle Message digest algorithms",
-          "Oracle MAC algorithms",
-          "Oracle ASN.1",
-          "Oracle Cryptographic service providers (CSPs)",
-          "Oracle Java Cryptography Architecture (JCA)",
-          "Oracle Key Vault",
-          "Oracle Secure multi-party computation (SMPC)",
-          "Oracle Decentralized",
-          "Oracle Off-chain",
-          "Oracle On-chain",
-          "Oracle Data governance",
-          "Oracle Data compliance",
-          "Oracle Data reliability",
-          "Oracle Data security",
-          "Oracle Data integrity",
-          "Oracle Data privacy",
-          "Oracle Data quality",
-          "Oracle Decentralized financial markets (DeFi)",
-          "Oracle Algorithmic stablecoins",
-          "Oracle Central bank digital currencies (CBDCs)",
-          "Oracle Tokenized assets",
           "Chainlink LINK",
           "Chainlink Token Price Analysis",
           "Chainlink Know-your-customer (KYC)",
@@ -11386,16 +11569,16 @@
           {
             "site": "https://cryptoslate.com/?s=chainlink+LINK",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=chainlink+LINK",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=chainlink%20LINK",
@@ -11440,38 +11623,6 @@
       {
         "coin_keyword": "API3",
         "keywords": [
-          "Oracle Crypto",
-          "Oracle Distributed ledger technology (DLT)",
-          "Oracle Smart contract",
-          "Oracle Decentralized applications (DApps)",
-          "Oracle Blockchain",
-          "Oracle Zero-knowledge proofs (ZKPs)",
-          "Oracle Public key cryptography (PKC)",
-          "Oracle Digital signatures",
-          "Oracle Key exchange",
-          "Oracle Symmetric cryptography",
-          "Oracle Message digest algorithms",
-          "Oracle MAC algorithms",
-          "Oracle ASN.1",
-          "Oracle Cryptographic service providers (CSPs)",
-          "Oracle Java Cryptography Architecture (JCA)",
-          "Oracle Key Vault",
-          "Oracle Secure multi-party computation (SMPC)",
-          "Oracle Decentralized",
-          "Oracle Off-chain",
-          "Oracle On-chain",
-          "Oracle Data governance",
-          "Oracle Data compliance",
-          "Oracle Data reliability",
-          "Oracle Data security",
-          "Oracle Data integrity",
-          "Oracle Data privacy",
-          "Oracle Data quality",
-          "Oracle Decentralized financial markets (DeFi)",
-          "Oracle Algorithmic stablecoins",
-          "Oracle Central bank digital currencies (CBDCs)",
-          "Oracle Tokenized assets",
-          "Chainlink LINK",
           "API3 Oracle",
           "API3 Token Price Analysis",
           "API3 Decentralized Autonomous Organizations (DAO)",
@@ -11858,16 +12009,16 @@
           {
             "site": "https://cryptoslate.com/?s=api+3",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=api+3",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=api%203",
@@ -11912,38 +12063,6 @@
       {
         "coin_keyword": "BAND",
         "keywords": [
-          "Oracle Crypto",
-          "Oracle Distributed ledger technology (DLT)",
-          "Oracle Smart contract",
-          "Oracle Decentralized applications (DApps)",
-          "Oracle Blockchain",
-          "Oracle Zero-knowledge proofs (ZKPs)",
-          "Oracle Public key cryptography (PKC)",
-          "Oracle Digital signatures",
-          "Oracle Key exchange",
-          "Oracle Symmetric cryptography",
-          "Oracle Message digest algorithms",
-          "Oracle MAC algorithms",
-          "Oracle ASN.1",
-          "Oracle Cryptographic service providers (CSPs)",
-          "Oracle Java Cryptography Architecture (JCA)",
-          "Oracle Key Vault",
-          "Oracle Secure multi-party computation (SMPC)",
-          "Oracle Decentralized",
-          "Oracle Off-chain",
-          "Oracle On-chain",
-          "Oracle Data governance",
-          "Oracle Data compliance",
-          "Oracle Data reliability",
-          "Oracle Data security",
-          "Oracle Data integrity",
-          "Oracle Data privacy",
-          "Oracle Data quality",
-          "Oracle Decentralized financial markets (DeFi)",
-          "Oracle Algorithmic stablecoins",
-          "Oracle Central bank digital currencies (CBDCs)",
-          "Oracle Tokenized assets",
-          "Chainlink LINK",
           "API3 Oracle",
           "API3 Token Price Analysis",
           "API3 Decentralized Autonomous Organizations (DAO)",
@@ -12323,16 +12442,16 @@
           {
             "site": "https://cryptoslate.com/?s=BAND",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=BAND",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=BAND",
@@ -12595,7 +12714,131 @@
           "Stellar zero-day attack",
           "Stellar Circle mobile payments",
           "Stellar self-custodial wallet",
-          "Stellar General Catalyst"
+          "Stellar General Catalyst",
+ "XLM Development Foundation",
+ "XLM Token Price Analysis",
+ "XLM Regulatory Framework",
+ "XLM Economic Development",
+ "XLM Token Value",
+ "XLM Token Pairing",
+ "XLM Security",
+ "XLM Soroban Smart Contract",
+ "XLM Humanitarian Project",
+ "XLM Beans App Wallet",
+ "XLM Decaf",
+ "XLM Andreessen Horowitz",
+ "XLM Ecosystem Growth",
+ "XLM Certora",
+ "XLM Performance Optimizations Enhance Speed Efficiency",
+ "XLM Protocol 20",
+ "XLM Conf 2024",
+ "XLM Africa",
+ "XLM MoneyGram",
+ "XLM Jed McCaleb",
+ "XLM Alaska Native Village Corporation",
+ "XLM Lumens",
+ "XLM Market Data",
+ "XLM Legal Compliance",
+ "XLM Financial Inclusion",
+ "XLM Token Price Trends",
+ "XLM/BTC",
+ "XLM Network Hack",
+ "XLM Efficient CrossBorder Payment Solutions",
+ "XLM World Economic Forum (WEF)",
+ "XLM Boss Money Wallet",
+ "XLM Latin America",
+ "XLM Blockchain Capital",
+ "XLM Ecosystem Expansion",
+ "XLM Soroban",
+ "XLM Strkey Authentication",
+ "XLM Protocol 20 Soroban Smart Contract",
+ "XLM Money20/20",
+ "XLM Emerging Markets",
+ "XLM Western Union",
+ "XLM Joyce Kim",
+ "XLM American Red Cross",
+ "XLM Network",
+ "XLM Price Charts",
+ "XLM KYC",
+ "XLM Sustainable Development",
+ "XLM Price Prediction",
+ "XLM/ETH",
+ "XLM Theft",
+ "XLM Vitalik Buterin",
+ "XLM Humanitarian and Resilience Investment Initiative",
+ "XLM OffRamp Ecosystem",
+ "XLM Decaf Payments",
+ "XLM Digital Currency Group",
+ "XLM Lightnet",
+ "XLM WASM",
+ "XLM Multi-Signature Enhancements",
+ "XLM Protocol 20 Testnet Upgrade",
+ "XLM Sibos",
+ "XLM Financial Literacy",
+ "XLM SWIFT",
+ "XLM Jed Bernstein",
+ "XLM Black Fives Foundation",
+ "XLM Community",
+ "XLM Price Prediction",
+ "XLM Securities Laws",
+ "XLM Global Trade",
+ "XLM Historical Price Data",
+ "XLM/USDT",
+ "XLM Wallet Hack",
+ "XLM Ethereum",
+ "XLM Shiba Budz (BUDZ)",
+ "XLM Cryptocurrency Wallets",
+ "XLM Decaf Remittances",
+ "XLM First Round Capital",
+ "XLM Keystone Bank",
+ "XLM Certora Smart Contracts",
+ "XLM Performance Improvements",
+ "XLM Protocol 20 Soroban",
+ "XLM Blockchain Africa Conference",
+ "XLM Economic Development",
+ "XLM Circle (USDC)",
+ "XLM Jed Bernstein CEO",
+ "XLM Brave New World",
+"XLM DEX",
+"XLM Technical Indicators",
+"XLM Cross-Border Payments Regulation",
+ "XLM Remittance Markets",
+ "XLM Price Volatility",
+ "XLM/USDC",
+ "XLM Exchange Hack",
+ "XLM Decentralized Applications (DApps)",
+ "XLM Vulnerable Communities",
+ "XLM CrossBorder Transactions",
+ "XLM Decaf OffRamps",
+ "XLM Horizons Ventures",
+ "XLM SBI Remit",
+ "XLM Certora Enhance Security of Soroban",
+ "XLM Interoperability Enhancements",
+ "XLM Core Protocol 20",
+ "XLM LatAm Blockchain Summit",
+ "XLM Sustainability",
+ "XLM Ripple",
+ "XLM Community",
+ "XLM CARE International",
+ "XLM XLM",
+ "XLM Price Trends",
+ "XLM Digital Asset Regulation",
+ "XLM Poverty Reduction",
+ "XLM Market Analysis",
+ "XLM/EUR",
+ "XLM Phishing Attack",
+ "XLM OnChain Marketplaces",
+ "XLM Fast Transactions",
+ "XLM Decaf USDC",
+ "XLM Lightspeed Venture Partners",
+ "XLM Tempo Payments",
+ "XLM Certora WASMPowered Project",
+ "XLM Network Scalability",
+ "XLM Protocol 20 Mainnet",
+ "XLM Institutional Adoption",
+ "XLM Competitor",
+ "XLM Jennifer King"
+
         ],
         "sites": [
           {
@@ -12643,16 +12886,16 @@
           {
             "site": "https://cryptoslate.com/?s=xlm",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=xlm",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=xlm",
@@ -13128,16 +13371,16 @@
           {
             "site": "https://cryptoslate.com/?s=ALGO",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=ALGO",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=ALGO",
@@ -13915,9 +14158,9 @@
           {
             "site": "https://cryptoslate.com/news/xrp/",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/ripple-price-analysis/",
@@ -14400,16 +14643,16 @@
           {
             "site": "https://cryptoslate.com/?s=dydx",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=dydx",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=dydx",
@@ -14910,16 +15153,16 @@
           {
             "site": "https://cryptoslate.com/?s=velo",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=velo",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=velo",
@@ -15421,9 +15664,9 @@
           {
             "site": "https://cryptoslate.com/?s=GMX",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/ripple-price-analysis/",
@@ -15871,16 +16114,16 @@
           {
             "site": "https://cryptoslate.com/?s=uni",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=uni",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=uni",
@@ -16299,16 +16542,16 @@
           {
             "site": "https://cryptoslate.com/?s=sushi",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=sushi",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=sushi",
@@ -16572,11 +16815,11 @@
             "main_container": "None"
           },
           {
-            "site": "https://cryptoslate.com/news/cake/",
+            "site": "https://cryptoslate.com/?s=CAKE",
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/ripple-price-analysis/",
@@ -17095,16 +17338,16 @@
           {
             "site": "https://cryptoslate.com/?s=aave",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=aave",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=aave",
@@ -17552,16 +17795,16 @@
           {
             "site": "https://cryptoslate.com/?s=pendle",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=pendle",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=pendle",
@@ -17905,11 +18148,11 @@
             "main_container": "None"
           },
           {
-            "site": "https://cryptoslate.com/news/1inch/",
+            "site": "https://cryptoslate.com/?s=1INCH",
             "base_url": "https://cryptoslate.com",
             "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/ripple-price-analysis/",
@@ -18116,7 +18359,7 @@
             "base_url": "https://cointelegraph.com",
             "website_name": "Cointelegraph",
             "is_URL_complete": false,
-            "main_container": "None"
+            "main_container": ".search-page__results"
           },
           {
             "site": "https://beincrypto.com/?s=OCEAN",
@@ -18156,16 +18399,16 @@
           {
             "site": "https://cryptoslate.com/?s=OCEAN",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=OCEAN",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=OCEAN",
@@ -18665,16 +18908,16 @@
           {
             "site": "https://cryptoslate.com/?s=fet",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/?s=fet",
             "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
+            "website_name": "Cryptopotato",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".content"
           },
           {
             "site": "https://www.theblock.co/search?query=fet",
@@ -18893,114 +19136,8 @@
           "Render Network governance",
           "Render Global economy",
           "Render Performance Metric",
-          "Render Supply chain security",
-          "Binance Japan listing Announcement",
-          "Solana Hassle-free",
-          "Animoca Brands",
-          "Google Cloud",
-          "Resource Utilization Stable Diffusion Support Upgrade",
-          "Long-term outlook",
-          "io.net Partnership Roadmap",
-          "The Sandbox",
-          "Infrastructure as a Service (IaaS)",
-          "Analysis",
-          "International law",
-          "Emerging markets",
-          "All-time high (ATH)",
-          "Third-party risk management",
-          "Creative Software Companies Partnership Adobe",
-          "Solana SPL-based RENDER",
-          "Solana Ventures",
-          "Somnium Space",
-          "Real-time Streaming",
-          "Industry predictions and forecasts",
-          "SuperRare",
-          "Platform as a Service (PaaS)",
-          "Trends",
-          "Regulatory compliance",
-          "Economic development",
-          "All-Time Low (ATL)",
-          "Compliance with security regulations",
-          "Creative Software Companies Design",
-          "Solana Strategic points system",
-          "Hypersphere",
-          "Autodesk",
-          "Real-time Streaming Upgrade",
-          "Investor interest and funding",
-          "SuperRare",
-          "Software as a Service (SaaS)",
-          "Market Analysis",
-          "Legal risk management",
-          "Inclusive growth",
-          "Bull Market",
-          "Security audit",
-          "Creative Software Companies Animation",
-          "Solana Real-time streaming",
-          "Metaversal",
-          "Microsoft Azure",
-          "Real-time Streaming Upgrade Launch",
-          "Democratization of rendering technology",
-          "Nifty Gateway",
-          "Edge computing",
-          "Indicators",
-          "Compliance audit",
-          "Sustainable development",
-          "Bear Market",
-          "Security patch",
-          "NFT Marketplaces",
-          "Solana Dynamic NFTs",
-          "Not Boring Capital",
-          "Amazon Web Services",
-          "Real-time Streaming Dynamic NFTs",
-          "Future of rendering landscape",
-          "Rarible",
-          "Internet of Things (IoT)",
-          "Price Forecast",
-          "Risk assessment",
-          "Bearish",
-          "Cryptocurrency security",
-          "NFT Marketplaces Seamless Rendering Partnership",
-          "Solana Supply and demand balancer",
-          "6th Sense Ventures",
-          "SuperRare",
-          "Cinema4D/Redshift Integration",
-          "Mintable",
-          "Machine learning (ML)",
-          "Candlestick",
-          "Legal transparency",
-          "Sentiment",
-          "Smart contract security",
-          "NFT Marketplaces Seamless Rendering Partnership Roadmap",
-          "Solana Cutting-edge features",
-          "Fenbushi Capital",
-          "Decentraland",
-          "Cinema4D/Redshift Integration Upgrade Roadmap",
-          "KnownOrigin",
-          "Deep learning (DL)",
-          "Moving Average",
-          "Performance",
-          "Distributed ledger security",
-          "Web3 Infrastructure Providers",
-          "Solana Innovation",
-          "LD Capital",
-          "Cinema4D/Redshift Integration Upgrade Launch",
-          "Foundation",
-          "Data science",
-          "MA",
-          "Rise",
-          "Zero-knowledge proofs",
-          "Web3 Infrastructure Providers Partnership",
-          "Solana Efficiency",
-          "NGC Ventures",
-          "Cinema4D/Redshift Integration 3D Rendering",
-          "Zora",
-          "Big data",
-          "RSI",
-          "Drop",
-          "Multi-party computation",
-          "Web3 Infrastructure Providers Partnership Announcement",
-          "Solana Growth",
-          "Cinema4D/Redshift Integration Real-time Streaming"
+          "Render Supply chain security"
+          
         ],
         "sites": [
           {
@@ -19041,9 +19178,9 @@
           {
             "site": "https://cryptoslate.com/news/rndr/",
             "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
+           "website_name": "cryptoslate",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".main-news-search"
           },
           {
             "site": "https://cryptopotato.com/ripple-price-analysis/",
