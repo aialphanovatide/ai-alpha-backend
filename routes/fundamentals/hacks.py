@@ -84,3 +84,22 @@ def edit_hack(hack_id):
     except Exception as e:
         session.rollback()
         return jsonify({'message': f'Error editing hack: {str(e)}', 'status': 500}), 500
+    
+    
+# Deletes a hack record
+@hacks_bp.route('/api/hacks/delete/<int:hack_id>', methods=['DELETE'])
+def delete_hack(hack_id):
+    try:
+        hack_to_delete = session.query(Hacks).filter_by(id=hack_id).first()
+
+        if not hack_to_delete:
+            return jsonify({'message': 'Hack not found', 'status': 404}), 404
+
+        session.delete(hack_to_delete)
+        session.commit()
+
+        return jsonify({'message': 'Hack deleted successfully', 'status': 200}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': f'Error deleting hack: {str(e)}', 'status': 500}), 500

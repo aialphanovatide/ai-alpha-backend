@@ -23,7 +23,7 @@ def get_dapps():
             coin_data = dapps if dapps else None
 
         if coin_data is None:
-            return jsonify({'message': 'No hacks found for the requested coin', 'status': 404}), 404
+            return jsonify({'message': 'No Dapps found for the requested coin', 'status': 404}), 404
 
         dapps_list = [dapp.as_dict() for dapp in coin_data]
         return jsonify({'message': dapps_list, 'status': 200}), 200
@@ -76,3 +76,21 @@ def edit_dapp(dapp_id):
 
     except Exception as e:
         return jsonify({'message': f'Error updating DApp: {str(e)}', 'status': 500}), 500
+
+
+# Deletes a dapps record of a coin
+@dapps_bp.route('/api/dapps/delete/<int:dapp_id>', methods=['DELETE'])
+def delete_dapp(dapp_id):
+    try:
+        dapp = session.query(DApps).filter_by(id=dapp_id).first()
+
+        if not dapp:
+            return jsonify({'message': 'DApp not found', 'status': 404}), 404
+
+        session.delete(dapp)
+        session.commit()
+        return jsonify({'message': 'DApp deleted successfully', 'status': 200}), 200  
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': f'Error deleting DApp: {str(e)}', 'status': 500}), 500

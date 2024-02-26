@@ -77,7 +77,7 @@ def get_analysis_by_coin():
 
         analysis_data = [{'analysis': analy.to_dict(
         ), 'analysis_images': get_analysis_images(analy)} for analy in analysis_objects]
-
+        
         return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
 
     except Exception as e:
@@ -120,7 +120,7 @@ def post_analysis():
     try:
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
-        image_file = request.files.get('image')
+        # image_file = request.files.get('image')
        
         # Check if any of the required values is missing
         if content == 'null' or coin_bot_id == 'null':
@@ -137,6 +137,8 @@ def post_analysis():
         session.add(new_analysis)
         session.commit()
 
+        print('new analaysis: ' ,new_analysis.analysis)
+        
         # Return success response if everything is fine
         return jsonify({'message': 'Analysis posted successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
@@ -171,8 +173,6 @@ def delete_analysis(analysis_id):
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
-
-# Edits an analysis
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
 def edit_analysis(analysis_id):
     try:
@@ -183,13 +183,12 @@ def edit_analysis(analysis_id):
             return jsonify({'error': 'Analysis not found', 'status': 404, 'success': False}), 404
 
         # Update analysis content if provided
-        new_content = request.form.get('content')
+        new_content = request.json.get('content')
 
         if not new_content:
-            return jsonify({'error': 'New content is required toe dit the Analysis', 'status': 404, 'success': False}), 404
+            return jsonify({'error': 'New content is required to edit the Analysis', 'status': 400, 'success': False}), 400
 
-        if new_content:
-            analysis_to_edit.analysis = new_content
+        analysis_to_edit.analysis = new_content
         session.commit()
 
         return jsonify({'message': 'Analysis edited successfully', 'status': 200, 'success': True}), 200
@@ -197,7 +196,6 @@ def edit_analysis(analysis_id):
     except Exception as e:
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
-
 
 # Gets the name and date of the last analysis created
 @analysis_bp.route('/get_last_analysis', methods=['GET'])

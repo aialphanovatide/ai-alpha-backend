@@ -76,14 +76,25 @@ def save_chart():
 
 # ----- ROUTE FOR THE APP ---------------------------
 # Gets the support and resistance lines of a requested coin
-@chart_bp.route('/api/coin-support-resistance/<coin_bot_name>', methods=['GET'])
-def get_chart_values_by_coin_bot_id(coin_bot_name):
+# Gets the support and resistance lines of a requested coin
+@chart_bp.route('/api/coin-support-resistance', methods=['GET'])
+def get_chart_values_by_coin_bot_id():
 
     try:
-           
-        coinbot = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
-        chart = session.query(Chart).filter_by(coin_bot_id=coinbot.bot_id).first()
+        # Obtenemos los parámetros de la solicitud
+        coin_name = request.args.get('coin_name')
+        temporality = request.args.get('temporality')
+        pair = request.args.get('pair')
+        
+        # Verificamos que todos los parámetros necesarios estén presentes
+        if not all([coin_name, temporality, pair]):
+            return jsonify({'success': False, 'message': 'Missing required parameters'})
 
+        coinbot = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+        if not coinbot:
+            return jsonify({'success': False, 'message': 'CoinBot not found for the given coin name'})
+        
+        chart = session.query(Chart).filter_by(coin_bot_id=coinbot.bot_id, temporality=temporality, pair=pair).first()
         if chart:
             chart_values = {
                 'support_1': chart.support_1,
@@ -98,15 +109,14 @@ def get_chart_values_by_coin_bot_id(coin_bot_name):
                 'pair': chart.pair,
                 'temporality': chart.temporality
             }
-
             return jsonify({'success': True, 'chart_values': chart_values})
         else:
-            return jsonify({'success': False, 'message': 'Chart not found for the given coin ID'})
+            return jsonify({'success': False, 'message': 'Chart not found for the given parameters'})
 
     except Exception as e:
         session.rollback()
         return jsonify({'success': False, 'message': str(e)})
-    
+
 
 
 # ----- ROUTE FOR THE DASHBOARD ---------------------------
