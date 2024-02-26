@@ -1,4 +1,4 @@
-from config import Competitor, session
+from config import CoinBot, Competitor, session
 from flask import Blueprint, request, jsonify
 
 
@@ -11,7 +11,7 @@ def edit_competitor_data(competitor_id):
     try:
         data = request.json
         coin_data = session.query(Competitor).filter(Competitor.id == competitor_id).first()
-
+        
         if not coin_data:
             return {'message': 'No data found for the requested coin'}, 404
 
@@ -46,7 +46,35 @@ def get_competitor_data(coin_bot_id):
     
     except Exception as e:
         return jsonify({'message': f'Error getting competitors data: {str(e)}', 'status': 500}), 500
+    
+    
 
+#APP GET COMPETITORS ROUTE
+# Gets a list of the competitors and the analyzed coin  
+@competitor_bp.route('/api/get_competitors_by_coin_name', methods=['GET'])
+def get_competitor_data_by_coin_name():
+    try:
+        coin_name = request.args.get('coin_name')
+        if not coin_name:
+            return jsonify({'message': 'Coin name is required', 'status': 400}), 400
+
+        coinbot = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+        if not coinbot:
+            return jsonify({'message': 'CoinBot not found for the given coin name', 'status': 404}), 404
+
+        coin_data = session.query(Competitor).filter(Competitor.coin_bot_id == coinbot.bot_id).all()
+
+        if not coin_data:
+            return jsonify({'message': 'No data found for the requested coin', 'status': 404}), 404
+
+        competitor_data = [{
+            'competitor': competitor_value.as_dict(),
+        } for competitor_value in coin_data]
+        
+        return jsonify({'competitors': competitor_data, 'status': 200}), 200
+    
+    except Exception as e:
+        return jsonify({'message': f'Error getting competitors data: {str(e)}', 'status': 500}), 500
 
 
 
@@ -93,4 +121,20 @@ def create_competitor_table():
 
 
 
-# Route to edit an already created competitor
+# Deletes a competitor record
+@competitor_bp.route('/delete_competitor/<int:competitor_id>', methods=['DELETE'])
+def delete_competitor(competitor_id):
+    try:
+        competitor_to_delete = session.query(Competitor).filter_by(id=competitor_id).first()
+
+        if not competitor_to_delete:
+            return jsonify({'message': 'Competitor not found', 'status': 404}), 404
+
+        session.delete(competitor_to_delete)
+        session.commit()
+
+        return jsonify({'message': 'Competitor deleted successfully', 'status': 200}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': f'Error deleting competitor: {str(e)}', 'status': 500}), 500

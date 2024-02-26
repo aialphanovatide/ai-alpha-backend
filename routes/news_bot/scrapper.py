@@ -52,13 +52,13 @@ def get_links(site, main_container):
                 browser = p.chromium.launch()
                 page = browser.new_page()
 
-                page.goto(site, timeout=10000)
-                page.wait_for_load_state("domcontentloaded", timeout=10000)
+                page.goto(site, timeout=30000)
+                page.wait_for_load_state("domcontentloaded", timeout=30000)
 
                 elements = []
 
                 if main_container != "None":
-                    container = page.wait_for_selector(main_container, timeout=20000)
+                    container = page.wait_for_selector(main_container, timeout=30000)
                     a_elements = container.query_selector_all('a')
 
                     for link in a_elements:
@@ -360,15 +360,15 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             print("MATCHED KEYWORDS: " + matched_keywords_string)
                             
                             # Send the message to Slack
-                            # send_NEWS_message_to_slack(channel_id=channel_id, 
-                            #                             title=title,
-                            #                             date_time=valid_date,
-                            #                             url=article_link,
-                            #                             summary=summary,
-                            #                             image=slack_image,
-                            #                             category_name=category_name,
-                            #                             extra_info=matched_keywords_string
-                            #                             )
+                            send_NEWS_message_to_slack(channel_id=channel_id, 
+                                                         title=title,
+                                                         date_time=valid_date,
+                                                         url=article_link,
+                                                         summary=summary,
+                                                         image=slack_image,
+                                                         category_name=category_name,
+                                                         extra_info=matched_keywords_string
+                                                         )
 
 
 

@@ -7,7 +7,7 @@ upgrades_bp = Blueprint('upgrades_bp', __name__)
 
 
 # Gets the upgrades data related to a coin
-@upgrades_bp.route('/get_upgrades', methods=['GET'])
+@upgrades_bp.route('/api/get_upgrades', methods=['GET'])
 def get_upgrades():
 
     try:
@@ -94,3 +94,21 @@ def edit_upgrade_data(upgrate_id):
     except Exception as e:
         session.rollback()
         return jsonify({'message': f'Error editing competitor data: {str(e)}', 'status': 500}), 500
+
+# Deletes an upgrade record
+@upgrades_bp.route('/delete_upgrade/<int:upgrade_id>', methods=['DELETE'])
+def delete_upgrade(upgrade_id):
+    try:
+        upgrade = session.query(Upgrades).filter_by(id=upgrade_id).first()
+
+        if not upgrade:
+            return jsonify({'message': 'Upgrade not found', 'status': 404}), 404
+
+        session.delete(upgrade)
+        session.commit()
+
+        return jsonify({'message': 'Upgrade deleted successfully', 'status': 200}), 200
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': f'Error deleting upgrade: {str(e)}', 'status': 500}), 500
