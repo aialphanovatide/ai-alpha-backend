@@ -101,7 +101,7 @@ def validate_ambcrypto_article(article_link, main_keyword, session_instance):
                             return title, content, valid_date, image_urls, matched_keywords
 
                     return None, None, None, None, None
-                            
+                           
             except Exception as e:
                 print("Inner Error in Ambcrypto" + str(e))
                 return None, None, None, None, None

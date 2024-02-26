@@ -44,7 +44,7 @@ defi_perpetual_slack_channel = 'C05UU8EKME0'
 defi_others_slack_channel = 'C067HNE4V0D'
 ai_slack_channel = 'C067E1LJYKY'
 
-
+# Gets the links of the source
 def get_links(site, main_container):
 
     try:
@@ -52,13 +52,13 @@ def get_links(site, main_container):
                 browser = p.chromium.launch(slow_mo=20, headless=False)
                 page = browser.new_page()
 
-                page.goto(site, timeout=10000)
-                page.wait_for_load_state("domcontentloaded", timeout=10000)
+                page.goto(site, timeout=30000)
+                page.wait_for_load_state("domcontentloaded", timeout=30000)
 
                 elements = []
 
                 if main_container != "None":
-                    container = page.wait_for_selector(main_container, timeout=20000)
+                    container = page.wait_for_selector(main_container, timeout=30000)
                     a_elements = container.query_selector_all('a')
 
                     for link in a_elements:
@@ -82,7 +82,8 @@ def get_links(site, main_container):
 
                         if href and article_title:
                             elements.append({'href': href, 'article_title': article_title})
-
+                
+        
                 browser.close()
                 return elements
         
@@ -191,6 +192,8 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         title, content, valid_date, image_urls, matched_keywords = validate_ambcrypto_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else:
+                            continue
 
 
                     if site_name == 'Beincrypto':
@@ -360,15 +363,15 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             print("MATCHED KEYWORDS: " + matched_keywords_string)
                             
                             # Send the message to Slack
-                            # send_NEWS_message_to_slack(channel_id=channel_id, 
-                            #                             title=title,
-                            #                             date_time=valid_date,
-                            #                             url=article_link,
-                            #                             summary=summary,
-                            #                             image=slack_image,
-                            #                             category_name=category_name,
-                            #                             extra_info=matched_keywords_string
-                            #                             )
+                            send_NEWS_message_to_slack(channel_id=channel_id, 
+                                                        title=title,
+                                                        date_time=valid_date,
+                                                        url=article_link,
+                                                        summary=summary,
+                                                        image=slack_image,
+                                                        category_name=category_name,
+                                                        extra_info=matched_keywords_string
+                                                        )
 
 
 
@@ -418,6 +421,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             
                             session.add(new_used_keyword)
                             session.commit()
+                            print('Keywords saved')
                             
                             
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
