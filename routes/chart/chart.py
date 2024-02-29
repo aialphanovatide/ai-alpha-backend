@@ -76,17 +76,14 @@ def save_chart():
 
 # ----- ROUTE FOR THE APP ---------------------------
 # Gets the support and resistance lines of a requested coin
-# Gets the support and resistance lines of a requested coin
 @chart_bp.route('/api/coin-support-resistance', methods=['GET'])
 def get_chart_values_by_coin_bot_id():
 
     try:
-        # Obtenemos los parámetros de la solicitud
         coin_name = request.args.get('coin_name')
         temporality = request.args.get('temporality')
         pair = request.args.get('pair')
         
-        # Verificamos que todos los parámetros necesarios estén presentes
         if not all([coin_name, temporality, pair]):
             return jsonify({'success': False, 'message': 'Missing required parameters'})
 

@@ -1,10 +1,22 @@
 from config import Analysis, AnalysisImage, session, CoinBot
-from flask import jsonify, Blueprint, request
+from flask import current_app, jsonify, Blueprint, request
 from sqlalchemy import desc
 from PIL import Image
 from io import BytesIO
 import base64
+from datetime import datetime, timezone
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.date import DateTrigger
+from apscheduler.schedulers.base import BaseScheduler
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.jobstores.base import JobLookupError
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.job import Job
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.schedulers.blocking import BlockingScheduler
 
+sched = BackgroundScheduler()
 
 analysis_bp = Blueprint('analysis', __name__)
 
@@ -224,3 +236,82 @@ def get_last_analysis():
     except Exception as e:
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+
+
+
+# Se define la función que se ejecutará como un trabajo programado
+def publish_analysis(coin_bot_id, content):
+    new_analysis = Analysis(analysis=content, coin_bot_id=coin_bot_id)
+    session.add(new_analysis)
+    session.commit()
+    print("Publishing analysis:", content)
+
+@analysis_bp.route('/schedule_post', methods=['POST'])
+def schedule_post():
+    try:
+        # if not sched.running:
+        #     sched.start()
+            
+        coin_bot_id = request.form.get('coinBot')
+        content = request.form.get('content')
+        scheduled_date_str = request.form.get('scheduledDate') 
+        
+        if not (coin_bot_id and content and scheduled_date_str):
+            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
+
+        # Se convierte la cadena de fecha y hora en un objeto datetime
+        scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+
+        # Se agrega un trabajo programado con DateTrigger para la fecha y hora especificadas
+        sched.add_job(publish_analysis, trigger=DateTrigger(run_date=scheduled_datetime), args=[coin_bot_id, content])
+
+
+        return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+
+@analysis_bp.route('/get_scheduled_jobs', methods=['GET'])
+def get_jobs():
+    try:
+        # Obtener una lista de todos los trabajos actualmente programados
+        job_listing = []
+        for job in sched.get_jobs():
+            job_info = {
+                'id': job.id,
+                'name': job.name,
+                'trigger': str(job.trigger),
+                'args': str(job.args),
+                'next_run_time': str(job.next_run_time) if hasattr(job, 'next_run_time') else None
+            }
+            job_listing.append(job_info)
+
+        print(job_listing)  # Imprimir los trabajos en la consola del servidor
+
+        return jsonify({'jobs': job_listing, 'status': 200, 'success': True}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+    
+    
+
+# Deletes a scheduled job by job id
+@analysis_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
+def delete_scheduled_job(job_id):
+    try:
+        # Busca el trabajo programado por su id
+        job = sched.get_job(job_id)
+        if job is None:
+            return jsonify({'error': 'Scheduled job not found', 'status': 404, 'success': False}), 404
+
+        # Elimina el trabajo programado
+        sched.remove_job(job_id)
+        
+        return jsonify({'message': 'Scheduled job deleted successfully', 'status': 200, 'success': True}), 200
+
+    except JobLookupError as e:
+        return jsonify({'error': str(e), 'status': 404, 'success': False}), 404
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+
+
+    
