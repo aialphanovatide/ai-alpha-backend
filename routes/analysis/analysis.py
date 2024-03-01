@@ -34,8 +34,6 @@ def get_analysis(coin_bot_id):
         #     print(f"Analysis ID: {analy['analysis_id']}, Analysis: {analy['analysis']}, Created At: {analy['created_at']}")
         #     for img in analy['analysis_images']:
         #         print(f"  Image ID: {img['image_id']}, Image: {img['image']}")
-        
-        print('analysis_data', analysis_data)
 
         return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
 
@@ -79,7 +77,6 @@ def get_analysis_by_coin():
 
         analysis_data = [{'analysis': analy.to_dict(
         ), 'analysis_images': get_analysis_images(analy)} for analy in analysis_objects]
-        
         
         return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
 
@@ -176,8 +173,6 @@ def delete_analysis(analysis_id):
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
-
-# Edits an analysis
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
 def edit_analysis(analysis_id):
     try:
@@ -188,13 +183,12 @@ def edit_analysis(analysis_id):
             return jsonify({'error': 'Analysis not found', 'status': 404, 'success': False}), 404
 
         # Update analysis content if provided
-        new_content = request.form.get('content')
+        new_content = request.json.get('content')
 
         if not new_content:
-            return jsonify({'error': 'New content is required toe dit the Analysis', 'status': 404, 'success': False}), 404
+            return jsonify({'error': 'New content is required to edit the Analysis', 'status': 400, 'success': False}), 400
 
-        if new_content:
-            analysis_to_edit.analysis = new_content
+        analysis_to_edit.analysis = new_content
         session.commit()
 
         return jsonify({'message': 'Analysis edited successfully', 'status': 200, 'success': True}), 200
@@ -202,7 +196,6 @@ def edit_analysis(analysis_id):
     except Exception as e:
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
-
 
 # Gets the name and date of the last analysis created
 @analysis_bp.route('/get_last_analysis', methods=['GET'])
