@@ -243,15 +243,9 @@ def publish_analysis(coin_bot_id, content):
 # Schedule an analysis
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post():
-<<<<<<< HEAD
     try:
-        #init a scheduler for posts
         if not sched.running:
             sched.start()
-            
-=======
-    try:  
->>>>>>> b8db9cf01981e17aef520f566b4e599f49684de9
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         scheduled_date_str = request.form.get('scheduledDate') 
