@@ -12,7 +12,8 @@ def title_in_db(article_title, session_instance): # True if Title already in DB
     except Exception as e:
         print(f'Error in title_in_db: {str(e)}')
         return False
-    
+
+
 def url_in_db(input_url, session_instance): # True if URL already in DB
     try:
         existing_url = session_instance.query(Article).filter(Article.url.ilike(input_url.casefold().strip())).first()
@@ -22,6 +23,7 @@ def url_in_db(input_url, session_instance): # True if URL already in DB
     except Exception as e:
         print(f'Error in url_in_db: {str(e)}')
         return False
+
 
 def validate_content(bot_name, content, session_instance):
     try:
@@ -54,6 +56,7 @@ def validate_content(bot_name, content, session_instance):
         print(f'Error in validate_content: {str(e)}')
         return False
 
+
 def find_matched_keywords(bot_name, content, session_instance):
     try:
         coin_name = session_instance.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
@@ -81,7 +84,6 @@ def find_matched_keywords(bot_name, content, session_instance):
     except Exception as e:
         print(f'Error in find_matched_keywords: {str(e)}')
         return set()
-
 
 
 def title_in_blacklist(input_title_formatted, session_instance): # True if Title in blacklist

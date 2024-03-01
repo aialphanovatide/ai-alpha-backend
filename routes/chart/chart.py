@@ -16,7 +16,6 @@ def save_chart():
         temporality = data.get('temporality')
         token = data.get('token')
 
-        print('temporality: ', temporality)
 
         if not coin_bot_id or not pair or not temporality or not token:
             return jsonify({'success': False, 'message': 'One or more fields are missing'}), 400
@@ -46,7 +45,6 @@ def save_chart():
             return jsonify({'success': True, 'message': 'Chart updated successfully'}), 200
         else:
             # Create a new chart
-            print('chart to create')
             new_chart = Chart(
                 support_1=data.get('support_1'),
                 support_2=data.get('support_2'),

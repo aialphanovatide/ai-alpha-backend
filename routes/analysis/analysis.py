@@ -1,20 +1,11 @@
 from config import Analysis, AnalysisImage, session, CoinBot
-from flask import current_app, jsonify, Blueprint, request
+from flask import jsonify, Blueprint, request
 from sqlalchemy import desc
-from PIL import Image
-from io import BytesIO
-import base64
-from datetime import datetime, timezone
+from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
-from apscheduler.schedulers.base import BaseScheduler
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.jobstores.base import JobLookupError
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.job import Job
-from apscheduler.triggers.cron import CronTrigger
-from apscheduler.schedulers.blocking import BlockingScheduler
+
 
 sched = BackgroundScheduler()
 
@@ -185,6 +176,7 @@ def delete_analysis(analysis_id):
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
+# Edits an analysis
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
 def edit_analysis(analysis_id):
     try:
@@ -208,6 +200,7 @@ def edit_analysis(analysis_id):
     except Exception as e:
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+
 
 # Gets the name and date of the last analysis created
 @analysis_bp.route('/get_last_analysis', methods=['GET'])
@@ -239,20 +232,26 @@ def get_last_analysis():
 
 
 
-# Se define la función que se ejecutará como un trabajo programado
+# Funtion to execute by the scheduler
 def publish_analysis(coin_bot_id, content):
     new_analysis = Analysis(analysis=content, coin_bot_id=coin_bot_id)
     session.add(new_analysis)
     session.commit()
     print("Publishing analysis:", content)
 
+
+# Schedule an analysis
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post():
+<<<<<<< HEAD
     try:
         #init a scheduler for posts
         if not sched.running:
             sched.start()
             
+=======
+    try:  
+>>>>>>> b8db9cf01981e17aef520f566b4e599f49684de9
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         scheduled_date_str = request.form.get('scheduledDate') 
@@ -260,21 +259,21 @@ def schedule_post():
         if not (coin_bot_id and content and scheduled_date_str):
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
-        # Se convierte la cadena de fecha y hora en un objeto datetime
+        # Creates an datetime object
         scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
 
-        # Se agrega un trabajo programado con DateTrigger para la fecha y hora especificadas
+        # Adds a new job
         sched.add_job(publish_analysis, trigger=DateTrigger(run_date=scheduled_datetime), args=[coin_bot_id, content])
-
 
         return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
+
+# Gets all the schedule analysis
 @analysis_bp.route('/get_scheduled_jobs', methods=['GET'])
 def get_jobs():
     try:
-        # Obtener una lista de todos los trabajos actualmente programados
         job_listing = []
         for job in sched.get_jobs():
             job_info = {
@@ -286,25 +285,22 @@ def get_jobs():
             }
             job_listing.append(job_info)
 
-        print(job_listing)  # Imprimir los trabajos en la consola del servidor
-
         return jsonify({'jobs': job_listing, 'status': 200, 'success': True}), 200
 
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
-    
     
 
 # Deletes a scheduled job by job id
 @analysis_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
     try:
-        # Busca el trabajo programado por su id
+        # Find the by schedule analysis by ID
         job = sched.get_job(job_id)
         if job is None:
             return jsonify({'error': 'Scheduled job not found', 'status': 404, 'success': False}), 404
 
-        # Elimina el trabajo programado
+        # Deletes an analysis
         sched.remove_job(job_id)
         
         return jsonify({'message': 'Scheduled job deleted successfully', 'status': 200, 'success': True}), 200

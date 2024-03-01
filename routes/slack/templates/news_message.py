@@ -2,8 +2,6 @@ from routes.slack.index import client
 from slack_sdk.errors import SlackApiError
 
 # Sends an article to Slack
-
-
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name, extra_info):
 
     blocks = [
