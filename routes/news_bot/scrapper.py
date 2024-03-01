@@ -425,7 +425,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             
                             
                             # Send the message to Slack
-                            send_NEWS_message_to_slack(channel_id='C05UJV1HHRC', 
+                            send_NEWS_message_to_slack(channel_id=channel_id,
                                                         title=title,
                                                         date_time=valid_date,
                                                         url=article_link,
@@ -470,12 +470,12 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                             counter_articles_saved +=1
 
-                            current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            # current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
                             new_used_keyword = Used_keywords(
                                 article_id=new_article.article_id,
                                 article_content=summary,
-                                article_date=current_datetime_str,
+                                article_date=valid_date,
                                 article_url=article_link,
                                 keywords=matched_keywords_string,
                                 source=article_link.split(".com")[0],
@@ -485,6 +485,7 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
 
                             session.add(new_used_keyword)
                             session.commit()
+                            print('Keywords saved')
                             
                             
                             print(f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
