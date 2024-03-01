@@ -249,8 +249,8 @@ def publish_analysis(coin_bot_id, content):
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post():
     try:
-        # if not sched.running:
-        #     sched.start()
+        if not sched.running:
+            sched.start()
             
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
