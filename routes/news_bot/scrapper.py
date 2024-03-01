@@ -1,3 +1,4 @@
+import datetime
 from routes.news_bot.poster_generator import generate_poster_prompt
 from routes.news_bot.sites.ambcrypto import validate_ambcrypto_article
 from routes.news_bot.sites.blockworks import validate_blockworks_article
@@ -44,52 +45,100 @@ defi_perpetual_slack_channel = 'C05UU8EKME0'
 defi_others_slack_channel = 'C067HNE4V0D'
 ai_slack_channel = 'C067E1LJYKY'
 
-
 def get_links(site, main_container):
+    base_urls = [
+        "/news",
+        "/article",
+        "/post",
+         "/news/",
+        "/article/",
+        "/post/",
+        "https://cointelegraph.com",
+        "https://beincrypto.com",
+        "https://bitcoinist.com",
+        "https://www.google.com/url?",
+        "https://coingape.com/markets",
+        "https://www.coingape.com/markets",
+        "https://www.coindesk.com/markets/",
+        "https://www.coindesk.com/tech",
+        "https://www.coindesk.com/consensus-magazine",
+        "https://www.coindesk.com/business",
+        "https://www.cryptonews.net",
+        "https://cryptoslate.com",
+        "https://cryptopotato.com",
+        "https://www.theblock.co/news",
+        "https://blockworks.co/news",
+        "https://cryptodaily.co.uk/20",
+        "https://dailyhodl.com",
+        "https://cryptonews.net",
+        "https://www.investing.com/news/cryptocurrency-news",
+        "https://u.today",
+        "https://blockworks.co",
+        "https://www.theblock.co/post",
+        "https://theblock.co/post",
+        "https://coinpedia.org/news",
+        "https://coinpedia.org/press-release",
+        "https://coinpedia.org/guest-post",
+        "https://ambcrypto.com",
+        "https://coincodex.com"
+    ]
 
     try:
         with sync_playwright() as p:
-                browser = p.chromium.launch(slow_mo=20, headless=False)
-                page = browser.new_page()
+            browser = p.chromium.launch(slow_mo=40, headless=False)
+            page = browser.new_page()
 
-                page.goto(site, timeout=10000)
-                page.wait_for_load_state("domcontentloaded", timeout=10000)
+            page.goto(site, timeout=30000)
+            page.wait_for_load_state("domcontentloaded", timeout=30000)
 
-                elements = []
+            elements = []
 
-                if main_container != "None":
-                    container = page.wait_for_selector(main_container, timeout=20000)
-                    a_elements = container.query_selector_all('a')
+            if main_container != "None":
+                container = page.wait_for_selector(main_container, timeout=30000)
+                a_elements = container.query_selector_all('a')
 
-                    for link in a_elements:
-                        href = link.get_attribute('href')
-                        article_title = link.text_content().strip().casefold()
-
-                        if href and article_title:
+                for link in a_elements:
+                    href = link.get_attribute('href')
+                    article_title = link.text_content().strip().casefold()
+                    
+                    if href and article_title:
+                        # Verificar si href comienza con algún base_url
+                        if any(href.startswith(base_url) for base_url in base_urls):
                             elements.append({'href': href, 'article_title': article_title})
-                else:
-                    links = page.evaluate('''() => {
-                        const anchors = Array.from(document.querySelectorAll('a'));
-                        return anchors.map(a => ({
-                            href: a.href,
-                            text: a.textContent.trim().toLowerCase()
-                        }));
-                    }''')
+                            print('Link is VALID for saving:', href)
+                        else:
+                            continue
+                            #print('Link is not valid for saving:', href)
+                        
+            else:
+                links = page.evaluate('''() => {
+                    const anchors = Array.from(document.querySelectorAll('a'));
+                    return anchors.map(a => ({
+                        href: a.href,
+                        text: a.textContent.trim().toLowerCase()
+                    }));
+                }''')
 
-                    for link in links:
-                        href = link['href']
-                        article_title = link['text']
+                for link in links:
+                    href = link['href']
+                    article_title = link['text']
 
-                        if href and article_title:
+                    if href and article_title:
+                        # Verificar si href comienza con algún base_url
+                        if any(href.startswith(base_url) for base_url in base_urls):
                             elements.append({'href': href, 'article_title': article_title})
+                            print('Link is VALID for saving:', href)
+                        else:
+                            continue
+                            # print('Link is not valid for saving:', href)
+                     
+            browser.close()
+            return elements
 
-                browser.close()
-                return elements
-        
     except TimeoutError as e:
         print('\nTimeout error in getting links: ' + str(e) + "\n" )
         return False
-        
+
     except Exception as e:
         print("\nError getting links: " + str(e) + "\n") 
         return False
@@ -191,108 +240,126 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                         title, content, valid_date, image_urls, matched_keywords = validate_ambcrypto_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
 
                     if site_name == 'Beincrypto':
                         title, content, valid_date, image_urls, matched_keywords = validate_beincrypto_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
 
                     if site_name == 'Bitcoinist':
                         title, content, valid_date, image_urls, matched_keywords = validate_bitcoinist_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Blockworks':
                         title, content, valid_date, image_urls, matched_keywords = validate_blockworks_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Coincodex':
                         title, content, valid_date, image_urls, matched_keywords = validate_coincodex_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
 
                     if site_name == 'Cointelegraph':
                         title, content, valid_date, image_urls, matched_keywords = validate_cointelegraph_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
 
                     if site_name == 'Coingape':                        
                         title, content, valid_date, image_urls, matched_keywords = validate_coingape_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
 
                     if site_name == 'Coindesk':
                         title, content, valid_date, image_urls, matched_keywords = validate_coindesk_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                             
                     if site_name == 'Coinpedia':
                         title, content, valid_date, image_urls, matched_keywords = validate_coinpedia_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Dailyhodl':
                         title, content, valid_date, image_urls, matched_keywords = validate_dailyhodl_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Cryptodaily':
                         title, content, valid_date, image_urls, matched_keywords = validate_cryptodaily_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                             
                     if site_name == 'Utoday':
                         title, content, valid_date, image_urls, matched_keywords = validate_utoday_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Cryptonews':
                         title, content, valid_date, image_urls, matched_keywords = validate_cryptonews_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                             
                     if site_name == 'Cryptopotato':
                         title, content, valid_date, image_urls, matched_keywords = validate_cryptopotato_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Cryptoslate':
                         title, content, valid_date, image_urls, matched_keywords = validate_cryptoslate_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Decrypt':
                         title, content, valid_date, image_urls, matched_keywords = validate_decrypt_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                             
                     if site_name == 'Investing':
                         title, content, valid_date, image_urls, matched_keywords = validate_investing_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
 
                     
                     if site_name == 'Theblock':
                         title, content, valid_date, image_urls, matched_keywords = validate_theblock_article(article_link, coin_bot_name, session)
                         if title and content and valid_date:
                             article_to_save.append((title, content, valid_date, article_link, site_name, image_urls, matched_keywords))
+                        else: continue
  
 
                     if not article_to_save:
@@ -356,19 +423,17 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             # Format the list of matched keywords as a string
                             matched_keywords_string = ', '.join(keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
                             
-
-                            print("MATCHED KEYWORDS: " + matched_keywords_string)
                             
                             # Send the message to Slack
-                            # send_NEWS_message_to_slack(channel_id=channel_id, 
-                            #                             title=title,
-                            #                             date_time=valid_date,
-                            #                             url=article_link,
-                            #                             summary=summary,
-                            #                             image=slack_image,
-                            #                             category_name=category_name,
-                            #                             extra_info=matched_keywords_string
-                            #                             )
+                            send_NEWS_message_to_slack(channel_id='C05UJV1HHRC', 
+                                                        title=title,
+                                                        date_time=valid_date,
+                                                        url=article_link,
+                                                        summary=summary,
+                                                        image=slack_image,
+                                                        category_name=category_name,
+                                                        extra_info=matched_keywords_string
+                                                        )
 
 
 
@@ -382,10 +447,11 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                             #                                         sub_title="Response",
                             #                                         message=response
                             #                                         )
-                           
-                            site_source = session.query(Site).filter(Site.site_name == site_name).first()
+
+                            bot = session.query(CoinBot).filter(CoinBot.bot_name == coin_bot_name).first()
+                            site_source = session.query(Site).filter(Site.site_name == site_name, Site.coin_bot_id == bot.bot_id).first()
                             coin_bot_id = site_source.coin_bot_id
-                            print(coin_bot_id)
+                            
                             new_article = Article(
                                 title=title,
                                 summary=summary,
@@ -393,29 +459,30 @@ def scrape_articles(article_urls, site_name,category_name, coin_bot_name, sessio
                                 url=article_link,
                                 coin_bot_id=coin_bot_id
                             )
-                            print('Article created')
                             
                             session.add(new_article)
                             session.commit()
 
 
                             new_article_image = ArticleImage(article_id=new_article.article_id, image=article_image)
-                            print('IMAGE created')
                             session.add(new_article_image)
                             session.commit()
 
                             counter_articles_saved +=1
-                            
+
+                            current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
                             new_used_keyword = Used_keywords(
                                 article_id=new_article.article_id,
                                 article_content=summary,
-                                article_date=valid_date,
+                                article_date=current_datetime_str,
                                 article_url=article_link,
                                 keywords=matched_keywords_string,
-                                source = article_link.split(".com")[0],
+                                source=article_link.split(".com")[0],
                                 coin_bot_id=coin_bot_id 
                             )
-                            
+
+
                             session.add(new_used_keyword)
                             session.commit()
                             
