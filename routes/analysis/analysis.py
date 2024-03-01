@@ -9,6 +9,10 @@ from apscheduler.jobstores.base import JobLookupError
 
 sched = BackgroundScheduler()
 
+if not sched.running:
+    sched.start()
+    print("--- Second scheduler started ---")
+
 analysis_bp = Blueprint('analysis', __name__)
 
 # Gets all the analysis related to a coin
@@ -244,8 +248,6 @@ def publish_analysis(coin_bot_id, content):
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post():
     try:
-        if not sched.running:
-            sched.start()
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         scheduled_date_str = request.form.get('scheduledDate') 
