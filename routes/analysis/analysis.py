@@ -249,6 +249,7 @@ def schedule_post():
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         scheduled_date_str = request.form.get('scheduledDate') 
+        title = request.form.get('title') 
         
         if not (coin_bot_id and content and scheduled_date_str):
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
@@ -257,7 +258,7 @@ def schedule_post():
         scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
 
         # Adds a new job
-        sched.add_job(publish_analysis, trigger=DateTrigger(run_date=scheduled_datetime), args=[coin_bot_id, content])
+        sched.add_job(publish_analysis, trigger=DateTrigger(run_date=scheduled_datetime), args=[coin_bot_id, content, title])
 
         return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
