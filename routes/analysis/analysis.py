@@ -9,13 +9,11 @@ from apscheduler.jobstores.base import JobLookupError
 
 sched = BackgroundScheduler()
 
-if not sched.running:
-    sched.start()
-    print("--- Second scheduler started ---")
-
 analysis_bp = Blueprint('analysis', __name__)
 
 # Gets all the analysis related to a coin
+
+
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
 def get_analysis(coin_bot_id):
 
@@ -50,20 +48,28 @@ def get_analysis(coin_bot_id):
   # Gets all the analysis related to a coin
 
 # Fn to get analysis related to a coin id
+
+
 def get_analysis_by_id(coin_bot_id):
     return session.query(Analysis).filter_by(coin_bot_id=coin_bot_id).order_by(desc(Analysis.created_at)).all()
 
-#Fn to get Analysis related to a coin name
+# Fn to get Analysis related to a coin name
+
+
 def get_analysis_by_name(coin_bot_name):
     coin = session.query(CoinBot).filter(
         CoinBot.bot_name == coin_bot_name).first()
     return session.query(Analysis).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
-#fn to get analysis images
+# fn to get analysis images
+
+
 def get_analysis_images(analysis_object):
     return [{'image_id': img.image_id, 'image': img.image} for img in session.query(AnalysisImage).filter_by(analysis_id=analysis_object.analysis_id).all()]
 
 # Route to get analysis by coin id/name
+
+
 @analysis_bp.route('/api/get_analysis_by_coin', methods=['GET'])
 def get_analysis_by_coin():
     try:
@@ -84,7 +90,7 @@ def get_analysis_by_coin():
 
         analysis_data = [{'analysis': analy.to_dict(
         ), 'analysis_images': get_analysis_images(analy)} for analy in analysis_objects]
-        
+
         return jsonify({'message': analysis_data, 'success': True, 'status': 200}), 200
 
     except Exception as e:
@@ -128,7 +134,7 @@ def post_analysis():
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         # image_file = request.files.get('image')
-       
+
         # Check if any of the required values is missing
         if content == 'null' or coin_bot_id == 'null':
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
@@ -144,8 +150,8 @@ def post_analysis():
         session.add(new_analysis)
         session.commit()
 
-        print('new analaysis: ' ,new_analysis.analysis)
-        
+        print('new analaysis: ', new_analysis.analysis)
+
         # Return success response if everything is fine
         return jsonify({'message': 'Analysis posted successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
@@ -181,6 +187,8 @@ def delete_analysis(analysis_id):
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
 # Edits an analysis
+
+
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
 def edit_analysis(analysis_id):
     try:
@@ -235,32 +243,42 @@ def get_last_analysis():
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
 
-
 # Funtion to execute by the scheduler
 def publish_analysis(coin_bot_id, content):
+    title_end_index = content.find('\n')
+    if title_end_index != -1:
+        # Extract title and remove leading/trailing spaces
+        title = content[:title_end_index].strip()
+        # Extract content after the title
+        content = content[title_end_index+1:]
+    else:
+        title = ''  # If no newline found, set title to empty string
+    # Create new analysis instance
     new_analysis = Analysis(analysis=content, coin_bot_id=coin_bot_id)
     session.add(new_analysis)
     session.commit()
-    print("Publishing analysis:", content)
+    print("Publishing analysis with title:", title)
 
 
-# Schedule an analysis
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post():
     try:
+        if not sched.running:
+            sched.start()
+
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
-        scheduled_date_str = request.form.get('scheduledDate') 
-        title = request.form.get('title') 
-        
+        scheduled_date_str = request.form.get('scheduledDate')
+
         if not (coin_bot_id and content and scheduled_date_str):
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
-        # Creates an datetime object
-        scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+        # Crear un objeto datetime
+        scheduled_datetime = datetime.strptime(
+            scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
 
-        # Adds a new job
-        sched.add_job(publish_analysis, trigger=DateTrigger(run_date=scheduled_datetime), args=[coin_bot_id, content, title])
+        # Agregar un nuevo trabajo
+        sched.add_job(publish_analysis, args=[coin_bot_id, content], trigger=DateTrigger(run_date=scheduled_datetime))
 
         return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
@@ -286,7 +304,7 @@ def get_jobs():
 
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
-    
+
 
 # Deletes a scheduled job by job id
 @analysis_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
@@ -299,13 +317,10 @@ def delete_scheduled_job(job_id):
 
         # Deletes an analysis
         sched.remove_job(job_id)
-        
+
         return jsonify({'message': 'Scheduled job deleted successfully', 'status': 200, 'success': True}), 200
 
     except JobLookupError as e:
         return jsonify({'error': str(e), 'status': 404, 'success': False}), 404
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
-
-
-    
