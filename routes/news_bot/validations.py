@@ -33,7 +33,6 @@ def validate_content(bot_name, content, session_instance):
 
         keywords = coin_name.keywords
         keyword_values = {keyword.word.casefold() for keyword in keywords}  # Set of case-folded keywords for faster lookup
-
         # Build Aho-Corasick automaton
         A = ahocorasick.Automaton()
         for idx, keyword in enumerate(keyword_values):
@@ -58,14 +57,12 @@ def validate_content(bot_name, content, session_instance):
 def find_matched_keywords(bot_name, content, session_instance):
     try:
         coin_name = session_instance.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
-
         if not coin_name:
             # Handle the case where no matching SCRAPPING_DATA object is found
             return set()
-
         keywords = coin_name.keywords
         keyword_values = {keyword.word.casefold() for keyword in keywords}  # Set of case-folded keywords for faster lookup
-
+        
         # Build Aho-Corasick automaton
         A = ahocorasick.Automaton()
         for idx, keyword in enumerate(keyword_values):

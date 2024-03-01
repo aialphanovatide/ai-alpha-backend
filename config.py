@@ -127,7 +127,7 @@ class Used_keywords(Base):
     __tablename__ = 'used_keywords'
     id = Column(Integer, primary_key=True, autoincrement=True)
     article_content = Column(String)
-    article_date = Column(TIMESTAMP)
+    article_date = Column(String)
     article_url = Column(String)
     keywords = Column(String)
     source = Column(String)
