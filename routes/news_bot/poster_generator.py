@@ -25,7 +25,7 @@ def resize_image(image_data, target_size=(500, 500)):
     return resized_image_data
 
 def generate_poster_prompt(article):
-    prompt = f'Please generate a DALL-E prompt related to this {article}, no more than 1 line longer, please DONT INCLUDE ANY NAME, PERSONALITY NAME, PRESIDENT NAME, INFLUENCE OR ECONOMIC NAME AND ANY OTHER NAME. DONT USE NAMES please. '
+    prompt = f'Please generate a DALL-E prompt related to this {article}. Prompt must be length 900 characters or less, please DONT INCLUDE ANY NAME, PERSONALITY NAME, PRESIDENT NAME, INFLUENCE OR ECONOMIC NAME AND ANY OTHER NAME. DONT USE NAMES. '
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "system", "content": prompt},
