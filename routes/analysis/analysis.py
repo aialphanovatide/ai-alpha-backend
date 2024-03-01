@@ -249,6 +249,7 @@ def publish_analysis(coin_bot_id, content):
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post():
     try:
+        #init a scheduler for posts
         if not sched.running:
             sched.start()
             
