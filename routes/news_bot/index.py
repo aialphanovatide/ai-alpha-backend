@@ -74,8 +74,7 @@ def delete_top_story(top_story_id):
         return jsonify({'error': f'An error occurred deleting the top story: {str(e)}'}), 500
     
 
-# Gets all the news related to a category: ex Layer 0 
-def get_news(bot_name, time_range):
+def get_news(bot_name, time_range, limit):
     try:
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name.casefold()).first()
 
@@ -84,7 +83,6 @@ def get_news(bot_name, time_range):
 
         coin_bot_id = coin_bot.bot_id
 
-        # Determine the time range based on the provided option
         if time_range == 'today':
             start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         elif time_range == 'this week':
@@ -98,11 +96,12 @@ def get_news(bot_name, time_range):
         else:
             start_date = None
 
-         # Filter news based on time range
+        # Ahora incluimos el límite en la consulta
         if start_date:
-            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id, Article.created_at >= start_date).order_by(desc(Article.created_at)).all()
+            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id, Article.created_at >= start_date).order_by(desc(Article.created_at)).limit(limit).all()
         else:
-            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.created_at)).all()
+            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.created_at)).limit(limit).all()
+
 
         if articles:
             articles_list = []
@@ -137,11 +136,12 @@ def get_news(bot_name, time_range):
     except Exception as e:
         return {'error': f'An error occurred getting the news for {bot_name}: {str(e)}'}, 500
 
-@scrapper_bp.route('/api/get/news', methods=['GET'])  
+@scrapper_bp.route('/api/get/news', methods=['GET'])
 def get_news_by_bot_name():
     try:
         coin = request.args.get('coin')
         time_range = request.args.get('time_range')
+        limit = request.args.get('limit', default=10, type=int)  # Agrega un valor por defecto si es necesario
 
         if time_range and time_range not in ["today", "this week", "last month"]:
             return {'error': "Time range isn't valid"}, 400
@@ -149,10 +149,11 @@ def get_news_by_bot_name():
         if not coin:
             return {'error': 'Coin is required'}, 400
         else:
-            res, status = get_news(bot_name=coin, time_range=time_range)
+            res, status = get_news(bot_name=coin, time_range=time_range, limit=limit)
             return res, status
     except Exception as e:
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
+
 
 
 # Gets all categories
