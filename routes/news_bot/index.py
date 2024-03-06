@@ -83,6 +83,7 @@ def get_news(bot_name, time_range):
             return {'error': f'Coin {bot_name} not found'}, 404
 
         coin_bot_id = coin_bot.bot_id
+        articles = None
 
         # Determine the time range based on the provided option
         if time_range == 'today':
@@ -98,11 +99,23 @@ def get_news(bot_name, time_range):
         else:
             start_date = None
 
-         # Filter news based on time range
+        # Filter news based on time range
         if start_date:
-            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id, Article.created_at >= start_date).order_by(desc(Article.created_at)).all()
+            articles = (
+                session.query(Article)
+                .filter(Article.coin_bot_id == coin_bot_id, Article.created_at >= start_date)
+                .order_by(desc(Article.created_at))
+                .limit(10)  # Limit the result to 10 articles
+                .all()
+            )
         else:
-            articles = session.query(Article).filter(Article.coin_bot_id == coin_bot_id).order_by(desc(Article.created_at)).all()
+            articles = (
+                session.query(Article)
+                .filter(Article.coin_bot_id == coin_bot_id)
+                .order_by(desc(Article.created_at))
+                .limit(10)  # Limit the result to 10 articles
+                .all()
+            )
 
         if articles:
             articles_list = []
