@@ -6,7 +6,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 from dotenv import load_dotenv
-#from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
+from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ def resize_image(image_data, target_size=(500, 500)):
     return resized_image_data
 
 def generate_poster_prompt(article):
-    prompt = f'Please generate a DALL-E prompt related to this {article}, no more than 1 line longer. IF THERE IS SOME WORD ABOUT TRUMP, BIDEN OR SOME PRESIDENT, PLEASE KEEP IT OFF AND MAKE A PROMPT WITHOUT THESE WORDS'
+    prompt = f'Please generate a DALL-E prompt related to this {article}. Prompt must be length 900 characters or less, please DONT INCLUDE ANY NAME, PERSONALITY NAME, PRESIDENT NAME, INFLUENCE OR ECONOMIC NAME AND ANY OTHER NAME. DONT USE NAMES. '
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "system", "content": prompt},
@@ -34,7 +34,6 @@ def generate_poster_prompt(article):
         max_tokens=1024,
     )
     final_prompt = response.choices[0].message.content
-    print(final_prompt)
 
     api_url = 'https://api.openai.com/v1/images/generations'
 
@@ -59,7 +58,7 @@ def generate_poster_prompt(article):
         return image_data, image_url
     else:
         print("Error:", response.status_code, response.text)
-      
+        send_INFO_message_to_slack_channel(title_message="Error generating D-ALLE image", sub_title="Message", message=str(response.text))
         return generate_poster_prompt(article)
 
 # content='''

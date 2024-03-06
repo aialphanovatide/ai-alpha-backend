@@ -16,7 +16,6 @@ def save_chart():
         temporality = data.get('temporality')
         token = data.get('token')
 
-        print('temporality: ', temporality)
 
         if not coin_bot_id or not pair or not temporality or not token:
             return jsonify({'success': False, 'message': 'One or more fields are missing'}), 400
@@ -46,7 +45,6 @@ def save_chart():
             return jsonify({'success': True, 'message': 'Chart updated successfully'}), 200
         else:
             # Create a new chart
-            print('chart to create')
             new_chart = Chart(
                 support_1=data.get('support_1'),
                 support_2=data.get('support_2'),
@@ -76,17 +74,14 @@ def save_chart():
 
 # ----- ROUTE FOR THE APP ---------------------------
 # Gets the support and resistance lines of a requested coin
-# Gets the support and resistance lines of a requested coin
 @chart_bp.route('/api/coin-support-resistance', methods=['GET'])
 def get_chart_values_by_coin_bot_id():
 
     try:
-        # Obtenemos los parámetros de la solicitud
         coin_name = request.args.get('coin_name')
         temporality = request.args.get('temporality')
         pair = request.args.get('pair')
         
-        # Verificamos que todos los parámetros necesarios estén presentes
         if not all([coin_name, temporality, pair]):
             return jsonify({'success': False, 'message': 'Missing required parameters'})
 
