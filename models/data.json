@@ -878,65 +878,9 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=hacks",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/tag/hacks/",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/scams/",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=hacks",
-            "base_url": "https://cryptoslate.com",
-            "website_name": "Cryptoslate",
-            "is_URL_complete": false,
-            "main_container": ".two-col-layout"
-          },
-          {
-            "site": "https://cryptonews.net/news/security/",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://coincodex.com/news/category/crypto-hacks/",
-            "base_url": "https://coincodex.com",
-            "website_name": "Coincodex",
-            "is_URL_complete": false,
-            "main_container": ".two-col-layout"
-          },
-          {
-            "site": "https://www.newsbtc.com/?s=hacks",
-            "base_url": "https://www.newsbtc.com",
-            "website_name": "Newsbtc",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=crypto%20hack",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
+            "site": "https://news.google.com/search?q=Crypto%20Hacks%20when%3A1d%20-Sead%20-medical%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
           }
@@ -1029,6 +973,7 @@
         "coin_keyword": "LDO",
         "keywords": [
           "Lido DAO Contributor",
+          "price",
           "Lido DAO Token Price Analysis",
           "Lido DAO Securities law",
           "Lido DAO Monetary policy",
@@ -1458,73 +1403,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=ldo",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=LDO%20Lido%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=ldo&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=ldo",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://ambcrypto.com/",
-            "base_url": "https://ambcrypto.com",
-            "website_name": "Ambcrypto",
-            "is_URL_complete": true,
-            "main_container": ".archive-posts"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=ldo",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=ldo",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=ldo",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://decrypt.co/search/news/ldo",
-            "base_url": "https://decrypt.co",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.dlnews.com/",
-            "base_url": "https://www.dlnews.com/",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=LDO",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -2014,73 +1896,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=RPL",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=RPL%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=RPL&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=RPL",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://ambcrypto.com/",
-            "base_url": "https://ambcrypto.com",
-            "website_name": "Ambcrypto",
-            "is_URL_complete": true,
-            "main_container": ".archive-posts"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=RPL",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=RPL",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=RPL",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://decrypt.co/search/news/RPL",
-            "base_url": "https://decrypt.co",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.dlnews.com/",
-            "base_url": "https://www.dlnews.com/",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=RPL",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -2606,73 +2425,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=FXS",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Frax%20FXS%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=FXS&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=FXS",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://ambcrypto.com/",
-            "base_url": "https://ambcrypto.com",
-            "website_name": "Ambcrypto",
-            "is_URL_complete": true,
-            "main_container": ".archive-posts"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=FXS",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=FXS",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=FXS",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://decrypt.co/search/news/FXS",
-            "base_url": "https://decrypt.co",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.dlnews.com/",
-            "base_url": "https://www.dlnews.com/",
-            "website_name": "Decrypt",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=FXS",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -3382,108 +3138,10 @@
        ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=atom",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Cosmos%20ATOM%20when%3A1d%20-INJ%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": ".search-page__posts-list"
-          },
-          {
-            "site": "https://beincrypto.com/?s=atom",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".main"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=atom",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=atom&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=atom&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=atom",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=atom",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=atom",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=atom",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=atom",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=atom&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=atom",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=atom",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=atom",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -3494,7 +3152,6 @@
       {
         "coin_keyword": "DOT",
         "keywords": [
-         
           "DOT",
           "DOT Project",
           "DOT Documentation",
@@ -3805,115 +3462,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=dot",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Polkadot%20DOT%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": ".search-page__posts-list"
-          },
-          {
-            "site": "https://beincrypto.com/?s=dot",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".main"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=dot",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=dot#gsc.tab=0&gsc.q=dot&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=dot&gsc.sort=",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=dot&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=dot",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=dot",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=dot",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=dot",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=doto",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=dot&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=dot",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=dot",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=dot",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -4311,115 +3863,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=qnt",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Quant%20QNT%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": ".search-page__posts-list"
-          },
-          {
-            "site": "https://beincrypto.com/?s=qnt",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".main"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=qnt",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=qnt#gsc.tab=0&gsc.q=qnt&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=layer+0#gsc.tab=0&gsc.q=qnt&gsc.sort=",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=qnt&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=qnt",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=qnt",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=qnt",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=qnt",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=qnto",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=qnt&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=qnt",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=qnt",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=qnt",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -4922,115 +4369,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=ada",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Cardano%20ADA%20%22Cardano%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=ada",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=ada",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=ada#gsc.tab=0&gsc.q=ada&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=ada&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=ada",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=ada",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=ada",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=ada",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=ada",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=ada",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=ada&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=ada",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=ada",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=ada",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -5608,115 +4950,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=SOL",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Solana%20SOL%20%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=SOL",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=SOL",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=SOL#gsc.tab=0&gsc.q=SOL&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=SOL&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=SOL",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=SOL",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=SOL",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=SOL",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=SOL",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=SOL",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=SOL&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=SOL",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=SOL",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=SOL",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -6419,117 +5656,12 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=avax",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Avalanche%20AVAX%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=avax",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=avax",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=avax#gsc.tab=0&gsc.q=avax&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=avax&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=avax",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=avax",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=avax",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=avax",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=avax",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=avax",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=avax&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=avax",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=avax",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=avax",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": "None"
-          }
+          } 
         ],
         "black_list": [
           "Tristan Greene"
@@ -6873,117 +6005,12 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=near",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=NEAR%20protocol%20%22Near%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=near",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=near",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=near#gsc.tab=0&gsc.q=near&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=near&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=near",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=near",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=near",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=near",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=near",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=near",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=near&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=near",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=near",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=near",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": "None"
-          }
+          } 
         ],
         "black_list": [
           "Tristan Greene"
@@ -7623,117 +6650,12 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=ftm",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=FTM%20Fantom%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=ftm",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=ftm",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=ftm#gsc.tab=0&gsc.q=ftm&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=ftm&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=ftm",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=ftm",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=ftm",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=ftm",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=ftm",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=ftm",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=ftm&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=ftm",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=ftm",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=ftm",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": "None"
-          }
+          } 
         ],
         "black_list": [
           "Tristan Greene"
@@ -8444,117 +7366,12 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=kas",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=KAS%20Kaspa%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=kas",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=kas",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=kas#gsc.tab=0&gsc.q=kas&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=kas&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=kas",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=kas",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=kas",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=kas",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=kas",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=kas",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=kas&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=kas",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=kas",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=kas",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": "None"
-          }
+          } 
         ],
         "black_list": [
           "Tristan Greene"
@@ -9308,81 +8125,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=matic",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=MATIC%20Polygon%20%22MATIC%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=matic",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=matic#gsc.tab=0&gsc.q=matic&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=matic&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=matic",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=matic",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=matic",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=matic",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=matic",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=matic",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://coinpedia.org/?s=matic",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -10014,82 +8761,12 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=arb",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=ARB%20Arbitrum%20when%3A1d%20-CEX%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=arb",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=arb#gsc.tab=0&gsc.q=arb&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=arb&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=arb",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=arb",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=arb",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=arb",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=arb",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=arb",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://coinpedia.org/?s=arb",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
-          }
+          } 
         ],
         "black_list": [
           "Tristan Greene"
@@ -10781,81 +9458,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=op",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=OP%20Optimism%20%22Optimism%22%20when%3A1d%20-AVAX%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=op",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=op#gsc.tab=0&gsc.q=op&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=op&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=op",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=op",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=op",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=op",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=op",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=op",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://coinpedia.org/?s=op",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": []
@@ -11041,81 +9648,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=chainlink",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=LINK%20Chainlink%20%22Chainlink%22%20when%3A1d&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=LINK+chainlink",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=LINK#gsc.tab=0&gsc.q=link&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=chainlink&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=chainlink+LINK",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=chainlink+LINK",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=chainlink%20LINK",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=chainlink+LINK",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=chainlink%20LINK",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=chainlink+LINK",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://coinpedia.org/?s=chainlink+LINK",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -11481,81 +10018,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=api%25203",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=API3%20Crypto%20when%3A1d&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=BAND",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=LINK+chainlink#gsc.tab=0&gsc.q=api%203&gsc.sort=",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=api%203&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=api+3",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=api+3",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=api%203",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=api+3",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=api%203",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=api+3",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://coinpedia.org/?s=api+3",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -11921,74 +10388,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=BAND",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=BAND%20Protocol%20when%3A1d%20-INJ%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=BAND",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=BAND&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=BAND",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=BAND",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=BAND",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=BAND",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=BAND",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=BAND",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://coinpedia.org/?s=BAND",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -12344,115 +10748,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=xlm",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=XLM%20Stellar%20when%3A1d%20-OTC%20-ADA%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=xlm",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=xlm",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=xlm#gsc.tab=0&gsc.q=xlm&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=xlm&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=xlm",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=xlm",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=xlm",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=xlm",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=xlm",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=xlm",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=xlm&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=xlm",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=xlm",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=xlm",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -12829,115 +11128,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=ALGO",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=ALGO%20Algorand%20%22Algorand%20ALGO%22%20when%3A1d%20-DOGE%20-Dogecoin%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=ALGO",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=ALGO",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=ALGO#gsc.tab=0&gsc.q=ALGO&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=ALGO&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=ALGO",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=ALGO",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=ALGO",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=ALGO",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=ALGO",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=ALGO",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=ALGO&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=ALGO",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=ALGO",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=ALGO",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -13623,108 +11817,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=xrp",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=XRP%20Ripple%20%22Ripple%20XRP%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=xrp",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=xrp#gsc.tab=0&gsc.q=xrp&gsc.page=1",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=xrp&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=xrp",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/news/xrp/",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/ripple-price-analysis/",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".rpwe-ul"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=xrp",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=xrp",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/ripple-and-xrp/",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": ".jeg_section"
-          },
-          {
-            "site": "https://cryptonews.net/?q=xrp&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/crypto/xrp/news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/ripple-news",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".main-block"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/ripple/",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -14101,116 +12197,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=dydx",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=DYDX%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=dydx",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=dydx",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": ".jnews_search_content_wrapper"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=dydx#gsc.tab=0&gsc.q=dydx&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": ".gsc-expansionArea"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=dydx&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": ".layout-container"
-          },
-          {
-            "site": "https://cryptonews.com/?s=dydx",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=dydx",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=dydx",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=dydx",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=dydx",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=dydx",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=dydx&rubricId=-1&time=past_day",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=dydx&tab=news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": ".searchSectionMain"
-          },
-          {
-            "site": "https://u.today/search/node?keys=dydx",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=dydx",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -14611,116 +12602,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=velo",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=VELO%20Velodrome%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=velo",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=velo",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": ".jnews_search_content_wrapper"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=velo#gsc.tab=0&gsc.q=velo&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=velo&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": ".layout-container"
-          },
-          {
-            "site": "https://cryptonews.com/?s=velo",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=velo",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=velo",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=velo",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=velo",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=velo",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=velo&rubricId=-1&time=past_day",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=velo&tab=news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=velo",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".search-result"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=velo",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -15129,109 +13015,11 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=gmx",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=GMX%20Crypto%20%22GMX%22%20when%3A1d%20-CEX%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=gmx",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=gmx#gsc.tab=0&gsc.q=gmx&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": ".gsc-expansionArea"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=gmx&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=gmx",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=GMX",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/ripple-price-analysis/",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".rpwe-ul"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=gmx",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=gmx",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=gmx",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=gmx&rubricId=-1&time=past_day",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/crypto/gmx/news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=gmx",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".main-block"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=gmx",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
-            "main_container": ".container-wrapper"
           }
         ],
         "black_list": [
@@ -15572,115 +13360,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=uni",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=UNI%20Uniswap%20%22UNI%22%20when%3A1d%20-sushi%20-near%20-PICKS%20-MSN%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=uni",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=uni",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": ".jeg_block_container"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=uni#gsc.tab=0&gsc.q=uni&gsc.sort=date",
-            "base_url": "https://www.google.com/url?client=internal",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": ".gsc-expansionArea"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=uni&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=uni",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=uni",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=uni",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=uni",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=uni",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=uni",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=uni&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=uni",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=uni",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=uni",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -16000,115 +13683,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=sushi",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=SUSHI%20Sushiswap%20%22SUSHI%22%20-UNI%20-MEDIUM%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=sushi",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=sushi",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=sushi#gsc.tab=0&gsc.q=sushi&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=sushi&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=sushi",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=sushi",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=sushi",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=sushi",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=sushi",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=sushi",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=sushi&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=sushi",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=sushi",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=sushi",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -16282,108 +13860,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=cake",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Cake%20Pancakeswap%20when%3A1d%20-MSN%20-MEDIUM&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=cake",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=cake#gsc.tab=0&gsc.q=cake&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=cake&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=cake",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=CAKE",
-            "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/ripple-price-analysis/",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".rpwe-ul"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=cake",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=cake",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/ripple-and-cake/",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": ".jeg_section"
-          },
-          {
-            "site": "https://cryptonews.net/?q=cake&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/crypto/cake/news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=cake",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".main-block"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=cake",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -16796,115 +14276,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=aave",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=AAVE%20Crypto%20%22AAVE%22%20when%3A1d%20-NEAR%20-UNI%20-UNISWAP%20-SHIBA%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=aave",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=aave",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=aave#gsc.tab=0&gsc.q=aave&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=aave&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=aave",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=aave",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=aave",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=aave",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=aave",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=aave",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=aave&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=aave",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=aave",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=aave",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -17253,115 +14628,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=pendle",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=PENDLE%20crypto%20%22PENDLE%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=pendle",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=pendle",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=pendle#gsc.tab=0&gsc.q=pendle&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=pendle&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=pendle",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=pendle",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=pendle",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=pendle",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=pendle",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=pendle",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=pendle&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=pendle",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=pendle",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=pendle",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -17615,108 +14885,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=1inch",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=1INCH%20Crypto%20%221INCH%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=1inch",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=1inch#gsc.tab=0&gsc.q=1inch&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=1inch&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=1inch",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=1INCH",
-            "base_url": "https://cryptoslate.com",
-            "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/ripple-price-analysis/",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".rpwe-ul"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=1inch",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=1inch",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/ripple-and-1inch/",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": ".jeg_section"
-          },
-          {
-            "site": "https://cryptonews.net/?q=1inch&rubricId=-1",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/crypto/1inch/news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=1inch",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".main-block"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=1inch",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -17857,115 +15029,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=ocean%2520protocol",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=ocean%20protocol%20%22Ocean%20protocol%22%20when%3A1d%20-FET%20-RNDR%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": ".search-page__results"
-          },
-          {
-            "site": "https://beincrypto.com/?s=OCEAN%20Protocol",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=OCEAN+protocol",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=OCEAN#gsc.tab=0&gsc.q=OCEAN%20protocol&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=OCEAN%20protocol&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=OCEAN+Protocol",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=OCEAN",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=OCEAN+protocol",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=OCEAN%20protocol",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=OCEAN+protocol",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=OCEAN+protocol",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=Ocean+protocol&rubricId=-1&type=strict&time=past_week",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=OCEAN%20protocol&tab=news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=OCEAN",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=ocean+protocol",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -18366,115 +15433,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=fet",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=fetch%20ai%20%22Fetch%20Ai%20FET%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?s=fetch+AI",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://bitcoinist.com/?s=fetch+ai",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=fet#gsc.tab=0&gsc.q=fetch%20ai&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=fetch%20ai&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=fet",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=fetch+ai",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=fetch+ai",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "Cryptopotato",
-            "is_URL_complete": true,
-            "main_container": ".content"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=fetch%20ai",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=fetch",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=fetch+ai",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/?q=fet+ai&rubricId=-1&time=past_week",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=fetch.ai",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=fet",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=fetch+ai",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
@@ -18643,108 +15605,10 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/search?query=RENDER",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
+            "site": "https://news.google.com/search?q=Render%20RNDR%20%22Render%20RNDR%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://beincrypto.com/?&s=RNDR+RENDER",
-            "base_url": "https://beincrypto.com",
-            "website_name": "Beincrypto",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/search_gcse/?q=rndr#gsc.tab=0&gsc.q=RENDER%20RNDR&gsc.sort=date",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.coindesk.com/search?s=rndr&sort=1&cf=Markets",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.com/?s=RENDER+RNDR",
-            "base_url": "https://cryptonews.com",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptoslate.com/?s=RENDER+RNDR",
-            "base_url": "https://cryptoslate.com",
-           "website_name": "cryptoslate",
-            "is_URL_complete": true,
-            "main_container": ".main-news-search"
-          },
-          {
-            "site": "https://cryptopotato.com/?s=render+rndr",
-            "base_url": "https://cryptopotato.com",
-            "website_name": "cryptopotato",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://www.theblock.co/search?query=rndr%20RENDER",
-            "base_url": "https://www.theblock.co",
-            "website_name": "Theblock",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptodaily.co.uk/search?q=Render",
-            "base_url": "https://cryptodaily.co.uk",
-            "website_name": "Cryptodaily",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/?s=RENDER+RNDR",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "hhttps://cryptonews.net/?q=Render+rndr&rubricId=-1&type=strict&location=title",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://www.investing.com/search/?q=render%20rndr&tab=news",
-            "base_url": "https://www.investing.com",
-            "website_name": "Investing",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://u.today/search/node?keys=Render+RNDR",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": ".main-block"
-          },
-          {
-            "site": "https://blockworks.co/news",
-            "base_url": "https://blockworks.co",
-            "website_name": "Blockworks",
-            "is_URL_complete": false,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coinpedia.org/?s=Render+rndr",
-            "base_url": "https://coinpedia.org",
-            "website_name": "Coinpedia",
-            "is_URL_complete": true,
             "main_container": "None"
           }
         ],
