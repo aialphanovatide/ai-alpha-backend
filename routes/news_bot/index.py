@@ -82,6 +82,7 @@ def get_news(bot_name, time_range, limit):
             return {'error': f'Coin {bot_name} not found'}, 404
 
         coin_bot_id = coin_bot.bot_id
+        articles = None
 
         if time_range == 'today':
             start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -119,13 +120,13 @@ def get_news(bot_name, time_range, limit):
                 }
 
                 # Include image information
-                # for image in article.images:
-                #     article_dict['images'].append({
-                #         'image_id': image.image_id,
-                #         'image': image.image,
-                #         'created_at': image.created_at.isoformat(),
-                #         'article_id': image.article_id
-                #     })
+                for image in article.images:
+                    article_dict['images'].append({
+                        'image_id': image.image_id,
+                        'image': image.image,
+                        'created_at': image.created_at.isoformat(),
+                        'article_id': image.article_id
+                    })
 
                 articles_list.append(article_dict)
 
@@ -141,7 +142,7 @@ def get_news_by_bot_name():
     try:
         coin = request.args.get('coin')
         time_range = request.args.get('time_range')
-        limit = request.args.get('limit', default=10, type=int)  # Agrega un valor por defecto si es necesario
+        limit = request.args.get('limit', default=10, type=int)
 
         if time_range and time_range not in ["today", "this week", "last month"]:
             return {'error': "Time range isn't valid"}, 400
