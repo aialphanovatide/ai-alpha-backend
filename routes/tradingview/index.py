@@ -1,5 +1,5 @@
 from sqlalchemy import desc  
-from flask import request, Blueprint
+from flask import jsonify, request, Blueprint
 from datetime import datetime, timedelta
 from config import session, Category, Alert, CoinBot
 from .alert_strategy import send_alert_strategy_to_telegram
@@ -52,7 +52,49 @@ def get_all_alerts():
     except Exception as e:
         return f'Error in getting all alerts: {str(e)}', 500
     
+#get alerts from more than one category especified by categories.
+@tradingview_bp.route('/api/tv/multiple_alerts', methods=['POST'])  
+def get_alerts_by_categories():
+    try:
+        data = request.json
+        if not data or 'categories' not in data:
+            return jsonify({'error': 'Categories are required in JSON format'}), 400
+        
+        categories = data['categories']
 
+        result = {}
+
+        for category_name in categories:
+            category_obj = session.query(Category).filter(Category.category == category_name).first()
+
+            if not category_obj:
+                result[category_name] = f"Category {category_name} doesn't exist"
+                continue
+
+            alerts_list = []
+
+            coin_bots = category_obj.coin_bot
+
+            for coin_bot in coin_bots:
+                alerts = session.query(Alert).filter(Alert.coin_bot == coin_bot).order_by(desc(Alert.created_at)).all()
+                for alert in alerts:
+                    alert_dict = {
+                        'alert_id': alert.alert_id,
+                        'alert_name': alert.alert_name,
+                        'alert_message': alert.alert_message,
+                        'symbol': alert.symbol,
+                        'price': alert.price,
+                        'coin_bot_id': alert.coin_bot_id,
+                        'created_at': alert.created_at.isoformat()  # Convert to ISO format
+                    }
+
+                    alerts_list.append(alert_dict)
+
+            result[category_name] = alerts_list
+
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 # Get alerts by coin - desc
 @tradingview_bp.route('/api/filter/alerts', methods=['GET', 'POST'])
