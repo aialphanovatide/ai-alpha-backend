@@ -493,63 +493,49 @@ session = Session()
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
-# Check if the user with the given email already exists
-existing_user = session.query(User).filter_by(
-    email='testuser@example.com').first()
 
-# Creates the user if not exist
-if existing_user is None:
-    new_user = User(
-        nickname='TestUser',
-        email='testuser@example.com',
-        email_verified=False,
-        picture='https://example.com/testuser.jpg',
-    )
+# --------- Populate or update the sources -------------------------
+with session:
+    try:
+        if not session.query(Site).first():
+            with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
+                config = json.load(data_file)
 
-    session.add(new_user)
-    session.commit()
-    print("---TestUser created successfully---")
+                # for item in config:
+                for index, item in enumerate(config):
+                    main_keyword = item['main_keyword']
+                    alias = item['alias']
+                    coins = item['coins']
 
+                    for index, coin in enumerate(coins):
 
-# Creates the suscription plan
-TestUser = session.query(User).filter_by(email='testuser@example.com').first()
+                        coin_bot = session.query(CoinBot).filter_by(bot_name=coin['coin_keyword'].casefold()).first()
+                        print("Bot ID: ", coin_bot.bot_id)
+                        print("Bot name: ", coin['coin_keyword'])
+                        coin_keyword = coin['coin_keyword']
+                        keywords = coin['keywords']
+                        sites = coin['sites']
+                        black_list = coin['black_list']
 
-if TestUser:
-    # Check if a subscription plan with 'layer 1 lmc' already exists for the user
-    existing_plan1 = session.query(PurchasedPlan).filter_by(
-        user_id=TestUser.user_id, reference_name='layer 1 lmc').first()
+                        # for site_data in sites:
+                        for index, site_data in enumerate(sites):
+                            site = Site(
+                                site_name=str(site_data['website_name']),
+                                base_url=str(site_data['base_url']).casefold(),
+                                data_source_url=str(site_data['site']).capitalize(),
+                                is_URL_complete=site_data['is_URL_complete'],
+                                main_container=str(site_data['main_container']),
+                                coin_bot_id=coin_bot.bot_id
+                            )
+                            session.add(site)
+                            session.commit()
+                print('-----Sources updated-----')
 
-    if not existing_plan1:
-        subscription_plan1 = PurchasedPlan(
-            reference_name='layer 1 lmc',
-            price=10,
-            is_subscribed=True,
-            user_id=TestUser.user_id,
-            created_at=datetime.utcnow()
-        )
-        session.add(subscription_plan1)
-
-    # Check if a subscription plan with 'bitcoin' already exists for the user
-    existing_plan2 = session.query(PurchasedPlan).filter_by(
-        user_id=TestUser.user_id, reference_name='bitcoin').first()
-
-    if not existing_plan2:
-        subscription_plan2 = PurchasedPlan(
-            reference_name='bitcoin',
-            price=10,
-            is_subscribed=True,
-            user_id=TestUser.user_id,
-            created_at=datetime.utcnow()
-        )
-        session.add(subscription_plan2)
-
-    session.commit()
-    if not existing_plan1 and not existing_plan2:
-        print(f"---Subscription plans created successfully---")
-else:
-    print("---TestUser not found---")
+    except Exception as e:
+        print(f"Error found populating the sources: {str(e)}")
 
 
+# ------------- Populate the database with all the data.json ---------------------------
 with session:
     try:
         if not session.query(Category).first():
