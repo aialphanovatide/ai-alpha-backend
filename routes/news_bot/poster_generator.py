@@ -6,7 +6,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 from dotenv import load_dotenv
-#from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
+from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
 load_dotenv()
 
@@ -58,6 +58,17 @@ def generate_poster_prompt(article):
         return image_data, image_url
     else:
         print("Error:", response.status_code, response.text)
+        send_INFO_message_to_slack_channel(title_message="Error generating DALL-E image", sub_title="Response", message=str(response.text))
+        return None, None
+
+
+
+
+
+
+
+
+
 
 
 # content='''
