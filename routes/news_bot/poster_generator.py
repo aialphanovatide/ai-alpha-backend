@@ -24,8 +24,9 @@ def resize_image(image_data, target_size=(500, 500)):
         resized_image.tobytes()).decode('utf-8')
     return resized_image_data
 
+
 def generate_poster_prompt(article):
-    prompt = f'Please generate a DALL-E prompt related to this {article}. Prompt must be length 900 characters or less, please DONT INCLUDE ANY NAME, PERSONALITY NAME, PRESIDENT NAME, INFLUENCE OR ECONOMIC NAME AND ANY OTHER NAME. DONT USE NAMES. '
+    prompt = f'Generate a DALL-E prompt related to this {article}. It should be 900 characters or less and avoid specific names, titles, or economic terms.'
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "system", "content": prompt},
@@ -33,8 +34,7 @@ def generate_poster_prompt(article):
         temperature=0.6,
         max_tokens=1024,
     )
-    final_prompt = response.choices[0].message.content
-
+    final_prompt = response.choices[0].message.content[:850] 
     api_url = 'https://api.openai.com/v1/images/generations'
 
     headers = {
@@ -43,7 +43,7 @@ def generate_poster_prompt(article):
     }
     data = {
         "model": "dall-e-2",
-        "prompt": f'{final_prompt} - depicting an anime style, exclusively in English. DONT USE WEIRD CHARACTERS, unreadable characters or unconventional symbols.',
+        "prompt": f'{final_prompt} - depicting an anime style, exclusively in English. Avoid using weird or unreadable characters.',
         "n": 1,
         "size": "256x256"
     }
@@ -58,15 +58,28 @@ def generate_poster_prompt(article):
         return image_data, image_url
     else:
         print("Error:", response.status_code, response.text)
-        send_INFO_message_to_slack_channel(title_message="Error generating D-ALLE image", sub_title="Message", message=str(response.text))
-        return generate_poster_prompt(article)
+        send_INFO_message_to_slack_channel(title_message="Error generating DALL-E image", sub_title="Response", message=str(response.text))
+        return None, None
+
+
+
+
+
+
+
+
+
+
 
 # content='''
-# - Article: Step One: "Trump's Re-election: Implications for Bitcoin"
-# Step Two:
-# - DWS Group, managing $924.5 billion assets, expresses concerns about the potential impact of Trump's re-election on US treasury bonds and Bitcoin.
-# - The firm recalls the 2016 election aftermath when Trump’s victory led to a sharp increase in 10-year government bond yields, hinting at possible inflationary pressures with another term.
-# - CNBC’s Rick Santelli warns of high yield close for 30-year bonds in 2024, a situation that could trigger a wave of selling.
+# - Fetch.ai (FET) experienced a significant rally of 36% within a 24-hour timeframe, with its price reaching over $2.75. 
+# - This surge in value is attributed to a shift in investor interest from meme coins to AI-themed cryptocurrencies, further bolstered by Nvidia's favorable earnings report in February.
+# - FET broke out of its five-day consolidation on February 28, resulting in a 166% upswing, with the current trading price around $2.13. 
+# - A potential retracement into a stable support level of $2.5 could offer a buying opportunity for investors, possibly leading to a nearly 40% increase in the AI token's value to the $3.0 level.
+# - The daily Relative Strength Index (RSI) and price strength at 91 suggest a bullish outlook, indicating the market is currently driven by the bulls. 
+# - The Awesome Oscillator indicates a spike in bullish momentum, suggesting a potential bounce after an anticipated pullback.
+# - The bullish outlook could be invalidated if Bitcoin's price continues to decline, dragging the entire crypto market down with it. If FET drops below $2.50, the $2.0 level could be the next target.
+# - The article advises readers to conduct their own research and consult with financial experts before making any investment decisions, as crypto products and NFTs can be highly risky and unregulated.
 # '''
 # result = generate_poster_prompt(content)
 

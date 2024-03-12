@@ -96,17 +96,18 @@ def get_alerts_by_categories():
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
-# Get alerts by coin - desc
+
+
 @tradingview_bp.route('/api/filter/alerts', methods=['GET', 'POST'])
 def get_filtered_alerts(): 
     try:
         coin = request.args.get('coin')
         date = request.args.get('date')
 
-        if not coin or not date:
-            return {'message': "Coin and date are required"}, 400
+        if not coin:
+            return {'message': "Coin is required"}, 400
 
-        if date not in ["today", "this week", "last week"]: 
+        if date not in ["today", "this week", "last week", "4h"]: 
             return {'message': "Date not valid"}, 400
         else:
             coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == coin.casefold().strip()).first()
@@ -116,7 +117,6 @@ def get_filtered_alerts():
             else:
                 coin_bot_id = coin_bot.bot_id
 
-                # Determine the date range based on the provided option
                 if date == 'today':
                     start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
                 elif date == 'this week':
@@ -127,14 +127,16 @@ def get_filtered_alerts():
                     today = datetime.now()
                     start_date = today - timedelta(days=(today.weekday() + 7))
                     start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                elif date == '4h':
+                    start_date = datetime.now() - timedelta(hours=4)
                 else:
                     start_date = None
 
-                # Filter alerts based on date range
+                # Filter alerts based on date range and limit to 10
                 if start_date:
-                    alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).order_by(desc(Alert.created_at)).all()
+                    alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).order_by(desc(Alert.created_at)).limit(10).all()
                 else:
-                    alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).order_by(desc(Alert.created_at)).all()
+                    alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).order_by(desc(Alert.created_at)).limit(10).all()
 
                 if alerts:
                     # Convert alerts to a list of dictionaries
@@ -159,6 +161,7 @@ def get_filtered_alerts():
 
     except Exception as e:
         return {'message': f'An error occurred: {str(e)}'}, 500
+
 
 
 # RESERVED ROUTE - DO NOT USE
