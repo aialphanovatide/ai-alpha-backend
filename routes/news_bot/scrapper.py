@@ -52,6 +52,7 @@ defi_others_slack_channel = 'C067HNE4V0D'
 ai_slack_channel = 'C067E1LJYKY'
 
 
+# Gets the initial links for BITCOIN, ETHEREUM AND SOLANA
 def get_links(site, main_container):
     base_urls = [
         "/news",
@@ -154,6 +155,7 @@ def get_links(site, main_container):
         return False
 
 
+# Gets the valid article news from Google News - HELPER FOR get_google_news_links
 def resolve_redirects(url):
     response = requests.get(url, allow_redirects=False)
     if response.status_code in (300, 301, 302, 303):
@@ -162,17 +164,24 @@ def resolve_redirects(url):
         return response.url
 
 
-def get_google_news_links(site, main_container):
+# Gets the initial links for the rest of the categories
+def get_google_news_links(site, main_container, max_links=12):
+    
     base_url = "https://news.google.com/articles"
     elements = []
 
+    user_dir = '/tmp/playwright'
+    
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)    
+    
+    # Sources we don't want articles from
     blacklist = ['https://tech-gate.org', 'https://medium.com/', 'https://learn.bybit.com', 'https://www.roubaixxl.fr/',
                  'https://cryptonews.com/editors/sead-fadilpasic', 'https://uk.movies.yahoo.com']
-    max_links = 12
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(slow_mo=20, headless=False)
+            browser = p.chromium.launch_persistent_context(user_dir,slow_mo=10000, headless=False)
             page = browser.new_page()
 
             page.goto(site, timeout=30000)
@@ -203,13 +212,12 @@ def get_google_news_links(site, main_container):
                                 if not any(resolved_url.startswith(domain) for domain in blacklist):
                                     elements.append(
                                         {'href': resolved_url, 'article_title': article_title})
-                                    print('Link is VALID for saving:',
-                                        resolved_url)
+                                    print('Link is VALID for saving:', resolved_url)
                                     if len(elements) >= max_links:
                                         break
                             else:
-                                continue
                                 print(f"Skipping URL: {resolved_url}")
+                                continue
                         else:
                             continue
                     else:
@@ -241,8 +249,7 @@ def get_google_news_links(site, main_container):
                             resolved_url = resolve_redirects(href)
                             if resolved_url.startswith("https://"):
                                 if not any(resolved_url.startswith(domain) for domain in blacklist):
-                                    elements.append(
-                                        {'href': resolved_url, 'article_title': article_title})
+                                    elements.append({'href': resolved_url, 'article_title': article_title})
                                     print('Link is VALID for saving:',
                                         resolved_url)
                                     if len(elements) >= max_links:
@@ -266,6 +273,7 @@ def get_google_news_links(site, main_container):
         return False
 
 
+# Validate the initial links for all the categories
 def scrape_sites(data_source_url, base_url, site_name, category_name, main_container, session_instance):
 
     article_urls = set()
@@ -431,15 +439,15 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                         keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
                     # Send the message to Slack
-                    # send_NEWS_message_to_slack(channel_id=channel_id,
-                    #                             title=title,
-                    #                             date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    #                             url=article_link,
-                    #                             summary=summary,
-                    #                             image=slack_image,
-                    #                             category_name=category_name,
-                    #                             extra_info=matched_keywords_string
-                    #                             )
+                    send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
+                                                title=title,
+                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                url=article_link,
+                                                summary=summary,
+                                                image=slack_image,
+                                                category_name=category_name,
+                                                extra_info=matched_keywords_string
+                                                )
 
                     bot = session.query(CoinBot).filter(
                         CoinBot.bot_name == coin_bot_name).first()
@@ -481,7 +489,6 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                     session.commit()
 
                     print(f'Iteration completed and saved for {title}')
-
                     print(
                         f'\nArticle: "{title}" has been added to the DB, Link: {article_link} from {site_name} in {category_name}.')
                 else:
@@ -726,7 +733,7 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                             keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
                         # Send the message to Slack
-                        send_NEWS_message_to_slack(channel_id=channel_id,
+                        send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
                                                    title=title,
                                                    date_time=valid_date,
                                                    url=article_link,
@@ -801,8 +808,7 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
             print(f'Error scraping the article link in {site_name}: {str(e)}')
             return f'Error scraping the article link in {site_name}: {str(e)}', 500
     else:
-        scrape_google_news_articles(
-            article_urls, site_name, category_name, coin_bot_name, session)
+        scrape_google_news_articles(article_urls, site_name, category_name, coin_bot_name, session)
         return list(article_urls), 200
 
 
