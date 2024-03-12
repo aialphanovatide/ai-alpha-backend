@@ -117,7 +117,6 @@ def get_filtered_alerts():
             else:
                 coin_bot_id = coin_bot.bot_id
 
-                # Determine the date range based on the provided option
                 if date == 'today':
                     start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
                 elif date == 'this week':
