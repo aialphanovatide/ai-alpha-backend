@@ -1,6 +1,10 @@
+import pd
+import requests
 from sqlalchemy import and_
 from config import Chart, session, CoinBot
 from flask import jsonify, request, Blueprint, jsonify
+from .total3 import get_total_marketcap_data, calculate_total3_market_cap, calculate_candlestick_data  
+from datetime import datetime
 
 chart_bp = Blueprint('chart', __name__)
 
@@ -155,3 +159,25 @@ def get_s_and_r():
     
 
 
+
+
+# ---------------- Route for TOTAL3 DATA --------------------------------
+
+@chart_bp.route('/api/total_3_data', methods=['GET'])
+def get_total_3_data():
+    try:
+        # Llama a tus funciones aquí
+        coinstats_data, binance_btc_data, binance_eth_data = get_total_marketcap_data()
+        total3_market_caps = calculate_total3_market_cap(coinstats_data, binance_btc_data, binance_eth_data)
+
+        # Aquí necesitarás obtener los timestamps adecuados para tus datos. 
+        # Estoy asumiendo que binance_btc_data tiene timestamps en su primer elemento de cada entrada.
+        timestamps = [datetime.fromtimestamp(entry[0] / 1000).strftime('%Y-%m-%d') for entry in binance_btc_data]
+
+        candlestick_data = calculate_candlestick_data(timestamps, total3_market_caps)
+
+        # Devuelve los datos en formato JSON
+        return jsonify({'success': True, 'candlestick_data': candlestick_data})
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
