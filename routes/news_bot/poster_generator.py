@@ -43,7 +43,7 @@ def generate_poster_prompt(article):
     }
     data = {
         "model": "dall-e-2",
-        "prompt": f'{final_prompt} - depicting an anime style, exclusively in English. Avoid using weird or unreadable characters.',
+        "prompt": f'{final_prompt} - depicting an anime style, Don t use words or letters, only numbers',
         "n": 1,
         "size": "256x256"
     }
@@ -60,11 +60,6 @@ def generate_poster_prompt(article):
         print("Error:", response.status_code, response.text)
         send_INFO_message_to_slack_channel(title_message="Error generating DALL-E image", sub_title="Response", message=str(response.text))
         return None, None
-
-
-
-
-
 
 
 
