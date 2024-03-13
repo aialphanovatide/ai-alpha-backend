@@ -170,13 +170,18 @@ def get_google_news_links(site, main_container, max_links=12):
     base_url = "https://news.google.com/articles"
     elements = []
 
+    user_dir = '/tmp/playwright'
+    
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)    
+    
     # Sources we don't want articles from
     blacklist = ['https://tech-gate.org', 'https://medium.com/', 'https://learn.bybit.com', 'https://www.roubaixxl.fr/',
                  'https://cryptonews.com/editors/sead-fadilpasic', 'https://uk.movies.yahoo.com']
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(slow_mo=20, headless=False)
+            browser = p.chromium.launch_persistent_context(user_dir,slow_mo=10000, headless=False)
             page = browser.new_page()
 
             page.goto(site, timeout=30000)
