@@ -5,8 +5,8 @@ from datetime import datetime
 
 def get_total_marketcap_data():
     coinstats_url = "https://openapiv1.coinstats.app/markets"
-    binance_btc_url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000"
-    binance_eth_url = "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&limit=1000"
+    binance_btc_url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=10"
+    binance_eth_url = "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&limit=10"
     
 
     headers = {
@@ -21,7 +21,8 @@ def get_total_marketcap_data():
     coinstats_data = coinstats_response.json()
     binance_btc_data = binance_btc_response.json()
     binance_eth_data = binance_eth_response.json()
-
+    print('BTC: ', binance_btc_data)
+    print('ETH: ', binance_eth_data)
     return coinstats_data, binance_btc_data, binance_eth_data
 
 def calculate_total3_market_cap(coinstats_data, binance_btc_data, binance_eth_data):
@@ -32,7 +33,7 @@ def calculate_total3_market_cap(coinstats_data, binance_btc_data, binance_eth_da
     total3_market_caps = []
     for btc_mc, eth_mc in zip(btc_market_caps, eth_market_caps):
         total3_market_caps.append(total_market_cap - btc_mc - eth_mc)
-    
+        
     return total3_market_caps
 
 def calculate_candlestick_data(timestamps, market_caps):

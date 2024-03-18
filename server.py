@@ -35,6 +35,7 @@ from routes.fundamentals.dapps import dapps_bp
 from routes.dashboard.individual_bot import individual_bot
 from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
+from routes.mkt_webisites.news import website_news_bp
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -56,6 +57,7 @@ app.register_blueprint(sign_in)
 app.register_blueprint(chart_bp)
 app.register_blueprint(coin_bots)
 app.register_blueprint(delete_kw)
+app.register_blueprint(website_news_bp)
 app.register_blueprint(bots_route)
 app.register_blueprint(getBots)
 app.register_blueprint(bots_status)
