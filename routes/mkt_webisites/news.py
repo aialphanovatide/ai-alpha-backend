@@ -19,7 +19,7 @@ def get_latest_news():
         except ValueError:
             return {'error': 'Invalid Coin Bot ID'}, 400
 
-        start_date = datetime.now() - timedelta(days=1)
+        start_date = datetime.now() - timedelta(days=3)
 
         articles = session.query(Article).filter(
             Article.coin_bot_id == coin_bot_id,
