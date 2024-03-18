@@ -182,7 +182,7 @@ def get_google_news_links(site, main_container, max_links=12):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch_persistent_context(user_dir,slow_mo=10000, headless=False)
+            browser = p.chromium.launch_persistent_context(user_dir, headless=False)
             # browser = p.webkit.launch(slow_mo=50, headless=False)
             page = browser.new_page()
 
