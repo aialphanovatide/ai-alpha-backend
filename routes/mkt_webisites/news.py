@@ -57,3 +57,46 @@ def get_latest_news():
  
     except Exception as e:
         return {'error': f'An error occurred while fetching the latest news: {str(e)}'}, 500
+
+
+@website_news_bp.route('/api/get/article', methods=['GET'])
+def get_article_by_id():
+    try:
+        article_id = request.args.get('article_id')
+
+        if article_id is None:
+            return {'error': 'Article ID is required'}, 400
+
+        try:
+            article_id = int(article_id)
+        except ValueError:
+            return {'error': 'Invalid Article ID'}, 400
+
+        article = session.query(Article).filter(Article.article_id == article_id).first()
+
+        if article:
+            article_data = {
+                'article_id': article.article_id,
+                'date': article.date,
+                'title': article.title,
+                'url': article.url,
+                'summary': article.summary,
+                'created_at': article.created_at.isoformat(),
+                'coin_bot_id': article.coin_bot_id,
+                'images': []
+            }
+
+            for image in article.images:
+                article_data['images'].append({
+                    'image_id': image.image_id,
+                    'image': image.image,
+                    'created_at': image.created_at.isoformat(),
+                    'article_id': image.article_id
+                })
+
+            return {'article': article_data}, 200
+        else:
+            return {'message': f'Article with ID {article_id} not found'}, 404
+
+    except Exception as e:
+        return {'error': f'An error occurred while fetching the article: {str(e)}'}, 500
