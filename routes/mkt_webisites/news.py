@@ -50,13 +50,6 @@ def get_latest_news():
                     'images': []
                 }
 
-                for image in article.images:
-                    article_dict['images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image,
-                        'created_at': image.created_at.isoformat(),
-                        'article_id': image.article_id
-                    })
 
                 articles_list.append(article_dict)
 
@@ -94,13 +87,6 @@ def get_article_by_id():
                 'images': []
             }
 
-            for image in article.images:
-                article_data['images'].append({
-                    'image_id': image.image_id,
-                    'image': image.image,
-                    'created_at': image.created_at.isoformat(),
-                    'article_id': image.article_id
-                })
 
             return {'article': article_data}, 200
         else:
