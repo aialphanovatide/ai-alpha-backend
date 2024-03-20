@@ -165,44 +165,6 @@ def get_links(site, main_container):
         print("\nError getting links: " + str(e) + "\n")
         return False
 
-# def resize_image(image_data, target_size=(256, 256)):
-#     response = requests.get(image_data)
-#     if response.status_code == 200:
-#         image_binary = response.content
-#         image = Image.open(BytesIO(image_binary))
-        
-#         # Redimensionar la imagen
-#         resized_image = image.resize(target_size)
-        
-#         # Convertir la imagen redimensionada a bytes
-#         with BytesIO() as output:
-#             resized_image.save(output, format="JPEG")
-#             resized_image_data = output.getvalue()
-#         return resized_image_data
-#     else:
-#         print("Error al descargar la imagen:", response.status_code)
-#         return None
-
-# #Upload image to s3 AWS
-
-# def upload_image_to_s3(image_data, bucket_name, object_name):
-#     try:
-#         client = boto3.client(
-#             's3',
-#             region_name='us-east-2',
-#             aws_access_key_id='AKIA47CRUIBYAI225DUC',
-#             aws_secret_access_key='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'
-#         )
-#         # Crear un objeto de BytesIO para leer los datos de la imagen
-#         image_stream = BytesIO(image_data)
-#         # Subir los datos de la imagen al bucket de S3
-#         client.upload_fileobj(image_stream, bucket_name, object_name)
-#         print("Imagen subida exitosamente a S3.")
-#         return True
-#     except Exception as e:
-#         print(f"Error al subir la imagen a S3: {e}")
-#         return False
-
 import boto3
 import uuid
 
