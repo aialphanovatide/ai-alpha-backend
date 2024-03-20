@@ -35,11 +35,17 @@ from routes.twitter.index import send_tweets_to_twitter
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
 from sqlalchemy.orm import joinedload
+from dotenv import load_dotenv
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
 from playwright.sync_api import sync_playwright
 from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword, Used_keywords
+
+load_dotenv()
+
+AWS_ACCESS = os.getenv('AWS_ACCESS')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -217,8 +223,8 @@ def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, targe
             s3 = boto3.client(
                 's3',
                 region_name='us-east-2',
-                aws_access_key_id='AKIA47CRUIBYAI225DUC',
-                aws_secret_access_key='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'
+                aws_access_key_id=AWS_ACCESS,
+                aws_secret_access_key=AWS_SECRET_KEY
             )
             
             # Subir la imagen redimensionada a S3
@@ -229,13 +235,12 @@ def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, targe
             
             # Obtener la URL de la imagen subida
             image_url = f"https://{bucket_name}.s3.amazonaws.com/{image_key}"
-            print('Image URL', image_url)
             return image_url
         else:
-            print("Error al descargar la imagen:", response.status_code)
+            print("Error:", response.status_code)
             return None
     except Exception as e:
-        print("Error en la carga de imagen a S3:", str(e))
+        print("Error :", str(e))
         return None
 
 
