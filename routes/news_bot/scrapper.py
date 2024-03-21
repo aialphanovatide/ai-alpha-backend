@@ -799,27 +799,27 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                         matched_keywords_string = ', '.join(
                             keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
-                        #Send the message to Slack
-                        send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
-                                                   title=title,
-                                                   date_time=valid_date,
-                                                   url=article_link,
-                                                   summary=summary,
-                                                   image=slack_image,
-                                                   category_name=category_name,
-                                                   extra_info=matched_keywords_string
-                                                   )
+                        # #Send the message to Slack
+                        # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
+                        #                            title=title,
+                        #                            date_time=valid_date,
+                        #                            url=article_link,
+                        #                            summary=summary,
+                        #                            image=slack_image,
+                        #                            category_name=category_name,
+                        #                            extra_info=matched_keywords_string
+                        #                            )
 
                         if category_name == 'bitcoin':
                             response, status = send_tweets_to_twitter(content=summary,
                                                                     title=title)
 
-                        #     if status == 200:
-                        #         send_INFO_message_to_slack_channel(channel_id=channel_id,
-                        #                                         title_message="New Notification from AI Alpha",
-                        #                                         sub_title="Response",
-                        #                                         message=response
-                        #                                         )
+                            if status == 200:
+                                send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                                title_message="New Notification from AI Alpha",
+                                                                sub_title="Response",
+                                                                message=response
+                                                                )
 
                         bot = session.query(CoinBot).filter(
                             CoinBot.bot_name == coin_bot_name).first()
