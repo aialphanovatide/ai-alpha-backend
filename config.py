@@ -241,6 +241,7 @@ class Analysis(Base):
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
     analysis = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    category_name = Column(String)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
 
