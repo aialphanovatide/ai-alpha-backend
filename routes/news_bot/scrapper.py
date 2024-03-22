@@ -174,14 +174,10 @@ def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, targe
         if response.status_code == 200:
             image_binary = response.content
             image = Image.open(BytesIO(image_binary))
-            
-            # Redimensionar la imagen
+
             resized_image = image.resize(target_size)
-            
-            # Generar un nombre único para la imagen
             image_key = image_filename
             
-            # Inicializar cliente de S3 con las credenciales
             s3 = boto3.client(
                 's3',
                 region_name='us-east-2',
@@ -491,15 +487,15 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                         keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
                     # Send the message to Slack
-                    # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
-                    #                             title=title,
-                    #                             date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    #                             url=article_link,
-                    #                             summary=summary,
-                    #                             image=slack_image,
-                    #                             category_name=category_name,
-                    #                             extra_info=matched_keywords_string
-                    #                             )
+                    send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
+                                                title=title,
+                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                url=article_link,
+                                                summary=summary,
+                                                image=slack_image,
+                                                category_name=category_name,
+                                                extra_info=matched_keywords_string
+                                                )
 
                     bot = session.query(CoinBot).filter(
                         CoinBot.bot_name == coin_bot_name).first()
@@ -527,9 +523,6 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                                 resized_image_url = resize_and_upload_image_to_s3(image, 'apparticleimages', image_filename)
 
                                 if resized_image_url:
-                                    # Save the URL of the resized image in the database along with the article
-                                    new_article.image_url = resized_image_url
-                                    session.commit()
                                     print("Image resized and uploaded to S3 successfully.")
                                 else:
                                     print("Error resizing and uploading the image to S3.")
@@ -800,15 +793,15 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                             keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
                         # #Send the message to Slack
-                        # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
-                        #                            title=title,
-                        #                            date_time=valid_date,
-                        #                            url=article_link,
-                        #                            summary=summary,
-                        #                            image=slack_image,
-                        #                            category_name=category_name,
-                        #                            extra_info=matched_keywords_string
-                        #                            )
+                        send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
+                                                   title=title,
+                                                   date_time=valid_date,
+                                                   url=article_link,
+                                                   summary=summary,
+                                                   image=slack_image,
+                                                   category_name=category_name,
+                                                   extra_info=matched_keywords_string
+                                                   )
 
                         if category_name == 'bitcoin':
                             response, status = send_tweets_to_twitter(content=summary,
