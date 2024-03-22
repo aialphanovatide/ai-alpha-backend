@@ -1,4 +1,3 @@
-import pd
 import requests
 from sqlalchemy import and_
 from config import Chart, session, CoinBot
