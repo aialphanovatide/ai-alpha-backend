@@ -31,7 +31,7 @@ class Admin(Base):
     mail = Column(String(255))
     username = Column(String(255))
     password = Column(String(255))
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     def to_dict(self):
         return {'admin_id': self.admin_id, 'username': self.username, 'mail': self.mail}
@@ -44,7 +44,7 @@ class User(Base):
     email = Column(String)
     email_verified = Column(String)
     picture = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     purchased_plans = relationship(
         'PurchasedPlan', back_populates='user', lazy=True)
 
@@ -56,7 +56,7 @@ class PurchasedPlan(Base):
     price = Column(Integer)
     is_subscribed = Column(Boolean)
     user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     user = relationship('User', back_populates='purchased_plans')
 
@@ -70,7 +70,7 @@ class Category(Base):
     is_active = Column(Boolean, default=False)
     border_color = Column(String, default='No Color')
     icon = Column(String, default='No Image')
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
 
@@ -82,7 +82,7 @@ class CoinBot(Base):
     image = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey(
         'category.category_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     chart = relationship('Chart', back_populates='coin_bot')
     alerts = relationship('Alert', back_populates='coin_bot')
     sites = relationship('Site', back_populates='coin_bot')
@@ -117,7 +117,7 @@ class Keyword(Base):
     word = Column(String)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='keywords', lazy=True)
 
@@ -133,7 +133,7 @@ class Used_keywords(Base):
     source = Column(String)
     article_id = Column(Integer, ForeignKey('article.article_id'))
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'))
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', backref='used_keywords')
     # article = relationship('Article', backref='used_keywords') 
@@ -153,7 +153,7 @@ class Site(Base):
     is_URL_complete = Column(Boolean)
     main_container = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='sites', lazy=True)
 
@@ -164,7 +164,7 @@ class Blacklist(Base):
     word = Column(String)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='blacklist', lazy=True)
 
@@ -178,7 +178,7 @@ class Alert(Base):
     price = Column(Float)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='alerts', lazy=True)
 
@@ -190,7 +190,7 @@ class Article(Base):
     title = Column(String)
     url = Column(String)
     summary = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
 
@@ -206,7 +206,7 @@ class ArticleImage(Base):
     __tablename__ = 'article_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     article_id = Column(Integer, ForeignKey(
         'article.article_id'), nullable=False)
     article = relationship('Article', back_populates='images')
@@ -217,7 +217,7 @@ class TopStory(Base):
     top_story_id = Column(Integer, primary_key=True, autoincrement=True)
     story_date = Column(String)
     summary = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
 
@@ -229,7 +229,7 @@ class TopStoryImage(Base):
     __tablename__ = 'top_story_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     top_story_id = Column(Integer, ForeignKey(
         'top_story.top_story_id'), nullable=False)
 
@@ -240,8 +240,8 @@ class Analysis(Base):
     __tablename__ = 'analysis'
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
     analysis = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    category_name = Column(String)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    category_name = Column(String, nullable=False, default=None)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
 
@@ -259,7 +259,7 @@ class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
     image_id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
     analysis_id = Column(Integer, ForeignKey(
         'analysis.analysis_id'), nullable=False)
 
@@ -272,7 +272,7 @@ class AnalyzedArticle(Base):
     source = Column(String)
     url = Column(String)
     is_analyzed = Column(Boolean)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
 
 class Chart(Base):
@@ -291,7 +291,7 @@ class Chart(Base):
     temporality = Column(String)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='chart', lazy=True)
 
@@ -307,8 +307,8 @@ class Introduction(Base):
     website = Column(String)
     whitepaper = Column(String)
     dynamic = Column(Boolean, default=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship(
         'CoinBot', back_populates='introduction', lazy=True)
 
@@ -328,8 +328,8 @@ class Tokenomics(Base):
     max_supply = Column(String)
     supply_model = Column(String)
     dynamic = Column(Boolean, default=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='tokenomics', lazy=True)
 
@@ -345,8 +345,8 @@ class Token_distribution(Base):
     holder_category = Column(String)
     percentage_held = Column(String)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship(
         'CoinBot', back_populates='token_distribution', lazy=True)
 
@@ -362,8 +362,8 @@ class Token_utility(Base):
     token_application = Column(String)
     description = Column(String, default=True)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship(
         'CoinBot', back_populates='token_utility', lazy=True)
 
@@ -379,8 +379,8 @@ class Value_accrual_mechanisms(Base):
     mechanism = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship(
         'CoinBot', back_populates='value_accrual_mechanisms', lazy=True)
 
@@ -396,8 +396,8 @@ class Revenue_model(Base):
     analized_revenue = Column(String)
     fees_1ys = Column(String)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship(
         'CoinBot', back_populates='revenue_model', lazy=True)
 
@@ -416,8 +416,8 @@ class Hacks(Base):
     consequences = Column(String)
     mitigation_measure = Column(String)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship('CoinBot', back_populates='hacks', lazy=True)
 
     def as_dict(self):
@@ -436,8 +436,8 @@ class Competitor(Base):
     key = Column(String, nullable=False)
     value = Column(String, nullable=False)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='competitor', lazy=True)
 
@@ -456,8 +456,8 @@ class DApps(Base):
     description = Column(String)
     tvl = Column(String)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship('CoinBot', back_populates='dapps', lazy=True)
 
     def as_dict(self):
@@ -474,8 +474,8 @@ class Upgrades(Base):
     event_overview = Column(String)
     impact = Column(String)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
     coin_bot = relationship('CoinBot', back_populates='upgrades', lazy=True)
 
     def as_dict(self):
