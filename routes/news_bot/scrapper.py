@@ -1,6 +1,11 @@
 
+import base64
 import datetime
+from io import BytesIO
+from PIL import Image
+import os
 import requests
+import boto3
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
 from routes.news_bot.poster_generator import generate_poster_prompt
@@ -30,11 +35,17 @@ from routes.twitter.index import send_tweets_to_twitter
 from playwright.sync_api import sync_playwright
 from .summarizer import summary_generator
 from sqlalchemy.orm import joinedload
+from dotenv import load_dotenv
 from websocket.socket import socketio
 from playwright.async_api import TimeoutError
 from sqlalchemy.exc import IntegrityError, InternalError, InvalidRequestError, IllegalStateChangeError
 from playwright.sync_api import sync_playwright
 from config import ArticleImage, Session, CoinBot, AnalyzedArticle, Article, Category, Site, Keyword, Used_keywords
+
+load_dotenv()
+
+AWS_ACCESS = os.getenv('AWS_ACCESS')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
 btc_slack_channel_id = 'C05RK7CCDEK'
 eth_slack_channel_id = 'C05URLDF3JP'
@@ -153,6 +164,47 @@ def get_links(site, main_container):
     except Exception as e:
         print("\nError getting links: " + str(e) + "\n")
         return False
+
+import boto3
+import uuid
+
+def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(256, 256)):
+    try:
+        response = requests.get(image_data)
+        if response.status_code == 200:
+            image_binary = response.content
+            image = Image.open(BytesIO(image_binary))
+            
+            # Redimensionar la imagen
+            resized_image = image.resize(target_size)
+            
+            # Generar un nombre único para la imagen
+            image_key = image_filename
+            
+            # Inicializar cliente de S3 con las credenciales
+            s3 = boto3.client(
+                's3',
+                region_name='us-east-2',
+                aws_access_key_id=AWS_ACCESS,
+                aws_secret_access_key=AWS_SECRET_KEY
+            )
+            
+            # Subir la imagen redimensionada a S3
+            with BytesIO() as output:
+                resized_image.save(output, format="JPEG")
+                output.seek(0)
+                s3.upload_fileobj(output, bucket_name, image_key)
+            
+            # Obtener la URL de la imagen subida
+            image_url = f"https://{bucket_name}.s3.amazonaws.com/{image_key}"
+            return image_url
+        else:
+            print("Error:", response.status_code)
+            return None
+    except Exception as e:
+        print("Error :", str(e))
+        return None
+
 
 
 # Gets the valid article news from Google News - HELPER FOR get_google_news_links
@@ -439,15 +491,15 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                         keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
                     # Send the message to Slack
-                    send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
-                                                title=title,
-                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                url=article_link,
-                                                summary=summary,
-                                                image=slack_image,
-                                                category_name=category_name,
-                                                extra_info=matched_keywords_string
-                                                )
+                    # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
+                    #                             title=title,
+                    #                             date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    #                             url=article_link,
+                    #                             summary=summary,
+                    #                             image=slack_image,
+                    #                             category_name=category_name,
+                    #                             extra_info=matched_keywords_string
+                    #                             )
 
                     bot = session.query(CoinBot).filter(
                         CoinBot.bot_name == coin_bot_name).first()
@@ -466,10 +518,25 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                     session.add(new_article)
                     session.commit()
 
-                    new_article_image = ArticleImage(
-                        article_id=new_article.article_id, image=article_image)
-                    session.add(new_article_image)
-                    session.commit()
+                    article_id = new_article.article_id
+                    image_filename = f"{article_id}.jpg"
+                        
+                    if image:
+                            try:
+                                # Resize and upload the image to S3
+                                resized_image_url = resize_and_upload_image_to_s3(image, 'apparticleimages', image_filename)
+
+                                if resized_image_url:
+                                    # Save the URL of the resized image in the database along with the article
+                                    new_article.image_url = resized_image_url
+                                    session.commit()
+                                    print("Image resized and uploaded to S3 successfully.")
+                                else:
+                                    print("Error resizing and uploading the image to S3.")
+                            except Exception as e:
+                                print("Error:", e)
+                    else:
+                        print("Image not generated.")
 
                     counter_articles_saved += 1
 
@@ -732,27 +799,27 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                         matched_keywords_string = ', '.join(
                             keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
-                        # Send the message to Slack
-                        send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
-                                                   title=title,
-                                                   date_time=valid_date,
-                                                   url=article_link,
-                                                   summary=summary,
-                                                   image=slack_image,
-                                                   category_name=category_name,
-                                                   extra_info=matched_keywords_string
-                                                   )
+                        # #Send the message to Slack
+                        # send_NEWS_message_to_slack(channel_id="C06FTS38JRX",
+                        #                            title=title,
+                        #                            date_time=valid_date,
+                        #                            url=article_link,
+                        #                            summary=summary,
+                        #                            image=slack_image,
+                        #                            category_name=category_name,
+                        #                            extra_info=matched_keywords_string
+                        #                            )
 
-                        # if category_name == 'bitcoin':
-                        #     response, status = send_tweets_to_twitter(content=summary,
-                        #                                             title=title)
+                        if category_name == 'bitcoin':
+                            response, status = send_tweets_to_twitter(content=summary,
+                                                                    title=title)
 
-                        #     if status == 200:
-                        #         send_INFO_message_to_slack_channel(channel_id=channel_id,
-                        #                                         title_message="New Notification from AI Alpha",
-                        #                                         sub_title="Response",
-                        #                                         message=response
-                        #                                         )
+                            if status == 200:
+                                send_INFO_message_to_slack_channel(channel_id=channel_id,
+                                                                title_message="New Notification from AI Alpha",
+                                                                sub_title="Response",
+                                                                message=response
+                                                                )
 
                         bot = session.query(CoinBot).filter(
                             CoinBot.bot_name == coin_bot_name).first()
@@ -770,11 +837,33 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
 
                         session.add(new_article)
                         session.commit()
+                        
+                        article_id = new_article.article_id
+                        image_filename = f"{article_id}.jpg"
+                        
+                        if image:
+                            try:
+                                # Resize and upload the image to S3
+                                resized_image_url = resize_and_upload_image_to_s3(image, 'apparticleimages', image_filename)
 
-                        new_article_image = ArticleImage(
-                            article_id=new_article.article_id, image=article_image)
-                        session.add(new_article_image)
-                        session.commit()
+                                if resized_image_url:
+                                    # Save the URL of the resized image in the database along with the article
+                                    new_article.image_url = resized_image_url
+                                    session.commit()
+                                    print("Image resized and uploaded to S3 successfully.")
+                                else:
+                                    print("Error resizing and uploading the image to S3.")
+                            except Exception as e:
+                                print("Error:", e)
+                        else:
+                            print("Image not generated.")
+
+
+
+                        # new_article_image = ArticleImage(
+                        #     article_id=new_article.article_id, image=article_image)
+                        # session.add(new_article_image)
+                        # session.commit()
 
                         counter_articles_saved += 1
 
