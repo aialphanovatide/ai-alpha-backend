@@ -199,7 +199,7 @@ def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, targe
             print("Error:", response.status_code)
             return None
     except Exception as e:
-        print("Error:", str(e))
+        print("Error:", str(e)) 
         return None
 
 
