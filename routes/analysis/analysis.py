@@ -1,3 +1,10 @@
+import os
+from dotenv import load_dotenv
+import datetime
+from io import BytesIO
+from PIL import Image
+import requests
+import boto3
 from config import Analysis, AnalysisImage, session, CoinBot
 from flask import jsonify, Blueprint, request
 from sqlalchemy import desc
@@ -5,13 +12,48 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.jobstores.base import JobLookupError
-
+from routes.news_bot.poster_generator import generate_poster_prompt
 
 sched = BackgroundScheduler()
 
 analysis_bp = Blueprint('analysis', __name__)
 
-# Gets all the analysis related to a coin
+load_dotenv()
+
+AWS_ACCESS = os.getenv('AWS_ACCESS')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(256, 256)):
+    try:
+        response = requests.get(image_data)
+        if response.status_code == 200:
+            image_binary = response.content
+            image = Image.open(BytesIO(image_binary))
+
+            resized_image = image.resize(target_size)
+            image_key = image_filename
+            
+            s3 = boto3.client(
+                's3',
+                region_name='us-east-2',
+                aws_access_key_id=AWS_ACCESS,
+                aws_secret_access_key=AWS_SECRET_KEY
+            )
+            
+            # Subir la imagen redimensionada a S3
+            with BytesIO() as output:
+                resized_image.save(output, format="JPEG")
+                output.seek(0)
+                s3.upload_fileobj(output, bucket_name, image_key)
+            
+            # Obtener la URL de la imagen subida
+            image_url = f"https://{bucket_name}.s3.amazonaws.com/{image_key}"
+            return image_url
+        else:
+            print("Error:", response.status_code)
+            return None
+    except Exception as e:
+        print("Error :", str(e))
+        return None
 
 
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
@@ -145,6 +187,8 @@ def post_analysis():
         # Check if any of the required values is missing
         if coin_bot_id is None or not coin_bot_id or content is None or not content:
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
+        
+        
 
         new_analysis = Analysis(
             analysis=content,
@@ -154,8 +198,30 @@ def post_analysis():
         
         session.add(new_analysis)
         session.commit()
+        
+        if new_analysis:
+            image = generate_poster_prompt(new_analysis.analysis)
+            print("image generated")
+            analysis_id = new_analysis.analysis_id
+            print('id analysis', analysis_id)
+            image_filename = f"{analysis_id}.jpg"    
+            print('filename: ', image_filename)
+            if image:
+                    try:
+                                # Resize and upload the image to S3
+                        resized_image_url = resize_and_upload_image_to_s3(image, 'appanalysisimages', image_filename)
 
-        print('new analaysis: ', new_analysis.analysis)
+                        if resized_image_url:
+                             print("Image resized and uploaded to S3 successfully.")
+                        else:
+                             print("Error resizing and uploading the image to S3.")
+                    except Exception as e:
+                        print("Error:", e)
+            else:
+                print("Image not generated.")
+        
+        
+
 
         # Return success response if everything is fine
         return jsonify({'message': 'Analysis posted successfully', 'status': 200, 'success': True}), 200
