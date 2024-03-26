@@ -1,8 +1,7 @@
 import requests
 from sqlalchemy import and_
 from config import Chart, session, CoinBot
-from flask import jsonify, request, Blueprint, jsonify
-from .total3 import get_total_marketcap_data, calculate_total3_market_cap, calculate_candlestick_data  
+from flask import jsonify, request, Blueprint, jsonify  
 from datetime import datetime
 
 chart_bp = Blueprint('chart', __name__)
@@ -159,20 +158,40 @@ def get_s_and_r():
 
 
 
-
 # ---------------- Route for TOTAL3 DATA --------------------------------
 
 @chart_bp.route('/api/total_3_data', methods=['GET'])
 def get_total_3_data():
     try:
-        coinstats_data, binance_btc_data, binance_eth_data = get_total_marketcap_data()
-        total3_market_caps = calculate_total3_market_cap(coinstats_data, binance_btc_data, binance_eth_data)
+        url_btc = "https://pro-api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily"
+        url_eth = "https://pro-api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=7&interval=daily"
+        url_total = "https://pro-api.coingecko.com/api/v3/global/market_cap_chart?days=7"
 
-        timestamps = [datetime.fromtimestamp(entry[0] / 1000).strftime('%Y-%m-%d') for entry in binance_btc_data]
+        headers = {"x-cg-pro-api-key": "CG-xXCJJaHa7QmvQNWyNheKmSfG"}
 
-        candlestick_data = calculate_candlestick_data(timestamps, total3_market_caps)
+        btc_response = requests.get(url_btc, headers=headers)
+        eth_response = requests.get(url_eth, headers=headers)
+        total_response = requests.get(url_total, headers=headers)
 
-        return jsonify({'success': True, 'candlestick_data': candlestick_data})
+        btc_response.raise_for_status()
+        eth_response.raise_for_status()
+        total_response.raise_for_status()
 
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+        data_eth = eth_response.json()
+        data_total = total_response.json()
+        data_btc = btc_response.json()
+
+        btc_market_caps = [entry[1] for entry in data_btc["market_caps"]]
+        eth_market_caps = [entry[1] for entry in data_eth["market_caps"]]
+        total_market_caps = [entry[1] for entry in data_total["market_cap_chart"]["market_cap"]]
+
+        eth_btc_market_caps = [btc_market_caps[i] + eth_market_caps[i] for i in range(len(btc_market_caps))]
+        total_market_cap = total_market_caps
+
+        total3 = [total_market_cap[i] - eth_btc_market_caps[i] for i in range(len(total_market_cap))]
+
+        return jsonify({"data": total3})
+
+    except requests.exceptions.RequestException as e:
+        print("Error", str(e))
+        return jsonify({"error": "Error " + str(e)})
