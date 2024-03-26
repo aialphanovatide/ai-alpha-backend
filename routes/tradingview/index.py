@@ -1,6 +1,7 @@
 from sqlalchemy import desc  
-from flask import jsonify, request, Blueprint
+from websocket.socket import socketio
 from datetime import datetime, timedelta
+from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
 from .alert_strategy import send_alert_strategy_to_telegram
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
@@ -11,6 +12,13 @@ tradingview_bp = Blueprint(
     template_folder='templates',
     static_folder='static'
 )
+
+# Test route for emitting data through a websocket
+@tradingview_bp.route('/emit')
+def index():
+    data = request.data.decode('utf-8')
+    socketio.emit('new_alert', {'message': data})
+    return 'message sent', 200
 
 # Gets all alerts of a catgerory - desc
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
@@ -52,6 +60,7 @@ def get_all_alerts():
     except Exception as e:
         return f'Error in getting all alerts: {str(e)}', 500
     
+
 #get alerts from more than one category especified by categories.
 @tradingview_bp.route('/api/tv/multiple_alerts', methods=['POST'])  
 def get_alerts_by_categories():
@@ -184,7 +193,10 @@ def receive_data_from_tv():
                 print('Data from Tradingview', request.data)
                 data_text = request.data.decode('utf-8')  # Decode the bytes to a string
                 data_lines = data_text.split(',')  # Split the text into lines
-               
+                
+                # Emits the alert data to the client
+                socketio.emit('new_alert', {'message': data_text})
+                
                 data_dict = {} 
 
                 for line in data_lines:

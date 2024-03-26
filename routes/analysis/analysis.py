@@ -72,8 +72,6 @@ def get_analysis_images(analysis_object):
     return [{'image_id': img.image_id, 'image': img.image} for img in session.query(AnalysisImage).filter_by(analysis_id=analysis_object.analysis_id).all()]
 
 # Route to get analysis by coin id/name
-
-
 @analysis_bp.route('/api/get_analysis_by_coin', methods=['GET'])
 def get_analysis_by_coin():
     try:
@@ -119,7 +117,8 @@ def get_all_analysis():
                 analysis_id=analy.analysis_id).all()
             images_data = [{'image_id': img.image_id, 'image': img.image}
                            for img in images_objects]
-
+            
+            analysis_dict['category_name'] = analy.category_name
             analysis_dict['analysis_images'] = images_data
             analysis_dict['coin_bot_id'] = analy.coin_bot_id
             analysis_data.append(analysis_dict)
@@ -137,10 +136,14 @@ def post_analysis():
     try:
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
+        category_name = request.form.get('category_name')
         # image_file = request.files.get('image')
 
         # Check if any of the required values is missing
         if content == 'null' or coin_bot_id == 'null':
+            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
+        
+        if category_name == 'null' or coin_bot_id == 'null':
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
         # Check if any of the required values is missing
@@ -149,8 +152,10 @@ def post_analysis():
 
         new_analysis = Analysis(
             analysis=content,
-            coin_bot_id=coin_bot_id
+            coin_bot_id=coin_bot_id,
+            category_name=category_name
         )
+        
         session.add(new_analysis)
         session.commit()
 
@@ -237,6 +242,7 @@ def get_last_analysis():
             'analysis_id': last_analysis.analysis_id,
             'content': last_analysis.analysis,
             'coin_name': coin.bot_name,
+            'category_name': last_analysis.category_name,
             'created_at': last_analysis.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
 
@@ -248,7 +254,7 @@ def get_last_analysis():
 
 
 # Funtion to execute by the scheduler
-def publish_analysis(coin_bot_id, content):
+def publish_analysis(coin_bot_id, content, category_name):
     title_end_index = content.find('\n')
     if title_end_index != -1:
         # Extract title and remove leading/trailing spaces
@@ -258,7 +264,7 @@ def publish_analysis(coin_bot_id, content):
     else:
         title = ''  # If no newline found, set title to empty string
     # Create new analysis instance
-    new_analysis = Analysis(analysis=content, coin_bot_id=coin_bot_id)
+    new_analysis = Analysis(analysis=content, category_name=category_name, coin_bot_id=coin_bot_id)
     session.add(new_analysis)
     session.commit()
     print("Publishing analysis with title:", title)
@@ -268,6 +274,7 @@ def publish_analysis(coin_bot_id, content):
 def schedule_post():
     try: 
         coin_bot_id = request.form.get('coinBot')
+        category_name = request.form.get('category_name')
         content = request.form.get('content')
         scheduled_date_str = request.form.get('scheduledDate')
 
@@ -279,7 +286,7 @@ def schedule_post():
             scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
 
         # Agregar un nuevo trabajo
-        sched.add_job(publish_analysis, args=[coin_bot_id, content], trigger=DateTrigger(run_date=scheduled_datetime))
+        sched.add_job(publish_analysis, args=[coin_bot_id, content, category_name], trigger=DateTrigger(run_date=scheduled_datetime))
 
         return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
