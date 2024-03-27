@@ -197,32 +197,33 @@ def receive_data_from_tv():
                 # Emits the alert data to the client
                 socketio.emit('new_alert', {'message': data_text})
                 
-                data_dict = {} 
+                # data_dict = {} 
 
-                for line in data_lines:
-                    if ':' in line:
-                        key, value = line.split(':', 1)
-                        data_dict[key.strip()] = value.strip()
+                # for line in data_lines:
+                #     if ':' in line:
+                #         key, value = line.split(':', 1)
+                #         data_dict[key.strip()] = value.strip()
 
-                alert_name = data_dict.get('alert_name', '') 
-                symbol = data_dict.get('symbol', '') 
-                message = data_dict.get('message', '')  
-                price = data_dict.get('price', data_dict.get('last_price', ''))
+                # alert_name = data_dict.get('alert_name', '') 
+                # symbol = data_dict.get('symbol', '') 
+                # message = data_dict.get('message', '')  
+                # price = data_dict.get('price', data_dict.get('last_price', ''))
                 
-                response, status = send_alert_strategy_to_telegram(price=price,
-                                                alert_name=alert_name,
-                                                message=message,
-                                                symbol=symbol,
-                                                )
+                # response, status = send_alert_strategy_to_telegram(price=price,
+                #                                 alert_name=alert_name,
+                #                                 message=message,
+                #                                 symbol=symbol,
+                #                                 )
                 
-                if status != 200:
-                    send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                                                        title_message='Error seding Tradingview Alert',
-                                                        sub_title='Reason',
-                                                        message=f"{str(response)} - Data: {str(request.data)}")
+                # if status != 200:
+                #     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                #                                         title_message='Error seding Tradingview Alert',
+                #                                         sub_title='Reason',
+                #                                         message=f"{str(response)} - Data: {str(request.data)}")
 
 
-                return response, status
+                # return response, status
+                return 'test', 200
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
