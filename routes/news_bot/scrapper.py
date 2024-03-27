@@ -170,14 +170,10 @@ def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, targe
         if response.status_code == 200:
             image_binary = response.content
             image = Image.open(BytesIO(image_binary))
-            
-            # Redimensionar la imagen
+
             resized_image = image.resize(target_size)
-            
-            # Generar un nombre único para la imagen
             image_key = image_filename
             
-            # Inicializar cliente de S3 con las credenciales
             s3 = boto3.client(
                 's3',
                 region_name='us-east-2',
