@@ -1,5 +1,6 @@
 from sqlalchemy import desc  
 from websocket.socket import socketio
+from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
@@ -105,7 +106,52 @@ def get_alerts_by_categories():
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
+# Get alerts from more than one category.
+@tradingview_bp.route('/api/tv/multiple_alert', methods=['POST'])  
+def get_alerts_by_categories_v1():
+    try:
+        data = request.json
+        if not data or 'categories' not in data:
+            return jsonify({'error': 'Categories are required'}), 400
+        
+        categories = data.get('categories')
+        limit = data.get('limit')
 
+        if not isinstance(categories, list):
+            return jsonify({'error': 'Categories must be a list of strings'}), 400
+
+        if limit is not None and not isinstance(limit, int) or limit < 0:
+            return jsonify({'error': 'Limit must be a non-negative integer'}), 400
+
+        result = {}
+
+        category_objs = session.query(Category).filter(Category.category.in_(categories)).options(joinedload(Category.coin_bot).joinedload(CoinBot.alerts))
+
+        for category_obj in category_objs:
+            alerts_list = []
+
+            for coin_bot in category_obj.coin_bot:
+                alerts = coin_bot.alerts
+                if limit is not None:
+                    alerts = alerts[:limit]
+                for alert in alerts:
+                    alert_dict = {
+                        'alert_id': alert.alert_id,
+                        'alert_name': alert.alert_name,
+                        'alert_message': alert.alert_message,
+                        'symbol': alert.symbol,
+                        'price': alert.price,
+                        'coin_bot_id': alert.coin_bot_id,
+                        'created_at': alert.created_at.isoformat()  # Convert to ISO format
+                    }
+
+                    alerts_list.append(alert_dict)
+
+            result[category_obj.category] = alerts_list
+
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 @tradingview_bp.route('/api/filter/alerts', methods=['GET', 'POST'])
 def get_filtered_alerts(): 
