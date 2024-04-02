@@ -14,6 +14,16 @@ tradingview_bp = Blueprint(
     static_folder='static'
 )
 
+new_alert = Alert(alert_name='test',
+                        alert_message = 'test',
+                        symbol='btc',
+                        price=234,
+                        coin_bot_id=1
+                        )
+
+session.add(new_alert)
+session.commit()
+
 # Test route for emitting data through a websocket
 @tradingview_bp.route('/emit')
 def index():
@@ -21,29 +31,37 @@ def index():
     socketio.emit('new_alert', {'message': data})
     return 'message sent', 200
 
-# Gets all alerts of a catgerory - desc
+# Gets all alerts of a catgerory
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
 def get_all_alerts():
     try:
         category = request.args.get('category')
+        limit = request.args.get('limit')
 
         if not category:
             return 'Category is required', 400
         
+        if limit is not None and (not isinstance(int(limit), int) or int(limit) < 0):
+            return 'Limit must be a non-negative integer', 400
+        
         category_obj = session.query(Category).filter(Category.category == category).first()
-
-        alerts_list = []
 
         if not category_obj:
             return f"Category {category} doesn't exist", 404
 
+        alerts_list = []
+
         if category_obj:
-            # gets all coin_bot related to this category
+            # Get all coin_bot related to this category
             coin_bots = category_obj.coin_bot
 
             for coin_bot in coin_bots:
+
                 # Order alerts by created_at in descending order
                 alerts = session.query(Alert).filter(Alert.coin_bot == coin_bot).order_by(desc(Alert.created_at)).all()
+                if limit:
+                    alerts = session.query(Alert).filter(Alert.coin_bot == coin_bot).order_by(desc(Alert.created_at)).limit(limit).all()
+
                 for alert in alerts:
                     alert_dict = {
                         'alert_id': alert.alert_id,
@@ -62,15 +80,22 @@ def get_all_alerts():
         return f'Error in getting all alerts: {str(e)}', 500
     
 
-#get alerts from more than one category especified by categories.
-@tradingview_bp.route('/api/tv/multiple_alerts', methods=['POST'])  
+# Get alerts from more than one category.
+@tradingview_bp.route('/api/tv/multiple_alert', methods=['POST'])  
 def get_alerts_by_categories():
     try:
         data = request.json
         if not data or 'categories' not in data:
-            return jsonify({'error': 'Categories are required in JSON format'}), 400
+            return jsonify({'error': 'Categories are required'}), 400
         
-        categories = data['categories']
+        categories = data.get('categories')
+        limit = data.get('limit')
+
+        if not isinstance(categories, list):
+            return jsonify({'error': 'Categories must be a list of strings'}), 400
+
+        if limit is not None and (not isinstance(limit, int) or limit < 0):
+            return jsonify({'error': 'Limit must be a non-negative integer'}), 400
 
         result = {}
 
@@ -87,6 +112,9 @@ def get_alerts_by_categories():
 
             for coin_bot in coin_bots:
                 alerts = session.query(Alert).filter(Alert.coin_bot == coin_bot).order_by(desc(Alert.created_at)).all()
+                if limit:
+                    alerts = session.query(Alert).filter(Alert.coin_bot == coin_bot).order_by(desc(Alert.created_at)).limit(limit).all()
+              
                 for alert in alerts:
                     alert_dict = {
                         'alert_id': alert.alert_id,
@@ -106,34 +134,61 @@ def get_alerts_by_categories():
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
-# Get alerts from more than one category.
-@tradingview_bp.route('/api/tv/multiple_alert', methods=['POST'])  
-def get_alerts_by_categories_v1():
+
+# Get alerts of a token (coin) 
+@tradingview_bp.route('/api/filter/alerts', methods=['GET', 'POST'])
+def get_filtered_alerts(): 
     try:
-        data = request.json
-        if not data or 'categories' not in data:
-            return jsonify({'error': 'Categories are required'}), 400
+        coin = request.args.get('coin')
+        date = request.args.get('date')
+        limit = request.args.get('limit')
+
+        if not coin or not coin.strip():
+            return jsonify({'error': 'Invalid or missing coin parameter'}), 400
         
-        categories = data.get('categories')
-        limit = data.get('limit')
+        if date and date not in ["today", "this week", "last week", "4h", "1h", "1w", "1d"]:
+            return jsonify({'error': 'Invalid date parameter'}), 400
+        
+        if limit:
+            try:
+                limit = int(limit)
+                if limit <= 0:
+                    return jsonify({'error': 'Invalid limit parameter'}), 400
+            except ValueError:
+                return jsonify({'error': 'Limit parameter must be an integer'}), 400
 
-        if not isinstance(categories, list):
-            return jsonify({'error': 'Categories must be a list of strings'}), 400
+       
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == coin.casefold().strip()).first()
 
-        if limit is not None and not isinstance(limit, int) or limit < 0:
-            return jsonify({'error': 'Limit must be a non-negative integer'}), 400
+        if not coin_bot:
+            return {'message': f'{coin} not found'}, 404
+        else:
+            coin_bot_id = coin_bot.bot_id
+        
+            start_date = None
+            if date == 'today' or date == '1d':
+                start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            elif date == 'this week' or date == '1w':  
+                today = datetime.now()
+                start_date = today - timedelta(days=today.weekday())
+                start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            elif date == 'last week':
+                today = datetime.now()
+                start_date = today - timedelta(days=(today.weekday() + 7))
+                start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            elif date == '4h':
+                start_date = datetime.now() - timedelta(hours=4)
+            elif date == '1h':
+                start_date = datetime.now() - timedelta(hours=1)
+            else:
+                start_date =  datetime.now()
 
-        result = {}
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at <= start_date).order_by(desc(Alert.created_at)).limit(limit).all()
+           
+            if alerts:
+                # Convert alerts to a list of dictionaries
+                alerts_list = []
 
-        category_objs = session.query(Category).filter(Category.category.in_(categories)).options(joinedload(Category.coin_bot).joinedload(CoinBot.alerts))
-
-        for category_obj in category_objs:
-            alerts_list = []
-
-            for coin_bot in category_obj.coin_bot:
-                alerts = coin_bot.alerts
-                if limit is not None:
-                    alerts = alerts[:limit]
                 for alert in alerts:
                     alert_dict = {
                         'alert_id': alert.alert_id,
@@ -147,72 +202,9 @@ def get_alerts_by_categories_v1():
 
                     alerts_list.append(alert_dict)
 
-            result[category_obj.category] = alerts_list
-
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
-
-@tradingview_bp.route('/api/filter/alerts', methods=['GET', 'POST'])
-def get_filtered_alerts(): 
-    try:
-        coin = request.args.get('coin')
-        date = request.args.get('date')
-
-        if not coin:
-            return {'message': "Coin is required"}, 400
-
-        if date not in ["today", "this week", "last week", "4h"]: 
-            return {'message': "Date not valid"}, 400
-        else:
-            coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == coin.casefold().strip()).first()
-
-            if not coin_bot:
-                return {'message': f'{coin} not found'}, 404
+                return {'alerts': alerts_list}, 200
             else:
-                coin_bot_id = coin_bot.bot_id
-
-                if date == 'today':
-                    start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-                elif date == 'this week':
-                    today = datetime.now()
-                    start_date = today - timedelta(days=today.weekday())
-                    start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-                elif date == 'last week':
-                    today = datetime.now()
-                    start_date = today - timedelta(days=(today.weekday() + 7))
-                    start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-                elif date == '4h':
-                    start_date = datetime.now() - timedelta(hours=4)
-                else:
-                    start_date = None
-
-                # Filter alerts based on date range and limit to 10
-                if start_date:
-                    alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).order_by(desc(Alert.created_at)).limit(10).all()
-                else:
-                    alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id).order_by(desc(Alert.created_at)).limit(10).all()
-
-                if alerts:
-                    # Convert alerts to a list of dictionaries
-                    alerts_list = []
-
-                    for alert in alerts:
-                        alert_dict = {
-                            'alert_id': alert.alert_id,
-                            'alert_name': alert.alert_name,
-                            'alert_message': alert.alert_message,
-                            'symbol': alert.symbol,
-                            'price': alert.price,
-                            'coin_bot_id': alert.coin_bot_id,
-                            'created_at': alert.created_at.isoformat()  # Convert to ISO format
-                        }
-
-                        alerts_list.append(alert_dict)
-
-                    return {'alerts': alerts_list}, 200
-                else:
-                    return {'message': f'No alerts found for {coin} on {date}'}, 204
+                return {'message': f'No alerts found for {coin} on {date}'}, 204
 
     except Exception as e:
         return {'message': f'An error occurred: {str(e)}'}, 500
@@ -243,32 +235,33 @@ def receive_data_from_tv():
                 # Emits the alert data to the client
                 socketio.emit('new_alert', {'message': data_text})
                 
-                data_dict = {} 
+                # data_dict = {} 
 
-                for line in data_lines:
-                    if ':' in line:
-                        key, value = line.split(':', 1)
-                        data_dict[key.strip()] = value.strip()
+                # for line in data_lines:
+                #     if ':' in line:
+                #         key, value = line.split(':', 1)
+                #         data_dict[key.strip()] = value.strip()
 
-                alert_name = data_dict.get('alert_name', '') 
-                symbol = data_dict.get('symbol', '') 
-                message = data_dict.get('message', '')  
-                price = data_dict.get('price', data_dict.get('last_price', ''))
+                # alert_name = data_dict.get('alert_name', '') 
+                # symbol = data_dict.get('symbol', '') 
+                # message = data_dict.get('message', '')  
+                # price = data_dict.get('price', data_dict.get('last_price', ''))
                 
-                response, status = send_alert_strategy_to_telegram(price=price,
-                                                alert_name=alert_name,
-                                                message=message,
-                                                symbol=symbol,
-                                                )
+                # response, status = send_alert_strategy_to_telegram(price=price,
+                #                                 alert_name=alert_name,
+                #                                 message=message,
+                #                                 symbol=symbol,
+                #                                 )
                 
-                if status != 200:
-                    send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                                                        title_message='Error seding Tradingview Alert',
-                                                        sub_title='Reason',
-                                                        message=f"{str(response)} - Data: {str(request.data)}")
+                # if status != 200:
+                #     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                #                                         title_message='Error seding Tradingview Alert',
+                #                                         sub_title='Reason',
+                #                                         message=f"{str(response)} - Data: {str(request.data)}")
 
 
-                return response, status
+                # return response, status
+                return 'test', 200
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
