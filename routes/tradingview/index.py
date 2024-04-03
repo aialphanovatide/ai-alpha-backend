@@ -146,7 +146,7 @@ def get_filtered_alerts():
         if not coin or not coin.strip():
             return jsonify({'error': 'Invalid or missing coin parameter'}), 400
         
-        if date and date not in ["today", "this week", "last week", "4h", "1h", "1w", "1d"]:
+        if date and date not in ["today", "this week", "last week", "4h", "1h", "1w", "1d", "24h"]:
             return jsonify({'error': 'Invalid date parameter'}), 400
         
         if limit:
@@ -180,10 +180,12 @@ def get_filtered_alerts():
                 start_date = datetime.now() - timedelta(hours=4)
             elif date == '1h':
                 start_date = datetime.now() - timedelta(hours=1)
+            elif date == '24h':
+                start_date = datetime.now() - timedelta(hours=24)
             else:
                 start_date =  datetime.now()
 
-            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at <= start_date).order_by(desc(Alert.created_at)).limit(limit).all()
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).order_by(desc(Alert.created_at)).limit(limit).all()
            
             if alerts:
                 # Convert alerts to a list of dictionaries
