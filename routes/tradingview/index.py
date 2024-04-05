@@ -146,7 +146,7 @@ def get_filtered_alerts():
         if not coin or not coin.strip():
             return jsonify({'error': 'Invalid or missing coin parameter'}), 400
         
-        if date and date not in ["today", "this week", "last week", "4h", "1h", "1w", "1d"]:
+        if date and date not in ["today", "this week", "last week", "4h", "1h", "1w", "1d", "24h"]:
             return jsonify({'error': 'Invalid date parameter'}), 400
         
         if limit:
@@ -180,10 +180,12 @@ def get_filtered_alerts():
                 start_date = datetime.now() - timedelta(hours=4)
             elif date == '1h':
                 start_date = datetime.now() - timedelta(hours=1)
+            elif date == '24h':
+                start_date = datetime.now() - timedelta(hours=24)
             else:
                 start_date =  datetime.now()
 
-            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at <= start_date).order_by(desc(Alert.created_at)).limit(limit).all()
+            alerts = session.query(Alert).filter(Alert.coin_bot_id == coin_bot_id, Alert.created_at >= start_date).order_by(desc(Alert.created_at)).limit(limit).all()
            
             if alerts:
                 # Convert alerts to a list of dictionaries
@@ -235,33 +237,32 @@ def receive_data_from_tv():
                 # Emits the alert data to the client
                 socketio.emit('new_alert', {'message': data_text})
                 
-                # data_dict = {} 
+                data_dict = {} 
 
-                # for line in data_lines:
-                #     if ':' in line:
-                #         key, value = line.split(':', 1)
-                #         data_dict[key.strip()] = value.strip()
+                for line in data_lines:
+                     if ':' in line:
+                         key, value = line.split(':', 1)
+                         data_dict[key.strip()] = value.strip()
 
-                # alert_name = data_dict.get('alert_name', '') 
-                # symbol = data_dict.get('symbol', '') 
-                # message = data_dict.get('message', '')  
-                # price = data_dict.get('price', data_dict.get('last_price', ''))
+                alert_name = data_dict.get('alert_name', '') 
+                symbol = data_dict.get('symbol', '') 
+                message = data_dict.get('message', '')  
+                price = data_dict.get('price', data_dict.get('last_price', ''))
                 
-                # response, status = send_alert_strategy_to_telegram(price=price,
-                #                                 alert_name=alert_name,
-                #                                 message=message,
-                #                                 symbol=symbol,
-                #                                 )
+                response, status = send_alert_strategy_to_telegram(price=price,
+                                                 alert_name=alert_name,
+                                                 message=message,
+                                                 symbol=symbol,
+                                                 )
                 
-                # if status != 200:
-                #     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                #                                         title_message='Error seding Tradingview Alert',
-                #                                         sub_title='Reason',
-                #                                         message=f"{str(response)} - Data: {str(request.data)}")
+                if status != 200:
+                     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                                                         title_message='Error seding Tradingview Alert',
+                                                         sub_title='Reason',
+                                                         message=f"{str(response)} - Data: {str(request.data)}")
 
 
-                # return response, status
-                return 'test', 200
+                return response, status
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
