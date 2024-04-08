@@ -27,7 +27,7 @@ def get_latest_news():
         else:
             limit = 20 
 
-        start_date = datetime.now() - timedelta(days=5)
+        start_date = datetime.now() - timedelta(days=30)
 
         # Utilizar el límite en la consulta
         articles = session.query(Article).filter(
