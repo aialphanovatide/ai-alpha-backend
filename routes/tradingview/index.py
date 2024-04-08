@@ -14,21 +14,10 @@ tradingview_bp = Blueprint(
     static_folder='static'
 )
 
-new_alert = Alert(alert_name='test',
-                        alert_message = 'test',
-                        symbol='btc',
-                        price=234,
-                        coin_bot_id=1
-                        )
-
-session.add(new_alert)
-session.commit()
-
 # Test route for emitting data through a websocket
-@tradingview_bp.route('/emit')
+@tradingview_bp.route('/emit', methods=['POST'])
 def index():
-    data = request.data.decode('utf-8')
-    socketio.emit('new_alert', {'message': data})
+    socketio.emit('new_alert', {'message': 'Holaaa'})
     return 'message sent', 200
 
 # Gets all alerts of a catgerory
@@ -234,15 +223,15 @@ def receive_data_from_tv():
                 data_text = request.data.decode('utf-8')  # Decode the bytes to a string
                 data_lines = data_text.split(',')  # Split the text into lines
                 
-                # Emits the alert data to the client
-                socketio.emit('new_alert', {'message': data_text})
-                
                 data_dict = {} 
 
                 for line in data_lines:
-                     if ':' in line:
-                         key, value = line.split(':', 1)
-                         data_dict[key.strip()] = value.strip()
+                    if ':' in line:
+                        key, value = line.split(':', 1)
+                        data_dict[key.strip()] = value.strip()
+
+                 # Emits the alert data to the client
+                socketio.emit('new_alert', data_dict)
 
                 alert_name = data_dict.get('alert_name', '') 
                 symbol = data_dict.get('symbol', '') 
@@ -250,16 +239,16 @@ def receive_data_from_tv():
                 price = data_dict.get('price', data_dict.get('last_price', ''))
                 
                 response, status = send_alert_strategy_to_telegram(price=price,
-                                                 alert_name=alert_name,
-                                                 message=message,
-                                                 symbol=symbol,
-                                                 )
+                                                alert_name=alert_name,
+                                          message=message,
+                                                symbol=symbol,
+                                                )
                 
                 if status != 200:
-                     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                                                         title_message='Error seding Tradingview Alert',
-                                                         sub_title='Reason',
-                                                         message=f"{str(response)} - Data: {str(request.data)}")
+                    send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                                                        title_message='Error seding Tradingview Alert',
+                                                        sub_title='Reason',
+                                                        message=f"{str(response)} - Data: {str(request.data)}")
 
 
                 return response, status
