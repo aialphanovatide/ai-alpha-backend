@@ -211,6 +211,7 @@ def resolve_redirects(url):
         return response.url
 
 
+
 # Gets the initial links for the rest of the categories
 def get_google_news_links(site, main_container, max_links=12):
     
@@ -218,9 +219,9 @@ def get_google_news_links(site, main_container, max_links=12):
     elements = []
 
     user_dir = '/tmp/playwright'
-
+    
     if not os.path.exists(user_dir):
-        os.makedirs(user_dir)
+        os.makedirs(user_dir)    
     
     # Sources we don't want articles from
     blacklist = ['https://tech-gate.org', 'https://medium.com/', 'https://learn.bybit.com', 'https://www.roubaixxl.fr/',
@@ -228,16 +229,15 @@ def get_google_news_links(site, main_container, max_links=12):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch_persistent_context(user_dir, headless=True)
-            # browser = p.webkit.launch(slow_mo=50, headless=False)
+            browser = p.chromium.launch_persistent_context(user_dir,slow_mo=10000, headless=True)
             page = browser.new_page()
 
-            page.goto(site, timeout=50000)
-            page.wait_for_load_state("domcontentloaded", timeout=50000)
+            page.goto(site, timeout=30000)
+            page.wait_for_load_state("domcontentloaded", timeout=30000)
 
             if main_container != "None":
                 container = page.wait_for_selector(
-                    main_container, timeout=50000)
+                    main_container, timeout=30000)
                 a_elements = container.query_selector_all('a')
 
                 for link in a_elements:
