@@ -109,6 +109,7 @@ class CoinBot(Base):
     hacks = relationship('Hacks', back_populates='coin_bot', lazy=True)
     dapps = relationship('DApps', back_populates='coin_bot', lazy=True)
     upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True)
+    narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True)
 
 
 class Keyword(Base):
@@ -273,6 +274,23 @@ class AnalyzedArticle(Base):
     url = Column(String)
     is_analyzed = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
+
+class NarrativeTrading(Base):
+    __tablename__ = 'narrative_trading'
+    narrative_trading_id = Column(Integer, primary_key=True, autoincrement=True)
+    narrative_trading = Column(String)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    category_name = Column(String, nullable=False, default=None)
+    coin_bot_id = Column(Integer, ForeignKey(
+        'coin_bot.bot_id'), nullable=False)
+
+    coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)
+
+    def to_dict(self):
+        return {
+            'narrative_trading_id': self.narrative_trading_id,
+            'narrative_trading': self.narrative_trading,
+            'created_at': str(self.created_at)}
 
 
 class Chart(Base):
