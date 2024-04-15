@@ -103,7 +103,7 @@ def get_links(site, main_container):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(slow_mo=40, headless=False)
+            browser = p.chromium.launch(slow_mo=40, headless=True)
             page = browser.new_page()
 
             page.goto(site, timeout=30000)
