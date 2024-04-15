@@ -106,30 +106,36 @@ def get_narrative_trading_images(narrative_trading_object):
 @narrative_trading_bp.route('/api/get_narrative_trading_by_coin', methods=['GET'])
 def get_narrative_trading_by_coin():
     try:
+        # Obtén el nombre o ID de la moneda/bot de la solicitud
         coin_bot_name = request.args.get('coin_bot_name')
         coin_bot_id = request.args.get('coin_bot_id')
 
+        # Verifica que se haya proporcionado un ID o nombre de moneda/bot
         if not coin_bot_id and not coin_bot_name:
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
+        # Obtén los objetos de "narrative trading" según el nombre o ID de la moneda/bot
         narrative_trading_objects = []
         if coin_bot_name:
             narrative_trading_objects = get_narrative_trading_by_name(coin_bot_name)
         elif coin_bot_id:
             narrative_trading_objects = get_narrative_trading_by_id(coin_bot_id)
 
+        # Si no se encuentran objetos de "narrative trading", devuelve un mensaje de error
         if not narrative_trading_objects:
-            return jsonify({'message': 'No narrative_trading found', 'status': 404}), 404
+            return jsonify({'message': 'No narrative trading found', 'status': 404}), 404
 
-        narrative_trading_data = [{'narrative_trading': nt.to_dict(
-        ), 'narrative_trading_images': get_narrative_trading_images(nt)} for nt in narrative_trading_objects]
+        # Transforma los objetos de "narrative trading" a diccionarios y devuelve los datos
+        narrative_trading_data = [nt.to_dict() for nt in narrative_trading_objects]
 
         return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
 
+    # Maneja excepciones y devuelve un mensaje de error genérico
     except Exception as e:
-        session.rollback()
+        session.rollback()  # Si se utiliza una sesión de base de datos, realiza un rollback
         return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
-
+    
+    
 # Gets all the nt from all coins
 @narrative_trading_bp.route('/get_narrative_trading', methods=['GET'])
 def get_all_narrative_trading():
