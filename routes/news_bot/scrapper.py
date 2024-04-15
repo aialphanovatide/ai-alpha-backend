@@ -102,17 +102,17 @@ def get_links(site, main_container):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch()
+            browser = p.chromium.launch(slow_mo=40, headless=True)
             page = browser.new_page()
 
-            page.goto(site, timeout=30000)
-            page.wait_for_load_state("domcontentloaded", timeout=30000)
+            page.goto(site, timeout=70000)
+            page.wait_for_load_state("domcontentloaded", timeout=70000)
 
             elements = []
 
             if main_container != "None":
                 container = page.wait_for_selector(
-                    main_container, timeout=30000)
+                    main_container, timeout=70000)
                 a_elements = container.query_selector_all('a')
 
                 for link in a_elements:
