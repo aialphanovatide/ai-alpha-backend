@@ -323,11 +323,10 @@ def get_google_news_links(site, main_container, max_links=30):
 
 # Validate the initial links for all the categories
 def scrape_sites(data_source_url, base_url, site_name, category_name, main_container, session_instance):
-
     article_urls = set()
     elements = None
 
-    if category_name == 'bitcoin' or category_name == 'solana':
+    if category_name == 'bitcoin':
         elements = get_links(site=data_source_url,
                              main_container=main_container,
                              )
@@ -415,7 +414,6 @@ def scrape_sites(data_source_url, base_url, site_name, category_name, main_conta
 
 def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot_name, session):
     counter_articles_saved = 0
-
     for article_link in article_urls:
         article_to_save = []
 
@@ -885,7 +883,6 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
 
 
 def start_periodic_scraping(category_name):
-
     with Session() as session:
         category = session.query(Category).filter(
             Category.category == category_name).first()
