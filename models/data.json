@@ -435,7 +435,7 @@
             "base_url": "https://u.today",
             "website_name": "Utoday",
             "is_URL_complete": true,
-            "main_container": "None"
+            "main_container": ".categories-list"
           },
           {
             "site": "https://cryptonews.net/news/ethereum/",
