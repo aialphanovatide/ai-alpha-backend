@@ -389,74 +389,17 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/tags/ethereum",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
-            "is_URL_complete": false,
-            "main_container": ".tag-page__posts-col"
-          },
-          {
-            "site": "https://bitcoinist.com/category/ethereum/",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/category/ethereum-news/",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": ".covergaelist"
-          },
-          {
-            "site": "https://www.coindesk.com/tag/ether/",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
+            "site": "https://news.google.com/search?q=ethereum%20%22ethereum%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/ethereum/",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://ambcrypto.com/",
-            "base_url": "https://ambcrypto.com",
-            "website_name": "Ambcrypto",
-            "is_URL_complete": true,
-            "main_container": ".archive-posts"
-          },
-          {
-            "site": "https://u.today/ethereum-news",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/news/ethereum/",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://coincodex.com/news/category/ethereum/",
-            "base_url": "https://coincodex.com",
-            "website_name": "Coincodex",
-            "is_URL_complete": false,
-            "main_container": ".two-col-layout"
           }
         ],
         "black_list": [
           "Amaka Nwaokocha",
           "Zhiyuan Sun",
           "Bitcoin Core",
-          "Ethereum",
           "Ezra Reguerra",
           "Rakesh Upadhyay",
           "Serge Egon Ostman",
