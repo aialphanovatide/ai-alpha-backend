@@ -128,7 +128,8 @@ def get_narrative_trading_by_coin():
 
             # Agrega el nombre de la categoría al diccionario de "narrative trading"
             nt_dict['category_name'] = nt.category_name
-
+            nt_dict['coin_bot_id'] = nt.coin_bot_id 
+                
             narrative_trading_data.append(nt_dict)
 
         return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
@@ -157,7 +158,7 @@ def get_all_narrative_trading():
 
             # Agrega el nombre de la categoría al diccionario de "narrative trading"
             narrative_trading_dict['category_name'] = analy.category_name
-
+            narrative_trading_dict['coin_bot_id'] = analy.coin_bot_id
             # narrative_trading_dict.pop('category_name', None)  # Remove 'category_name' if it's not relevant
             # narrative_trading_dict.pop('coin_bot_id', None)  # Remove 'coin_bot_id' if it's not relevant
 
