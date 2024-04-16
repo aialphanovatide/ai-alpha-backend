@@ -213,7 +213,7 @@ def resolve_redirects(url):
 
 
 # Gets the initial links for the rest of the categories
-def get_google_news_links(site, main_container, max_links=12):
+def get_google_news_links(site, main_container, max_links=30):
     
     base_url = "https://news.google.com/articles"
     elements = []
@@ -327,7 +327,7 @@ def scrape_sites(data_source_url, base_url, site_name, category_name, main_conta
     article_urls = set()
     elements = None
 
-    if category_name == 'bitcoin' or category_name == 'ethereum' or category_name == 'solana':
+    if category_name == 'bitcoin' or category_name == 'solana':
         elements = get_links(site=data_source_url,
                              main_container=main_container,
                              )
@@ -487,15 +487,15 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                         keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
                     #Send the message to Slack
-                    send_NEWS_message_to_slack(channel_id=channel_id,
-                                                title=title,
-                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                url=article_link,
-                                                summary=summary,
-                                                image=slack_image,
-                                                category_name=category_name,
-                                                extra_info=matched_keywords_string
-                                                )
+                    # send_NEWS_message_to_slack(channel_id=channel_id,
+                    #                             title=title,
+                    #                             date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    #                             url=article_link,
+                    #                             summary=summary,
+                    #                             image=slack_image,
+                    #                             category_name=category_name,
+                    #                             extra_info=matched_keywords_string
+                    #                             )
 
                     bot = session.query(CoinBot).filter(
                         CoinBot.bot_name == coin_bot_name).first()
@@ -559,7 +559,7 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
 
 
 def scrape_articles(article_urls, site_name, category_name, coin_bot_name, session):
-    if category_name == 'bitcoin' or category_name == 'ethereum' or category_name == 'solana':
+    if category_name == 'bitcoin' or category_name == 'solana':
         try:
             counter_articles_saved = 0
 
