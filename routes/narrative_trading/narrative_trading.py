@@ -72,7 +72,7 @@ def get_narrative_trading(coin_bot_id):
             # Exclude images and any other irrelevant fields
             narrative_trading_dict.pop('narrative_trading_images', None)
             narrative_trading_dict.pop('image', None)  # If 'image' is present in the original object
-
+            narrative_trading_dict['category_name'] = nt.category_name
             narrative_trading_data.append(narrative_trading_dict)
 
         return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
@@ -102,37 +102,39 @@ def get_narrative_trading_by_name(coin_bot_name):
 def get_narrative_trading_images(narrative_trading_object):
     return [{'image_id': img.image_id, 'image': img.image} for img in session.query(NarrativeTrading).filter_by(narrative_trading_id=narrative_trading_object.narrative_trading_id).all()]
 
-# Route to get narrative_trading by coin id/name
 @narrative_trading_bp.route('/api/get_narrative_trading_by_coin', methods=['GET'])
 def get_narrative_trading_by_coin():
     try:
-        # Obtén el nombre o ID de la moneda/bot de la solicitud
         coin_bot_name = request.args.get('coin_bot_name')
         coin_bot_id = request.args.get('coin_bot_id')
 
-        # Verifica que se haya proporcionado un ID o nombre de moneda/bot
         if not coin_bot_id and not coin_bot_name:
             return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
 
-        # Obtén los objetos de "narrative trading" según el nombre o ID de la moneda/bot
         narrative_trading_objects = []
         if coin_bot_name:
             narrative_trading_objects = get_narrative_trading_by_name(coin_bot_name)
         elif coin_bot_id:
             narrative_trading_objects = get_narrative_trading_by_id(coin_bot_id)
 
-        # Si no se encuentran objetos de "narrative trading", devuelve un mensaje de error
         if not narrative_trading_objects:
             return jsonify({'message': 'No narrative trading found', 'status': 404}), 404
 
-        # Transforma los objetos de "narrative trading" a diccionarios y devuelve los datos
-        narrative_trading_data = [nt.to_dict() for nt in narrative_trading_objects]
+        narrative_trading_data = []
+        for nt in narrative_trading_objects:
+            nt_dict = nt.to_dict()
+            nt_dict.pop('narrative_trading_images', None)
+            nt_dict.pop('image', None)
+
+            # Agrega el nombre de la categoría al diccionario de "narrative trading"
+            nt_dict['category_name'] = nt.category_name
+
+            narrative_trading_data.append(nt_dict)
 
         return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
 
-    # Maneja excepciones y devuelve un mensaje de error genérico
     except Exception as e:
-        session.rollback()  # Si se utiliza una sesión de base de datos, realiza un rollback
+        session.rollback()
         return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
     
     
@@ -153,8 +155,11 @@ def get_all_narrative_trading():
             narrative_trading_dict.pop('narrative_trading_images', None)
             narrative_trading_dict.pop('image', None)  # If 'image' is present in the original object
 
-            narrative_trading_dict.pop('category_name', None)  # Remove 'category_name' if it's not relevant
-            narrative_trading_dict.pop('coin_bot_id', None)  # Remove 'coin_bot_id' if it's not relevant
+            # Agrega el nombre de la categoría al diccionario de "narrative trading"
+            narrative_trading_dict['category_name'] = analy.category_name
+
+            # narrative_trading_dict.pop('category_name', None)  # Remove 'category_name' if it's not relevant
+            # narrative_trading_dict.pop('coin_bot_id', None)  # Remove 'coin_bot_id' if it's not relevant
 
             narrative_trading_data.append(narrative_trading_dict)
 
@@ -163,7 +168,6 @@ def get_all_narrative_trading():
     except Exception as e:
         session.rollback()
         return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
-
 
 # Creates an narrative_trading
 @narrative_trading_bp.route('/post_narrative_trading', methods=['POST'])
