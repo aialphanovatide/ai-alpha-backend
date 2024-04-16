@@ -520,23 +520,25 @@ with session:
             with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
-                # for item in config:
                 for index, item in enumerate(config):
                     main_keyword = item['main_keyword']
                     alias = item['alias']
                     coins = item['coins']
 
                     for index, coin in enumerate(coins):
+                        coin_keyword = coin['coin_keyword'].casefold()
+                        coin_bot = session.query(CoinBot).filter_by(bot_name=coin_keyword).first()
+                        
+                        if coin_bot is None:
+                            print(f"No CoinBot found for keyword: {coin_keyword}")
+                            continue  # Skip this coin since there's no corresponding CoinBot
 
-                        coin_bot = session.query(CoinBot).filter_by(bot_name=coin['coin_keyword'].casefold()).first()
                         print("Bot ID: ", coin_bot.bot_id)
-                        print("Bot name: ", coin['coin_keyword'])
-                        coin_keyword = coin['coin_keyword']
+                        print("Bot name: ", coin_keyword)
                         keywords = coin['keywords']
                         sites = coin['sites']
                         black_list = coin['black_list']
 
-                        # for site_data in sites:
                         for index, site_data in enumerate(sites):
                             site = Site(
                                 site_name=str(site_data['website_name']),
@@ -547,7 +549,7 @@ with session:
                                 coin_bot_id=coin_bot.bot_id
                             )
                             session.add(site)
-                            session.commit()
+                        session.commit()
                 print('-----Sources updated-----')
 
     except Exception as e:
