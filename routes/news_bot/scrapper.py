@@ -229,15 +229,15 @@ def get_google_news_links(site, main_container, max_links=30):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch_persistent_context(user_dir,slow_mo=10000, headless=True)
+            
+            browser = p.chromium.launch_persistent_context(user_dir, slow_mo=10, headless=False)
             page = browser.new_page()
 
-            page.goto(site, timeout=30000)
-            page.wait_for_load_state("domcontentloaded", timeout=30000)
-
+            page.goto(site, timeout=70000)
+            page.wait_for_load_state("domcontentloaded", timeout=70000)
             if main_container != "None":
                 container = page.wait_for_selector(
-                    main_container, timeout=30000)
+                    main_container, timeout=700000)
                 a_elements = container.query_selector_all('a')
 
                 for link in a_elements:
@@ -484,16 +484,7 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                     matched_keywords_string = ', '.join(
                         keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
-                    #Send the message to Slack
-                    send_NEWS_message_to_slack(channel_id=channel_id,
-                                                title=title,
-                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                url=article_link,
-                                                summary=summary,
-                                                image=slack_image,
-                                                category_name=category_name,
-                                                extra_info=matched_keywords_string
-                                                )
+                   
 
                     bot = session.query(CoinBot).filter(
                         CoinBot.bot_name == coin_bot_name).first()
@@ -514,6 +505,8 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
 
                     article_id = new_article.article_id
                     image_filename = f"{article_id}.jpg"
+
+                    
                         
                     if image:
                             try:
@@ -528,8 +521,19 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                                 print("Error:", e)
                     else:
                         print("Image not generated.")
-
+                    
                     counter_articles_saved += 1
+                    image_url=f'https://apparticleimages.s3.us-east-2.amazonaws.com/{image_filename}'
+                     #Send the message to Slack
+                    send_NEWS_message_to_slack(channel_id=channel_id,
+                                                title=title,
+                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                url=article_link,
+                                                summary=summary,
+                                                image=image_url,
+                                                category_name=category_name,
+                                                extra_info=matched_keywords_string
+                                                )
 
                     # current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
