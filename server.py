@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from websocket.socket import socketio
+from ws.socket import socketio
 from routes.chart.chart import chart_bp
 from routes.dashboard.bots import bots_route
 from routes.news_bot.index import scrapper_bp
