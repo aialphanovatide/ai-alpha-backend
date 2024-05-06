@@ -8,7 +8,6 @@ from routes.news_bot.index import activate_news_bot, deactivate_news_bot, scrapp
 from routes.telegram.index import telegram_bp 
 from routes.slack.slack_actions import slack_events_bp
 from flask_cors import CORS
-from websocket.socket import socketio
 from flask import Flask, jsonify, render_template, session as flask_session
 from flask import request, redirect, url_for
 from config import Session as DBSession 
