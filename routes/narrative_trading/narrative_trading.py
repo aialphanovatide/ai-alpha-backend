@@ -334,12 +334,12 @@ def publish_narrative_trading(coin_bot_id, content, category_name):
     print("Publishing narrative_trading with title:", title)
 
 
-@narrative_trading_bp.route('/schedule_post', methods=['POST'])
+@narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
 def schedule_post():
     try:
         if not sched.running:
             sched.start()
-
+            
         coin_bot_id = request.form.get('coinBot')
         category_name = request.form.get('category_name')
         content = request.form.get('content')
@@ -348,7 +348,6 @@ def schedule_post():
         if not (coin_bot_id and content and scheduled_date_str):
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
 
-        # Crear un objeto datetime
         scheduled_datetime = datetime.strptime(
             scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
 
@@ -361,7 +360,7 @@ def schedule_post():
 
 
 # Gets all the schedule narrative_trading
-@narrative_trading_bp.route('/get_scheduled_jobs', methods=['GET'])
+@narrative_trading_bp.route('//get_narrative_trading_jobs', methods=['GET'])
 def get_jobs():
     try:
         job_listing = []
