@@ -176,12 +176,12 @@ def get_categories():
                 'is_active': category.is_active,
                 'icon': category.icon,
                 'borderColor': category.border_color,
-                'created_at': category.created_at.isoformat(),
+                'created_at': category.created_at,
                 'coin_bots': [{
                     'bot_id': bot.bot_id,
                     'bot_name': bot.bot_name,
                     'image': bot.image,
-                    'created_at': bot.created_at.isoformat()
+                    'created_at': bot.created_at
                 } for bot in category.coin_bot]
             })
         
