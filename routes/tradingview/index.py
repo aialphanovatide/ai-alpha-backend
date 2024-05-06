@@ -1,5 +1,5 @@
 from sqlalchemy import desc  
-from websocket.socket import socketio
+from ws.socket import socketio
 from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint

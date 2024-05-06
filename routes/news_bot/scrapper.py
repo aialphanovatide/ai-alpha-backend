@@ -794,16 +794,7 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                         matched_keywords_string = ', '.join(
                             keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
-                        # #Send the message to Slack
-                        send_NEWS_message_to_slack(channel_id=channel_id,
-                                                   title=title,
-                                                   date_time=valid_date,
-                                                   url=article_link,
-                                                   summary=summary,
-                                                   image=slack_image,
-                                                   category_name=category_name,
-                                                   extra_info=matched_keywords_string
-                                                   )
+                        
 
                         # if category_name == 'bitcoin':
                         #     response, status = send_tweets_to_twitter(content=summary,
@@ -849,8 +840,20 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                                 print("Error:", e)
                         else:
                             print("Image not generated.")
-
+                            
                         counter_articles_saved += 1
+                        image_url=f'https://apparticleimages.s3.us-east-2.amazonaws.com/{image_filename}'
+                        
+                        #Send the message to Slack
+                        send_NEWS_message_to_slack(channel_id=channel_id,
+                                                    title=title,
+                                                    date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                    url=article_link,
+                                                    summary=summary,
+                                                    image=image_url,
+                                                    category_name=category_name,
+                                                    extra_info=matched_keywords_string
+                                                    )
 
                         # current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
