@@ -360,7 +360,7 @@ def schedule_post():
 
 
 # Gets all the schedule narrative_trading
-@narrative_trading_bp.route('//get_narrative_trading_jobs', methods=['GET'])
+@narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
 def get_jobs():
     try:
         job_listing = []
@@ -381,8 +381,9 @@ def get_jobs():
 
 
 # Deletes a scheduled job by job id
-@narrative_trading_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
+@narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
+    print("job_id", job_id)
     try:
         # Find the by schedule narrative_trading by ID
         job = sched.get_job(job_id)
