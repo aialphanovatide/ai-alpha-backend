@@ -259,9 +259,7 @@ def delete_narrative_trading(narrative_trading_id):
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
-# Edits an narrative_trading
-
-
+# Edits an narrative_trading post
 @narrative_trading_bp.route('/edit_narrative_trading/<int:narrative_trading_id>', methods=['PUT'])
 def edit_narrative_trading(narrative_trading_id):
     try:
@@ -317,7 +315,7 @@ def get_last_narrative_trading():
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
 
-# Funtion to execute by the scheduler
+# Funtion to execute by the scheduler post
 def publish_narrative_trading(coin_bot_id, content, category_name):
     title_end_index = content.find('\n')
     if title_end_index != -1:
@@ -360,7 +358,7 @@ def schedule_post():
 
 
 # Gets all the schedule narrative_trading
-@narrative_trading_bp.route('//get_narrative_trading_jobs', methods=['GET'])
+@narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
 def get_jobs():
     try:
         job_listing = []
@@ -390,6 +388,7 @@ def delete_scheduled_job(job_id):
             return jsonify({'error': 'Scheduled job not found', 'status': 404, 'success': False}), 404
 
         # Deletes an narrative_trading
+        print("Scheduled deleted")
         sched.remove_job(job_id)
 
         return jsonify({'message': 'Scheduled job deleted successfully', 'status': 200, 'success': True}), 200
