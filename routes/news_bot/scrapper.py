@@ -228,16 +228,17 @@ def get_google_news_links(site, main_container, max_links=30):
                  'https://cryptonews.com/editors/sead-fadilpasic', 'https://uk.movies.yahoo.com']
 
     try:
+       
         with sync_playwright() as p:
-            
-            browser = p.chromium.launch_persistent_context(user_dir, slow_mo=10, headless=False)
+   
+            browser = p.chromium.launch_persistent_context(user_dir, slow_mo=200, headless=False)
             page = browser.new_page()
 
             page.goto(site, timeout=70000)
             page.wait_for_load_state("domcontentloaded", timeout=70000)
             if main_container != "None":
                 container = page.wait_for_selector(
-                    main_container, timeout=700000)
+                    main_container, timeout=70000)
                 a_elements = container.query_selector_all('a')
 
                 for link in a_elements:

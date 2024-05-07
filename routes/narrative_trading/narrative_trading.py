@@ -13,10 +13,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.jobstores.base import JobLookupError
 from routes.news_bot.poster_generator import generate_poster_prompt
+import pytz
 
 sched = BackgroundScheduler()
 
 narrative_trading_bp = Blueprint('narrative_trading', __name__)
+buenos_aires_tz = pytz.timezone('America/Argentina/Buenos_Aires')
 
 load_dotenv()
 
@@ -259,9 +261,7 @@ def delete_narrative_trading(narrative_trading_id):
         session.rollback()
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
-# Edits an narrative_trading
-
-
+# Edits an narrative_trading post
 @narrative_trading_bp.route('/edit_narrative_trading/<int:narrative_trading_id>', methods=['PUT'])
 def edit_narrative_trading(narrative_trading_id):
     try:
@@ -317,7 +317,7 @@ def get_last_narrative_trading():
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
 
-# Funtion to execute by the scheduler
+# Funtion to execute by the scheduler post
 def publish_narrative_trading(coin_bot_id, content, category_name):
     title_end_index = content.find('\n')
     if title_end_index != -1:
@@ -347,12 +347,13 @@ def schedule_post():
 
         if not (coin_bot_id and content and scheduled_date_str):
             return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
+        
+        scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+        scheduled_datetime_buenos_aires = scheduled_datetime.astimezone(buenos_aires_tz)
 
-        scheduled_datetime = datetime.strptime(
-            scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+        # Agregar un nuevo trabajo con la fecha y hora ajustada
+        sched.add_job(publish_narrative_trading, args=[coin_bot_id, content, category_name], trigger=DateTrigger(run_date=scheduled_datetime_buenos_aires))
 
-        # Agregar un nuevo trabajo
-        sched.add_job(publish_narrative_trading, args=[coin_bot_id, content, category_name], trigger=DateTrigger(run_date=scheduled_datetime))
 
         return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
     except Exception as e:
@@ -383,7 +384,6 @@ def get_jobs():
 # Deletes a scheduled job by job id
 @narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
-    print("job_id", job_id)
     try:
         # Find the by schedule narrative_trading by ID
         job = sched.get_job(job_id)
@@ -391,6 +391,7 @@ def delete_scheduled_job(job_id):
             return jsonify({'error': 'Scheduled job not found', 'status': 404, 'success': False}), 404
 
         # Deletes an narrative_trading
+        print("Scheduled deleted")
         sched.remove_job(job_id)
 
         return jsonify({'message': 'Scheduled job deleted successfully', 'status': 200, 'success': True}), 200
