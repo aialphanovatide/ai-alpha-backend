@@ -164,7 +164,7 @@ def get_links(site, main_container):
         return False
 
 
-def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(256, 256)):
+def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(512, 512)):
     try:
         response = requests.get(image_data)
         if response.status_code == 200:
