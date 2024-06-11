@@ -164,7 +164,7 @@ def get_links(site, main_container):
         return False
 
 
-def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(256, 256)):
+def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(512, 512)):
     try:
         response = requests.get(image_data)
         if response.status_code == 200:
@@ -210,18 +210,14 @@ def resolve_redirects(url):
     else:
         return response.url
 
-
-
-# Gets the initial links for the rest of the categories
+## Gets the initial links for the rest of the categories
 def get_google_news_links(site, main_container, max_links=30):
     
     base_url = "https://news.google.com/articles"
     elements = []
 
-    user_dir = '/tmp/playwright'
-    
-    if not os.path.exists(user_dir):
-        os.makedirs(user_dir)    
+    root_dir = os.path.abspath(os.path.dirname(__file__))
+    user_data_dir = os.path.join(root_dir, 'userDataDir')   
     
     # Sources we don't want articles from
     blacklist = ['https://tech-gate.org', 'https://medium.com/', 'https://learn.bybit.com', 'https://www.roubaixxl.fr/',
@@ -230,18 +226,29 @@ def get_google_news_links(site, main_container, max_links=30):
     try:
        
         with sync_playwright() as p:
-   
-            browser = p.chromium.launch_persistent_context(user_dir, slow_mo=200, headless=False)
-            page = browser.new_page()
+            browser = p.chromium.launch_persistent_context(
+                user_data_dir=user_data_dir,
+                headless=False,
+                bypass_csp=True, 
+                ignore_https_errors=True, 
+                accept_downloads=True,
+                slow_mo=200,
+                args=['--disable-features=IsolateOrigins,site-per-process', '--no-first-run'], 
+                )
+            page = browser.pages[0] if browser.pages else browser.new_page()
 
+           
             page.goto(site, timeout=70000)
             page.wait_for_load_state("domcontentloaded", timeout=70000)
+            
+            
             if main_container != "None":
-                container = page.wait_for_selector(
-                    main_container, timeout=70000)
+                container = page.wait_for_selector(main_container, timeout=70000)
                 a_elements = container.query_selector_all('a')
+            else:
+                a_elements = page.query_selector_all('a')
 
-                for link in a_elements:
+            for link in a_elements:
                     href = link.get_attribute('href')
                     article_title = link.text_content().strip().casefold()
 
@@ -320,7 +327,6 @@ def get_google_news_links(site, main_container, max_links=30):
     except Exception as e:
         print("\nError getting links: " + str(e) + "\n")
         return False
-
 
 # Validate the initial links for all the categories
 def scrape_sites(data_source_url, base_url, site_name, category_name, main_container, session_instance):

@@ -1,5 +1,6 @@
+import datetime
 from routes.news_bot.index import activate_news_bot
-from flask import render_template, session as flask_session, redirect, url_for, jsonify, Blueprint
+from flask import render_template, request, session as flask_session, redirect, url_for, jsonify, Blueprint
 from config import Session as DBSession, Chart, CoinBot, Category
 
 
@@ -55,3 +56,31 @@ def get_last_chart_update():
         return jsonify({'success': False, 'error': str(e)})
 
 
+
+@bots_route.route('/create_category', methods=['POST'])
+def create_category():
+    try:
+        # Parsea los datos del formulario
+        category_data = request.json
+
+        # Crea una nueva instancia de la clase Category
+        new_category = Category(
+            category=category_data['category'],
+            category_name=category_data['category_name'],
+            time_interval=category_data.get('time_interval', 50),
+            is_active=category_data.get('is_active', False),
+            border_color=category_data.get('border_color', 'No Color'),
+            icon=category_data.get('icon', 'No Image'),
+            created_at=datetime.datetime.now(),
+            updated_at=datetime.datetime.now()
+        )
+
+        # Guarda la nueva categoría en la base de datos
+        with DBSession() as session:
+            session.add(new_category)
+            session.commit()
+
+        return jsonify({'success': True, 'message': 'Category created successfully'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})

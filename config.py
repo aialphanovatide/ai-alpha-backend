@@ -71,6 +71,7 @@ class Category(Base):
     border_color = Column(String, default='No Color')
     icon = Column(String, default='No Image')
     created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
 

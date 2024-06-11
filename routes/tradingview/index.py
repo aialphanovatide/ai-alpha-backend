@@ -6,7 +6,7 @@ from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
 from .alert_strategy import send_alert_strategy_to_telegram
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
-
+from services.firebase.firebase import send_notification
 
 tradingview_bp = Blueprint(
     'tradingview_bp', __name__,
@@ -237,6 +237,48 @@ def receive_data_from_tv():
                 symbol = data_dict.get('symbol', '') 
                 message = data_dict.get('message', '')  
                 price = data_dict.get('price', data_dict.get('last_price', ''))
+
+                print('alert_name: ', alert_name)
+                print('symbol: ', symbol)
+                print('message: ', message)
+
+
+                token_name = str(symbol).casefold().split('usdt')[0] # btc, eth...
+                categories = {
+                    'baseblock_4999_m1': ['ada', 'sol', 'avax'],
+                    'corechain_4999_m1': ['near', 'ftm', 'kas'],
+                    'rootlink_4999_m1': ['atom', 'dot', 'qnt'],
+                    'xpayments_4999_m1': ['xlm', 'algo', 'xrp'],
+                    'lsds_4999_m1': ['ldo', 'rpl', 'fxs'],
+                    'boostlayer_4999_m1': ['matic', 'arb', 'op'],
+                    'truthnodes_4999_m1': ['link', 'api3', 'band'],
+                    'cycleswap_4999_m1': ['dydx', 'velo', 'gmx'],
+                    'nextrade_4999_m1': ['uni', 'sushi', 'cake'],
+                    'diversefi_4999_m1': ['aave', 'pendle', '1inch'],
+                    'intellichain_4999_m1': ['ocean', 'fet', 'rndr'],
+                    'bitcoin_4999_m1': ['BTC'],
+                    'ethereum_4999_m1': ['ETH'],
+                    'founders_14999_m1': []
+                }
+
+               
+
+                # Iterate over the keys and update 'founders_14999_m1' value list
+                for key, value in categories.items():
+                    if key != 'founders_14999_m1':
+                        categories['founders_14999_m1'].extend(value)
+                
+                matching_topics = []
+                for plan, tokens in categories.items():
+                 
+                    for token in tokens:
+                        if token.casefold() == token_name.casefold():
+                            matching_topics.append(plan)
+                            break
+                
+                for x in matching_topics:
+                    send_notification(topic=x, title=alert_name, body=message)
+                    print('notification send to: ', x)
                 
                 response, status = send_alert_strategy_to_telegram(price=price,
                                                 alert_name=alert_name,
