@@ -1,7 +1,6 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from websocket.socket import socketio
 from routes.chart.chart import chart_bp
 from routes.dashboard.bots import bots_route
 from routes.news_bot.index import scrapper_bp
@@ -42,8 +41,6 @@ app.name = 'AI Alpha'
 
 CORS(app, origins='*', supports_credentials=True)
 
-# Init of Socket
-socketio.init_app(app)
 
 app.static_folder = 'static'
 app.secret_key = os.urandom(24)
@@ -87,7 +84,8 @@ app.register_blueprint(individual_bot)
 if __name__ == '__main__':
     try:
         print('---AI Alpha server is running---') 
-        socketio.run(app, port=9000, debug=False, use_reloader=False) 
+        app.run(port=9000, debug=False, use_reloader=False) 
+        # socketio.run(app, port=9000, debug=False, use_reloader=False) 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
