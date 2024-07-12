@@ -21,7 +21,6 @@ from routes.fundamentals.competitors import competitor_bp
 from routes.dashboard_access.sign_in_session import sign_in
 from routes.dashboard.create_new_keyword import new_keyword
 from routes.dashboard.activate_all_bots import bots_activator
-from routes.trendspider.index import trendspider_notification_bp
 from routes.dashboard.deactivate_all_bots import bots_deactivator
 from routes.dashboard.all_sites import all_sites
 from routes.dashboard.erase_site import erase_site
@@ -99,7 +98,6 @@ app.register_blueprint(hacks_bp)
 app.register_blueprint(revenue_model_bp)
 app.register_blueprint(introduction)
 app.register_blueprint(upgrades_bp)
-app.register_blueprint(trendspider_notification_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(individual_bot)
@@ -109,7 +107,7 @@ app.register_blueprint(narrative_trading_bp)
 if __name__ == '__main__':
     try:
         print('---AI Alpha server is running---') 
-        app.run(port=9000, debug=False, use_reloader=False, threaded=True) 
+        app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:

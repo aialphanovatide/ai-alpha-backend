@@ -73,14 +73,14 @@ def redis_cache(expire_time: int = 300):
     return decorator
 
 # Example usage
-@redis_cache(expire_time=60)
-def example_function(param: str) -> dict:
-    return {"result": f"Processed {param}"}
+# @redis_cache(expire_time=60)
+# def example_function(param: str) -> dict:
+#     return {"result": f"Processed {param}"}
 
-if __name__ == "__main__":
-    # Test the cached function
-    result1 = example_function("test")
-    print("First call:", result1)
+# if __name__ == "__main__":
+#     # Test the cached function
+#     result1 = example_function("test")
+#     print("First call:", result1)
 
-    result2 = example_function("test")
-    print("Second call (should be cached):", result2)
+#     result2 = example_function("test")
+#     print("Second call (should be cached):", result2)

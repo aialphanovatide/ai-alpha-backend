@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
+from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram
 from services.firebase.firebase import send_notification
-
 
 tradingview_bp = Blueprint(
     'tradingview_bp', __name__,
@@ -12,7 +12,6 @@ tradingview_bp = Blueprint(
     static_folder='static'
 )
 
-# Gets all alerts of a catgerory
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
 def get_all_alerts():
     try:
@@ -271,24 +270,24 @@ def receive_data_from_tv():
                
                 
                 
-                # response, status = send_alert_strategy_to_telegram(price=price,
-                #                                 alert_name=alert_name,
-                #                                 message=message,
-                #                                 symbol=symbol)
+                response, status = send_alert_strategy_to_telegram(price=price,
+                                                alert_name=alert_name,
+                                                message=message,
+                                                symbol=symbol)
                 
-                # if status != 200:
-                #     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                #                                         title_message='Error seding Tradingview Alert',
-                #                                         sub_title='Reason',
-                #                                         message=f"{str(response)} - Data: {str(request.data)}")
+                if status != 200:
+                    send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                                                        title_message='Error seding Tradingview Alert',
+                                                        sub_title='Reason',
+                                                        message=f"{str(response)} - Data: {str(request.data)}")
 
 
-                # return response, status
-                return 'ok', 300
+                return response, status
+
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
-                send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
                                                     title_message='Error receiving Tradingview message',
                                                     sub_title='Reason',
                                                     message=f"{str(e)} - Data: {str(request.data)}")
