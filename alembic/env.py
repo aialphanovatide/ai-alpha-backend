@@ -2,7 +2,7 @@ from logging.config import fileConfig
 from config import Base
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
+import os
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -24,6 +24,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
 
 
 def run_migrations_offline() -> None:

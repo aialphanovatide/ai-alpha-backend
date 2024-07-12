@@ -268,8 +268,6 @@ def receive_data_from_tv():
                     send_notification(topic=x, title=alert_name, body=message)
                     print('notification send to: ', x)
                
-                
-                
                 response, status = send_alert_strategy_to_telegram(price=price,
                                                 alert_name=alert_name,
                                                 message=message,
