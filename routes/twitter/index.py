@@ -1,5 +1,4 @@
-from tweepy.errors import TweepyException, TooManyRequests
-# from tweet_counter import count_tweet
+from tweepy.errors import TweepyException
 from dotenv import load_dotenv
 import tweepy
 import re
@@ -21,8 +20,6 @@ auth = tweepy.Client(
     TWITTER_ACCESS_TOKEN_SECRET
 )
 
-# print(auth.get_me())
-
 def find_title_between_asterisks(text):
     match = re.search(r'\*{1,2}(.*?)\*{1,2}', text)
     if match:
@@ -30,7 +27,6 @@ def find_title_between_asterisks(text):
         return title
     else:
         return None
-
 
 def bold(title):
     chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -74,7 +70,6 @@ def split_string(input_string: str) -> str:
     return result
 
 def send_tweets_to_twitter(content: str, title: str) -> list:
-
     if len(content) == 0:
         return 'There is no content to send to Twitter', 404
 
