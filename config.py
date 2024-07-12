@@ -44,7 +44,10 @@ class User(Base):
     email = Column(String)
     email_verified = Column(String)
     picture = Column(String)
+    auth0id = Column(String)
+    provider = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
+    update_at = Column(TIMESTAMP, default=datetime.now)
     purchased_plans = relationship(
         'PurchasedPlan', back_populates='user', lazy=True)
 
