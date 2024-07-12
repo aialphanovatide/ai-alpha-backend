@@ -16,6 +16,9 @@ COPY requirements.txt .
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install playwright browsers
+RUN playwright install
+
 # Copy the rest of the application code
 COPY . .
 

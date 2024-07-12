@@ -67,9 +67,9 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
     return response_dict, status_code
 
 # Example usage
-result, status_code = send_notification(
-    topic='founders_14999_m1',
-    title='NEARUSDT 4H Chart - Bullish',
-    body='Price Crossover Resistance 2'
-)
-print(result, status_code)
+# result, status_code = send_notification(
+#     topic='founders_14999_m1',
+#     title='NEARUSDT 4H Chart - Bullish',
+#     body='Price Crossover Resistance 2'
+# )
+# print(result, status_code)

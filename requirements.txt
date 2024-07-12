@@ -26,3 +26,4 @@ slack_sdk
 slackeventsapi
 apscheduler
 redis
+pyahocorasick
