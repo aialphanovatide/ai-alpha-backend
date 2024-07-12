@@ -1,5 +1,4 @@
 from sqlalchemy import desc  
-from websocket.socket import socketio
 from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
@@ -14,12 +13,6 @@ tradingview_bp = Blueprint(
     template_folder='templates',
     static_folder='static'
 )
-
-# Test route for emitting data through a websocket
-@tradingview_bp.route('/emit', methods=['POST'])
-def index():
-    socketio.emit('new_alert', {'message': 'Holaaa'})
-    return 'message sent', 200
 
 # Gets all alerts of a catgerory
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  

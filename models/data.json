@@ -161,6 +161,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "btc",
           "Bitcoin (BTC) Price Index",
           "Bitcoin",
@@ -389,74 +390,18 @@
         ],
         "sites": [
           {
-            "site": "https://cointelegraph.com/tags/ethereum",
-            "base_url": "https://cointelegraph.com",
-            "website_name": "Cointelegraph",
-            "is_URL_complete": false,
-            "main_container": ".tag-page__posts-col"
-          },
-          {
-            "site": "https://bitcoinist.com/category/ethereum/",
-            "base_url": "https://bitcoinist.com",
-            "website_name": "Bitcoinist",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://coingape.com/category/ethereum-news/",
-            "base_url": "https://www.google.com/url?",
-            "website_name": "Coingape",
-            "is_URL_complete": true,
-            "main_container": ".covergaelist"
-          },
-          {
-            "site": "https://www.coindesk.com/tag/ether/",
-            "base_url": "https://www.coindesk.com",
-            "website_name": "Coindesk",
+            "site": "https://news.google.com/search?q=ethereum%20%22ethereum%22%20when%3A1d%20-msn%20-buy&hl=en-US&gl=US&ceid=US%3Aen",
+            "base_url": "https://news.google.com",
+            "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
-          },
-          {
-            "site": "https://dailyhodl.com/ethereum/",
-            "base_url": "https://dailyhodl.com",
-            "website_name": "Dailyhodl",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://ambcrypto.com/",
-            "base_url": "https://ambcrypto.com",
-            "website_name": "Ambcrypto",
-            "is_URL_complete": true,
-            "main_container": ".archive-posts"
-          },
-          {
-            "site": "https://u.today/ethereum-news",
-            "base_url": "https://u.today",
-            "website_name": "Utoday",
-            "is_URL_complete": true,
-            "main_container": "None"
-          },
-          {
-            "site": "https://cryptonews.net/news/ethereum/",
-            "base_url": "https://cryptonews.net",
-            "website_name": "Cryptonews",
-            "is_URL_complete": false,
-            "main_container": ".container"
-          },
-          {
-            "site": "https://coincodex.com/news/category/ethereum/",
-            "base_url": "https://coincodex.com",
-            "website_name": "Coincodex",
-            "is_URL_complete": false,
-            "main_container": ".two-col-layout"
           }
         ],
         "black_list": [
+          "to buy", 
           "Amaka Nwaokocha",
           "Zhiyuan Sun",
           "Bitcoin Core",
-          "Ethereum",
           "Ezra Reguerra",
           "Rakesh Upadhyay",
           "Serge Egon Ostman",
@@ -886,6 +831,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Sam Bankman-Fried's Wildest",
           "Craziest",
           "Dumbest Trades",
@@ -1403,7 +1349,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=LDO%20Lido%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=LDO%20Lido%20%22LDO%22%20%22lido%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -1411,6 +1357,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Bitcoin Core",
           "Ethereum",
           "Ezra Reguerra",
@@ -1896,7 +1843,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=RPL%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=RPL%20crypto%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -1904,6 +1851,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Bitcoin Core",
           "Ethereum",
           "Ezra Reguerra",
@@ -2425,7 +2373,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Frax%20FXS%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Frax%20FXS%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -2433,6 +2381,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Bitcoin Core",
           "Ethereum",
           "Ezra Reguerra",
@@ -3138,7 +3087,7 @@
        ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Cosmos%20ATOM%20when%3A1d%20-INJ%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Cosmos%20ATOM%20%22Cosmos%22%20%22ATOM%22%20when%3A1d%20-INJ%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -3146,6 +3095,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -3462,7 +3412,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Polkadot%20DOT%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Polkadot%20DOT%20%22dot%22%20%22DOT%22%20%22Polkadot%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -3470,6 +3420,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -3863,7 +3814,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Quant%20QNT%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Quant%20QNT%20%22Quant%22%20%20%22QNT%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -3871,6 +3822,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -4369,7 +4321,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Cardano%20ADA%20%22Cardano%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Cardano%20ADA%20%22Cardano%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -4377,6 +4329,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -4950,7 +4903,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Solana%20SOL%20%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Solana%20SOL%20%22Sol%22%20%22Solana%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -4958,6 +4911,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -5656,7 +5610,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Avalanche%20AVAX%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Avalanche%20AVAX%20%22Avalanche%22%20%22AVAX%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -5664,6 +5618,7 @@
           } 
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -6005,7 +5960,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=NEAR%20protocol%20%22Near%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=NEAR%20protocol%20%22Near%22%20%22NEAR%22%20when%3A1d%20-msn%20-top&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -6013,6 +5968,7 @@
           } 
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -6650,7 +6606,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=FTM%20Fantom%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=FTM%20Fantom%20%22FTM%22%20%22Fantom%22%20when%3A1d%20-msn%20-medium%20-buy&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -6658,6 +6614,7 @@
           } 
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -7366,7 +7323,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=KAS%20Kaspa%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=KAS%20Kaspa%20%22KAS%22%20%22Kaspa%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -7374,6 +7331,7 @@
           } 
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -8125,7 +8083,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=MATIC%20Polygon%20%22MATIC%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=MATIC%20Polygon%20%22Polygon%22%20%22MATIC%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -8133,6 +8091,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -8761,7 +8720,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=ARB%20Arbitrum%20when%3A1d%20-CEX%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=ARB%20Arbitrum%20%22ARB%22%20%22Arbitrum%22%20when%3A1d%20-CEX%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -8769,6 +8728,7 @@
           } 
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -9458,14 +9418,16 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=OP%20Optimism%20%22Optimism%22%20when%3A1d%20-AVAX%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=OP%20Optimism%20%22OP%22%20%22Optimism%22%20when%3A1d%20-AVAX%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
             "main_container": "None"
           }
         ],
-        "black_list": []
+        "black_list": [
+          "to buy"
+        ]
       }
     ]
   },
@@ -9648,7 +9610,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=LINK%20Chainlink%20%22Chainlink%22%20when%3A1d&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=LINK%20Chainlink%20%22LINK%22%20%22Chainlink%22%20when%3A1d%20-medium%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -9656,6 +9618,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -10026,6 +9989,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -10388,7 +10352,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=BAND%20Protocol%20when%3A1d%20-INJ%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=BAND%20Protocol%20%22BAND%20Protocol%22%20%22BAND%22%20when%3A1d%20-INJ%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -10396,6 +10360,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -10748,7 +10713,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=XLM%20Stellar%20when%3A1d%20-OTC%20-ADA%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=XLM%20Stellar%20%22XLM%22%20%22Stellar%22%20when%3A1d%20-OTC%20-ADA%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -10756,6 +10721,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -11136,6 +11102,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -11817,7 +11784,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=XRP%20Ripple%20%22Ripple%20XRP%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=XRP%20Ripple%20%22Ripple%20XRP%22%20when%3A1d%20-msn%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -11825,6 +11792,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -12197,7 +12165,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=DYDX%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=DYDX%20%22dydx%22%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -12205,6 +12173,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -12602,7 +12571,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=VELO%20Velodrome%20crypto%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=VELO%20Velodrome%20crypto%20%22VELO%22%20%22Velodrome%22%20when%3A1d%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -12610,6 +12579,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -13023,6 +12993,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -13360,7 +13331,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=UNI%20Uniswap%20%22UNI%22%20when%3A1d%20-sushi%20-near%20-PICKS%20-MSN%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=UNI%20Uniswap%20%22UNI%22%20%22Uniswap%22%20when%3A1d%20-sushi%20-near%20-PICKS%20-MSN%20-msn&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -13368,6 +13339,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -13683,7 +13655,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=SUSHI%20Sushiswap%20%22SUSHI%22%20-UNI%20-MEDIUM%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=SUSHI%20Sushiswap%20%22SUSHI%22%20%22Sushiswap%20%22%20when%3A1d%20-medium%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -13691,6 +13663,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -13860,7 +13833,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Cake%20Pancakeswap%20when%3A1d%20-MSN%20-MEDIUM&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=CAKE%20Pancakeswap%20%22CAKE%22%20%22Pancakeswap%22%20when%3A1d%20-MSN%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -13868,6 +13841,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -14276,7 +14250,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=AAVE%20Crypto%20%22AAVE%22%20when%3A1d%20-NEAR%20-UNI%20-UNISWAP%20-SHIBA%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=AAVE%20Crypto%20%22AAVE%22%20when%3A1d%20-NEAR%20-UNI%20-UNISWAP%20-SHIBA%20-MSN%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -14284,6 +14258,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -14628,7 +14603,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=PENDLE%20crypto%20%22PENDLE%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=PENDLE%20crypto%20%22PENDLE%22%20when%3A1d%20-MSN%20-medium%20-blockDag&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -14636,6 +14611,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -14885,7 +14861,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=1INCH%20Crypto%20%221INCH%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=1INCH%20Crypto%20%221INCH%22%20when%3A1d%20-MSN%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -14893,6 +14869,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }
@@ -15029,7 +15006,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=ocean%20protocol%20%22Ocean%20protocol%22%20when%3A1d%20-FET%20-RNDR%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=ocean%20protocol%20%22Ocean%20protocol%22%20when%3A1d%20-FET%20-RNDR%20-MSN%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -15037,6 +15014,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -15433,7 +15411,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=fetch%20ai%20%22Fetch%20Ai%20FET%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=fetch%20ai%20%22Fetch%20Ai%22%20%22FET%22%20when%3A1d%20-MSN%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -15441,6 +15419,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       },
@@ -15605,7 +15584,7 @@
         ],
         "sites": [
           {
-            "site": "https://news.google.com/search?q=Render%20RNDR%20%22Render%20RNDR%22%20when%3A1d%20-MSN&hl=en-US&gl=US&ceid=US%3Aen",
+            "site": "https://news.google.com/search?q=Render%20RNDR%20%22Render%22%20%22RNDR%22%20when%3A1d%20-MSN%20-medium&hl=en-US&gl=US&ceid=US%3Aen",
             "base_url": "https://news.google.com",
             "website_name": "Google News",
             "is_URL_complete": false,
@@ -15613,6 +15592,7 @@
           }
         ],
         "black_list": [
+          "to buy", 
           "Tristan Greene"
         ]
       }

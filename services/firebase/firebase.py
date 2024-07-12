@@ -2,7 +2,7 @@ from firebase_admin import initialize_app, credentials, messaging
 import os
 
 # Get the absolute path to the service account JSON file
-json_file_path = os.path.abspath('services/firebase/ai-alpha-app-firebase-service-account.json')
+json_file_path = os.path.abspath('services/firebase/service_account.json')
 
 cred = credentials.Certificate(json_file_path)
 default_app = initialize_app(credential=cred)
@@ -41,5 +41,5 @@ def send_notification(topic, title, body, action='new_alert'):
     
 
 # example usage
-print(send_notification(topic='boostlayer_4999_m1', title='test - NEARUSDT 4H Chart - Bullish', body='Price Crossover Resistance 2'))
+# print(send_notification(topic='boostlayer_4999_m1', title='test - NEARUSDT 4H Chart - Bullish', body='Price Crossover Resistance 2'))
 

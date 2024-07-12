@@ -1,6 +1,6 @@
 # AI Alpha
 
-Full rest API for AI Alpha dashboard
+Full rest API for AI Alpha
 
 ## Installation
 
@@ -27,10 +27,29 @@ python3 -m venv venv
 pip install -r requirements.txt
 ```
 
-### To write all used libraries into a txt file run:
+### Database Migrations
+- We use Alembic for database migrations. Follow these steps to manage database schema changes:
 
 ```bash
-pip freeze > requirements.txt
+alembic init alembic
+```
+
+- Create a new migration:
+
+```bash
+alembic revision --autogenerate -m "Description of changes"
+```
+
+- Apply upgrades:
+
+```bash
+alembic upgrade head
+```
+
+- Perform downgrades:
+
+```bash
+alembic downgrade -1
 ```
 
 ## License

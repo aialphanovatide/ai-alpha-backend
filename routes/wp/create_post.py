@@ -8,8 +8,6 @@ WP_API_KEY = os.getenv('WP_API_KEY')
 
 
 def send_post_request(post_title, post_date, post_content, post_status="publish"):
-
-
     url = f"https://coinstrategdev.wpenginepowered.com/?wpwhpro_action=get_news&wpwhpro_api_key={WP_API_KEY}&action=create_post"
     
     data = {

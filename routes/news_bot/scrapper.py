@@ -1,5 +1,4 @@
 
-import base64
 import datetime
 from io import BytesIO
 from PIL import Image
@@ -103,17 +102,17 @@ def get_links(site, main_container):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(slow_mo=40, headless=False)
+            browser = p.chromium.launch(slow_mo=1000, headless=False)
             page = browser.new_page()
 
-            page.goto(site, timeout=30000)
-            page.wait_for_load_state("domcontentloaded", timeout=30000)
+            page.goto(site, timeout=70000)
+            page.wait_for_load_state("domcontentloaded", timeout=70000)
 
             elements = []
 
             if main_container != "None":
                 container = page.wait_for_selector(
-                    main_container, timeout=30000)
+                    main_container, timeout=70000)
                 a_elements = container.query_selector_all('a')
 
                 for link in a_elements:
@@ -165,7 +164,7 @@ def get_links(site, main_container):
         return False
 
 
-def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(256, 256)):
+def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(512, 512)):
     try:
         response = requests.get(image_data)
         if response.status_code == 200:
@@ -212,8 +211,9 @@ def resolve_redirects(url):
         return response.url
 
 
+
 # Gets the initial links for the rest of the categories
-def get_google_news_links(site, main_container, max_links=12):
+def get_google_news_links(site, main_container, max_links=30):
     
     base_url = "https://news.google.com/articles"
     elements = []
@@ -229,15 +229,15 @@ def get_google_news_links(site, main_container, max_links=12):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch_persistent_context(user_dir,slow_mo=10000, headless=False)
+            
+            browser = p.chromium.launch_persistent_context(user_dir, slow_mo=10, headless=False)
             page = browser.new_page()
 
-            page.goto(site, timeout=30000)
-            page.wait_for_load_state("domcontentloaded", timeout=30000)
-
+            page.goto(site, timeout=70000)
+            page.wait_for_load_state("domcontentloaded", timeout=70000)
             if main_container != "None":
                 container = page.wait_for_selector(
-                    main_container, timeout=30000)
+                    main_container, timeout=700000)
                 a_elements = container.query_selector_all('a')
 
                 for link in a_elements:
@@ -323,11 +323,10 @@ def get_google_news_links(site, main_container, max_links=12):
 
 # Validate the initial links for all the categories
 def scrape_sites(data_source_url, base_url, site_name, category_name, main_container, session_instance):
-
     article_urls = set()
     elements = None
 
-    if category_name == 'bitcoin' or category_name == 'ethereum' or category_name == 'solana':
+    if category_name == 'bitcoin':
         elements = get_links(site=data_source_url,
                              main_container=main_container,
                              )
@@ -415,7 +414,6 @@ def scrape_sites(data_source_url, base_url, site_name, category_name, main_conta
 
 def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot_name, session):
     counter_articles_saved = 0
-
     for article_link in article_urls:
         article_to_save = []
 
@@ -486,16 +484,7 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                     matched_keywords_string = ', '.join(
                         keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
-                    #Send the message to Slack
-                    send_NEWS_message_to_slack(channel_id=channel_id,
-                                                title=title,
-                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                url=article_link,
-                                                summary=summary,
-                                                image=slack_image,
-                                                category_name=category_name,
-                                                extra_info=matched_keywords_string
-                                                )
+                   
 
                     bot = session.query(CoinBot).filter(
                         CoinBot.bot_name == coin_bot_name).first()
@@ -516,6 +505,8 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
 
                     article_id = new_article.article_id
                     image_filename = f"{article_id}.jpg"
+
+                    
                         
                     if image:
                             try:
@@ -530,8 +521,19 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
                                 print("Error:", e)
                     else:
                         print("Image not generated.")
-
+                    
                     counter_articles_saved += 1
+                    image_url=f'https://apparticleimages.s3.us-east-2.amazonaws.com/{image_filename}'
+                     #Send the message to Slack
+                    send_NEWS_message_to_slack(channel_id=channel_id,
+                                                title=title,
+                                                date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                url=article_link,
+                                                summary=summary,
+                                                image=image_url,
+                                                category_name=category_name,
+                                                extra_info=matched_keywords_string
+                                                )
 
                     # current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -559,7 +561,7 @@ def scrape_google_news_articles(article_urls, site_name, category_name, coin_bot
 
 
 def scrape_articles(article_urls, site_name, category_name, coin_bot_name, session):
-    if category_name == 'bitcoin' or category_name == 'ethereum' or category_name == 'solana':
+    if category_name == 'bitcoin' or category_name == 'solana':
         try:
             counter_articles_saved = 0
 
@@ -792,16 +794,7 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                         matched_keywords_string = ', '.join(
                             keyword[1] for keyword in matched_keywords) if matched_keywords else 'No keywords found.'
 
-                        # #Send the message to Slack
-                        send_NEWS_message_to_slack(channel_id=channel_id,
-                                                   title=title,
-                                                   date_time=valid_date,
-                                                   url=article_link,
-                                                   summary=summary,
-                                                   image=slack_image,
-                                                   category_name=category_name,
-                                                   extra_info=matched_keywords_string
-                                                   )
+                        
 
                         # if category_name == 'bitcoin':
                         #     response, status = send_tweets_to_twitter(content=summary,
@@ -847,8 +840,20 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
                                 print("Error:", e)
                         else:
                             print("Image not generated.")
-
+                            
                         counter_articles_saved += 1
+                        image_url=f'https://apparticleimages.s3.us-east-2.amazonaws.com/{image_filename}'
+                        
+                        #Send the message to Slack
+                        send_NEWS_message_to_slack(channel_id=channel_id,
+                                                    title=title,
+                                                    date_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                    url=article_link,
+                                                    summary=summary,
+                                                    image=image_url,
+                                                    category_name=category_name,
+                                                    extra_info=matched_keywords_string
+                                                    )
 
                         # current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -885,7 +890,6 @@ def scrape_articles(article_urls, site_name, category_name, coin_bot_name, sessi
 
 
 def start_periodic_scraping(category_name):
-
     with Session() as session:
         category = session.query(Category).filter(
             Category.category == category_name).first()
