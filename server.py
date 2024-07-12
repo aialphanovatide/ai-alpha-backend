@@ -36,6 +36,7 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.mkt_webisites.news import website_news_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
+from routes.user.user import user_bp
 from flasgger import Swagger
 
 app = Flask(__name__)
@@ -102,6 +103,7 @@ app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(individual_bot)
 app.register_blueprint(narrative_trading_bp)
+app.register_blueprint(user_bp)
 
 
 if __name__ == '__main__':
