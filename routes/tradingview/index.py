@@ -1,9 +1,7 @@
 from sqlalchemy import desc  
-from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
-from .alert_strategy import send_alert_strategy_to_telegram
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from services.firebase.firebase import send_notification
 

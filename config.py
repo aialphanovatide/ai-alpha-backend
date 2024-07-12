@@ -1,8 +1,9 @@
+from sqlalchemy import (
+    Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
+    create_engine, Text, Enum, Date, DateTime
+)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy.orm import relationship, sessionmaker
 from dotenv import load_dotenv
 from datetime import datetime
 from pathlib import Path
@@ -10,18 +11,23 @@ import json
 import os
 
 
+# Load environment variables
 load_dotenv()
 
+# Database connection details
 DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
 
+# Construct database URL
 db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
+# Create engine with connection pool settings
 engine = create_engine(db_url, pool_size=30, max_overflow=20)
 
-
+# Create base class for declarative models
 Base = declarative_base()
 
 
@@ -137,7 +143,7 @@ class Used_keywords(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', backref='used_keywords')
-    # article = relationship('Article', backref='used_keywords') 
+
     article = relationship('Article', back_populates='used_keywords')
     
     
