@@ -56,6 +56,9 @@ class User(Base):
     update_at = Column(TIMESTAMP, default=datetime.now)
     purchased_plans = relationship(
         'PurchasedPlan', back_populates='user', lazy=True)
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class PurchasedPlan(Base):
@@ -68,6 +71,9 @@ class PurchasedPlan(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     user = relationship('User', back_populates='purchased_plans')
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class Category(Base):
@@ -82,6 +88,9 @@ class Category(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
+    
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class CoinBot(Base):
@@ -120,6 +129,9 @@ class CoinBot(Base):
     upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True)
     narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True)
 
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+
 
 class Keyword(Base):
     __tablename__ = 'keyword'
@@ -130,6 +142,9 @@ class Keyword(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='keywords', lazy=True)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 
@@ -146,9 +161,7 @@ class Used_keywords(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', backref='used_keywords')
-
     article = relationship('Article', back_populates='used_keywords')
-    
     
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -167,6 +180,9 @@ class Site(Base):
 
     coin_bot = relationship('CoinBot', back_populates='sites', lazy=True)
 
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+
 
 class Blacklist(Base):
     __tablename__ = 'blacklist'
@@ -177,6 +193,9 @@ class Blacklist(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='blacklist', lazy=True)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class Alert(Base):
@@ -191,6 +210,9 @@ class Alert(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='alerts', lazy=True)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class Article(Base):
@@ -207,10 +229,10 @@ class Article(Base):
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
     images = relationship('ArticleImage', back_populates='article', lazy=True)
     used_keywords = relationship('Used_keywords', back_populates='article', lazy=True)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
    
-
-    
-
 
 class ArticleImage(Base):
     __tablename__ = 'article_image'
@@ -220,6 +242,9 @@ class ArticleImage(Base):
     article_id = Column(Integer, ForeignKey(
         'article.article_id'), nullable=False)
     article = relationship('Article', back_populates='images')
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class TopStory(Base):
@@ -234,6 +259,9 @@ class TopStory(Base):
     coin_bot = relationship('CoinBot', back_populates='top_story', lazy=True)
     images = relationship('TopStoryImage', back_populates='top_story')
 
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+
 
 class TopStoryImage(Base):
     __tablename__ = 'top_story_image'
@@ -244,6 +272,9 @@ class TopStoryImage(Base):
         'top_story.top_story_id'), nullable=False)
 
     top_story = relationship('TopStory', back_populates='images')
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 class Analysis(Base):
@@ -275,6 +306,9 @@ class AnalysisImage(Base):
 
     analysis = relationship('Analysis', back_populates='images')
 
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+
 
 class AnalyzedArticle(Base):
     __tablename__ = 'analyzed_article'
@@ -283,6 +317,9 @@ class AnalyzedArticle(Base):
     url = Column(String)
     is_analyzed = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 class NarrativeTrading(Base):
     __tablename__ = 'narrative_trading'
@@ -321,6 +358,9 @@ class Chart(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
 
     coin_bot = relationship('CoinBot', back_populates='chart', lazy=True)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
 
 
 # -----------------------------------------------------------------------------------
@@ -629,7 +669,9 @@ with session:
 try:
     if not session.query(Admin).first():
         new_admin = Admin(mail='team@novatide.io',
-                          username='novatideteam', password='Novatide2023!')
+                          username='novatideteam', 
+                          password='Novatide2023!')
+        
         session.add(new_admin)
         session.commit()
         print('---- Admin user created------')
