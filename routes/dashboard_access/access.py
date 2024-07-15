@@ -86,14 +86,13 @@ def register_admin():
 
     return jsonify(response), status_code
 
-
 @dashboard_access_bp.route('/admin/login', methods=['POST'])
 def login_admin():
     """
     Authenticate an admin.
     
     Args:
-        email (str): Admin's email address
+        username (str): Admin's username address
         password (str): Admin's password
     
     Returns:
@@ -108,7 +107,7 @@ def login_admin():
     status_code = 500  # Default to server error
     
     try:
-        admin = session.query(Admin).filter_by(email=data['email']).first()
+        admin = session.query(Admin).filter_by(username=data['username']).first()
         if admin and admin.verify_password(data['password']):
             response["message"] = "Login successful"
             response["admin_id"] = admin.admin_id
@@ -120,6 +119,7 @@ def login_admin():
         response["error"] = f"Missing required field: {str(e)}"
         status_code = 400
     except SQLAlchemyError as e:
+        session.rollback()
         response["error"] = f"Database error: {str(e)}"
         status_code = 500
     except Exception as e:
@@ -157,6 +157,7 @@ def get_admin(admin_id):
             response["error"] = "Admin not found"
             status_code = 404
     except SQLAlchemyError as e:
+        session.rollback()
         response["error"] = f"Database error: {str(e)}"
         status_code = 500
     except Exception as e:
