@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
-    create_engine, Text, Enum, Date, DateTime
+    create_engine, Text, Enum, Date, DateTime, JSON
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -13,6 +13,7 @@ from pathlib import Path
 import json
 import os
 import uuid
+
 
 
 # Load environment variables
@@ -1163,6 +1164,8 @@ class Upgrades(Base):
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session()
+
+
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
