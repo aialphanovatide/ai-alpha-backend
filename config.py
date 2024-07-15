@@ -6,9 +6,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from dotenv import load_dotenv
 from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.sql import func
 from pathlib import Path
 import json
 import os
+import uuid
 
 
 # Load environment variables
@@ -30,17 +34,123 @@ engine = create_engine(db_url, pool_size=30, max_overflow=20)
 # Create base class for declarative models
 Base = declarative_base()
 
+# _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
 
-class Admin(Base):
-    __tablename__ = 'admin'
+
+class Admin(Base):   
+    """
+    Represents an admin user in the system.
+
+    This class defines the structure and behavior of admin users, including
+    their authentication details and timestamps for record-keeping.
+
+    Attributes:
+        admin_id (int): The primary key for the admin.
+        uuid (str): A unique identifier for the admin.
+        email (str): The admin's email address (unique).
+        username (str): The admin's username (unique).
+        _password (str): The hashed password of the admin.
+        created_at (datetime): Timestamp of when the admin was created.
+        updated_at (datetime): Timestamp of the last update to the admin record.
+        roles (relationship): Relationship to the roles assigned to this admin.
+    """
+    __tablename__ = 'admins'
     admin_id = Column(Integer, primary_key=True, autoincrement=True)
-    mail = Column(String(255))
-    username = Column(String(255))
-    password = Column(String(255))
-    created_at = Column(TIMESTAMP, default=datetime.now)
+    uuid = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    _password = Column('password', String(255), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    roles = relationship('Role', secondary='admin_roles', back_populates='admins')
 
     def to_dict(self):
-        return {'admin_id': self.admin_id, 'username': self.username, 'mail': self.mail}
+        """
+        Convert the admin object to a dictionary.
+
+        Returns:
+            dict: A dictionary representation of the admin.
+        """
+        return {
+            'admin_id': self.admin_id,
+            'uuid': self.uuid,
+            'username': self.username,
+            'email': self.email,
+            'roles': [role.name for role in self.roles],
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+    
+    @property
+    def password(self):
+        """
+        Getter for password. Raises an error if attempted to be read.
+
+        Raises:
+            AttributeError: Always raised when this property is accessed.
+        """
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
+        """
+        Setter for password. Hashes the password before storing.
+
+        Args:
+            password (str): The plain text password to be hashed and stored.
+        """
+        self._password = generate_password_hash(password)
+
+    def verify_password(self, password):
+        """
+        Verify a given password against the stored hash.
+
+        Args:
+            password (str): The password to verify.
+
+        Returns:
+            bool: True if the password is correct, False otherwise.
+        """
+        return check_password_hash(self._password, password)
+    
+class Role(Base):
+    """
+    Represents a role in the system.
+
+    This class defines the structure of roles that can be assigned to admins.
+
+    Attributes:
+        id (int): The primary key for the role.
+        name (str): The name of the role (unique).
+        description (str): A description of the role.
+        admins (relationship): Relationship to the admins assigned this role.
+    """
+    __tablename__ = 'roles'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(String(255))
+
+    admins = relationship('Admin', secondary='admin_roles', back_populates='roles')
+
+class AdminRole(Base):
+    """
+    Represents the many-to-many relationship between admins and roles.
+
+    This class serves as an association table linking admins to their roles.
+
+    Attributes:
+        admin_id (int): Foreign key referencing the admin.
+        role_id (int): Foreign key referencing the role.
+    """
+    __tablename__ = 'admin_roles'
+
+    admin_id = Column(Integer, ForeignKey('admins.admin_id'), primary_key=True, nullable=False)
+    role_id = Column(Integer, ForeignKey('roles.id'), primary_key=True, nullable=False)
+
+
+# __________________________ AI ALPHA APP TABLES __________________________________________
 
 
 class User(Base):
@@ -282,7 +392,7 @@ class Analysis(Base):
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
     analysis = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
-    category_name = Column(String, nullable=False, default=None)
+    category_name = Column(String)
     coin_bot_id = Column(Integer, ForeignKey(
         'coin_bot.bot_id'), nullable=False)
 
@@ -552,63 +662,17 @@ class Upgrades(Base):
 # ----------------------------------------
 
 
-# Export the sql session
 Base.metadata.create_all(engine)
-# Fa.metadata.create_all(engine) # Creates the FA tables
-
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session()
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 
-# --------- Populate or update the sources -------------------------
+# ------------- Populate the database with all the data from data.json ---------------------------
 with session:
     try:
-        if not session.query(Site).first():
-            with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
-                config = json.load(data_file)
-
-                for index, item in enumerate(config):
-                    main_keyword = item['main_keyword']
-                    alias = item['alias']
-                    coins = item['coins']
-
-                    for index, coin in enumerate(coins):
-                        coin_keyword = coin['coin_keyword'].casefold()
-                        coin_bot = session.query(CoinBot).filter_by(bot_name=coin_keyword).first()
-                        
-                        if coin_bot is None:
-                            print(f"No CoinBot found for keyword: {coin_keyword}")
-                            continue  # Skip this coin since there's no corresponding CoinBot
-
-                        print("Bot ID: ", coin_bot.bot_id)
-                        print("Bot name: ", coin_keyword)
-                        keywords = coin['keywords']
-                        sites = coin['sites']
-                        black_list = coin['black_list']
-
-                        for index, site_data in enumerate(sites):
-                            site = Site(
-                                site_name=str(site_data['website_name']),
-                                base_url=str(site_data['base_url']).casefold(),
-                                data_source_url=str(site_data['site']).capitalize(),
-                                is_URL_complete=site_data['is_URL_complete'],
-                                main_container=str(site_data['main_container']),
-                                coin_bot_id=coin_bot.bot_id
-                            )
-                            session.add(site)
-                        session.commit()
-                print('-----Sources updated-----')
-
-    except Exception as e:
-        print(f"Error found populating the sources: {str(e)}")
-
-
-# ------------- Populate the database with all the data.json ---------------------------
-with session:
-    try:
-        if not session.query(Category).first():
+        if not session.query(Category).first() and not session.query(Site).first():
             with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
@@ -617,47 +681,46 @@ with session:
                     alias = item['alias']
                     coins = item['coins']
 
-                    new_category = Category(category=main_keyword,
-                                            category_name=alias,
-                                            icon=item['icon'],
-                                            border_color=item['borderColor'],
-                                            )
+                    new_category = Category(
+                        category=main_keyword,
+                        category_name=alias,
+                        icon=item['icon'],
+                        border_color=item['borderColor'],
+                    )
 
                     for coin in coins:
-                        coin_keyword = coin['coin_keyword']
+                        coin_keyword = coin['coin_keyword'].casefold()
                         keywords = coin['keywords']
                         sites = coin['sites']
                         black_list = coin['black_list']
 
-                        new_coin = CoinBot(bot_name=coin_keyword.casefold())
-
+                        new_coin = CoinBot(bot_name=coin_keyword)
                         new_coin.category = new_category
+
                         for keyword in keywords:
-                            new_coin.keywords.append(
-                                Keyword(word=keyword.casefold()))
+                            new_coin.keywords.append(Keyword(word=keyword.casefold()))
 
                         for word in black_list:
-                            new_coin.blacklist.append(
-                                Blacklist(word=word.casefold()))
+                            new_coin.blacklist.append(Blacklist(word=word.casefold()))
 
                         for site_data in sites:
                             site = Site(
                                 site_name=str(site_data['website_name']),
                                 base_url=str(site_data['base_url']).casefold(),
-                                data_source_url=str(
-                                    site_data['site']).capitalize(),
+                                data_source_url=str(site_data['site']).capitalize(),
                                 is_URL_complete=site_data['is_URL_complete'],
                                 main_container=str(site_data['main_container'])
                             )
                             new_coin.sites.append(site)
 
-                            session.add(new_coin)
-                            print('-----CoinBot data saved-----')
-                            session.commit()
+                        session.add(new_coin)
+                        print(f'-----CoinBot data saved for {coin_keyword}-----')
 
                     session.add(new_category)
-                    print('-----Category table populated-----')
-                    session.commit()
+                    print(f'-----Category {main_keyword} populated-----')
+                    
+                session.commit()
+                print('-----All data successfully populated-----')
 
     except Exception as e:
         print(f'---Error populating the database: {str(e)}---')
@@ -666,17 +729,56 @@ with session:
 
 # --------- CREATE AN ADMIN USER ----------------------------------------
 
-try:
-    if not session.query(Admin).first():
-        new_admin = Admin(mail='team@novatide.io',
-                          username='novatideteam', 
-                          password='Novatide2023!')
+def init_superadmin():
+    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL')
+    ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+
+    if not all([ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD]):
+        print("---- Error: Admin credentials not fully provided in environment variables ----")
+        return
+
+    session = Session()
+
+    try:
+        # Check if the admin user already exists
+        existing_admin = session.query(Admin).filter_by(username=ADMIN_USERNAME).first()
         
-        session.add(new_admin)
-        session.commit()
-        print('---- Admin user created------')
-    else:
-        print('---- Admin user already exist------')
-except Exception as e:
-    print(f'---Error creating the admin user: {str(e)}---')
-    session.rollback()
+        if not existing_admin:
+            # Create new admin
+            new_admin = Admin(
+                email=ADMIN_EMAIL,
+                username=ADMIN_USERNAME,
+                password=ADMIN_PASSWORD
+            )
+            session.add(new_admin)
+            session.flush()  # This will populate the admin_id
+
+            # Check if superadmin role exists, create if not
+            superadmin_role = session.query(Role).filter_by(name='superadmin').first()
+            if not superadmin_role:
+                superadmin_role = Role(name='superadmin', description='Super Administrator')
+                session.add(superadmin_role)
+                session.flush()  # This will populate the role_id
+
+            # Assign superadmin role to the new admin
+            admin_role = AdminRole(admin_id=new_admin.admin_id, role_id=superadmin_role.id)
+            session.add(admin_role)
+
+            session.commit()
+            print('---- Superadmin user created successfully ----')
+        else:
+            print('---- Superadmin user already exists ----')
+
+    except SQLAlchemyError as e:
+        print(f'---- Database error creating the superadmin user: {str(e)} ----')
+        session.rollback()
+    except Exception as e:
+        print(f'---- Unexpected error creating the superadmin user: {str(e)} ----')
+        session.rollback()
+    finally:
+        session.close()
+
+
+# Create SuperAdmin
+init_superadmin()
