@@ -15,6 +15,9 @@ from apscheduler.jobstores.base import JobLookupError
 from routes.news_bot.poster_generator import generate_poster_prompt
 
 sched = BackgroundScheduler()
+if sched.state != 1:
+    sched.start()
+    print("--- Third Scheduler started ---")
 
 narrative_trading_bp = Blueprint('narrative_trading', __name__)
 
