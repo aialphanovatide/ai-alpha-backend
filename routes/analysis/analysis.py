@@ -397,25 +397,7 @@ def resize_and_upload_image_to_s3(
 #         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
 
-# # Gets all the schedule analysis
-# @analysis_bp.route('/get_scheduled_jobs', methods=['GET'])
-# def get_jobs():
-#     try:
-#         job_listing = []
-#         for job in sched.get_jobs():
-#             job_info = {
-#                 'id': job.id,
-#                 'name': job.name,
-#                 'trigger': str(job.trigger),
-#                 'args': str(job.args),
-#                 'next_run_time': str(job.next_run_time) if hasattr(job, 'next_run_time') else None
-#             }
-#             job_listing.append(job_info)
 
-#         return jsonify({'jobs': job_listing, 'status': 200, 'success': True}), 200
-
-#     except Exception as e:
-#         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
 
 
 # # Deletes a scheduled job by job id
@@ -756,7 +738,6 @@ def post_analysis():
     coin_bot_id = request.form.get('coinBot')
     content = request.form.get('content')
     category_name = request.form.get('category_name')
-
     # Check if any of the required values is missing or null
     if not coin_bot_id or coin_bot_id == 'null' or not content or content == 'null' or not category_name or category_name == 'null':
         response["error"] = "One or more required values are missing or null"
@@ -1194,3 +1175,24 @@ def get_scheduled_job(job_id):
         status_code = 500
     
     return jsonify(response), status_code
+
+
+# Gets all the schedule analysis
+@analysis_bp.route('/get_scheduled_jobs', methods=['GET'])
+def get_jobs():
+    try:
+        job_listing = []
+        for job in sched.get_jobs():
+            job_info = {
+                'id': job.id,
+                'name': job.name,
+                'trigger': str(job.trigger),
+                'args': str(job.args),
+                'next_run_time': str(job.next_run_time) if hasattr(job, 'next_run_time') else None
+            }
+            job_listing.append(job_info)
+
+        return jsonify({'jobs': job_listing, 'status': 200, 'success': True}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500

@@ -379,7 +379,7 @@ def get_jobs():
 
 
 # Deletes a scheduled job by job id
-@narrative_trading_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
+@narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
     try:
         # Find the by schedule narrative_trading by ID
