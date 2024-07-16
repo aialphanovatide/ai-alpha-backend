@@ -21,7 +21,6 @@ from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.fundamentals.dapps import dapps_bp
 from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
-from routes.mkt_webisites.news import website_news_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
 from flasgger import Swagger
@@ -62,7 +61,6 @@ app.register_blueprint(scrapper_bp)
 app.register_blueprint(news_bots_features_bp)
 app.register_blueprint(sign_in)
 app.register_blueprint(chart_bp)
-app.register_blueprint(website_news_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(all_keywords)
