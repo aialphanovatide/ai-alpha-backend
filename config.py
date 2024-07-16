@@ -3,7 +3,10 @@ from sqlalchemy import (
     create_engine, Text, Enum, Date, DateTime, JSON
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
@@ -16,23 +19,18 @@ import uuid
 
 
 
-# Load environment variables
 load_dotenv()
 
-# Database connection details
 DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
 
-# Construct database URL
 db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-
-# Create engine with connection pool settings
 engine = create_engine(db_url, pool_size=30, max_overflow=20)
 
-# Create base class for declarative models
+
 Base = declarative_base()
 
 # _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
@@ -389,7 +387,9 @@ class Used_keywords(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     coin_bot = relationship('CoinBot', backref='used_keywords')
+    # article = relationship('Article', backref='used_keywords') 
     article = relationship('Article', back_populates='used_keywords')
+    
     
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -529,6 +529,9 @@ class Article(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+    
+
 
 class ArticleImage(Base):
     """
