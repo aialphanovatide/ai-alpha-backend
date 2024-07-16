@@ -7,7 +7,6 @@ all_keywords = Blueprint('getAllKeywords', __name__)
 
 @all_keywords.route('/get_keywords_for_coin_bot/<int:coin_bot_id>', methods=['GET'])
 def get_keywords_for_coin_bot(coin_bot_id):
-    print(coin_bot_id)
     try:
         with DBSession() as db_session:
             keywords = db_session.query(Keyword).filter_by(coin_bot_id=coin_bot_id).all()

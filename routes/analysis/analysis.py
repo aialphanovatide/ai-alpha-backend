@@ -549,7 +549,7 @@ def get_analysis(coin_bot_id):
     return jsonify(response), status_code
 
 
-@analysis_bp.route('get_analysis_by_coin', methods=['GET'])
+@analysis_bp.route('/get_analysis_by_coin', methods=['GET'])
 def get_analysis_by_coin():
     """
     Retrieve analyses for a specific coin by name or ID.

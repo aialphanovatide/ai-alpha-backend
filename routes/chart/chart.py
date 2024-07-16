@@ -1,6 +1,6 @@
 import requests
 from sqlalchemy import and_
-from config import Chart, session, CoinBot
+from config import Chart, Session, session, CoinBot
 from flask import jsonify, request, Blueprint, jsonify  
 from datetime import datetime
 
@@ -195,3 +195,37 @@ def get_total_3_data():
     except requests.exceptions.RequestException as e:
         print("Error", str(e))
         return jsonify({"error": "Error " + str(e)})
+
+
+
+
+# Gets the last chart updated with Support and resistance lines - Return a DATE
+@chart_bp.route('/get_last_chart_update', methods=['GET'])
+def get_last_chart_update():
+    try:
+        with Session() as db_session:
+            last_update = (
+                db_session.query(Chart, CoinBot.bot_name)
+                .outerjoin(CoinBot, Chart.coin_bot_id == CoinBot.bot_id)
+                .order_by(Chart.created_at.desc())
+                .first()
+            )
+
+        if last_update:
+            chart, bot_name = last_update
+            formatted_date = chart.created_at.strftime('%m/%d/%Y %H:%M')
+
+            return jsonify({
+                'success': True,
+                'last_update': {
+                    'coin_bot_name': bot_name,
+                    'formatted_date': formatted_date
+                }
+            })
+        else:
+            return jsonify({'success': False, 'message': 'there is no updates available'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
