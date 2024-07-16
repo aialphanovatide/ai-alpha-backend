@@ -28,3 +28,4 @@ apscheduler
 redis
 pyahocorasick
 uuid
+cachetools

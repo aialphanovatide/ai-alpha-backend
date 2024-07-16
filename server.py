@@ -7,7 +7,6 @@ from routes.news_bot.index import scrapper_bp
 from routes.telegram.index import telegram_bp
 from routes.analysis.analysis import analysis_bp 
 from routes.tradingview.index import tradingview_bp
-from routes.dashboard_access.register import sign_up 
 from routes.slack.slack_actions import slack_events_bp
 from routes.dashboard.all_keywords import all_keywords
 from routes.fundamentals.introduction import introduction
@@ -61,7 +60,6 @@ app.secret_key = os.urandom(24)
 # Register blueprints -  routes
 app.register_blueprint(scrapper_bp)
 app.register_blueprint(news_bots_features_bp)
-app.register_blueprint(sign_up)
 app.register_blueprint(sign_in)
 app.register_blueprint(chart_bp)
 app.register_blueprint(website_news_bp)
