@@ -530,9 +530,6 @@ class Article(Base):
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-    
-
-
 class ArticleImage(Base):
     """
     Represents an image associated with an article.
