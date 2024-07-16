@@ -22,6 +22,7 @@ from routes.dashboard_access.sign_in_session import sign_in
 from routes.dashboard.create_new_keyword import new_keyword
 from routes.dashboard.activate_all_bots import bots_activator
 from routes.dashboard.deactivate_all_bots import bots_deactivator
+from routes.dashboard_access.access import dashboard_access_bp
 from routes.dashboard.all_sites import all_sites
 from routes.dashboard.erase_site import erase_site
 from routes.fundamentals.hacks import hacks_bp
@@ -80,6 +81,7 @@ app.register_blueprint(coin_bots)
 app.register_blueprint(delete_kw)
 app.register_blueprint(website_news_bp)
 app.register_blueprint(bots_route)
+app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(getBots)
 app.register_blueprint(bots_status)
 app.register_blueprint(telegram_bp)

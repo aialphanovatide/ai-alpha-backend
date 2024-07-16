@@ -27,3 +27,4 @@ slackeventsapi
 apscheduler
 redis
 pyahocorasick
+uuid
