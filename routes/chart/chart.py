@@ -3,9 +3,7 @@ import requests
 from http import HTTPStatus
 from sqlalchemy import desc
 from dotenv import load_dotenv
-from functools import lru_cache
 from sqlalchemy.exc import SQLAlchemyError
-from cachetools import TTLCache
 from cachetools.func import ttl_cache
 from config import Chart, session, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  

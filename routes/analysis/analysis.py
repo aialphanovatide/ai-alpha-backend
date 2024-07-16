@@ -14,6 +14,7 @@ from apscheduler.triggers.date import DateTrigger
 from sqlalchemy.orm.exc import NoResultFound
 from apscheduler.jobstores.base import JobLookupError
 from botocore.exceptions import ClientError, BotoCoreError
+from services.firebase.firebase import send_notification
 from config import Analysis, AnalysisImage, session, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.news_bot.poster_generator import generate_poster_prompt
@@ -445,6 +446,16 @@ def post_analysis():
         response["success"] = True
         status_code = 200
 
+        # Send a notification to the phone
+        title = new_analysis.analysis
+        body = new_analysis.analysis
+        topic = f"{str(new_analysis.category_name).lower()}-analysis"
+        send_notification(topic=topic,
+                          title=title,
+                          body=body,
+                          type="analysis"
+                          )
+
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
@@ -699,6 +710,15 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str) -> None
         session.add(new_analysis)
         session.commit()
         print(f"Publishing analysis with title: {title}")
+        # Send a notification to the phone
+        title = new_analysis.analysis
+        body = new_analysis.analysis
+        topic = f"{str(new_analysis.category_name).lower()}-analysis"
+        send_notification(topic=topic,
+                          title=title,
+                          body=body,
+                          type="analysis"
+                          )
     except SQLAlchemyError as e:
         session.rollback()
         print(f"Error publishing analysis: {str(e)}")

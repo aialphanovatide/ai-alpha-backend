@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "News Bots V2 API",
-    "description": "API for managing All routes related to News Bots",
-    "version": "2.0"
+    "title": "AI Alpha API",
+    "description": "API for managing All routes related to AI Alpha",
+    "version": "2.1"
   },
   "tags": [
     {
@@ -45,19 +45,8 @@
     {
       "name": "TradingView",
       "description": "Operations related to the TradingView"
-    },
-    {
-      "name": "Trendspider",
-      "description": "Operations related to the Trendspider"
-    },
-    {
-      "name": "Twitter",
-      "description": "Operations related to the Twitter"
-    },
-    {
-      "name": "Wp",
-      "description": "Operations related to the Wp"
     }
+
   ],
   "paths": {
     "/get_analysis/{coin_bot_id}": {
