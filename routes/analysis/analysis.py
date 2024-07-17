@@ -1,4 +1,5 @@
 import os
+import re
 import boto3
 import datetime
 import requests
@@ -218,6 +219,18 @@ def get_analysis_by_coin():
 
     return jsonify(response), status_code
 
+def extract_title_and_body(html_content):
+    # Regex to capture the first <p>...</p> and the rest of the content
+    pattern = r'(<p>.*?</p>)(.*)'
+    match = re.search(pattern, html_content, re.DOTALL)
+
+    if match:
+        title = match.group(1)  # First <p>...</p>
+        body = match.group(2)   # The rest of the content
+        return title, body
+    else:
+        return None, None
+
 
 @analysis_bp.route('/get_analysis', methods=['GET'])
 def get_all_analysis():
@@ -390,11 +403,8 @@ def post_analysis():
             }
             response["success"] = True
             status_code = 200
+            title, body = extract_title_and_body(new_analysis.analysis)
 
-            # Send a notification to the phone
-            title = new_analysis.analysis # title
-            body = new_analysis.analysis # paragraph 15 first letters
-            
             topic = f"{str(new_analysis.category_name).lower()}_4999_m1_analysis"
             
             # Send coin name in the notification or empty string

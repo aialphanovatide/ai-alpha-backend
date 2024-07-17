@@ -53,7 +53,6 @@ def generate_poster_prompt(article):
     if response.status_code == 200:
         result = response.json()
         image_url = result['data'][0]['url']
-        print("img url: ", image_url)
         return image_url  # Retorna solo la URL de la imagen
     else:
         print("Error:", response.status_code, response.text)
