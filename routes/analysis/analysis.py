@@ -7,17 +7,17 @@ from io import BytesIO
 from sqlalchemy import desc
 from datetime import datetime
 from dotenv import load_dotenv
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Dict
 from sqlalchemy.exc import SQLAlchemyError
 from flask import jsonify, Blueprint, request
 from apscheduler.triggers.date import DateTrigger
 from sqlalchemy.orm.exc import NoResultFound
 from apscheduler.jobstores.base import JobLookupError
-from botocore.exceptions import ClientError, BotoCoreError
 from services.firebase.firebase import send_notification
 from config import Analysis, AnalysisImage, session, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.news_bot.poster_generator import generate_poster_prompt
+from services.aws.s3 import ImageProcessor as image_proccessor
 
 sched = BackgroundScheduler()
 if sched.state != 1:
@@ -30,72 +30,6 @@ load_dotenv()
 
 AWS_ACCESS = os.getenv('AWS_ACCESS')
 AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
-
-# THIS FUNCTION SEEMS TO BE DUPLICATED WITH THE ONE ON routes/news_bot/poster_generator
-# Verify and remove if it is.
-def resize_and_upload_image_to_s3(
-    image_data: str,
-    bucket_name: str,
-    image_filename: str,
-    target_size: Tuple[int, int] = (256, 256),
-    region_name: str = 'us-east-2',
-    aws_access_key_id: str = AWS_ACCESS,
-    aws_secret_access_key: str = AWS_SECRET_KEY
-) -> Optional[str]:
-    """
-    Resize an image from a URL and upload it to an S3 bucket.
-
-    Args:
-        image_data (str): URL of the image to be resized and uploaded.
-        bucket_name (str): Name of the S3 bucket to upload to.
-        image_filename (str): Desired filename for the uploaded image.
-        target_size (Tuple[int, int]): Desired dimensions for the resized image. Default is (256, 256).
-        region_name (str): AWS region name. Default is 'us-east-2'.
-        aws_access_key_id (str): AWS access key ID.
-        aws_secret_access_key (str): AWS secret access key.
-
-    Returns:
-        Optional[str]: URL of the uploaded image in S3, or None if an error occurred.
-    """
-    try:
-        # Fetch the image from the URL
-        response = requests.get(image_data, timeout=10)
-        response.raise_for_status()  # Raise an exception for bad status codes
-
-        # Open the image using PIL
-        image = Image.open(BytesIO(response.content))
-
-        # Resize the image
-        resized_image = image.resize(target_size)
-
-        # Prepare S3 client
-        s3 = boto3.client(
-            's3',
-            region_name=region_name,
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key
-        )
-
-        # Upload the resized image to S3
-        with BytesIO() as output:
-            resized_image.save(output, format="JPEG")
-            output.seek(0)
-            s3.upload_fileobj(output, bucket_name, image_filename)
-
-        # Generate and return the URL of the uploaded image
-        image_url = f"https://{bucket_name}.s3.amazonaws.com/{image_filename}"
-        return image_url
-
-    except requests.RequestException as e:
-        print(f"Error fetching image: {str(e)}")
-    except IOError as e:
-        print(f"Error processing image: {str(e)}")
-    except (BotoCoreError, ClientError) as e:
-        print(f"Error uploading to S3: {str(e)}")
-    except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-
-    return None
 
 
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
@@ -404,81 +338,100 @@ def post_analysis():
     }
     status_code = 500  # Default to server error
 
-    coin_bot_id = request.form.get('coinBot')
-    content = request.form.get('content')
-    category_name = request.form.get('category_name')
-    # Check if any of the required values is missing or null
-    if not coin_bot_id or coin_bot_id == 'null' or not content or content == 'null' or not category_name or category_name == 'null':
-        response["error"] = "One or more required values are missing or null"
-        return jsonify(response), 400
-
-    session = Session()
     try:
-        new_analysis = Analysis(
-            analysis=content,
-            coin_bot_id=coin_bot_id,
-            category_name=category_name
-        )
-        
-        session.add(new_analysis)
-        session.flush()  # This will populate new_analysis.analysis_id
+        # Extract data from the request
+        coin_bot_id = request.form.get('coinBot')
+        content = request.form.get('content')
+        category_name = request.form.get('category_name')
 
-        # Generate and upload image
-        image = generate_poster_prompt(new_analysis.analysis)
-        if not image:
-            raise ValueError("Image not generated")
+        # Check if any of the required values is missing or null
+        if not coin_bot_id or coin_bot_id == 'null' or not content or content == 'null' or not category_name or category_name == 'null':
+            response["error"] = "One or more required values are missing or null"
+            return jsonify(response), 400
 
-        image_filename = f"{new_analysis.analysis_id}.jpg"
-        resized_image_url = resize_and_upload_image_to_s3(image, 'appanalysisimages', image_filename)
-        if not resized_image_url:
-            raise ValueError("Error resizing and uploading the image to S3")
+        # Create a new session
+        session = Session()
 
-        session.commit()
+        try:
+            # Create a new Analysis object
+            new_analysis = Analysis(
+                analysis=content,
+                coin_bot_id=coin_bot_id,
+                category_name=category_name
+            )
 
-        response["data"] = {
-            "analysis_id": new_analysis.analysis_id,
-            "content": new_analysis.analysis,
-            "coin_bot_id": new_analysis.coin_bot_id,
-            "category_name": new_analysis.category_name,
-            "created_at": new_analysis.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            "image_url": ""
-        }
-        response["success"] = True
-        status_code = 200
+            # Add the new_analysis object to the session
+            session.add(new_analysis)
 
-        # Send a notification to the phone
-        title = new_analysis.analysis # 15 first letters
-        body = new_analysis.analysis # paragraph
-        
-        topic = f"{str(new_analysis.category_name).lower()}_4999_m1_analysis"
-        
-        # Send coin name in the notification or empty string
-        coin_bot_name = session.query(CoinBot).filter_by(bot_id=new_analysis.coin_bot_id).first()
-        if not coin_bot_name:
-            coin_bot_name = ""
+            # Commit the session to save the new_analysis to the database
+            session.commit()
 
-        send_notification(topic=topic,
-                          title=title,
-                          body=body,
-                          type="analysis",
-                          coin=coin_bot_name
-                          )
-        print("--- Notification Sent ---")
+            # Generate and upload image
+            image = generate_poster_prompt(new_analysis.analysis)
+            if not image:
+                raise ValueError("Image not generated")
 
-    except SQLAlchemyError as e:
-        session.rollback()
-        response["error"] = f"Database error occurred: {str(e)}"
-        status_code = 500
-    except ValueError as e:
-        session.rollback()
-        response["error"] = str(e)
-        status_code = 500
+            image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
+
+            image_filename = f"{new_analysis.analysis_id}.jpg"
+            resized_image_url = image_processor.process_and_upload_image(
+                image_url=image,
+                bucket_name='appanalysisimages',
+                image_filename=image_filename
+            )
+            if not resized_image_url:
+                raise ValueError("Error resizing and uploading the image to S3")
+
+            # Update the response data with analysis details
+            response["data"] = {
+                "analysis_id": new_analysis.analysis_id,
+                "content": new_analysis.analysis,
+                "coin_bot_id": new_analysis.coin_bot_id
+            }
+            response["success"] = True
+            status_code = 200
+
+            # Send a notification to the phone
+            title = new_analysis.analysis # title
+            body = new_analysis.analysis # paragraph 15 first letters
+            
+            topic = f"{str(new_analysis.category_name).lower()}_4999_m1_analysis"
+            
+            # Send coin name in the notification or empty string
+            coin_bot_name = session.query(CoinBot).filter_by(bot_id=new_analysis.coin_bot_id).first()
+            if not coin_bot_name:
+                coin_bot_name = ""
+
+            send_notification(topic=topic,
+                            title=title,
+                            body=body,
+                            type="analysis",
+                            coin=coin_bot_name
+                            )
+            print("--- Notification Sent ---")
+
+        except SQLAlchemyError as e:
+            # Rollback the session in case of any database error
+            session.rollback()
+            response["error"] = f"Database error occurred: {str(e)}"
+            status_code = 500
+        except ValueError as e:
+            # Rollback the session in case of image processing error
+            session.rollback()
+            response["error"] = str(e)
+            status_code = 500
+        except Exception as e:
+            # Rollback the session in case of any unexpected error
+            session.rollback()
+            response["error"] = f"An unexpected error occurred: {str(e)}"
+            status_code = 500
+        finally:
+            # Close the session
+            session.close()
+
     except Exception as e:
-        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
-    finally:
-        session.close()
 
     return jsonify(response), status_code
 
