@@ -9,7 +9,7 @@ json_file_path = os.path.abspath('services/firebase/service_account.json')
 cred = credentials.Certificate(json_file_path)
 default_app = initialize_app(credential=cred)
 
-def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert") -> Tuple[Dict[str, str], int]:
+def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None ) -> Tuple[Dict[str, str], int]:
     """
     Send a notification to devices subscribed to a specific topic using Firebase Cloud Messaging.
 
@@ -33,7 +33,8 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
                 body=body,
             ),
             data={
-                "type": type
+                "type": type,
+                "coin": coin
             },
             topic=topic,
             android=messaging.AndroidConfig(

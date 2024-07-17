@@ -441,20 +441,29 @@ def post_analysis():
             "coin_bot_id": new_analysis.coin_bot_id,
             "category_name": new_analysis.category_name,
             "created_at": new_analysis.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            "image_url": resized_image_url
+            "image_url": ""
         }
         response["success"] = True
         status_code = 200
 
         # Send a notification to the phone
-        title = new_analysis.analysis
-        body = new_analysis.analysis
-        topic = f"{str(new_analysis.category_name).lower()}-analysis"
+        title = new_analysis.analysis # 15 first letters
+        body = new_analysis.analysis # paragraph
+        
+        topic = f"{str(new_analysis.category_name).lower()}_4999_m1_analysis"
+        
+        # Send coin name in the notification or empty string
+        coin_bot_name = session.query(CoinBot).filter_by(bot_id=new_analysis.coin_bot_id).first()
+        if not coin_bot_name:
+            coin_bot_name = ""
+
         send_notification(topic=topic,
                           title=title,
                           body=body,
-                          type="analysis"
+                          type="analysis",
+                          coin=coin_bot_name
                           )
+        print("--- Notification Sent ---")
 
     except SQLAlchemyError as e:
         session.rollback()
