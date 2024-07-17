@@ -15,32 +15,12 @@
       "description": "Operations related to the Charts"
     },
     {
-      "name": "Dashboard Access",
-      "description": "Operations related to the Dashboard Access"
-    },
-    {
       "name": "Fundamentals",
       "description": "Operations related to the Fundamentals"
     },
     {
-      "name": "Markting websites",
-      "description": "Operations related to the Markting websites"
-    },
-    {
       "name": "Narrative Trading",
       "description": "Operations related to the Narrative Tragind"
-    },
-    {
-      "name": "News Bots",
-      "description": "Operations related to the News Bots"
-    },
-    {
-      "name": "Slack",
-      "description": "Operations related to the Slack"
-    },
-    {
-      "name": "Telegram",
-      "description": "Operations related to the Telegram"
     },
     {
       "name": "TradingView",
