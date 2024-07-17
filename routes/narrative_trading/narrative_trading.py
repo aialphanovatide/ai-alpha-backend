@@ -14,6 +14,7 @@ from apscheduler.triggers.date import DateTrigger
 from apscheduler.jobstores.base import JobLookupError
 from routes.news_bot.poster_generator import generate_poster_prompt
 from utils.session_management import handle_db_session, create_response
+from services.aws.s3 import ImageProcessor as image_proccessor
 
 sched = BackgroundScheduler()
 if sched.state != 1:
@@ -27,93 +28,74 @@ load_dotenv()
 AWS_ACCESS = os.getenv('AWS_ACCESS')
 AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
-def resize_and_upload_image_to_s3(image_data, bucket_name, image_filename, target_size=(256, 256)):
-    try:
-        response = requests.get(image_data)
-        if response.status_code == 200:
-            image_binary = response.content
-            image = Image.open(BytesIO(image_binary))
-
-            resized_image = image.resize(target_size)
-            image_key = image_filename
-            
-            s3 = boto3.client(
-                's3',
-                region_name='us-east-2',
-                aws_access_key_id=AWS_ACCESS,
-                aws_secret_access_key=AWS_SECRET_KEY
-            )
-            
-            # Subir la imagen redimensionada a S3
-            with BytesIO() as output:
-                resized_image.save(output, format="JPEG")
-                output.seek(0)
-                s3.upload_fileobj(output, bucket_name, image_key)
-            
-            # Obtener la URL de la imagen subida
-            image_url = f"https://{bucket_name}.s3.amazonaws.com/{image_key}"
-            return image_url
-        else:
-            print("Error:", response.status_code)
-            return None
-    except Exception as e:
-        print("Error :", str(e))
-        return None
-
 
 @narrative_trading_bp.route('/get_narrative_trading/<int:coin_bot_id>', methods=['GET'])
+@handle_db_session
 def get_narrative_trading(coin_bot_id):
+    """
+    Retrieve narrative trading posts by coin bot ID.
 
+    Args:
+        coin_bot_id (int): ID of the coin bot
+
+    Returns:
+        JSON response:
+            - Success: True if narrative trading posts are retrieved successfully
+            - Error: Error message if any exception occurs
+    """
     try:
-        narrative_trading_objects = session.query(NarrativeTrading).filter_by(
-            coin_bot_id=coin_bot_id).order_by(desc(NarrativeTrading.created_at)).all()
+        narrative_trading_objects = get_narrative_trading_by_id(coin_bot_id)
+        if not narrative_trading_objects:
+            return jsonify(create_response(success=False, error='No narrative trading found')), 404
+
         narrative_trading_data = []
-
-        # Iterates over the narrative_trading objects and fetches relevant data
         for nt in narrative_trading_objects:
-            narrative_trading_dict = nt.to_dict()
+            nt_dict = nt.to_dict()
+            nt_dict.pop('narrative_trading_images', None)
+            nt_dict.pop('image', None)
+            nt_dict['category_name'] = nt.category_name
+            nt_dict['coin_bot_id'] = nt.coin_bot_id 
+            narrative_trading_data.append(nt_dict)
 
-            # Exclude images and any other irrelevant fields
-            narrative_trading_dict.pop('narrative_trading_images', None)
-            narrative_trading_dict.pop('image', None)  # If 'image' is present in the original object
-            narrative_trading_dict['category_name'] = nt.category_name
-            narrative_trading_data.append(narrative_trading_dict)
-
-        return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
+        return jsonify(create_response(success=True, data=narrative_trading_data)), 200
 
     except Exception as e:
-        session.rollback()
-        return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
 
-
-# Fn to get narrative_trading related to a coin id
 
 
 def get_narrative_trading_by_id(coin_bot_id):
     return session.query(NarrativeTrading).filter_by(coin_bot_id=coin_bot_id).order_by(desc(NarrativeTrading.created_at)).all()
-
-# Fn to get Narrative trading related to a coin name
-
 
 def get_narrative_trading_by_name(coin_bot_name):
     coin = session.query(CoinBot).filter(
         CoinBot.bot_name == coin_bot_name).first()
     return session.query(NarrativeTrading).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
-# fn to get nt images
-
-
 def get_narrative_trading_images(narrative_trading_object):
     return [{'image_id': img.image_id, 'image': img.image} for img in session.query(NarrativeTrading).filter_by(narrative_trading_id=narrative_trading_object.narrative_trading_id).all()]
 
 @narrative_trading_bp.route('/api/get_narrative_trading_by_coin', methods=['GET'])
+@handle_db_session
 def get_narrative_trading_by_coin():
+    """
+    Retrieve narrative trading posts by coin bot name or ID.
+
+    Args (query parameters):
+        coin_bot_name (str): Name of the coin bot
+        coin_bot_id (int): ID of the coin bot
+
+    Returns:
+        JSON response:
+            - Success: True if narrative trading posts are retrieved successfully
+            - Error: Error message if any exception occurs
+    """
     try:
         coin_bot_name = request.args.get('coin_bot_name')
         coin_bot_id = request.args.get('coin_bot_id')
 
         if not coin_bot_id and not coin_bot_name:
-            return jsonify({'message': 'Coin ID or name is missing', 'status': 400}), 400
+            return jsonify(create_response(success=False, error='Coin ID or name is missing')), 400
 
         narrative_trading_objects = []
         if coin_bot_name:
@@ -122,188 +104,218 @@ def get_narrative_trading_by_coin():
             narrative_trading_objects = get_narrative_trading_by_id(coin_bot_id)
 
         if not narrative_trading_objects:
-            return jsonify({'message': 'No narrative trading found', 'status': 404}), 404
+            return jsonify(create_response(success=False, error='No narrative trading found')), 404
 
         narrative_trading_data = []
         for nt in narrative_trading_objects:
             nt_dict = nt.to_dict()
             nt_dict.pop('narrative_trading_images', None)
             nt_dict.pop('image', None)
-
-            # Agrega el nombre de la categoría al diccionario de "narrative trading"
             nt_dict['category_name'] = nt.category_name
             nt_dict['coin_bot_id'] = nt.coin_bot_id 
-                
             narrative_trading_data.append(nt_dict)
 
-        return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
+        return jsonify(create_response(success=True, data=narrative_trading_data)), 200
 
     except Exception as e:
-        session.rollback()
-        return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
-    
-    
-# Gets all the nt from all coins
-@narrative_trading_bp.route('/get_narrative_trading', methods=['GET'])
-def get_all_narrative_trading():
+        return jsonify(create_response(success=False, error=str(e))), 500
 
+    
+@narrative_trading_bp.route('/get_narrative_trading', methods=['GET'])
+@handle_db_session
+def get_all_narrative_trading():
+    """
+    Retrieve all narrative trading posts.
+
+    Returns:
+        JSON response:
+            - 'message': List of narrative trading data
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
         narrative_trading_objects = session.query(NarrativeTrading).order_by(
             desc(NarrativeTrading.created_at)).all()
         narrative_trading_data = []
 
-        # Iterates over the narrative_trading objects and fetches relevant data
         for analy in narrative_trading_objects:
             narrative_trading_dict = analy.to_dict()
-
-            # Exclude images and any other irrelevant fields
             narrative_trading_dict.pop('narrative_trading_images', None)
-            narrative_trading_dict.pop('image', None)  # If 'image' is present in the original object
-
-            # Agrega el nombre de la categoría al diccionario de "narrative trading"
+            narrative_trading_dict.pop('image', None)
             narrative_trading_dict['category_name'] = analy.category_name
             narrative_trading_dict['coin_bot_id'] = analy.coin_bot_id
-            # narrative_trading_dict.pop('category_name', None)  # Remove 'category_name' if it's not relevant
-            # narrative_trading_dict.pop('coin_bot_id', None)  # Remove 'coin_bot_id' if it's not relevant
-
             narrative_trading_data.append(narrative_trading_dict)
 
-        return jsonify({'message': narrative_trading_data, 'success': True, 'status': 200}), 200
+        return jsonify(create_response(success=True, data=narrative_trading_data)), 200
 
     except Exception as e:
         session.rollback()
-        return jsonify({'message': str(e), 'success': False, 'status': 500}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
 
-# Creates an narrative_trading
+
 @narrative_trading_bp.route('/post_narrative_trading', methods=['POST'])
+@handle_db_session
 def post_narrative_trading():
+    """
+    Create a new narrative trading post.
+
+    Args (form parameters):
+        coinBot (str): ID of the coin bot
+        content (str): Content of the post
+        category_name (str): Name of the category
+
+    Returns:
+        JSON response:
+            - 'message': Success message
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
         coin_bot_id = request.form.get('coinBot')
         content = request.form.get('content')
         category_name = request.form.get('category_name')
-        # image_file = request.files.get('image')
 
-        # Check if any of the required values is missing
-        if content == 'null' or coin_bot_id == 'null':
-            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
-        
-        if category_name == 'null' or coin_bot_id == 'null':
-            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
-
-        # Check if any of the required values is missing
-        if coin_bot_id is None or not coin_bot_id or content is None or not content:
-            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
-        
-        
+        if not (coin_bot_id and content):
+            return jsonify(create_response(success=False, error='One or more required values are missing')), 400
 
         new_narrative_trading = NarrativeTrading(
             narrative_trading=content,
             coin_bot_id=coin_bot_id,
             category_name=category_name
         )
-        
+    
+
         session.add(new_narrative_trading)
         session.commit()
         
+        
+        image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
+
         if new_narrative_trading:
             image = generate_poster_prompt(new_narrative_trading.narrative_trading)
+            print("image:", image)
             print("image generated")
             narrative_trading_id = new_narrative_trading.narrative_trading_id
             print('id narrative_trading', narrative_trading_id)
             image_filename = f"{narrative_trading_id}.jpg"    
             print('filename: ', image_filename)
+            
             if image:
-                    try:
-                                # Resize and upload the image to S3
-                        resized_image_url = resize_and_upload_image_to_s3(image, 'appnarrativetradingimages', image_filename)
+                try:
+                    # Resize and upload the image to S3
+                    resized_image_url = image_processor.process_and_upload_image(
+                        image_url=image,
+                        bucket_name='appnarrativetradingimages',
+                        image_filename=image_filename
+                    )
 
-                        if resized_image_url:
-                             print("Image resized and uploaded to S3 successfully.")
-                        else:
-                             print("Error resizing and uploading the image to S3.")
-                    except Exception as e:
-                        print("Error:", e)
+                    if resized_image_url:
+                        print("Image resized and uploaded to S3 successfully.")
+                    else:
+                        print("Error resizing and uploading the image to S3.")
+                except Exception as e:
+                    print("Error:", e)
             else:
                 print("Image not generated.")
-        
-        
 
 
-        # Return success response if everything is fine
-        return jsonify({'message': 'narrative_trading posted successfully', 'status': 200, 'success': True}), 200
+            return jsonify(create_response(success=True, message='narrative_trading posted successfully')), 200
+
     except Exception as e:
         session.rollback()
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
+    
 
-
-# Deletes an narrative_trading passing the narrative_trading_id
 @narrative_trading_bp.route('/delete_narrative_trading/<int:narrative_trading_id>', methods=['DELETE'])
+@handle_db_session
 def delete_narrative_trading(narrative_trading_id):
+    """
+    Delete a narrative trading post by narrative_trading_id.
+
+    Args:
+        narrative_trading_id (int): ID of the narrative trading post to delete
+
+    Returns:
+        JSON response:
+            - 'message': Success or error message
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
-        # Check if the narrative_trading_id exists
         narrative_trading_to_delete = session.query(NarrativeTrading).filter(
             NarrativeTrading.narrative_trading_id == narrative_trading_id).first()
-        if narrative_trading_to_delete is None:
-            return jsonify({'error': 'narrative_trading not found', 'status': 404, 'success': False}), 404
 
-        # Delete the associated image if it exists
-        narrative_trading_image_to_delete = session.query(
-            NarrativeTrading).filter_by(narrative_trading_id=narrative_trading_id).first()
+        if not narrative_trading_to_delete:
+            return jsonify(create_response(success=False, error='narrative_trading not found')), 404
 
-        if narrative_trading_image_to_delete:
-            session.delete(narrative_trading_image_to_delete)
-
-        # Delete the narrative_trading
         session.delete(narrative_trading_to_delete)
         session.commit()
 
-        return jsonify({'message': 'narrative_trading deleted successfully', 'status': 200, 'success': True}), 200
+        return jsonify(create_response(success=True, message='narrative_trading deleted successfully')), 200
 
     except Exception as e:
         session.rollback()
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
 
-# Edits an narrative_trading post
 @narrative_trading_bp.route('/edit_narrative_trading/<int:narrative_trading_id>', methods=['PUT'])
+@handle_db_session
 def edit_narrative_trading(narrative_trading_id):
+    """
+    Edit an existing narrative trading post.
+
+    Args:
+        narrative_trading_id (int): ID of the narrative trading post to edit
+
+    Returns:
+        JSON response:
+            - 'message': Success or error message
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
-        # Check if the narrative_trading_id exists
         narrative_trading_to_edit = session.query(NarrativeTrading).filter(
             NarrativeTrading.narrative_trading_id == narrative_trading_id).first()
-        if narrative_trading_to_edit is None:
-            return jsonify({'error': 'narrative_trading not found', 'status': 404, 'success': False}), 404
 
-        # Update narrative_trading content if provided
+        if not narrative_trading_to_edit:
+            return jsonify(create_response(success=False, error='narrative_trading not found')), 404
+
         new_content = request.json.get('content')
 
         if not new_content:
-            return jsonify({'error': 'New content is required to edit the narrative_trading', 'status': 400, 'success': False}), 400
+            return jsonify(create_response(success=False, error='New content is required to edit the narrative_trading')), 400
 
         narrative_trading_to_edit.narrative_trading = new_content
         session.commit()
 
-        return jsonify({'message': 'narrative_trading edited successfully', 'status': 200, 'success': True}), 200
+        return jsonify(create_response(success=True, message='narrative_trading edited successfully')), 200
 
     except Exception as e:
         session.rollback()
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
 
 
-# Gets the name and date of the last narrative_trading created
 @narrative_trading_bp.route('/get_last_narrative_trading', methods=['GET'])
+@handle_db_session
 def get_last_narrative_trading():
+    """
+    Retrieve information about the last narrative trading created.
+
+    Returns:
+        JSON response:
+            - 'last_narrative_trading': Dictionary containing details of the last narrative trading
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
-        # Retrieve the last narrative_trading created
         last_narrative_trading = session.query(NarrativeTrading).order_by(
             NarrativeTrading.created_at.desc()).first()
 
-        if last_narrative_trading is None:
-            return jsonify({'error': 'No narrative_trading found', 'status': 404, 'success': False}), 404
+        if not last_narrative_trading:
+            return jsonify(create_response(success=False, error='No narrative_trading found')), 404
 
         coin = session.query(CoinBot).filter(
             CoinBot.bot_id == last_narrative_trading.coin_bot_id).first()
 
-        # Extract relevant information, such as narrative_trading content and creation date
         narrative_trading_data = {
             'narrative_trading_id': last_narrative_trading.narrative_trading_id,
             'content': last_narrative_trading.narrative_trading,
@@ -312,11 +324,12 @@ def get_last_narrative_trading():
             'created_at': last_narrative_trading.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
 
-        return jsonify({'last_narrative_trading': narrative_trading_data, 'status': 200, 'success': True}), 200
+        return jsonify(create_response(success=True, data={'last_narrative_trading': narrative_trading_data})), 200
 
     except Exception as e:
         session.rollback()
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
+
 
 
 # Funtion to execute by the scheduler post
@@ -335,35 +348,59 @@ def publish_narrative_trading(coin_bot_id, content, category_name):
     session.commit()
     print("Publishing narrative_trading with title:", title)
 
-
 @narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
+@handle_db_session
 def schedule_post():
+    """
+    Schedule a narrative trading post for future publishing.
+
+    Args (form parameters):
+        coinBot (str): ID of the coin bot
+        category_name (str): Name of the category
+        content (str): Content of the post
+        scheduledDate (str): Scheduled date and time for publishing
+
+    Returns:
+        JSON response:
+            - 'message': Success or error message
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
         if not sched.running:
             sched.start()
-            
+
         coin_bot_id = request.form.get('coinBot')
         category_name = request.form.get('category_name')
         content = request.form.get('content')
         scheduled_date_str = request.form.get('scheduledDate')
 
         if not (coin_bot_id and content and scheduled_date_str):
-            return jsonify({'error': 'One or more required values are missing', 'status': 400, 'success': False}), 400
+            return jsonify(create_response(success=False, error='One or more required values are missing')), 400
 
         scheduled_datetime = datetime.strptime(
             scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
 
-        # Agregar un nuevo trabajo
-        sched.add_job(publish_narrative_trading, args=[coin_bot_id, content, category_name], trigger=DateTrigger(run_date=scheduled_datetime))
+        sched.add_job(publish_narrative_trading, args=[coin_bot_id, content, category_name],
+                      trigger=DateTrigger(run_date=scheduled_datetime))
 
-        return jsonify({'message': 'Post scheduled successfully', 'status': 200, 'success': True}), 200
+        return jsonify(create_response(success=True, message='Post scheduled successfully')), 200
+
     except Exception as e:
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
 
-
-# Gets all the schedule narrative_trading
 @narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
+@handle_db_session
 def get_jobs():
+    """
+    Retrieve a list of all scheduled narrative trading jobs.
+
+    Returns:
+        JSON response:
+            - 'jobs': List of dictionaries containing job details
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
     try:
         job_listing = []
         for job in sched.get_jobs():
@@ -376,207 +413,217 @@ def get_jobs():
             }
             job_listing.append(job_info)
 
-        return jsonify({'jobs': job_listing, 'status': 200, 'success': True}), 200
+        return jsonify(create_response(success=True, data={'jobs': job_listing})), 200
 
     except Exception as e:
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
 
 
-# Deletes a scheduled job by job id
 @narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
+@handle_db_session
 def delete_scheduled_job(job_id):
-    try:
-        # Find the by schedule narrative_trading by ID
-        job = sched.get_job(job_id)
-        if job is None:
-            return jsonify({'error': 'Scheduled job not found', 'status': 404, 'success': False}), 404
+    """
+    Delete a scheduled narrative trading job by job ID.
 
-        # Deletes an narrative_trading
-        print("Scheduled deleted")
+    Args:
+        job_id (str): ID of the job to delete
+
+    Returns:
+        JSON response:
+            - 'message': Success or error message
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
+    try:
+        job = sched.get_job(job_id)
+        if not job:
+            return jsonify(create_response(success=False, error='Scheduled job not found')), 404
+
         sched.remove_job(job_id)
 
-        return jsonify({'message': 'Scheduled job deleted successfully', 'status': 200, 'success': True}), 200
+        return jsonify(create_response(success=True, message='Scheduled job deleted successfully')), 200
 
     except JobLookupError as e:
-        return jsonify({'error': str(e), 'status': 404, 'success': False}), 404
+        return jsonify(create_response(success=False, error=str(e))), 404
     except Exception as e:
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        return jsonify(create_response(success=False, error=str(e))), 500
+
     
 
 # ________________________ IMPROVED VERSION __________________________________
 
-@handle_db_session
-def publish_narrative_trading(coin_bot_id, content, category_name, session):
-    """
-    Publish a narrative trading post.
+# @handle_db_session
+# def publish_narrative_trading(coin_bot_id, content, category_name, session):
+#     """
+#     Publish a narrative trading post.
 
-    Args:
-        coin_bot_id (int): ID of the coin bot
-        content (str): Content of the post
-        category_name (str): Name of the category
-        session (Session): SQLAlchemy session (injected by decorator)
+#     Args:
+#         coin_bot_id (int): ID of the coin bot
+#         content (str): Content of the post
+#         category_name (str): Name of the category
+#         session (Session): SQLAlchemy session (injected by decorator)
 
-    Returns:
-        dict: Response dictionary
-    """
-    if not all([coin_bot_id, content, category_name]):
-        print("Error: Missing required arguments for publish_narrative_trading")
-        return create_response(error="Missing required arguments")
+#     Returns:
+#         dict: Response dictionary
+#     """
+#     if not all([coin_bot_id, content, category_name]):
+#         print("Error: Missing required arguments for publish_narrative_trading")
+#         return create_response(error="Missing required arguments")
 
-    title_end_index = content.find('\n')
-    if title_end_index != -1:
-        title = content[:title_end_index].strip()
-        content = content[title_end_index+1:].strip()
-    else:
-        title = "Untitled"
-        content = content.strip()
+#     title_end_index = content.find('\n')
+#     if title_end_index != -1:
+#         title = content[:title_end_index].strip()
+#         content = content[title_end_index+1:].strip()
+#     else:
+#         title = "Untitled"
+#         content = content.strip()
 
-    new_narrative_trading = NarrativeTrading(
-        narrative_trading=content,
-        category_name=category_name,
-        coin_bot_id=coin_bot_id,
-        title=title,
-        created_at=datetime.now()
-    )
-    session.add(new_narrative_trading)
-    session.flush()  # This will assign an ID to new_narrative_trading
+#     new_narrative_trading = NarrativeTrading(
+#         narrative_trading=content,
+#         category_name=category_name,
+#         coin_bot_id=coin_bot_id,
+#         title=title,
+#         created_at=datetime.now()
+#     )
+#     session.add(new_narrative_trading)
+#     session.flush()  # This will assign an ID to new_narrative_trading
 
-    print(f"Published narrative trading: ID={new_narrative_trading.id}, Title='{title}', CoinBot={coin_bot_id}")
-    return create_response(success=True, message="Narrative trading published successfully", data={"id": new_narrative_trading.id})
+#     print(f"Published narrative trading: ID={new_narrative_trading.id}, Title='{title}', CoinBot={coin_bot_id}")
+#     return create_response(success=True, message="Narrative trading published successfully", data={"id": new_narrative_trading.id})
 
-@narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
-def schedule_post():
-    """
-    Schedule a narrative trading post.
+# @narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
+# def schedule_post():
+#     """
+#     Schedule a narrative trading post.
 
-    Expected form data:
-    - coinBot: ID of the coin bot
-    - category_name: Name of the category (optional)
-    - content: Content of the post
-    - scheduledDate: Date and time for the scheduled post (format: 'Mon, Jan 01, 2023, 12:00:00 AM')
+#     Expected form data:
+#     - coinBot: ID of the coin bot
+#     - category_name: Name of the category (optional)
+#     - content: Content of the post
+#     - scheduledDate: Date and time for the scheduled post (format: 'Mon, Jan 01, 2023, 12:00:00 AM')
 
-    Returns:
-        JSON response with status code:
-        - 200: Post scheduled successfully
-        - 400: Missing required values
-        - 500: Unexpected error
-    """
-    response = {"message": None, "error": None, "success": False}
-    status_code = 500  
+#     Returns:
+#         JSON response with status code:
+#         - 200: Post scheduled successfully
+#         - 400: Missing required values
+#         - 500: Unexpected error
+#     """
+#     response = {"message": None, "error": None, "success": False}
+#     status_code = 500  
 
-    try:
-        coin_bot_id = request.form.get('coinBot')
-        category_name = request.form.get('category_name')
-        content = request.form.get('content')
-        scheduled_date_str = request.form.get('scheduledDate')
+#     try:
+#         coin_bot_id = request.form.get('coinBot')
+#         category_name = request.form.get('category_name')
+#         content = request.form.get('content')
+#         scheduled_date_str = request.form.get('scheduledDate')
 
-        # Validate required fields
-        if not all([coin_bot_id, content, scheduled_date_str]):
-            response["error"] = "One or more required values are missing"
-            response["status"] = 400
-            return jsonify(response), 400
+#         # Validate required fields
+#         if not all([coin_bot_id, content, scheduled_date_str]):
+#             response["error"] = "One or more required values are missing"
+#             response["status"] = 400
+#             return jsonify(response), 400
 
-        # Parse the scheduled date
-        try:
-            scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
-        except ValueError:
-            response["error"] = "Invalid date format. Expected format: 'Mon, Jan 01, 2023, 12:00:00 AM'"
-            response["status"] = 400
-            return jsonify(response), 400
+#         # Parse the scheduled date
+#         try:
+#             scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+#         except ValueError:
+#             response["error"] = "Invalid date format. Expected format: 'Mon, Jan 01, 2023, 12:00:00 AM'"
+#             response["status"] = 400
+#             return jsonify(response), 400
 
-        # Schedule the job
-        job = sched.add_job(
-            publish_narrative_trading,
-            args=[coin_bot_id, content, category_name],
-            trigger=DateTrigger(run_date=scheduled_datetime)
-        )
+#         # Schedule the job
+#         job = sched.add_job(
+#             publish_narrative_trading,
+#             args=[coin_bot_id, content, category_name],
+#             trigger=DateTrigger(run_date=scheduled_datetime)
+#         )
 
-        response["message"] = f"Post scheduled successfully. Job ID: {job.id}"
-        response["success"] = True
-        response["status"] = 200
-        status_code = 200
+#         response["message"] = f"Post scheduled successfully. Job ID: {job.id}"
+#         response["success"] = True
+#         response["status"] = 200
+#         status_code = 200
 
-    except Exception as e:
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        response["status"] = 500
+#     except Exception as e:
+#         response["error"] = f"An unexpected error occurred: {str(e)}"
+#         response["status"] = 500
 
-    return jsonify(response), status_code
+#     return jsonify(response), status_code
 
 
-@narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
-def get_jobs():
-    """
-    Get all scheduled narrative trading jobs.
+# @narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
+# def get_jobs():
+#     """
+#     Get all scheduled narrative trading jobs.
 
-    Returns:
-        JSON response with status code:
-        - 200: List of jobs retrieved successfully
-        - 500: Unexpected error
-    """
-    response = {"jobs": [], "message": None, "error": None, "success": False}
-    status_code = 500  # Default to server error
+#     Returns:
+#         JSON response with status code:
+#         - 200: List of jobs retrieved successfully
+#         - 500: Unexpected error
+#     """
+#     response = {"jobs": [], "message": None, "error": None, "success": False}
+#     status_code = 500  # Default to server error
 
-    try:
-        for job in sched.get_jobs():
-            job_info = {
-                'id': job.id,
-                'name': job.name,
-                'trigger': str(job.trigger),
-                'args': str(job.args),
-                'next_run_time': str(job.next_run_time) if job.next_run_time else None
-            }
-            response["jobs"].append(job_info)
+#     try:
+#         for job in sched.get_jobs():
+#             job_info = {
+#                 'id': job.id,
+#                 'name': job.name,
+#                 'trigger': str(job.trigger),
+#                 'args': str(job.args),
+#                 'next_run_time': str(job.next_run_time) if job.next_run_time else None
+#             }
+#             response["jobs"].append(job_info)
 
-        response["message"] = "Jobs retrieved successfully"
-        response["success"] = True
-        response["status"] = 200
-        status_code = 200
+#         response["message"] = "Jobs retrieved successfully"
+#         response["success"] = True
+#         response["status"] = 200
+#         status_code = 200
 
-    except Exception as e:
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        response["status"] = 500
+#     except Exception as e:
+#         response["error"] = f"An unexpected error occurred: {str(e)}"
+#         response["status"] = 500
 
-    return jsonify(response), status_code
+#     return jsonify(response), status_code
 
-@narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
-def delete_scheduled_job(job_id):
-    """
-    Delete a scheduled job by job ID.
+# @narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
+# def delete_scheduled_job(job_id):
+#     """
+#     Delete a scheduled job by job ID.
 
-    Args:
-        job_id (str): The ID of the job to delete
+#     Args:
+#         job_id (str): The ID of the job to delete
 
-    Returns:
-        JSON response with status code:
-        - 200: Job deleted successfully
-        - 404: Job not found
-        - 500: Unexpected error
-    """
-    response = {"message": None, "error": None, "success": False}
-    status_code = 500 
+#     Returns:
+#         JSON response with status code:
+#         - 200: Job deleted successfully
+#         - 404: Job not found
+#         - 500: Unexpected error
+#     """
+#     response = {"message": None, "error": None, "success": False}
+#     status_code = 500 
 
-    try:
-        # Find the scheduled job by ID
-        job = sched.get_job(job_id)
-        if job is None:
-            response["error"] = "Scheduled job not found"
-            response["status"] = 404
-            return jsonify(response), 404
+#     try:
+#         # Find the scheduled job by ID
+#         job = sched.get_job(job_id)
+#         if job is None:
+#             response["error"] = "Scheduled job not found"
+#             response["status"] = 404
+#             return jsonify(response), 404
 
-        # Delete the scheduled job
-        sched.remove_job(job_id)
-        response["message"] = "Scheduled job deleted successfully"
-        response["status"] = 200
-        response["success"] = True
-        status_code = 200
+#         # Delete the scheduled job
+#         sched.remove_job(job_id)
+#         response["message"] = "Scheduled job deleted successfully"
+#         response["status"] = 200
+#         response["success"] = True
+#         status_code = 200
 
-    except JobLookupError as e:
-        response["error"] = str(e)
-        response["status"] = 404
-        status_code = 404
-    except Exception as e:
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        response["status"] = 500
-        status_code = 500
+#     except JobLookupError as e:
+#         response["error"] = str(e)
+#         response["status"] = 404
+#         status_code = 404
+#     except Exception as e:
+#         response["error"] = f"An unexpected error occurred: {str(e)}"
+#         response["status"] = 500
+#         status_code = 500
 
-    return jsonify(response), status_code
+#     return jsonify(response), status_code
