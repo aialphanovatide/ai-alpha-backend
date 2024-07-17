@@ -66,10 +66,7 @@ def get_narrative_trading_by_name(coin_bot_name):
         CoinBot.bot_name == coin_bot_name).first()
     return session.query(NarrativeTrading).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
-def get_narrative_trading_images(narrative_trading_object):
-    return [{'image_id': img.image_id, 'image': img.image} for img in session.query(NarrativeTrading).filter_by(narrative_trading_id=narrative_trading_object.narrative_trading_id).all()]
-
-@narrative_trading_bp.route('/api/get_narrative_trading_by_coin', methods=['GET'])
+@narrative_trading_bp.route('/get_narrative_trading_by_coin', methods=['GET'])
 @handle_db_session
 def get_narrative_trading_by_coin():
     """
@@ -323,7 +320,6 @@ def get_last_narrative_trading():
     except Exception as e:
         session.rollback()
         return jsonify(create_response(success=False, error=str(e))), 500
-
 
 
 # Funtion to execute by the scheduler post

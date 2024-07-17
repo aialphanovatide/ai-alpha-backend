@@ -37,7 +37,7 @@ def set_new_user():
         new_user = User(
             nickname=data.get('nickname'),
             email=data.get('email'),
-            email_verified=data.get('email_verified', True),
+            email_verified=data.get('email_verified', False),
             picture=data.get('picture'),
             auth0id=data.get('auth0id'),
             provider=data.get('provider'),
