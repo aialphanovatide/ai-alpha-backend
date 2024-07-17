@@ -61,7 +61,7 @@ def get_tokenomics():
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500}), 500
     
-#get tokenomic indivually
+# Get tokenomic indivually
 @tokenomics.route('/get_tokenomic/<int:id>', methods=['GET'])
 def get_tokenomic(id):
     try:
@@ -75,8 +75,6 @@ def get_tokenomic(id):
     
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500}), 500
-
-
 
 # Get a token distribution
 @tokenomics.route('/get_token_distribution/<int:id>', methods=['GET'])
@@ -94,8 +92,6 @@ def get_token_distribution(id):
         return jsonify({'error': str(e), 'status': 500}), 500
 
 # Get a token utility
-
-
 @tokenomics.route('/get_token_utility/<int:id>', methods=['GET'])
 def get_token_utility(id):
     try:
@@ -111,8 +107,6 @@ def get_token_utility(id):
         return jsonify({'error': str(e), 'status': 500}), 500
 
 # Get a value accrual mechanism
-
-
 @tokenomics.route('/get_value_accrual/<int:id>', methods=['GET'])
 def get_value_accrual(id):
     try:
@@ -128,8 +122,6 @@ def get_value_accrual(id):
         return jsonify({'error': str(e), 'status': 500}), 500
 
 # ------- POST ---------- CREATES A NEW INSTANCE OF THE TABLE ----------------------------------
-
-
 @tokenomics.route('/post_token_utility', methods=['POST'])
 def create_token_utility():
 
@@ -241,7 +233,6 @@ def create_tokenomics():
 # ------- PUT ---------- EDITS AN INSTANCE OF THE TABLE ----------------------------------------
 
 # Create the edit route for editing a already created tokenomics
-
 @tokenomics.route('/edit_tokenomics/<int:tokenomics_id>', methods=['PUT'])
 def edit_competitor_data(tokenomics_id):
     try:

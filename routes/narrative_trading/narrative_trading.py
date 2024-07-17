@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image
 import requests
 import boto3
-from config import NarrativeTrading, session, CoinBot
+from config import NarrativeTrading, session, CoinBot, Session
 from flask import jsonify, Blueprint, request
 from sqlalchemy import desc
 from datetime import datetime
@@ -13,6 +13,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.jobstores.base import JobLookupError
 from routes.news_bot.poster_generator import generate_poster_prompt
+from utils.session_management import handle_db_session, create_response
 
 sched = BackgroundScheduler()
 if sched.state != 1:
@@ -400,3 +401,182 @@ def delete_scheduled_job(job_id):
         return jsonify({'error': str(e), 'status': 404, 'success': False}), 404
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+    
+
+# ________________________ IMPROVED VERSION __________________________________
+
+@handle_db_session
+def publish_narrative_trading(coin_bot_id, content, category_name, session):
+    """
+    Publish a narrative trading post.
+
+    Args:
+        coin_bot_id (int): ID of the coin bot
+        content (str): Content of the post
+        category_name (str): Name of the category
+        session (Session): SQLAlchemy session (injected by decorator)
+
+    Returns:
+        dict: Response dictionary
+    """
+    if not all([coin_bot_id, content, category_name]):
+        print("Error: Missing required arguments for publish_narrative_trading")
+        return create_response(error="Missing required arguments")
+
+    title_end_index = content.find('\n')
+    if title_end_index != -1:
+        title = content[:title_end_index].strip()
+        content = content[title_end_index+1:].strip()
+    else:
+        title = "Untitled"
+        content = content.strip()
+
+    new_narrative_trading = NarrativeTrading(
+        narrative_trading=content,
+        category_name=category_name,
+        coin_bot_id=coin_bot_id,
+        title=title,
+        created_at=datetime.now()
+    )
+    session.add(new_narrative_trading)
+    session.flush()  # This will assign an ID to new_narrative_trading
+
+    print(f"Published narrative trading: ID={new_narrative_trading.id}, Title='{title}', CoinBot={coin_bot_id}")
+    return create_response(success=True, message="Narrative trading published successfully", data={"id": new_narrative_trading.id})
+
+@narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
+def schedule_post():
+    """
+    Schedule a narrative trading post.
+
+    Expected form data:
+    - coinBot: ID of the coin bot
+    - category_name: Name of the category (optional)
+    - content: Content of the post
+    - scheduledDate: Date and time for the scheduled post (format: 'Mon, Jan 01, 2023, 12:00:00 AM')
+
+    Returns:
+        JSON response with status code:
+        - 200: Post scheduled successfully
+        - 400: Missing required values
+        - 500: Unexpected error
+    """
+    response = {"message": None, "error": None, "success": False}
+    status_code = 500  
+
+    try:
+        coin_bot_id = request.form.get('coinBot')
+        category_name = request.form.get('category_name')
+        content = request.form.get('content')
+        scheduled_date_str = request.form.get('scheduledDate')
+
+        # Validate required fields
+        if not all([coin_bot_id, content, scheduled_date_str]):
+            response["error"] = "One or more required values are missing"
+            response["status"] = 400
+            return jsonify(response), 400
+
+        # Parse the scheduled date
+        try:
+            scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+        except ValueError:
+            response["error"] = "Invalid date format. Expected format: 'Mon, Jan 01, 2023, 12:00:00 AM'"
+            response["status"] = 400
+            return jsonify(response), 400
+
+        # Schedule the job
+        job = sched.add_job(
+            publish_narrative_trading,
+            args=[coin_bot_id, content, category_name],
+            trigger=DateTrigger(run_date=scheduled_datetime)
+        )
+
+        response["message"] = f"Post scheduled successfully. Job ID: {job.id}"
+        response["success"] = True
+        response["status"] = 200
+        status_code = 200
+
+    except Exception as e:
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+        response["status"] = 500
+
+    return jsonify(response), status_code
+
+
+@narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
+def get_jobs():
+    """
+    Get all scheduled narrative trading jobs.
+
+    Returns:
+        JSON response with status code:
+        - 200: List of jobs retrieved successfully
+        - 500: Unexpected error
+    """
+    response = {"jobs": [], "message": None, "error": None, "success": False}
+    status_code = 500  # Default to server error
+
+    try:
+        for job in sched.get_jobs():
+            job_info = {
+                'id': job.id,
+                'name': job.name,
+                'trigger': str(job.trigger),
+                'args': str(job.args),
+                'next_run_time': str(job.next_run_time) if job.next_run_time else None
+            }
+            response["jobs"].append(job_info)
+
+        response["message"] = "Jobs retrieved successfully"
+        response["success"] = True
+        response["status"] = 200
+        status_code = 200
+
+    except Exception as e:
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+        response["status"] = 500
+
+    return jsonify(response), status_code
+
+@narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
+def delete_scheduled_job(job_id):
+    """
+    Delete a scheduled job by job ID.
+
+    Args:
+        job_id (str): The ID of the job to delete
+
+    Returns:
+        JSON response with status code:
+        - 200: Job deleted successfully
+        - 404: Job not found
+        - 500: Unexpected error
+    """
+    response = {"message": None, "error": None, "success": False}
+    status_code = 500 
+
+    try:
+        # Find the scheduled job by ID
+        job = sched.get_job(job_id)
+        if job is None:
+            response["error"] = "Scheduled job not found"
+            response["status"] = 404
+            return jsonify(response), 404
+
+        # Delete the scheduled job
+        sched.remove_job(job_id)
+        response["message"] = "Scheduled job deleted successfully"
+        response["status"] = 200
+        response["success"] = True
+        status_code = 200
+
+    except JobLookupError as e:
+        response["error"] = str(e)
+        response["status"] = 404
+        status_code = 404
+    except Exception as e:
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+        response["status"] = 500
+        status_code = 500
+
+    return jsonify(response), status_code

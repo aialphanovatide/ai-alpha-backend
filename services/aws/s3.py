@@ -4,10 +4,16 @@ import requests
 from PIL import Image
 from io import BytesIO
 import boto3
+import os
+from dotenv import load_dotenv
 from botocore.exceptions import BotoCoreError, ClientError
 from requests.exceptions import RequestException
 
 logger = logging.getLogger(__name__)
+load_dotenv()
+
+AWS_ACCESS = os.getenv('AWS_ACCESS')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
 class ImageProcessor:
     def __init__(self, 
@@ -15,7 +21,7 @@ class ImageProcessor:
                  aws_access_key: Optional[str] = None,
                  aws_secret_key: Optional[str] = None):
         """
-        Initialize the ImageProcessor.
+        Resize and upload to an AWS S3 Bucket
 
         Args:
             aws_region (str): AWS region for S3. Default is 'us-east-2'.
@@ -126,7 +132,7 @@ class ImageProcessor:
 # Initialize the ImageProcessor
 image = ImageProcessor(aws_access_key="YOUR_ACCESS_KEY", aws_secret_key="YOUR_SECRET_KEY")
 
-# # Use the processor
+# Use the processor
 # image_url = "https://example.com/image.jpg"
 # bucket_name = "my-bucket"
 # image_filename = "resized_image.jpg"

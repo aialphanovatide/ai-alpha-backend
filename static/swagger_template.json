@@ -46,7 +46,6 @@
       "name": "TradingView",
       "description": "Operations related to the TradingView"
     }
-
   ],
   "paths": {
     "/get_analysis/{coin_bot_id}": {

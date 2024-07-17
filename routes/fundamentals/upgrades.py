@@ -1,4 +1,3 @@
-from sqlalchemy import desc
 from config import Upgrades, session, CoinBot
 from flask import Blueprint, request, jsonify
 
