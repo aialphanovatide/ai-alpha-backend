@@ -732,7 +732,6 @@ class NarrativeTrading(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category_name = Column(String, nullable=False)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    test = Column(String, default=False)
 
     coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)
 
