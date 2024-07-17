@@ -8,10 +8,8 @@ from routes.telegram.index import telegram_bp
 from routes.analysis.analysis import analysis_bp 
 from routes.tradingview.index import tradingview_bp
 from routes.slack.slack_actions import slack_events_bp
-from routes.dashboard.all_keywords import all_keywords
 from routes.fundamentals.introduction import introduction
 from routes.fundamentals.competitors import competitor_bp
-from routes.dashboard_access.sign_in_session import sign_in
 from routes.dashboard_access.access import dashboard_access_bp
 from routes.fundamentals.hacks import hacks_bp
 from routes.fundamentals.tokenomics import tokenomics
@@ -59,11 +57,9 @@ app.secret_key = os.urandom(24)
 # Register blueprints -  routes
 app.register_blueprint(scrapper_bp)
 app.register_blueprint(news_bots_features_bp)
-app.register_blueprint(sign_in)
 app.register_blueprint(chart_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
-app.register_blueprint(all_keywords)
 app.register_blueprint(send_email_bp)
 app.register_blueprint(competitor_bp)
 app.register_blueprint(tradingview_bp)
