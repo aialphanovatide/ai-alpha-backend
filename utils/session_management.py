@@ -1,6 +1,6 @@
 from flask import jsonify
 from sqlalchemy.exc import SQLAlchemyError
-from config import db_url, session
+from config import Session, db_url, session
 from functools import wraps
 
 def create_response(success=False, data=None, error=None, **kwargs):
@@ -33,6 +33,7 @@ def handle_db_session(func):
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
+        session = Session()
         try:
             # Execute the decorated function
             response = func(*args, **kwargs)
