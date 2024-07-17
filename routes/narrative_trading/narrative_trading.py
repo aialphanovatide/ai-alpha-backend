@@ -58,8 +58,6 @@ def get_narrative_trading(coin_bot_id):
     except Exception as e:
         return jsonify(create_response(success=False, error=str(e))), 500
 
-
-
 def get_narrative_trading_by_id(coin_bot_id):
     return session.query(NarrativeTrading).filter_by(coin_bot_id=coin_bot_id).order_by(desc(NarrativeTrading.created_at)).all()
 
