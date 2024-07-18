@@ -1,11 +1,5 @@
 import os
-import re
-import boto3
 import datetime
-from bs4 import BeautifulSoup
-import requests
-from PIL import Image
-from io import BytesIO
 from sqlalchemy import desc
 from datetime import datetime
 from dotenv import load_dotenv
@@ -14,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask import jsonify, Blueprint, request
 from apscheduler.triggers.date import DateTrigger
 from sqlalchemy.orm.exc import NoResultFound
+from utils.general import extract_title_and_body
 from apscheduler.jobstores.base import JobLookupError
 from services.firebase.firebase import send_notification
 from config import Analysis, AnalysisImage, session, CoinBot, Session
@@ -220,26 +215,6 @@ def get_analysis_by_coin():
 
     return jsonify(response), status_code
 
-def extract_title_and_body(html_content):
-    # Parse HTML content
-    soup = BeautifulSoup(html_content, 'html.parser')
-    
-    # Extract all <p> tags
-    paragraphs = soup.find_all('p')
-    
-    if not paragraphs:
-        return None, None
-    
-    # Get the title (text inside the first <p>)
-    title = paragraphs[0].get_text()
-    
-    # Get the body (text inside all other <p> tags)
-    body = ' '.join(p.get_text() for p in paragraphs[1:])
-    
-    return title, body
-
-
-
 
 @analysis_bp.route('/get_analysis', methods=['GET'])
 def get_all_analysis():
@@ -329,6 +304,7 @@ def get_all_analysis():
         status_code = 500
 
     return jsonify(response), status_code
+
 
 
 @analysis_bp.route('/post_analysis', methods=['POST'])
