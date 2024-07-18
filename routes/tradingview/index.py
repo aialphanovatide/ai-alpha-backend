@@ -1,11 +1,12 @@
 from sqlalchemy import desc  
-from ws.socket import socketio
-from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
-from .alert_strategy import send_alert_strategy_to_telegram
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
+<<<<<<< HEAD
+=======
+from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram
+>>>>>>> 6cb8234e6f8b75d26cdfcc69a44effbd26b6dbf7
 from services.firebase.firebase import send_notification
 
 tradingview_bp = Blueprint(
@@ -14,13 +15,6 @@ tradingview_bp = Blueprint(
     static_folder='static'
 )
 
-# Test route for emitting data through a websocket
-@tradingview_bp.route('/emit', methods=['POST'])
-def index():
-    socketio.emit('new_alert', {'message': 'Holaaa'})
-    return 'message sent', 200
-
-# Gets all alerts of a catgerory
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
 def get_all_alerts():
     try:
@@ -230,9 +224,6 @@ def receive_data_from_tv():
                         key, value = line.split(':', 1)
                         data_dict[key.strip()] = value.strip()
 
-                 # Emits the alert data to the client
-                socketio.emit('new_alert', data_dict)
-
                 alert_name = data_dict.get('alert_name', '') 
                 symbol = data_dict.get('symbol', '') 
                 message = data_dict.get('message', '')  
@@ -267,6 +258,7 @@ def receive_data_from_tv():
                 for key, value in categories.items():
                     if key != 'founders_14999_m1':
                         categories['founders_14999_m1'].extend(value)
+<<<<<<< HEAD
                 
                 matching_topics = []
                 for plan, tokens in categories.items():
@@ -279,12 +271,31 @@ def receive_data_from_tv():
                 for x in matching_topics:
                     send_notification(topic=x, title=alert_name, body=message)
                     print('notification send to: ', x)
+=======
+>>>>>>> 6cb8234e6f8b75d26cdfcc69a44effbd26b6dbf7
                 
+                matching_topics = []
+                for plan, tokens in categories.items():
+                 
+                    for token in tokens:
+                        if token.casefold() == token_name.casefold():
+                            matching_topics.append(plan)
+                            break
+                
+                for x in matching_topics:
+                    send_notification(topic=x, title=alert_name, body=message)
+                    print('notification send to: ', x)
+               
                 response, status = send_alert_strategy_to_telegram(price=price,
                                                 alert_name=alert_name,
+<<<<<<< HEAD
                                           message=message,
                                                 symbol=symbol,
                                                 )
+=======
+                                                message=message,
+                                                symbol=symbol)
+>>>>>>> 6cb8234e6f8b75d26cdfcc69a44effbd26b6dbf7
                 
                 if status != 200:
                     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
@@ -294,10 +305,11 @@ def receive_data_from_tv():
 
 
                 return response, status
+
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
-                send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
                                                     title_message='Error receiving Tradingview message',
                                                     sub_title='Reason',
                                                     message=f"{str(e)} - Data: {str(request.data)}")

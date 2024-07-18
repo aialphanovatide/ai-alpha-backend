@@ -79,8 +79,6 @@ def get_competitor_data_by_coin_name():
 
 
 # Builder to create competitor table
-
-
 @competitor_bp.route('/create_competitor', methods=['POST'])
 def create_competitor_table():
     try:
