@@ -18,7 +18,7 @@ load_dotenv()
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 
 
-@chart_bp.route('/save_chart', methods=['POST'])
+@chart_bp.route('/api/chart/save_chart', methods=['POST'])
 def save_chart():
     """
     Adds a new support and resistance lines record for a coin.

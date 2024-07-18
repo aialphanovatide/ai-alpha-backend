@@ -25,7 +25,7 @@ from flasgger import Swagger
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
-swagger_template_path = os.path.join(app.root_path, 'static', 'swagger_template2.json')
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger_template.json')
 
 with open(swagger_template_path, 'r') as f:
     swagger_template = json.load(f)
