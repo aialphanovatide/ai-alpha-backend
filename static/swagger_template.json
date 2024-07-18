@@ -2701,6 +2701,98 @@
             }
           }
         }
+      },
+      "/api/get_competitors_by_coin_name": {
+        "get": {
+          "tags": [
+            "Competitors"
+          ],
+          "summary": "Get competitors data for a specific coin by name",
+          "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
+          "parameters": [
+            {
+              "name": "coin_name",
+              "in": "query",
+              "required": true,
+              "type": "string",
+              "description": "The name of the coin to get competitors for"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "competitors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "competitor": {
+                          "type": "object",
+                          "description": "Competitor details"
+                        }
+                      }
+                    }
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 200
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - Coin name is required",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Coin name is required"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 400
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not found - CoinBot not found or no data for the requested coin",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "CoinBot not found for the given coin name"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 404
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Error getting competitors data: [error details]"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 500
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "definitions": {
