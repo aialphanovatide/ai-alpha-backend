@@ -3,10 +3,7 @@ from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
 from config import session, Category, Alert, CoinBot
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
-<<<<<<< HEAD
-=======
 from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram
->>>>>>> 6cb8234e6f8b75d26cdfcc69a44effbd26b6dbf7
 from services.firebase.firebase import send_notification
 
 tradingview_bp = Blueprint(
@@ -258,21 +255,6 @@ def receive_data_from_tv():
                 for key, value in categories.items():
                     if key != 'founders_14999_m1':
                         categories['founders_14999_m1'].extend(value)
-<<<<<<< HEAD
-                
-                matching_topics = []
-                for plan, tokens in categories.items():
-                 
-                    for token in tokens:
-                        if token.casefold() == token_name.casefold():
-                            matching_topics.append(plan)
-                            break
-                
-                for x in matching_topics:
-                    send_notification(topic=x, title=alert_name, body=message)
-                    print('notification send to: ', x)
-=======
->>>>>>> 6cb8234e6f8b75d26cdfcc69a44effbd26b6dbf7
                 
                 matching_topics = []
                 for plan, tokens in categories.items():
@@ -288,14 +270,8 @@ def receive_data_from_tv():
                
                 response, status = send_alert_strategy_to_telegram(price=price,
                                                 alert_name=alert_name,
-<<<<<<< HEAD
-                                          message=message,
-                                                symbol=symbol,
-                                                )
-=======
                                                 message=message,
                                                 symbol=symbol)
->>>>>>> 6cb8234e6f8b75d26cdfcc69a44effbd26b6dbf7
                 
                 if status != 200:
                     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",

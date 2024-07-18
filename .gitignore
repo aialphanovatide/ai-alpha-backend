@@ -11,6 +11,8 @@ __pycache__/config.cpython-311.pyc
 # Logs
 *.log
 
+*account.json
+
 # Temporary files
 *.swp
 *.swo
