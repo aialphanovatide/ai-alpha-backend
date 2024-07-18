@@ -224,7 +224,6 @@ def get_google_news_links(site, main_container, max_links=30):
                  'https://cryptonews.com/editors/sead-fadilpasic', 'https://uk.movies.yahoo.com']
 
     try:
-       
         with sync_playwright() as p:
             browser = p.chromium.launch_persistent_context(
                 user_data_dir=user_data_dir,

@@ -1,3 +1,4 @@
+import json
 import os
 from flask import Flask
 from flask_cors import CORS
@@ -37,9 +38,31 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.mkt_webisites.news import website_news_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
+from flasgger import Swagger
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger_template.json')
+
+with open(swagger_template_path, 'r') as f:
+    swagger_template = json.load(f)
+
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": 'apispec_1',
+            "route": '/apispec_1.json',
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/apidocs/"
+}
+
+swagger = Swagger(app, template=swagger_template, config=swagger_config)
 
 CORS(app, origins='*', supports_credentials=True)
 

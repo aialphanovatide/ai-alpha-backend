@@ -84,3 +84,32 @@ def create_category():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+    
+
+
+# Ruta para eliminar una categoría por su nombre
+@bots_route.route('/categories/delete', methods=['DELETE'])
+def delete_category_by_name():
+    try:
+        # Parsea los datos del formulario
+        category_data = request.json
+        category_name = category_data.get('category_name')
+
+        if not category_name:
+            return jsonify({'success': False, 'error': 'Category name is required'}), 400
+
+        # Busca la categoría en la base de datos
+        with DBSession() as session:
+            category = session.query(Category).filter_by(category_name=category_name).first()
+            
+            if not category:
+                return jsonify({'success': False, 'error': f'Category with name {category_name} not found'}), 404
+
+            # Elimina la categoría
+            session.delete(category)
+            session.commit()
+
+        return jsonify({'success': True, 'message': 'Category deleted successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500

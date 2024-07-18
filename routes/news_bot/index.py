@@ -1,5 +1,5 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from config import CoinBot, session, Category, Article, TopStory, TopStoryImage
+from config import CoinBot, User, session, Category, Article, TopStory, TopStoryImage
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint, jsonify
@@ -281,3 +281,17 @@ def news_bot_commands():
     #             minutes, seconds = divmod(final_scrapping_time, 60)
     #             print(f"Final time: {minutes:.0f} minutes and {seconds:.2f} seconds")
     #             return res, status
+        
+
+
+@scrapper_bp.route('/check-email', methods=['GET'])
+def check_email():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({"error": "Email parameter is required"}), 400
+
+    user = session.query(User).filter_by(email=email).first()
+    if user:
+        return jsonify({"exists": True}), 200
+    else:
+        return jsonify({"exists": False}), 200
