@@ -2,6 +2,7 @@ import os
 import re
 import boto3
 import datetime
+from bs4 import BeautifulSoup
 import requests
 from PIL import Image
 from io import BytesIO
@@ -220,16 +221,24 @@ def get_analysis_by_coin():
     return jsonify(response), status_code
 
 def extract_title_and_body(html_content):
-    # Regex to capture the first <p>...</p> and the rest of the content
-    pattern = r'(<p>.*?</p>)(.*)'
-    match = re.search(pattern, html_content, re.DOTALL)
-
-    if match:
-        title = match.group(1)  # First <p>...</p>
-        body = match.group(2)   # The rest of the content
-        return title, body
-    else:
+    # Parse HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Extract all <p> tags
+    paragraphs = soup.find_all('p')
+    
+    if not paragraphs:
         return None, None
+    
+    # Get the title (text inside the first <p>)
+    title = paragraphs[0].get_text()
+    
+    # Get the body (text inside all other <p> tags)
+    body = ' '.join(p.get_text() for p in paragraphs[1:])
+    
+    return title, body
+
+
 
 
 @analysis_bp.route('/get_analysis', methods=['GET'])
@@ -681,7 +690,6 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str) -> None
         new_analysis = Analysis(analysis=content, category_name=category_name, coin_bot_id=coin_bot_id)
         session.add(new_analysis)
         session.commit()
-        print(f"Publishing analysis with title: {title}")
         # Send a notification to the phone
         title = new_analysis.analysis
         body = new_analysis.analysis
