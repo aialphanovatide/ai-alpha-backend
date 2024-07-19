@@ -69,19 +69,21 @@ def save_chart():
             return jsonify(response), response["status"]
         
         chart_data = {
-            'support_1': data.get('support_1'),
-            'support_2': data.get('support_2'),
-            'support_3': data.get('support_3'),
-            'support_4': data.get('support_4'),
-            'resistance_1': data.get('resistance_1'),
-            'resistance_2': data.get('resistance_2'),
-            'resistance_3': data.get('resistance_3'),
-            'resistance_4': data.get('resistance_4'),
+            'support_1': float(data.get('support_1')),
+            'support_2': float(data.get('support_2')),
+            'support_3': float(data.get('support_3')),
+            'support_4': float(data.get('support_4')),
+            'resistance_1': float(data.get('resistance_1')),
+            'resistance_2': float(data.get('resistance_2')),
+            'resistance_3': float(data.get('resistance_3')),
+            'resistance_4': float(data.get('resistance_4')),
             'token': token,
             'pair': pair,
             'temporality': temporality,
             'coin_bot_id': coin_bot_id
         }
+
+        print("data from charts", chart_data)
 
         new_chart = Chart(**chart_data)
         session.add(new_chart)
