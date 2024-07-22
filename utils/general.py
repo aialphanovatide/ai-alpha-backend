@@ -17,3 +17,6 @@ def extract_title_and_body(html_content):
     body = ' '.join(p.get_text() for p in paragraphs[1:])
     
     return title, body
+
+
+

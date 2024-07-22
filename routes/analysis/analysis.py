@@ -397,11 +397,12 @@ def post_analysis():
             if not coin_bot_name:
                 coin_bot_name = ""
 
+            
             send_notification(topic=topic,
                             title=title,
                             body=body,
                             type="analysis",
-                            coin=coin_bot_name
+                            coin=coin_bot_name.bot_name
                             )
             print("--- Notification Sent ---")
 
