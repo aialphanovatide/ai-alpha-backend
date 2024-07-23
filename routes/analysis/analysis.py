@@ -401,7 +401,7 @@ def post_analysis():
                             title=title,
                             body=body,
                             type="analysis",
-                            coin=coin_bot_name
+                            coin=coin_bot_name.bot_name
                             )
             print("--- Notification Sent ---")
 
