@@ -19,7 +19,6 @@ from services.aws.s3 import ImageProcessor as image_proccessor
 sched = BackgroundScheduler()
 if sched.state != 1:
     sched.start()
-    print("--- Second Scheduler started ----")
 
 analysis_bp = Blueprint('analysis_bp', __name__)
 

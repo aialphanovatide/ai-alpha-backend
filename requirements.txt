@@ -29,3 +29,4 @@ redis
 pyahocorasick
 uuid
 cachetools
+flask-socketio

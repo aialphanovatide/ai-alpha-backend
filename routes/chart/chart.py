@@ -7,6 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from cachetools.func import ttl_cache
 from config import Chart, session, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  
+from operator import itemgetter
+
 
 chart_bp = Blueprint('chart', __name__)
 
@@ -16,6 +18,8 @@ load_dotenv()
 
 # Get WordPress API key from environment variables
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
+COINGECKO_API_URL = "https://pro-api.coingecko.com/api/v3"
+
 
 
 @chart_bp.route('/api/chart/save_chart', methods=['POST'])
@@ -220,6 +224,7 @@ def get_total_3_data():
 
     return jsonify(response), response["status"]
 
+
 @ttl_cache(maxsize=1, ttl=3600)  # Cache for 1 hour
 def calculate_total_3_data():
     """
@@ -259,3 +264,5 @@ def calculate_total_3_data():
     total3 = [total - eth_btc for total, eth_btc in zip(total_market_caps, eth_btc_market_caps)]
 
     return total3
+
+
