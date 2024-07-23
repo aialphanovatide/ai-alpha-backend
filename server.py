@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from routes.chart.chart import chart_bp
+from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
 from routes.telegram.index import telegram_bp
 from routes.analysis.analysis import analysis_bp 
@@ -22,10 +23,14 @@ from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
 from flasgger import Swagger
+from ws.socket import init_socketio
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
 swagger_template_path = os.path.join(app.root_path, 'static', 'swagger_template.json')
+
+# Initialize SocketIO
+socketio = init_socketio(app)
 
 with open(swagger_template_path, 'r') as f:
     swagger_template = json.load(f)
@@ -58,6 +63,7 @@ app.secret_key = os.urandom(24)
 app.register_blueprint(scrapper_bp)
 app.register_blueprint(news_bots_features_bp)
 app.register_blueprint(chart_bp)
+app.register_blueprint(chart_graphs_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(send_email_bp)

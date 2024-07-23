@@ -19,7 +19,6 @@ from services.aws.s3 import ImageProcessor as image_proccessor
 sched = BackgroundScheduler()
 if sched.state != 1:
     sched.start()
-    print("--- Second Scheduler started ----")
 
 analysis_bp = Blueprint('analysis_bp', __name__)
 
@@ -397,11 +396,12 @@ def post_analysis():
             if not coin_bot_name:
                 coin_bot_name = ""
 
+            
             send_notification(topic=topic,
                             title=title,
                             body=body,
                             type="analysis",
-                            coin=coin_bot_name
+                            coin=coin_bot_name.bot_name
                             )
             print("--- Notification Sent ---")
 

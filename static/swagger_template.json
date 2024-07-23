@@ -57,6 +57,10 @@
       {
         "name": "Send Email",
         "description": "Endpoints related to sending email notifications"
+      },
+      {
+        "name": "WebSocket",
+        "description": "WebSocket operations for real-time cryptocurrency data"
       }
     ],
     "paths": {
@@ -2701,7 +2705,309 @@
             }
           }
         }
-      }
+      },
+      "/api/get_competitors_by_coin_name": {
+        "get": {
+          "tags": [
+            "Competitors"
+          ],
+          "summary": "Get competitors data for a specific coin by name",
+          "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
+          "parameters": [
+            {
+              "name": "coin_name",
+              "in": "query",
+              "required": true,
+              "type": "string",
+              "description": "The name of the coin to get competitors for"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "competitors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "competitor": {
+                          "type": "object",
+                          "description": "Competitor details"
+                        }
+                      }
+                    }
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 200
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - Coin name is required",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Coin name is required"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 400
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not found - CoinBot not found or no data for the requested coin",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "CoinBot not found for the given coin name"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 404
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Error getting competitors data: [error details]"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "example": 500
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/chart/ohlc": {
+        "get": {
+          "tags": [
+            "Chart"
+          ],
+          "summary": "Get OHLC data for a specific coin",
+          "description": "Fetch OHLC data for a specific cryptocurrency.",
+          "operationId": "getOhlcData",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "name": "coin",
+              "in": "query",
+              "description": "The cryptocurrency to fetch data for (symbol or name).",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "vs_currency",
+              "in": "query",
+              "description": "The currency to compare against.",
+              "required": false,
+              "type": "string",
+              "default": "usd"
+            },
+            {
+              "name": "interval",
+              "in": "query",
+              "description": "Data interval ('1h', '4h', '1d', '1w').",
+              "required": false,
+              "type": "string",
+              "default": "1h",
+              "enum": ["1h", "4h", "1d", "1w"]
+            },
+            {
+              "name": "precision",
+              "in": "query",
+              "description": "Decimal place for currency price value (optional).",
+              "required": false,
+              "type": "integer",
+              "default": 2,
+              "minimum": 0,
+              "maximum": 18
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Coin not found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/top-movers": {
+        "get": {
+          "tags": ["Chart"],
+          "summary": "Get top cryptocurrency movers",
+          "description": "Retrieve the top 10 gainers and top 10 losers based on specified criteria.",
+          "operationId": "getCryptoMarkets",
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "name": "vs_currency",
+              "in": "query",
+              "description": "The target currency for market data (default: 'usd').",
+              "required": false,
+              "type": "string",
+              "default": "usd",
+              "enum": ["usd", "btc", "eth"]
+            },
+            {
+              "name": "order",
+              "in": "query",
+              "description": "The ordering criteria for the data.",
+              "required": false,
+              "type": "string",
+              "default": "market_cap_desc",
+              "enum": ["market_cap_desc", "market_cap_asc", "volume_desc", "volume_asc", "price_change_desc", "price_change_asc"]
+            },
+            {
+              "name": "precision",
+              "in": "query",
+              "description": "The number of decimal places for price values.",
+              "required": false,
+              "type": "integer",
+              "default": null
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "top_10_gainers": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/CryptoData"
+                        }
+                      },
+                      "top_10_losers": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/CryptoData"
+                        }
+                      }
+                    }
+                  },
+                  "order": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid order parameter",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "error": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "error": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+  }
     },
     "definitions": {
       "UserWithPlans": {
@@ -2727,6 +3033,97 @@
                 "created_at": { "type": "string", "format": "date-time" }
               }
             }
+          }
+        }
+      },
+      "CryptoData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "current_price": {
+            "type": "number"
+          },
+          "market_cap": {
+            "type": "number"
+          },
+          "market_cap_rank": {
+            "type": "integer"
+          },
+          "total_volume": {
+            "type": "number"
+          },
+          "high_24h": {
+            "type": "number"
+          },
+          "low_24h": {
+            "type": "number"
+          },
+          "price_change_24h": {
+            "type": "number"
+          },
+          "price_change_percentage_24h": {
+            "type": "number"
+          },
+          "market_cap_change_24h": {
+            "type": "number"
+          },
+          "market_cap_change_percentage_24h": {
+            "type": "number"
+          },
+          "circulating_supply": {
+            "type": "number"
+          },
+          "total_supply": {
+            "type": "number"
+          },
+          "max_supply": {
+            "type": "number"
+          },
+          "ath": {
+            "type": "number"
+          },
+          "ath_change_percentage": {
+            "type": "number"
+          },
+          "ath_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "atl": {
+            "type": "number"
+          },
+          "atl_change_percentage": {
+            "type": "number"
+          },
+          "atl_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "roi": {
+            "type": "object",
+            "properties": {
+              "times": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "percentage": {
+                "type": "number"
+              }
+            }
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

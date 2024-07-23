@@ -1,4 +1,4 @@
-from config import CoinBot, Competitor, session
+from config import CoinBot, Competitor, session, Session
 from flask import Blueprint, request, jsonify
 
 

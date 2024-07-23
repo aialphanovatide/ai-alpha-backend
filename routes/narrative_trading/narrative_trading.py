@@ -15,7 +15,6 @@ from services.aws.s3 import ImageProcessor as image_proccessor
 sched = BackgroundScheduler()
 if sched.state != 1:
     sched.start()
-    print("--- Third Scheduler started ---")
 
 narrative_trading_bp = Blueprint('narrative_trading', __name__)
 
