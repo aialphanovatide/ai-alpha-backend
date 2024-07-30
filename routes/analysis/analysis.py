@@ -670,11 +670,14 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str) -> None
         title = new_analysis.analysis
         body = new_analysis.analysis
         topic = f"{str(new_analysis.category_name).lower()}-analysis"
+        coin=session.query(CoinBot).filter_by(bot_id=coin_bot_id).first()
         send_notification(topic=topic,
                           title=title,
                           body=body,
-                          type="analysis"
+                          type="analysis",
+                          coin=coin.bot_name
                           )
+        print("notification sent")
     except SQLAlchemyError as e:
         session.rollback()
         print(f"Error publishing analysis: {str(e)}")
