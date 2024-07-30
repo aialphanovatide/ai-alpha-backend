@@ -9,7 +9,7 @@ json_file_path = os.path.abspath('services/firebase/service_account.json')
 cred = credentials.Certificate(json_file_path)
 default_app = initialize_app(credential=cred)
 
-def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None ) -> Tuple[Dict[str, str], int]:
+def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None) -> Tuple[Dict[str, str], int]:
     """
     Send a notification to devices subscribed to a specific topic using Firebase Cloud Messaging.
 
@@ -27,15 +27,21 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
     status_code = HTTPStatus.OK
 
     try:
+        # Convert type and coin to strings if they are not already
+        str_type = str(type)
+        str_coin = str(coin) if coin is not None else ''
+
+        data_payload = {
+            "type": str_type,  # Ensure type is a string
+            "coin": str_coin  # Ensure coin is a string, handle None case
+        }
+
         message = messaging.Message(
             notification=messaging.Notification(
                 title=title,
                 body=body,
             ),
-            data={
-                "type": type,
-                "coin": coin
-            },
+            data=data_payload,
             topic=topic,
             android=messaging.AndroidConfig(
                 priority='high',
@@ -64,8 +70,8 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
         response_dict["message"] = "Error sending notification"
         response_dict["error"] = str(e)
         status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-
     return response_dict, status_code
+
 
 # Example usage
 # result, status_code = send_notification(
