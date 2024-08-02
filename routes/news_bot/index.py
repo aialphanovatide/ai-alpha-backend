@@ -1,5 +1,5 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-from config import CoinBot, User, session, Category, Article, TopStory, TopStoryImage
+from config import CoinBot, PurchasedPlan, User, session, Category, Article, TopStory, TopStoryImage
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint, jsonify
@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from scheduler import scheduler
 from sqlalchemy import exists
 from sqlalchemy import desc
+from sqlalchemy import exc
 
 scrapper_bp = Blueprint(
     'scrapper_bp', __name__,
@@ -283,15 +284,60 @@ def news_bot_commands():
     #             return res, status
         
 
-
 @scrapper_bp.route('/check-email', methods=['GET'])
 def check_email():
-    email = request.args.get('email')
-    if not email:
-        return jsonify({"error": "Email parameter is required"}), 400
+    """
+    Check if a user with the given email exists and has a plan with 'founders' in reference_name.
 
-    user = session.query(User).filter_by(email=email).first()
-    if user:
-        return jsonify({"exists": True}), 200
-    else:
-        return jsonify({"exists": False}), 200
+    Args:
+        email (str): Email address of the user to check.
+
+    Response:
+        200: User and plan found successfully.
+        400: Missing required email parameter.
+        404: User or plan not found.
+        500: Internal server error.
+    """
+    response = {'success': False, 'message': None, 'data': None}
+    try:
+        email = request.args.get('email')
+        if not email:
+            response['message'] = 'Email parameter is required'
+            return jsonify(response), 400
+
+        user = session.query(User).filter_by(email=email).first()
+        if not user:
+            response['message'] = 'User not found'
+            return jsonify(response), 404
+
+        plan_exists = session.query(PurchasedPlan).filter(
+            PurchasedPlan.user_id == user.user_id,
+            PurchasedPlan.reference_name.ilike('%founders%')
+        ).first()
+        
+        if plan_exists:
+            response['success'] = True
+            response['message'] = 'User and plan found successfully'
+            response['data'] = {
+                "user_id": user.user_id,
+                "nickname": user.nickname,
+                "email": user.email,
+                "email_verified": user.email_verified,
+                "picture": user.picture,
+                "auth0id": user.auth0id,
+                "provider": user.provider,
+                "created_at": user.created_at
+            }
+            return jsonify(response), 200
+        else:
+            response['message'] = "No plan with 'founders' found"
+            return jsonify(response), 404
+
+    except exc.SQLAlchemyError as e:
+        session.rollback()
+        response['message'] = f'Database error: {str(e)}'
+        return jsonify(response), 500
+    
+    except Exception as e:
+        response['message'] = str(e)
+        return jsonify(response), 500
