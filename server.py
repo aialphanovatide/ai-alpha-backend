@@ -146,7 +146,7 @@ if __name__ == '__main__':
                 except SQLAlchemyError as e:
                     session.rollback()
                     print(f'Database error: {str(e)}')
-                    
+            load_users_from_json('./users.json') 
             print('---AI Alpha server is running---') 
             app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
         except Exception as e:
