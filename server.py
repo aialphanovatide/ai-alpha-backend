@@ -3,7 +3,7 @@ import json
 import os
 from flask import Flask, session
 from flask_cors import CORS
-from config import User
+from config import User  # Asegúrate de que db esté importado
 from routes.chart.chart import chart_bp
 from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
@@ -27,6 +27,7 @@ from routes.user.user import user_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
 from sqlalchemy.exc import SQLAlchemyError
+from dateutil import parser
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -84,68 +85,71 @@ app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
 
 
-def determine_provider(auth0id):
-    if auth0id.startswith('apple|'):
-        return 'apple'
-    elif auth0id.startswith('google|'):
-        return 'google'
-    elif auth0id.startswith('auth0|'):
-        return 'auth0'
-    else:
-        return 'unknown'
-
-def load_users_from_json(filepath):
-    with open(filepath, 'r') as file:
-        users = json.load(file)
-    
-    for user in users:
-        try:
-            # Verificar que los campos obligatorios estén presentes
-            required_fields = ['nickname', 'email']
-            if not all(field in user for field in required_fields):
-                print(f'Missing required fields in user data: {user}')
-                continue
-
-            # Determinar el proveedor basado en el auth0id
-            provider = determine_provider(user.get('user_id', ''))
-
-            new_user = User(
-                nickname=user.get('nickname'),
-                email=user.get('email'),
-                email_verified=user.get('email_verified', False),
-                picture=user.get('picture'),
-                auth0id=user.get('user_id'),
-                provider=provider,
-                created_at=datetime.fromisoformat(user.get('created_at').replace('Z', '+00:00'))
-            )
-            
-            session.add(new_user)
-        
-        except Exception as e:
-            print(f'Error processing user {user.get("email")}: {str(e)}')
-
-    try:
-        session.commit()
-        print('All users loaded successfully')
-    except SQLAlchemyError as e:
-        session.rollback()
-        print(f'Database error: {str(e)}')
 
 
 if __name__ == '__main__':
-    try:
-        with app.app_context():
-            load_users_from_json('./users.json') 
-        print('---AI Alpha server is running---') 
-        app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
-    except Exception as e:
-        print(f"Failed to start the AI Alpha server: {e}")
-    finally:
-        # send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-        #                                     title_message="*CRITICAL ERROR*", 
-        #                                     sub_title="AI Alpha server has stopped running",
-        #                                     message="@David P. - Check this error on the Mac mini immediately")
-        print('---AI Alpha server was stopped---')
+    with app.app_context():
+        try:
 
 
+            def determine_provider(auth0id):
+                if auth0id.startswith('apple|'):
+                    return 'apple'
+                elif auth0id.startswith('google|'):
+                    return 'google'
+                elif auth0id.startswith('auth0|'):
+                    return 'auth0'
+                else:
+                    return 'unknown'
 
+            def load_users_from_json(filepath):
+                with open(filepath, 'r') as file:
+                    users = json.load(file)
+                
+                for user in users:
+                    try:
+                        required_fields = ['nickname', 'email']
+                        if not all(field in user for field in required_fields):
+                            print(f'Missing required fields in user data: {user}')
+                            continue
+
+                        provider = determine_provider(user.get('user_id', ''))
+
+                        # Convert email_verified to boolean
+                        email_verified = user.get('email_verified')
+                        if isinstance(email_verified, str):
+                            email_verified = email_verified.lower() == 'true'
+                        else:
+                            email_verified = bool(email_verified)
+
+                        # Convert created_at to datetime
+                        created_at = parser.isoparse(user.get('created_at', ''))
+                        
+                        new_user = User(
+                            nickname=user.get('nickname'),
+                            email=user.get('email'),
+                            email_verified=email_verified,
+                            picture=user.get('picture'),
+                            auth0id=user.get('user_id'),
+                            provider=provider,
+                            created_at=created_at
+                        )
+                        
+                        session.add(new_user)
+                    
+                    except Exception as e:
+                        print(f'Error processing user {user.get("email")}: {str(e)}')
+
+                try:
+                    session.commit()
+                    print('All users loaded successfully')
+                except SQLAlchemyError as e:
+                    session.rollback()
+                    print(f'Database error: {str(e)}')
+                    
+            print('---AI Alpha server is running---') 
+            app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+        except Exception as e:
+            print(f"Failed to start the AI Alpha server: {e}")
+        finally:
+            print('---AI Alpha server was stopped---')

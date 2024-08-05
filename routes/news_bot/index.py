@@ -1,9 +1,5 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
-<<<<<<< HEAD
-from config import CoinBot, User, session, Category, Article, TopStory, TopStoryImage
-=======
 from config import CoinBot, PurchasedPlan, User, session, Category, Article, TopStory, TopStoryImage
->>>>>>> b22c12344dca3cc16c79838508f229ecec05d3e9
 from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint, jsonify
@@ -288,20 +284,6 @@ def news_bot_commands():
     #             return res, status
         
 
-<<<<<<< HEAD
-
-@scrapper_bp.route('/check-email', methods=['GET'])
-def check_email():
-    email = request.args.get('email')
-    if not email:
-        return jsonify({"error": "Email parameter is required"}), 400
-
-    user = session.query(User).filter_by(email=email).first()
-    if user:
-        return jsonify({"exists": True}), 200
-    else:
-        return jsonify({"exists": False}), 200
-=======
 @scrapper_bp.route('/check-email', methods=['GET'])
 def check_email():
     """
@@ -319,6 +301,8 @@ def check_email():
     response = {'success': False, 'message': None, 'data': None}
     try:
         email = request.args.get('email')
+
+        email = email.replace("!verify ", "")
         if not email:
             response['message'] = 'Email parameter is required'
             return jsonify(response), 400
@@ -327,13 +311,13 @@ def check_email():
         if not user:
             response['message'] = 'User not found'
             return jsonify(response), 404
-
         plan_exists = session.query(PurchasedPlan).filter(
             PurchasedPlan.user_id == user.user_id,
             PurchasedPlan.reference_name.ilike('%founders%')
         ).first()
         
         if plan_exists:
+            print("plan", plan_exists)
             response['success'] = True
             response['message'] = 'User and plan found successfully'
             response['data'] = {
@@ -359,4 +343,3 @@ def check_email():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
->>>>>>> b22c12344dca3cc16c79838508f229ecec05d3e9
