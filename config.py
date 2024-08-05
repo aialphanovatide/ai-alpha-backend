@@ -1033,15 +1033,14 @@ class Hacks(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    hack_name = Column(String)
-    date = Column(String)
-    incident_description = Column(String)
-    consequences = Column(String)
-    mitigation_measure = Column(String)
+    hack_name = Column(String, nullable=False)
+    date = Column(String, nullable=False)
+    incident_description = Column(String, nullable=False)
+    consequences = Column(String, nullable=False)
+    mitigation_measure = Column(String, nullable=False)
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.now)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now(), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='hacks', lazy=True)
 
