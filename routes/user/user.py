@@ -180,7 +180,7 @@ def get_user_with_plans():
     Response:
         200: Successful operation, returns user data with plans.
         400: User identifier not provided.
-        404: User not found or user has no active plans.
+        404: User not found.
         500: Internal server error.
     """
     response = {'success': False, 'data': None, 'message': None}
@@ -221,25 +221,24 @@ def get_user_with_plans():
             'purchased_plans': []
         }
         
-        has_active_plans = False
         for plan in user.purchased_plans:
-            if plan.is_subscribed:
-                has_active_plans = True
-                plan_data = {
-                    'product_id': plan.product_id,
-                    'reference_name': plan.reference_name,
-                    'price': plan.price,
-                    'is_subscribed': plan.is_subscribed,
-                    'created_at': plan.created_at
-                }
-                user_data['purchased_plans'].append(plan_data)
-        
-        if not has_active_plans:
-            response['message'] = 'User does not have active plans'
-            return jsonify(response), 404
+            plan_data = {
+                'product_id': plan.product_id,
+                'reference_name': plan.reference_name,
+                'price': plan.price,
+                'is_subscribed': plan.is_subscribed,
+                'created_at': plan.created_at
+            }
+            user_data['purchased_plans'].append(plan_data)
         
         response['success'] = True
         response['data'] = user_data
+        
+        # Check if user has no active plans
+        if not user.purchased_plans:
+            response['message'] = 'User does not have any purchased plans'
+            return jsonify(response), 200
+        
         return jsonify(response), 200
 
     except exc.SQLAlchemyError as e:
@@ -249,6 +248,7 @@ def get_user_with_plans():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+
 
 
 
