@@ -310,24 +310,43 @@ def save_package():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+    
+    
 
-
-@user_bp.route('/unsubscribe_package/<int:product_id>', methods=['PUT'])
-def unsubscribe_package(product_id):
+@user_bp.route('/unsubscribe_package', methods=['PUT'])
+def unsubscribe_package():
     """
-    Unsubscribe a user from a purchased plan identified by product ID.
+    Unsubscribe a user from a purchased plan identified by reference name and user auth0id.
+    
     Args:
-        product_id (int): ID of the purchased plan to unsubscribe from.
+        auth0id (str): Auth0 ID of the user.
+        reference_name (str): Reference name of the purchased plan.
+
     Response:
         200: User unsubscribed from package successfully.
-        404: Package not found.
+        400: Missing required fields (auth0id, reference_name).
+        404: Package not found or user not found.
         500: Internal server error.
     """
     response = {'success': False, 'message': None}
     try:
-        # Buscar el plan por ID
-        plan = session.query(PurchasedPlan).filter_by(product_id=product_id).first()
+        data = request.json
         
+        # Validar que los campos obligatorios estén presentes
+        required_fields = ['auth0id', 'reference_name']
+        for field in required_fields:
+            if field not in data:
+                response['message'] = f'Missing required field: {field}'
+                return jsonify(response), 400
+        
+        # Buscar el usuario por auth0id para obtener el user_id
+        user = session.query(User).filter_by(auth0id=data['auth0id']).first()
+        if not user:
+            response['message'] = 'User not found for provided auth0id'
+            return jsonify(response), 404
+        
+        # Buscar el plan por reference_name y user_id
+        plan = session.query(PurchasedPlan).filter_by(user_id=user.user_id, reference_name=data['reference_name']).first()
         if not plan:
             response['message'] = 'Package not found'
             return jsonify(response), 404
