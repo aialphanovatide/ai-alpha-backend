@@ -166,7 +166,6 @@ def get_all_users_with_plans():
         response['message'] = str(e)
         return jsonify(response), 500
 
-
 @user_bp.route('/user', methods=['GET'])
 def get_user_with_plans():
     """
@@ -176,6 +175,7 @@ def get_user_with_plans():
         user_id (int): ID of the user to retrieve.
         email (str): Email address of the user to retrieve.
         nickname (str): Nickname of the user to retrieve.
+        auth0id (str): Auth0 ID of the user to retrieve.
 
     Response:
         200: Successful operation, returns user data with plans.
@@ -188,10 +188,11 @@ def get_user_with_plans():
         user_id = request.args.get('user_id')
         email = request.args.get('email')
         nickname = request.args.get('nickname')
+        auth0id = request.args.get('auth0id')
         
         query = session.query(User).outerjoin(PurchasedPlan)
         
-        if not any([user_id, email, nickname]):
+        if not any([user_id, email, nickname, auth0id]):
             response['message'] = 'User identifier not provided'
             return jsonify(response), 400
         
@@ -201,6 +202,8 @@ def get_user_with_plans():
             user = query.filter(User.email == email).first()
         elif nickname:
             user = query.filter(User.nickname == nickname).first()
+        elif auth0id:
+            user = query.filter(User.auth0id == auth0id).first()
         
         if not user:
             response['message'] = 'User not found'
