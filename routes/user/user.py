@@ -349,7 +349,7 @@ def unsubscribe_package():
             return jsonify(response), 404
         
         # Actualizar el estado de suscripción
-        plan.is_subscribed = False
+        plan.is_subscribed = False  
 
         session.commit()
         

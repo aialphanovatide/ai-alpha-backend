@@ -1,8 +1,5 @@
 import json
 import os
-import requests
-from threading import Thread
-from time import sleep
 from flask import Flask
 from flask_cors import CORS
 from routes.chart.chart import chart_bp
@@ -22,11 +19,11 @@ from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.fundamentals.dapps import dapps_bp
 from routes.news_bot.used_keywords import news_bots_features_bp
+from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
-
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -83,91 +80,19 @@ app.register_blueprint(tokenomics)
 app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
 
-def determine_provider(auth0id):
-    if auth0id.startswith('apple|'):
-        return 'apple'
-    elif auth0id.startswith('google-oauth2|'):
-        return 'google'
-    elif auth0id.startswith('auth0|'):
-        return 'auth0'
-    else:
-        return 'unknown'
-
-def load_users_from_json(filepath):
-    users_data = []
-    
-    with open(filepath, 'r') as file:
-        users = json.load(file)
-    
-    for user in users:
-        try:
-            required_fields = ['nickname', 'email']
-            if not all(field in user for field in required_fields):
-                print(f'Missing required fields in user data: {user}')
-                continue
-
-            provider = determine_provider(user.get('user_id', ''))
-
-            # Convert email_verified to boolean
-            email_verified = user.get('email_verified')
-            if isinstance(email_verified, str):
-                email_verified = email_verified.lower() == 'true'
-            else:
-                email_verified = bool(email_verified)
-
-            # Convert created_at to datetime string
-            created_at = user.get('created_at', '')
-
-            # Store user data in memory
-            user_data = {
-                'nickname': user.get('nickname'),
-                'email': user.get('email'),
-                'email_verified': email_verified,
-                'picture': user.get('picture'),
-                'auth0id': user.get('user_id'),
-                'provider': provider,
-                'created_at': created_at
-            }
-            
-            users_data.append(user_data)
-        
-        except Exception as e:
-            print(f'Error processing user {user.get("email")}: {str(e)}')
-    
-    print('All users loaded successfully into memory')
-    return users_data
-
-def register_users(users_data):
-    url = 'http://localhost:9000/register'
-    
-    for user in users_data:
-        try:
-            response = requests.post(url, json=user)
-            if response.status_code == 200:
-                print(f'Successfully registered user {user.get("email")}')
-            else:
-                print(f'Failed to register user {user.get("email")}. Status code: {response.status_code}, Response: {response.text}')
-        except Exception as e:
-            print(f'Error while registering user {user.get("email")}: {str(e)}')
-
-def start_server():
-    app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0')
 
 if __name__ == '__main__':
     try:
-        users_data = load_users_from_json('./users.json')
-        
-        # Start the server in a separate thread
-        server_thread = Thread(target=start_server)
-        server_thread.start()
-        
-        # Wait a bit to make sure the server starts
-        sleep(5)
-        
-        # Register users
-        register_users(users_data)
-        
+        print('---AI Alpha server is running---') 
+        app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
+        # send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+        #                                     title_message="*CRITICAL ERROR*", 
+        #                                     sub_title="AI Alpha server has stopped running",
+        #                                     message="@David P. - Check this error on the Mac mini immediately")
         print('---AI Alpha server was stopped---')
+
+
+
