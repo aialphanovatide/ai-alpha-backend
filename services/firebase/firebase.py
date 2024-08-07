@@ -47,7 +47,7 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
             android=messaging.AndroidConfig(
                 priority='high',
             ),
-            apns=messaging.APNSConfig(
+            apns=messaging.APNSConfigs(
                 payload=messaging.APNSPayload(
                     aps=messaging.Aps(
                         sound='default',
