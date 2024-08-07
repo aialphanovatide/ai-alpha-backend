@@ -29,7 +29,7 @@ def get_economic_events():
     forex, filtered by date range, country ISO, currency, and impact.
 
     Args:
-        country_iso (str): The country ISO code (optional)
+        country_iso (str): The country ISO code ('US', 'GB' or 'CN') (optional)
         impact (str): Comma-separated list of impact levels ('high', 'medium', 'low') (optional)
         date (str): The lower limit of the event start date in the format yyyy-mm-dd (optional)
         end_date (str): The upper limit of the event end date in the format yyyy-mm-dd (optional)
