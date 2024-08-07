@@ -1,7 +1,6 @@
 
 Flask==2.3.3
 SQLAlchemy==2.0.31
-alembic==1.13.2
 Flask-SocketIO==5.3.6
 Flask-Cors==4.0.1
 flasgger==0.9.7.1
@@ -29,4 +28,5 @@ redis
 pyahocorasick
 uuid
 cachetools
+alembic
 flask-socketio

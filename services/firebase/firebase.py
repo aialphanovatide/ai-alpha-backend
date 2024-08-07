@@ -4,8 +4,9 @@ from http import HTTPStatus
 from firebase_admin import initialize_app, credentials, messaging
 
 # Get the absolute path to the service account JSON file
-json_file_path = os.path.abspath('services/firebase/service_account.json')
+json_file_path = os.path.abspath('services/firebase/service-account.json')
 
+# Creds
 cred = credentials.Certificate(json_file_path)
 default_app = initialize_app(credential=cred)
 

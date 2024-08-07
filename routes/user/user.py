@@ -166,7 +166,6 @@ def get_all_users_with_plans():
         response['message'] = str(e)
         return jsonify(response), 500
 
-
 @user_bp.route('/user', methods=['GET'])
 def get_user_with_plans():
     """
@@ -176,11 +175,12 @@ def get_user_with_plans():
         user_id (int): ID of the user to retrieve.
         email (str): Email address of the user to retrieve.
         nickname (str): Nickname of the user to retrieve.
+        auth0id (str): Auth0 ID of the user to retrieve.
 
     Response:
         200: Successful operation, returns user data with plans.
         400: User identifier not provided.
-        404: User not found or user has no active plans.
+        404: User not found.
         500: Internal server error.
     """
     response = {'success': False, 'data': None, 'message': None}
@@ -188,10 +188,11 @@ def get_user_with_plans():
         user_id = request.args.get('user_id')
         email = request.args.get('email')
         nickname = request.args.get('nickname')
+        auth0id = request.args.get('auth0id')
         
         query = session.query(User).outerjoin(PurchasedPlan)
         
-        if not any([user_id, email, nickname]):
+        if not any([user_id, email, nickname, auth0id]):
             response['message'] = 'User identifier not provided'
             return jsonify(response), 400
         
@@ -201,6 +202,8 @@ def get_user_with_plans():
             user = query.filter(User.email == email).first()
         elif nickname:
             user = query.filter(User.nickname == nickname).first()
+        elif auth0id:
+            user = query.filter(User.auth0id == auth0id).first()
         
         if not user:
             response['message'] = 'User not found'
@@ -218,25 +221,24 @@ def get_user_with_plans():
             'purchased_plans': []
         }
         
-        has_active_plans = False
         for plan in user.purchased_plans:
-            if plan.is_subscribed:
-                has_active_plans = True
-                plan_data = {
-                    'product_id': plan.product_id,
-                    'reference_name': plan.reference_name,
-                    'price': plan.price,
-                    'is_subscribed': plan.is_subscribed,
-                    'created_at': plan.created_at
-                }
-                user_data['purchased_plans'].append(plan_data)
-        
-        if not has_active_plans:
-            response['message'] = 'User does not have active plans'
-            return jsonify(response), 404
+            plan_data = {
+                'product_id': plan.product_id,
+                'reference_name': plan.reference_name,
+                'price': plan.price,
+                'is_subscribed': plan.is_subscribed,
+                'created_at': plan.created_at
+            }
+            user_data['purchased_plans'].append(plan_data)
         
         response['success'] = True
         response['data'] = user_data
+        
+        # Check if user has no active plans
+        if not user.purchased_plans:
+            response['message'] = 'User does not have any purchased plans'
+            return jsonify(response), 200
+        
         return jsonify(response), 200
 
     except exc.SQLAlchemyError as e:
@@ -246,6 +248,7 @@ def get_user_with_plans():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+
 
 
 

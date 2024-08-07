@@ -1,7 +1,13 @@
+import datetime
 import json
 import os
+<<<<<<< HEAD
 from flask import Flask
+=======
+from flask import Flask, session
+>>>>>>> d369ab7fd669d313285ffe7702677ff3dcc0f2bd
 from flask_cors import CORS
+from config import User
 from routes.chart.chart import chart_bp
 from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
@@ -24,6 +30,10 @@ from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
+<<<<<<< HEAD
+=======
+from sqlalchemy.exc import SQLAlchemyError
+>>>>>>> d369ab7fd669d313285ffe7702677ff3dcc0f2bd
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -81,10 +91,12 @@ app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
 
 
+
 if __name__ == '__main__':
     try:
-        print('---AI Alpha server is running---') 
-        app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+        with app.app_context():
+            print('---AI Alpha server is running---') 
+            app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:

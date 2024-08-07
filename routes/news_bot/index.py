@@ -301,6 +301,8 @@ def check_email():
     response = {'success': False, 'message': None, 'data': None}
     try:
         email = request.args.get('email')
+
+        email = email.replace("!verify ", "")
         if not email:
             response['message'] = 'Email parameter is required'
             return jsonify(response), 400
@@ -309,13 +311,13 @@ def check_email():
         if not user:
             response['message'] = 'User not found'
             return jsonify(response), 404
-
         plan_exists = session.query(PurchasedPlan).filter(
             PurchasedPlan.user_id == user.user_id,
             PurchasedPlan.reference_name.ilike('%founders%')
         ).first()
         
         if plan_exists:
+            print("plan", plan_exists)
             response['success'] = True
             response['message'] = 'User and plan found successfully'
             response['data'] = {
