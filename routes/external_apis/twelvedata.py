@@ -32,7 +32,7 @@ def get_symbol_time_series():
     for a given financial symbol, based on the provided interval and output size.
 
     Args:
-        symbol (str): The symbol of the financial instrument (default is 'VIX').
+        symbol (str): The symbol of the financial instrument (optional, default is 'VIX').
         interval (str): The time interval for the data points, such as '1min', '1h', or '1day' (optional, default is '1h').
         outputsize (int): The maximum number of data points to retrieve (optional, default is 10).
 
@@ -56,24 +56,27 @@ def get_symbol_time_series():
     interval = request.args.get("interval", "1h")
 
     if interval.lower() not in INTERVAL_VALUES:
-        response["error"] = (
-            f"Invalid interval format. Permited values: {INTERVAL_VALUES}"
-        )
+        response["error"] = f"Invalid interval format. Permitted values: {INTERVAL_VALUES}"
         return jsonify(response), status_code
 
-    url = f"https://api.twelvedata.com/time_series?apikey={TUELVEDATA_API_KEY}&symbol={symbol.upper()}&interval={interval.lower()}"
+    try:
+        outputsize = int(outputsize)
+        if outputsize < 1:
+            raise ValueError
+    except ValueError:
+        response["error"] = "Invalid outputsize. Must be a positive integer."
+        return jsonify(response), status_code
 
-    if outputsize is not None:
-        url += f"&outputsize={outputsize}"
+    url = f"https://api.twelvedata.com/time_series?apikey={TUELVEDATA_API_KEY}&symbol={symbol.upper()}&interval={interval.lower()}&outputsize={outputsize}"
 
     try:
         data = requests.get(url)
         data.raise_for_status()
         data = data.json()
 
-        if "code" in data and data["code"] == 404:
-            response["error"] = data["message"]
-            return jsonify(response), 404
+        if "code" in data:
+            response["error"] = data.get("message", "Error occurred")
+            return jsonify(response), data.get("code", 500)
 
         response["data"] = data
         response["success"] = True
@@ -82,7 +85,7 @@ def get_symbol_time_series():
     except requests.exceptions.HTTPError as http_e:
         try:
             error_data = http_e.response.json()
-            response["error"] = error_data.get("errorCode")
+            response["error"] = error_data.get("errorCode", "HTTP error occurred")
             status_code = 401
         except ValueError:
             response["error"] = f"HTTP error occurred: {str(http_e)}"
