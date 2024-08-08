@@ -62,9 +62,8 @@ def get_funding_rates():
     symbols_list = symbols.split(",")
     for symbol in symbols_list:
         if symbol.upper() not in SYMBOL_VALUES:
-            response["error"] = (
-                f"One or more symbols are invalid. Permitted values: {SYMBOL_VALUES}"
-            )
+            response["error"] = f"One or more symbols are invalid. Permitted values: {SYMBOL_VALUES}"
+            status_code = 404
             return jsonify(response), status_code
 
     url = f"https://api.coinalyze.net/v1/funding-rate?api_key={COINALYZE_API_KEY}&symbols={symbols.upper()}"
