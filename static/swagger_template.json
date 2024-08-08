@@ -3007,7 +3007,79 @@
             }
           }
         }
-  }
+      },
+      "/get_symbol_time_series": {
+        "get": {
+          "summary": "Retrieve historical time series data for a specified symbol",
+          "description": "This endpoint queries the TwelveData API to retrieve historical time series data for a given financial symbol, based on the provided interval and output size.",
+          "tags": ["TwelveData"],
+          "parameters": [
+            {
+              "name": "symbol",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "default": "VIX"
+              },
+              "description": "The symbol of the financial instrument"
+            },
+            {
+              "name": "interval",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "default": "1h"
+              },
+              "description": "The time interval for the data points, such as '1min', '1h', or '1day'"
+            },
+            {
+              "name": "outputsize",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "default": 10
+              },
+              "description": "The maximum number of data points to retrieve"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "description": "The historical time series data"
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Error message, if any"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - Invalid parameter(s) provided"
+            },
+            "404": {
+              "description": "Not Found - The specified symbol was not found"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      }
     },
     "definitions": {
       "UserWithPlans": {
