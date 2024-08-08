@@ -24,6 +24,7 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
+from routes.external_apis.twelvedata import twelvedata_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
 from sqlalchemy.exc import SQLAlchemyError
@@ -82,6 +83,7 @@ app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(twelvedata_bp)
 
 
 
