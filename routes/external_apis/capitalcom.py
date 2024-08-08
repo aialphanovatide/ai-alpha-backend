@@ -12,6 +12,42 @@ X_CAP_API_KEY = os.getenv("X_CAP_API_KEY")
 
 email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
+REQUIRED_HEADERS = ["X_SECURITY_TOKEN", "CST"]
+RESOLUTION_VALUES = [
+    "MINUTE",
+    "MINUTE_5",
+    "MINUTE_15",
+    "MINUTE_30",
+    "HOUR",
+    "HOUR_4",
+    "DAY",
+    "WEEK",
+]
+
+
+def validate_resolution(resolution):
+    print(resolution)
+    if resolution is None:
+        return "HOUR"
+    if resolution.upper() not in RESOLUTION_VALUES:
+        raise ValueError(
+            f"Invalid resolution value. Expected one of {RESOLUTION_VALUES}"
+        )
+    return resolution
+
+
+def validate_max(max_value):
+    if max_value is not None:
+        max_int = int(max_value)
+        if not 1 <= max_int <= 1000:
+            raise ValueError("Invalid max value. Expected integer between 1 and 1000")
+
+
+def validate_headers(headers):
+    missing_headers = [h for h in REQUIRED_HEADERS if not headers.get(h)]
+    if missing_headers:
+        raise ValueError(f"Missing required headers: {', '.join(missing_headers)}")
+
 
 @capitalcom_bp.route("/get_symbol_prices", methods=["GET"])
 def get_symbol_prices():
@@ -42,62 +78,34 @@ def get_symbol_prices():
         401 Unauthorized: If the session or security token is invalid.
         500 Internal Server Error: If there's an unexpected error during execution.
     """
-
     response = {"data": None, "error": None, "success": False}
     status_code = 400
-    resolution_possible_values = [
-        "MINUTE",
-        "MINUTE_5",
-        "MINUTE_15",
-        "MINUTE_30",
-        "HOUR",
-        "HOUR_4",
-        "DAY",
-        "WEEK",
-    ]
-
-    if request.headers is not None:
-        X_SECURITY_TOKEN = request.headers.get("X_SECURITY_TOKEN")
-        CST = request.headers.get("CST")
-
-    symbol = request.args.get("symbol")
-    resolution = request.args.get("resolution")
-    max = request.args.get("max")
-
-    if symbol is None or symbol == "":
-        response["error"] = "Missing Symbol param."
-        return jsonify(response), status_code
-
-    if resolution is not None:
-        if resolution.upper() not in resolution_possible_values:
-            response["error"] = (
-                f"Invalid resolution value. Expected {str(resolution_possible_values)}"
-            )
-            return jsonify(response), status_code
-    else:
-        resolution = "HOUR"
-
-    if max is not None:
-        if int(max) > 1000 or int(max) < 1:
-            response["error"] = (
-                f"Invalid max value. Expected integer between 1 and 1000"
-            )
-            return jsonify(response), status_code
-
-    url = f"https://api-capital.backend-capital.com/api/v1/prices/{symbol.upper()}?resolution={resolution}"
-
-    if max is not None:
-        url += f"&max={max}"
-
-    headers = {
-        "Accept": "*/*",
-        "User-Agent": "news",
-        "Content-Type": "application/json",
-        "X-SECURITY-TOKEN": X_SECURITY_TOKEN,
-        "CST": CST,
-    }
-
     try:
+        headers = request.headers
+        validate_headers(headers)
+        symbol = request.args.get("symbol")
+
+        if not symbol:
+            response["error"] = "Missing Symbol param."
+            return jsonify(response), status_code
+
+        resolution = validate_resolution(request.args.get("resolution"))
+        validate_max(request.args.get("max"))
+
+        url = f"https://api-capital.backend-capital.com/api/v1/prices/{symbol.upper()}?resolution={resolution.upper()}"
+        print(url)
+
+        if max_value := request.args.get("max"):
+            url += f"&max={max_value}"
+
+        headers = {
+            "Accept": "*/*",
+            "User-Agent": "news",
+            "Content-Type": "application/json",
+            "X-SECURITY-TOKEN": headers.get("X_SECURITY_TOKEN"),
+            "CST": headers.get("CST"),
+        }
+
         data = requests.get(url, headers=headers)
         data.raise_for_status()
         data = data.json()
@@ -105,6 +113,10 @@ def get_symbol_prices():
         response["data"] = data
         response["success"] = True
         status_code = 200
+
+    except ValueError as ve:
+        response["error"] = str(ve)
+        return jsonify(response), status_code
 
     except requests.exceptions.HTTPError as http_e:
         try:
