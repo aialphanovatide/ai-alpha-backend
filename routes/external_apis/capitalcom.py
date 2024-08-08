@@ -26,7 +26,6 @@ RESOLUTION_VALUES = [
 
 
 def validate_resolution(resolution):
-    print(resolution)
     if resolution is None:
         return "HOUR"
     if resolution.upper() not in RESOLUTION_VALUES:
