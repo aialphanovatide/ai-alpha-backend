@@ -79,8 +79,8 @@ def get_symbol_klines():
     except requests.exceptions.HTTPError as http_e:
         try:
             error_data = http_e.response.json()
-            response["error"] = error_data.get("errorCode", "HTTP error occurred")
-            status_code = 401
+            response["error"] = error_data.get("errorCode", "Internal Server Error")
+            status_code = 500
         except ValueError:
             response["error"] = f"HTTP error occurred: {str(http_e)}"
             status_code = http_e.response.status_code
