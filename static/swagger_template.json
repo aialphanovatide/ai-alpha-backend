@@ -3007,7 +3007,100 @@
             }
           }
         }
-  }
+      },
+      "/get_symbol_klines": {
+        "get": {
+          "summary": "Retrieve Kline/Candlestick Data for a Specified Symbol",
+          "description": "Fetch Kline/Candlestick data for the given symbol and interval from Binance API.",
+          "tags": ["Binance"],
+          "parameters": [
+            {
+              "name": "symbol",
+              "in": "query",
+              "description": "Trading pair symbol, e.g., 'BTCUSDT'.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "example": "BTCUSDT"
+              }
+            },
+            {
+              "name": "interval",
+              "in": "query",
+              "description": "Time interval for the Klines. Default is '1h'.",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1M"],
+                "default": "1h"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response with Kline data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "kline_open_time": { "type": "string", "example": "2023-08-09 00:00:00" },
+                            "open_price": { "type": "string", "example": "29000.12" },
+                            "high_price": { "type": "string", "example": "29500.45" },
+                            "low_price": { "type": "string", "example": "28900.67" },
+                            "close_price": { "type": "string", "example": "29450.34" },
+                            "volume": { "type": "string", "example": "100.567" },
+                            "kline_close_time": { "type": "string", "example": "2023-08-09 01:00:00" },
+                            "quote_asset_volume": { "type": "string", "example": "2900000.23" },
+                            "number_of_trades": { "type": "integer", "example": 308 },
+                            "taker_buy_base_asset_volume": { "type": "string", "example": "50.123" },
+                            "taker_buy_quote_asset_volume": { "type": "string", "example": "1450000.45" }
+                          }
+                        }
+                      },
+                      "error": { "type": "string", "nullable": true },
+                      "success": { "type": "boolean", "example": true }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid symbol or missing parameters",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Symbol param is required." },
+                      "success": { "type": "boolean", "example": false }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "An unexpected error occurred: ..." },
+                      "success": { "type": "boolean", "example": false }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "definitions": {
       "UserWithPlans": {
