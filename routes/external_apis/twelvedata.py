@@ -1,27 +1,14 @@
 import os
-import datetime
 import requests
 from dotenv import load_dotenv
 from flask import jsonify, Blueprint, request
+from utils.external_apis_values import TWELVEDATA_INTERVAL_VALUES
 
 twelvedata_bp = Blueprint("twelvedata_bp", __name__)
 
 load_dotenv()
 
 TUELVEDATA_API_KEY = os.getenv("TUELVEDATA_API_KEY")
-INTERVAL_VALUES = [
-    "1min",
-    "5min",
-    "15min",
-    "30min",
-    "45min",
-    "1h",
-    "2h",
-    "4h",
-    "1day",
-    "1week",
-    "1month",
-]
 
 @twelvedata_bp.route("/get_symbol_time_series", methods=["GET"])
 def get_symbol_time_series():
@@ -55,8 +42,8 @@ def get_symbol_time_series():
     outputsize = request.args.get("outputsize", 10)
     interval = request.args.get("interval", "1h")
 
-    if interval.lower() not in INTERVAL_VALUES:
-        response["error"] = f"Invalid interval format. Permitted values: {INTERVAL_VALUES}"
+    if interval.lower() not in TWELVEDATA_INTERVAL_VALUES:
+        response["error"] = f"Invalid interval format. Permitted values: {TWELVEDATA_INTERVAL_VALUES}"
         return jsonify(response), status_code
 
     try:
