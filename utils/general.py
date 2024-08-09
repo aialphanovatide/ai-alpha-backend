@@ -20,3 +20,11 @@ def extract_title_and_body(html_content):
 
 
 
+def create_response(success=False, data=None, error=None, **kwargs):
+    response = {
+        'success': success,
+        'data': data,
+        'error': error,
+        **kwargs
+    }
+    return response
