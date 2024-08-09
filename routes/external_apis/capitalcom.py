@@ -1,52 +1,16 @@
 import os
 import re
-import datetime
 import requests
 from dotenv import load_dotenv
 from flask import jsonify, Blueprint, request
+from utils.general import validate_headers, validate_max, validate_resolution
 
 capitalcom_bp = Blueprint("capitalcom_bp", __name__)
 
 load_dotenv()
 X_CAP_API_KEY = os.getenv("X_CAP_API_KEY")
-
-email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-
 REQUIRED_HEADERS = ["X_SECURITY_TOKEN", "CST"]
-RESOLUTION_VALUES = [
-    "MINUTE",
-    "MINUTE_5",
-    "MINUTE_15",
-    "MINUTE_30",
-    "HOUR",
-    "HOUR_4",
-    "DAY",
-    "WEEK",
-]
-
-
-def validate_resolution(resolution):
-    if resolution is None:
-        return "HOUR"
-    if resolution.upper() not in RESOLUTION_VALUES:
-        raise ValueError(
-            f"Invalid resolution value. Expected one of {RESOLUTION_VALUES}"
-        )
-    return resolution
-
-
-def validate_max(max_value):
-    if max_value is not None:
-        max_int = int(max_value)
-        if not 1 <= max_int <= 1000:
-            raise ValueError("Invalid max value. Expected integer between 1 and 1000")
-
-
-def validate_headers(headers):
-    missing_headers = [h for h in REQUIRED_HEADERS if not headers.get(h)]
-    if missing_headers:
-        raise ValueError(f"Missing required headers: {', '.join(missing_headers)}")
-
+email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
 @capitalcom_bp.route("/get_symbol_prices", methods=["GET"])
 def get_symbol_prices():
@@ -81,7 +45,7 @@ def get_symbol_prices():
     status_code = 400
     try:
         headers = request.headers
-        validate_headers(headers)
+        validate_headers(headers, REQUIRED_HEADERS)
         symbol = request.args.get("symbol")
 
         if not symbol:
@@ -136,9 +100,9 @@ def get_symbol_prices():
 @capitalcom_bp.route("/post_capitalcom_session", methods=["POST"])
 def post_capitalcom_session():
     """
-    Creates a session with the Capital.com API.
+    Creates a session with the CapitalCom API.
 
-    This endpoint sends a POST request to the Capital.com API to create a session using the provided
+    This endpoint sends a POST request to the CapitalCom API to create a session using the provided
     email (identifier) and password.
 
     Request JSON:
@@ -149,7 +113,7 @@ def post_capitalcom_session():
 
     Response JSON:
         {
-            "data": dict or None,  # The response data from Capital.com API if successful
+            "data": dict or None,  # The response data from CapitalCom API if successful
             "error": str or None,  # Error message if the request failed
             "success": bool        # Indicates if the operation was successful
         }
@@ -161,7 +125,7 @@ def post_capitalcom_session():
         - 500 Internal Server Error: If there's an unexpected error during execution.
 
     Raises:
-        requests.exceptions.RequestException: If there's an issue with the request to the Capital.com API.
+        requests.exceptions.RequestException: If there's an issue with the request to the CapitalCom API.
     """
 
     response = {"data": None, "error": None, "success": False}
@@ -205,6 +169,10 @@ def post_capitalcom_session():
         response["X-SECURITY-TOKEN"] = data.headers.get("X-SECURITY-TOKEN")
         response["CST"] = data.headers.get("CST")
         status_code = 200
+
+    except requests.exceptions.HTTPError as http_e:
+        response["error"] = f"HTTP error occurred: {http_e.response.text}"
+        status_code = http_e.response.status_code
 
     except requests.exceptions.RequestException as e:
         if "401" in str(e):
