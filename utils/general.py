@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 def extract_title_and_body(html_content):
     # Parse HTML content
@@ -18,5 +19,5 @@ def extract_title_and_body(html_content):
     
     return title, body
 
-
-
+def parse_timestamp(timestamp):
+    return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
