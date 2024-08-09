@@ -1,24 +1,15 @@
 import os
-import datetime
 import requests
 from dotenv import load_dotenv
 from flask import jsonify, Blueprint, request
+from utils.general import validate_date
+from utils.external_apis_values import PROFIT_ISO_CURRENCIES
 
 profit_bp = Blueprint("profit_bp", __name__)
 
 load_dotenv()
 
 PROFIT_COM_API_KEY = os.getenv("PROFIT_COM_API_KEY")
-iso_currencies = {"US": "USD", "GB": "GBP", "CN": "CNY"}
-
-
-def validate_date(date_text):
-    try:
-        datetime.datetime.strptime(date_text, "%Y-%m-%d")
-        return True
-    except ValueError:
-        return False
-
 
 @profit_bp.route("/get_economic_events", methods=["GET"])
 def get_economic_events():
@@ -65,7 +56,7 @@ def get_economic_events():
 
     if country_iso:
         country_iso = country_iso.upper()
-        if country_iso not in iso_currencies:
+        if country_iso not in PROFIT_ISO_CURRENCIES:
             response["error"] = ("Invalid country_iso value. Expected 'US', 'GB' or 'CN'.")
             return jsonify(response), status_code
 
@@ -97,6 +88,10 @@ def get_economic_events():
         response["success"] = True
         response["url"] = url
         status_code = 200
+
+    except requests.exceptions.HTTPError as http_e:
+        response["error"] = f"HTTP error occurred: {http_e.response.text}"
+        status_code = http_e.response.status_code
 
     except requests.exceptions.RequestException as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import datetime
 
 def extract_title_and_body(html_content):
     # Parse HTML content
@@ -18,5 +19,9 @@ def extract_title_and_body(html_content):
     
     return title, body
 
-
-
+def validate_date(date_text):
+    try:
+        datetime.datetime.strptime(date_text, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
