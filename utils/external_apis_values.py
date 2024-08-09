@@ -1,0 +1,14 @@
+COINALYZE_SYMBOL_VALUES = [
+    "BTCUSD_PERP.3",
+    "BTCUSD_PERP.A",
+    "BTCUSD.6",
+    "BTC-USD.8",
+    "ETHUSD_PERP.3",
+    "ETHUSD_PERP.A",
+    "ETHUSD.6",
+    "ETH-USD.8",
+    "SOLUSD_PERP.3",
+    "SOLUSD_PERP.A",
+    "SOLUSD.6",
+    "SOL-USD.8",
+]

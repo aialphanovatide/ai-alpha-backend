@@ -1,29 +1,14 @@
 import os
-import datetime
 import requests
 from dotenv import load_dotenv
 from flask import jsonify, Blueprint, request
+from utils.external_apis_values import COINALYZE_SYMBOL_VALUES
 
 coinalyze_bp = Blueprint("coinalyze_bp", __name__)
 
 load_dotenv()
 
 COINALYZE_API_KEY = os.getenv("COINALYZE_API_KEY")
-SYMBOL_VALUES = [
-    "BTCUSD_PERP.3",
-    "BTCUSD_PERP.A",
-    "BTCUSD.6",
-    "BTC-USD.8",
-    "ETHUSD_PERP.3",
-    "ETHUSD_PERP.A",
-    "ETHUSD.6",
-    "ETH-USD.8",
-    "SOLUSD_PERP.3",
-    "SOLUSD_PERP.A",
-    "SOLUSD.6",
-    "SOL-USD.8",
-]
-
 
 @coinalyze_bp.route("/get_funding_rates", methods=["GET"])
 def get_funding_rates():
@@ -49,7 +34,6 @@ def get_funding_rates():
         404 Not Found: If the provided symbols are not found.
         500 Internal Server Error: If there's an unexpected error during execution.
     """
-
     response = {"data": None, "error": None, "success": False}
     status_code = 400
 
@@ -61,8 +45,8 @@ def get_funding_rates():
 
     symbols_list = symbols.split(",")
     for symbol in symbols_list:
-        if symbol.upper() not in SYMBOL_VALUES:
-            response["error"] = f"One or more symbols are invalid. Permitted values: {SYMBOL_VALUES}"
+        if symbol.upper() not in COINALYZE_SYMBOL_VALUES:
+            response["error"] = f"One or more symbols are invalid. Permitted values: {COINALYZE_SYMBOL_VALUES}"
             status_code = 404
             return jsonify(response), status_code
 
