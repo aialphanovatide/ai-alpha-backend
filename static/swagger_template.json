@@ -3007,7 +3007,69 @@
             }
           }
         }
-  }
+      },
+      "/get_revenuecat_user_info": {
+        "get": {
+          "tags": [
+            "revenuecat"
+          ],
+          "summary": "Retrieve RevenueCat User Info",
+          "description": "This endpoint queries the RevenueCat API to retrieve subscription and purchase information for a specific user, identified by their RevenueCat user ID.",
+          "operationId": "getRevenueCatUserInfo",
+          "parameters": [
+            {
+              "name": "revenuecat_user_id",
+              "in": "query",
+              "required": true,
+              "description": "The unique identifier of the RevenueCat user.",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "description": "The user information from RevenueCat"
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Error message, if any"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request. Missing or invalid RevenueCat user ID."
+            },
+            "401": {
+              "description": "Unauthorized. Invalid API token."
+            },
+            "500": {
+              "description": "Internal Server Error. An unexpected error occurred."
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      }
     },
     "definitions": {
       "UserWithPlans": {
