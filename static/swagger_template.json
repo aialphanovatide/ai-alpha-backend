@@ -3008,6 +3008,84 @@
           }
         }
       },
+      "/get_crypto_events": {
+        "get": {
+          "tags": ["Crypto Events"],
+          "summary": "Retrieve cryptocurrency events based on specified filters.",
+          "description": "This endpoint queries the Coindar API to retrieve events related to cryptocurrencies, filtered by date range, coin IDs, tags, and sorting options.",
+          "parameters": [
+            {
+              "name": "today_date",
+              "in": "query",
+              "description": "The lower limit of the event start date in the format yyyy-mm-dd (optional)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            {
+              "name": "end_date",
+              "in": "query",
+              "description": "The upper date limit of the event start date in the format yyyy-mm-dd (optional)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            {
+              "name": "filter_coins",
+              "in": "query",
+              "description": "Comma-separated list of cryptocurrency IDs related to the requested events (optional)",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Parameter defining events sorting; possible values are 'date_start', 'date_added', or 'views' (optional)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["date_start", "date_added", "views"]
+              }
+            },
+            {
+              "name": "filter_tags",
+              "in": "query",
+              "description": "Comma-separated list of tag IDs (optional)",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "order_by",
+              "in": "query",
+              "description": "Sorting order; possible values are '0' (ascending) or '1' (descending) (optional)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["0", "1"]
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Cryptocurrency events retrieved successfully"
+            },
+            "400": {
+              "description": "Invalid parameter value"
+            },
+            "500": {
+              "description": "Server error"
+            }
+          }
+        }
+      },
       "/get_funding_rates": {
         "get": {
           "summary": "Retrieve funding rates for specified symbols",
