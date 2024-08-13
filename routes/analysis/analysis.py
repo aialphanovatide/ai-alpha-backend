@@ -8,10 +8,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask import jsonify, Blueprint, request
 from apscheduler.triggers.date import DateTrigger
 from sqlalchemy.orm.exc import NoResultFound
-from utils.general import extract_title_and_body
+from utils.general import create_response, extract_title_and_body
 from apscheduler.jobstores.base import JobLookupError
 from services.firebase.firebase import send_notification
-from config import Analysis, AnalysisImage, session, CoinBot, Session
+from config import Analysis, AnalysisImage, Category, session, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.news_bot.poster_generator import generate_poster_prompt
 from services.aws.s3 import ImageProcessor as image_proccessor
@@ -798,7 +798,7 @@ def get_scheduled_job(job_id):
     """
     response = {"data": None, "error": None, "job_id": job_id, "success": False}
     status_code = 500  # Default to server error
-
+    
     try:
         job = sched.get_job(job_id)
         
@@ -843,3 +843,46 @@ def get_jobs():
 
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+    
+
+@analysis_bp.route('/get_bot_ids_by_category/<category_name>', methods=['GET'])
+def get_bot_ids_by_category(category_name):
+    """
+    Retrieve bot IDs associated with a given category name.
+    Args:
+        category_name (str): The name of the category to find bots for.
+    Response:
+        200: List of bot IDs retrieved successfully.
+        404: Category not found.
+        500: Internal server error.
+    """
+    response = {"data": None, "error": None, "success": False}
+    status_code = 500  # Default to server error
+
+    session = None
+    try:
+        session = Session()
+        # Fetch the category from the database
+        category = session.query(Category).filter_by(category_name=category_name).first()
+        if not category:
+            response["error"] = 'Category not found'
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Fetch all bots associated with the category
+        bots = session.query(CoinBot).filter_by(category_id=category.category_id).all()
+        bot_ids = [bot.bot_id for bot in bots]
+
+        response["data"] = {'bot_ids': bot_ids}
+        response["success"] = True
+        status_code = 200
+
+    except Exception as e:
+        response["error"] = f'Error retrieving bots for category "{category_name}": {str(e)}'
+        status_code = 500
+
+    finally:
+        if session:
+            session.close()
+
+    return jsonify(response), status_code
