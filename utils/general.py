@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import datetime
 
 def extract_title_and_body(html_content):
     # Parse HTML content
@@ -28,3 +29,14 @@ def create_response(success=False, data=None, error=None, **kwargs):
         **kwargs
     }
     return response
+
+
+def validate_date(date_text: str):
+    try:
+        datetime.datetime.strptime(date_text, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+def validate_int_list(int_list: list):
+    return all(item.isdigit() for item in int_list.split(","))
