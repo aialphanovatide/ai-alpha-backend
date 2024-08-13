@@ -3086,6 +3086,358 @@
           }
         }
       },
+      "/get_economic_events": {
+        "get": {
+          "tags": ["Economic Events"],
+          "summary": "Retrieve economic events based on specified filters.",
+          "description": "This endpoint queries the Profit API to retrieve economic events related to forex, filtered by date range, country ISO, currency, and impact.",
+          "parameters": [
+            {
+              "name": "country_iso",
+              "in": "query",
+              "description": "The country ISO code (optional). Expected values are 'US', 'GB', 'CN'.",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["US", "GB", "CN"]
+              }
+            },
+            {
+              "name": "impact",
+              "in": "query",
+              "description": "Comma-separated list of impact levels ('high', 'medium', 'low') (optional).",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "date",
+              "in": "query",
+              "description": "The lower limit of the event start date in the format yyyy-mm-dd (optional).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            {
+              "name": "end_date",
+              "in": "query",
+              "description": "The upper limit of the event end date in the format yyyy-mm-dd (optional).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Economic events retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the API request"
+                      },
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "description": "List of event objects"
+                      },
+                      "error": {
+                        "type": ["string", "null"],
+                        "description": "Error message, if any"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid parameter value",
+              "content": {
+                "application/json": {
+                  "schema": {
+                      "type": "object",
+                      "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the API request"
+                      },
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "description": "List of event objects"
+                      },
+                      "error": {
+                        "type": "string",
+                        "description": "Error message"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the API request"
+                      },
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "description": "List of event objects"
+                      },
+                      "error": {
+                      "type": "string",
+                      "description": "Error message"
+                      },
+                      "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/get_revenuecat_user_info": {
+        "get": {
+          "tags": [
+            "revenuecat"
+          ],
+          "summary": "Retrieve RevenueCat User Info",
+          "description": "This endpoint queries the RevenueCat API to retrieve subscription and purchase information for a specific user, identified by their RevenueCat user ID.",
+          "operationId": "getRevenueCatUserInfo",
+          "parameters": [
+            {
+              "name": "revenuecat_user_id",
+              "in": "query",
+              "required": true,
+              "description": "The unique identifier of the RevenueCat user.",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "description": "The user information from RevenueCat"
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Error message, if any"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request. Missing or invalid RevenueCat user ID."
+            },
+            "401": {
+              "description": "Unauthorized. Invalid API token."
+            },
+            "500": {
+              "description": "Internal Server Error. An unexpected error occurred."
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      },
+      "/post_capitalcom_session": {
+        "post": {
+          "summary": "Create a session with CapitalCom",
+          "description": "Creates a session with the CapitalCom API using the provided email (identifier) and password.",
+          "tags": ["CapitalCom Session"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "identifier": {
+                      "type": "string",
+                      "description": "The email address of the user"
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "The password of the user"
+                    }
+                  },
+                  "required": ["identifier", "password"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Session created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "description": "The response data from CapitalCom API if successful"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      },
+                      "X-SECURITY-TOKEN": {
+                        "type": "string",
+                        "description": "Security token returned by the API"
+                      },
+                      "CST": {
+                        "type": "string",
+                        "description": "Session token returned by the API"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "description": "HTTP status code"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - missing or invalid identifier/password"
+            },
+            "401": {
+              "description": "Unauthorized - invalid credentials"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      },
+      "/get_symbol_prices": {
+        "get": {
+          "summary": "Retrieve historical prices for a specific symbol",
+          "description": "Queries the CapitalCom API to retrieve historical price data for a given financial instrument, based on the provided symbol and resolution.",
+          "tags": ["CapitalCom Prices"],
+          "parameters": [
+            {
+              "name": "symbol",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              },
+              "description": "The symbol of the financial instrument",
+              "required": true
+            },
+            {
+              "name": "resolution",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "enum": ["MINUTE", "MINUTE_5", "MINUTE_15", "MINUTE_30", "HOUR", "HOUR_4", "DAY", "WEEK"]
+              },
+              "description": "The time resolution for the price data, such as 'MINUTE', 'HOUR', or 'DAY' (default is 'HOUR')",
+              "required": false
+            },
+            {
+              "name": "max",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "description": "The maximum number of data points to retrieve, between 1 and 1000",
+              "required": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "description": "The historical price data"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - Invalid or missing parameters"
+            },
+            "401": {
+              "description": "Unauthorized - Invalid session or security token"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "security": [
+            {
+              "X-SECURITY-TOKEN": [],
+              "CST": []
+            }
+          ]
+        }
+      },
       "/get_funding_rates": {
         "get": {
           "summary": "Retrieve funding rates for specified symbols",
