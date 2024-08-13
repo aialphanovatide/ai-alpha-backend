@@ -3437,6 +3437,59 @@
             }
           ]
         }
+      },
+      "/get_funding_rates": {
+        "get": {
+          "summary": "Retrieve funding rates for specified symbols",
+          "description": "This endpoint retrieves historical funding rates for a list of specified symbols from the Coinalyze API.",
+          "tags": ["Coinalyze"],
+          "parameters": [
+            {
+              "name": "symbols",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              },
+              "required": true,
+              "description": "Comma-separated list of symbols to retrieve funding rates for."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "description": "The historical funding rates data."
+                      },
+                      "error": {
+                        "type": "string",
+                        "description": "Error message, if any."
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - Invalid symbol parameter or symbol is missing."
+            },
+            "404": {
+              "description": "Not found - Symbol not found."
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
       }
     },
     "definitions": {
