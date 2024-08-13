@@ -1,3 +1,6 @@
+# Profit values
+PROFIT_ISO_CURRENCIES = {"US": "USD", "GB": "GBP", "CN": "CNY"}
+
 # CapitalCom values
 CAPITALCOM_RESOLUTION_VALUES = [
     "MINUTE",
