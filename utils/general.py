@@ -64,3 +64,7 @@ def validate_headers(headers: dict, required_headers: list):
     missing_headers = [h for h in required_headers if not headers.get(h)]
     if missing_headers:
         raise ValueError(f"Missing required headers: {', '.join(missing_headers)}")
+
+
+def parse_timestamp(timestamp):
+    return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
