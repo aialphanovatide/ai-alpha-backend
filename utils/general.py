@@ -20,7 +20,6 @@ def extract_title_and_body(html_content):
     return title, body
 
 
-
 def create_response(success=False, data=None, error=None, **kwargs):
     response = {
         'success': success,
@@ -37,6 +36,7 @@ def validate_date(date_text: str):
         return True
     except ValueError:
         return False
+
 
 def validate_int_list(int_list: list):
     return all(item.isdigit() for item in int_list.split(","))

@@ -3085,6 +3085,149 @@
             }
           }
         }
+      },
+      "/get_economic_events": {
+        "get": {
+          "tags": ["Economic Events"],
+          "summary": "Retrieve economic events based on specified filters.",
+          "description": "This endpoint queries the Profit API to retrieve economic events related to forex, filtered by date range, country ISO, currency, and impact.",
+          "parameters": [
+            {
+              "name": "country_iso",
+              "in": "query",
+              "description": "The country ISO code (optional). Expected values are 'US', 'GB', 'CN'.",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["US", "GB", "CN"]
+              }
+            },
+            {
+              "name": "impact",
+              "in": "query",
+              "description": "Comma-separated list of impact levels ('high', 'medium', 'low') (optional).",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "date",
+              "in": "query",
+              "description": "The lower limit of the event start date in the format yyyy-mm-dd (optional).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            {
+              "name": "end_date",
+              "in": "query",
+              "description": "The upper limit of the event end date in the format yyyy-mm-dd (optional).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Economic events retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the API request"
+                      },
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "description": "List of event objects"
+                      },
+                      "error": {
+                        "type": ["string", "null"],
+                        "description": "Error message, if any"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid parameter value",
+              "content": {
+                "application/json": {
+                  "schema": {
+                      "type": "object",
+                      "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the API request"
+                      },
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "description": "List of event objects"
+                      },
+                      "error": {
+                        "type": "string",
+                        "description": "Error message"
+                      },
+                      "success": {
+                        "type": "boolean",
+                        "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the API request"
+                      },
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "description": "List of event objects"
+                      },
+                      "error": {
+                      "type": "string",
+                      "description": "Error message"
+                      },
+                      "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "definitions": {
