@@ -1,0 +1,1 @@
+PROFIT_ISO_CURRENCIES = {"US": "USD", "GB": "GBP", "CN": "CNY"}
