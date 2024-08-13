@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from datetime import datetime
+import datetime
 
 def extract_title_and_body(html_content):
     # Parse HTML content
@@ -18,6 +18,29 @@ def extract_title_and_body(html_content):
     body = ' '.join(p.get_text() for p in paragraphs[1:])
     
     return title, body
+
+
+def create_response(success=False, data=None, error=None, **kwargs):
+    response = {
+        'success': success,
+        'data': data,
+        'error': error,
+        **kwargs
+    }
+    return response
+
+
+def validate_date(date_text: str):
+    try:
+        datetime.datetime.strptime(date_text, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
+def validate_int_list(int_list: list):
+    return all(item.isdigit() for item in int_list.split(","))
+
 
 def parse_timestamp(timestamp):
     return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
