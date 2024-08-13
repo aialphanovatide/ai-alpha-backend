@@ -27,6 +27,7 @@ from routes.user.user import user_bp
 from routes.external_apis.profit import profit_bp
 from routes.external_apis.coindar import coindar_bp
 from routes.external_apis.revenuecat import revenuecat_bp
+from routes.external_apis.capitalcom import capitalcom_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
 from sqlalchemy.exc import SQLAlchemyError
@@ -88,6 +89,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(profit_bp)
 app.register_blueprint(coindar_bp)
 app.register_blueprint(revenuecat_bp)
+app.register_blueprint(capitalcom_bp)
 
 
 
