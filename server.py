@@ -24,7 +24,12 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
+from routes.external_apis.profit import profit_bp
 from routes.external_apis.coindar import coindar_bp
+from routes.external_apis.revenuecat import revenuecat_bp
+from routes.external_apis.capitalcom import capitalcom_bp
+from routes.external_apis.coinalyze import coinalyze_bp
+from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
@@ -84,7 +89,12 @@ app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(profit_bp)
 app.register_blueprint(coindar_bp)
+app.register_blueprint(revenuecat_bp)
+app.register_blueprint(capitalcom_bp)
+app.register_blueprint(coinalyze_bp)
+app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
 
 
