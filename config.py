@@ -162,6 +162,7 @@ class User(Base):
     Attributes:
         user_id (int): The primary key for the user.
         nickname (str): The user's nickname or display name.
+        full_name (str): The user's fullname.
         email (str): The user's email address.
         email_verified (str): Indicates if the user's email has been verified.
         picture (str): URL or path to the user's profile picture.
@@ -175,6 +176,7 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     nickname = Column(String)
+    full_name = Column(String)
     email = Column(String)
     email_verified = Column(String)
     picture = Column(String)

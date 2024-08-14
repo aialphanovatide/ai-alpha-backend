@@ -11,6 +11,7 @@ def set_new_user():
     Create a new user with provided data.
 
     Args:
+        full_name (str): User's full name.
         nickname (str): User's nickname.
         email (str): User's email.
         email_verified (bool): Whether the user's email is verified.
@@ -20,7 +21,7 @@ def set_new_user():
 
     Response:
         200: User created successfully.
-        400: Missing required fields (nickname, email).
+        400: Missing required fields (full_name, nickname, email).
         500: Internal server error.
     """
     response = {'success': False, 'message': None}
@@ -28,13 +29,14 @@ def set_new_user():
         data = request.json
         
         # Validar que los campos obligatorios estén presentes
-        required_fields = ['nickname', 'email']
+        required_fields = ['full_name', 'nickname', 'email']
         for field in required_fields:
             if field not in data:
                 response['message'] = f'Missing required field: {field}'
                 return jsonify(response), 400
         
         new_user = User(
+            full_name=data.get('full_name'),
             nickname=data.get('nickname'),
             email=data.get('email'),
             email_verified=data.get('email_verified', False),
@@ -86,6 +88,8 @@ def edit_user_data(user_id):
             return jsonify(response), 404
         
         # Actualizar los campos si están presentes en los datos recibidos
+        if 'full_name' in data:
+            user.full_name = data['full_name']
         if 'nickname' in data:
             user.nickname = data['nickname']
         if 'email' in data:
@@ -135,6 +139,7 @@ def get_all_users_with_plans():
             user_data = {
                 'user_id': user.user_id,
                 'nickname': user.nickname,
+                'full_name': user.full_name,
                 'email': user.email,
                 'email_verified': user.email_verified,
                 'picture': user.picture,
@@ -188,6 +193,7 @@ def get_user_with_plans():
         user_id = request.args.get('user_id')
         email = request.args.get('email')
         nickname = request.args.get('nickname')
+        full_name = request.args.get('full_name')
         auth0id = request.args.get('auth0id')
         
         query = session.query(User).outerjoin(PurchasedPlan)
@@ -204,6 +210,8 @@ def get_user_with_plans():
             user = query.filter(User.nickname == nickname).first()
         elif auth0id:
             user = query.filter(User.auth0id == auth0id).first()
+        elif full_name:
+            user = query.filter(User.full_name == full_name).first()
         
         if not user:
             response['message'] = 'User not found'
@@ -212,6 +220,7 @@ def get_user_with_plans():
         user_data = {
             'user_id': user.user_id,
             'nickname': user.nickname,
+            'full_name': user.full_name,
             'email': user.email,
             'email_verified': user.email_verified,
             'picture': user.picture,

@@ -1042,6 +1042,7 @@
                 "required": ["nickname", "email"],
                 "properties": {
                   "nickname": { "type": "string" },
+                  "full_name": { "type": "string"},
                   "email": { "type": "string" },
                   "email_verified": { "type": "boolean", "default": false },
                   "picture": { "type": "string" },
@@ -1079,6 +1080,7 @@
                 "type": "object",
                 "properties": {
                   "nickname": { "type": "string" },
+                  "full_name": { "type": "string"},
                   "email": { "type": "string" },
                   "email_verified": { "type": "boolean" },
                   "picture": { "type": "string" },
@@ -1138,6 +1140,12 @@
             },
             {
               "name": "nickname",
+              "in": "query",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "full_name",
               "in": "query",
               "required": false,
               "type": "string"
@@ -3663,6 +3671,7 @@
         "properties": {
           "user_id": { "type": "integer" },
           "nickname": { "type": "string" },
+          "full_name": { "type": "string" },
           "email": { "type": "string" },
           "email_verified": { "type": "boolean" },
           "picture": { "type": "string" },
