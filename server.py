@@ -24,6 +24,7 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
+from routes.category.category import category_bp
 from routes.external_apis.profit import profit_bp
 from routes.external_apis.coindar import coindar_bp
 from routes.external_apis.revenuecat import revenuecat_bp
@@ -85,6 +86,7 @@ app.register_blueprint(hacks_bp)
 app.register_blueprint(revenue_model_bp)
 app.register_blueprint(introduction)
 app.register_blueprint(upgrades_bp)
+app.register_blueprint(category_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
 app.register_blueprint(narrative_trading_bp)

@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import datetime
-from external_apis_values import CAPITALCOM_RESOLUTION_VALUES
+from utils.external_apis_values import  CAPITALCOM_RESOLUTION_VALUES
 
 def extract_title_and_body(html_content):
     # Parse HTML content
