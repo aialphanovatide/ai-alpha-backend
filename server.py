@@ -32,6 +32,7 @@ from routes.external_apis.capitalcom import capitalcom_bp
 from routes.external_apis.coinalyze import coinalyze_bp
 from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
+from routes.coin_bot.coinbot import coin_bot_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
 from sqlalchemy.exc import SQLAlchemyError
@@ -98,6 +99,7 @@ app.register_blueprint(capitalcom_bp)
 app.register_blueprint(coinalyze_bp)
 app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
+app.register_blueprint(coin_bot_bp)
 
 
 
