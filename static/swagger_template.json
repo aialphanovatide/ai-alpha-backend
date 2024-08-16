@@ -1060,45 +1060,51 @@
         }
       },
       "/edit_user/{user_id}": {
-        "put": {
-          "tags": [
-            "User"
-          ],
-          "summary": "Edit user data identified by user ID.",
-          "parameters": [
-            {
-              "name": "user_id",
-              "in": "path",
-              "required": true,
-              "type": "integer"
-            },
-            {
-              "name": "body",
-              "in": "body",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nickname": { "type": "string" },
-                  "full_name": { "type": "string"},
-                  "email": { "type": "string" },
-                  "email_verified": { "type": "boolean" },
-                  "picture": { "type": "string" },
-                  "auth0id": { "type": "string" },
-                  "provider": { "type": "string" },
-                  "created_at": { "type": "string", "format": "date-time" }
-                }
-              }
-            }
-          ],
-          "responses": {
-            "200": { "description": "User data updated successfully." },
-            "400": { "description": "Missing user ID or no data provided to update." },
-            "404": { "description": "User not found." },
-            "500": { "description": "Internal server error." }
-          }
+  "put": { 
+    "tags": [
+      "User"
+    ],
+    "summary": "Edit user data identified by user ID.",
+    "parameters": [
+      {
+        "name": "user_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
         }
       },
+      {
+        "name": "body",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "nickname": { "type": "string" },
+            "full_name": { "type": "string" }
+          },
+          "required": [] 
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "User data updated successfully."
+      },
+      "400": {
+        "description": "No valid fields provided for update or missing user ID."
+      },
+      "404": {
+        "description": "User not found."
+      },
+      "500": {
+        "description": "Internal server error."
+      }
+    }
+  }
+},
+
       "/users": {
         "get": {
           "tags": [
