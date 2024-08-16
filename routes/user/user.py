@@ -61,9 +61,7 @@ def set_new_user():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
-
-
-@user_bp.route('/edit_user/<int:user_id>', methods=['PUT'])
+@user_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 def edit_user_data(user_id):
     """
     Edit user data identified by user ID.
@@ -81,29 +79,22 @@ def edit_user_data(user_id):
     try:
         data = request.json
         
+        # Solo permitir 'full_name' y 'nickname'
+        if not any(key in data for key in ['full_name', 'nickname']):
+            response['message'] = 'No valid fields provided for update'
+            return jsonify(response), 400
+        
         user = session.query(User).filter_by(user_id=user_id).first()
         
         if not user:
             response['message'] = 'User not found'
             return jsonify(response), 404
         
-        # Actualizar los campos si están presentes en los datos recibidos
+        # Actualizar solo los campos permitidos
         if 'full_name' in data:
             user.full_name = data['full_name']
         if 'nickname' in data:
             user.nickname = data['nickname']
-        if 'email' in data:
-            user.email = data['email']
-        if 'email_verified' in data:
-            user.email_verified = data['email_verified']
-        if 'picture' in data:
-            user.picture = data['picture']
-        if 'auth0id' in data:
-            user.auth0id = data['auth0id']
-        if 'provider' in data:
-            user.provider = data['provider']
-        if 'created_at' in data:
-            user.created_at = data['created_at']
 
         session.commit()
         
@@ -112,13 +103,13 @@ def edit_user_data(user_id):
         return jsonify(response), 200
                 
     except exc.SQLAlchemyError as e:
-        session.rollback()
         response['message'] = f'Database error: {str(e)}'
         return jsonify(response), 500
     
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+    
 @user_bp.route('/users', methods=['GET'])
 def get_all_users_with_plans():
     """
