@@ -119,8 +119,6 @@ def edit_user_data(user_id):
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
-
-
 @user_bp.route('/users', methods=['GET'])
 def get_all_users_with_plans():
     """
@@ -132,10 +130,12 @@ def get_all_users_with_plans():
     """
     response = {'success': False, 'data': None, 'message': None}
     try:
-        users_with_plans = session.query(User).join(PurchasedPlan).distinct(User.user_id).all()
+        # Realizar una consulta con un outer join para incluir todos los usuarios
+        users_with_plans = session.query(User).outerjoin(PurchasedPlan).all()
         
         result = []
         for user in users_with_plans:
+            # Preparar los datos del usuario
             user_data = {
                 'user_id': user.user_id,
                 'nickname': user.nickname,
@@ -148,15 +148,20 @@ def get_all_users_with_plans():
                 'created_at': user.created_at,
                 'purchased_plans': []
             }
-            for plan in user.purchased_plans:
-                plan_data = {
-                    'product_id': plan.product_id,
-                    'reference_name': plan.reference_name,
-                    'price': plan.price,
-                    'is_subscribed': plan.is_subscribed,
-                    'created_at': plan.created_at
-                }
-                user_data['purchased_plans'].append(plan_data)
+            
+            # Agregar los planes del usuario si existen
+            if user.purchased_plans:
+                for plan in user.purchased_plans:
+                    plan_data = {
+                        'product_id': plan.product_id,
+                        'reference_name': plan.reference_name,
+                        'price': plan.price,
+                        'is_subscribed': plan.is_subscribed,
+                        'created_at': plan.created_at
+                    }
+                    user_data['purchased_plans'].append(plan_data)
+            
+            # Agregar la información del usuario a la lista de resultados
             result.append(user_data)
         
         response['success'] = True
@@ -379,9 +384,9 @@ def unsubscribe_package():
         return jsonify(response), 500
     
 
-
-@user_bp.route('/delete_user/<int:user_id>', methods=['DELETE'])
-def delete_user_account(user_id):
+    
+@user_bp.route('/delete_user', methods=['DELETE'])
+def delete_user_account():
     """
     Delete a user account identified by user ID.
 
@@ -395,6 +400,11 @@ def delete_user_account(user_id):
     """
     response = {'success': False, 'message': None}
     try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'message': 'User ID not provided'}), 400
+        
         # Buscar el usuario por ID
         user = session.query(User).filter_by(user_id=user_id).first()
         
