@@ -1217,6 +1217,38 @@
           }
         }
       },
+      "/delete_user": {
+    "delete": {
+        "tags": [
+            "User"
+        ],
+        "summary": "Delete a user account identified by user ID.",
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "required": ["user_id"],
+                    "properties": {
+                        "user_id": {
+                            "type": "integer",
+                            "description": "ID of the user to delete."
+                        }
+                    }
+                }
+            }
+        ],
+        "responses": {
+            "200": { "description": "User account deleted successfully." },
+            "400": { "description": "User ID not provided." },
+            "404": { "description": "User not found." },
+            "500": { "description": "Internal server error." }
+        }
+    }
+},
+
       "/api/tv/alerts": {
         "get": {
           "tags": [
