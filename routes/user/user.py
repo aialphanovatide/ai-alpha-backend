@@ -377,3 +377,44 @@ def unsubscribe_package():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+    
+
+
+@user_bp.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user_account(user_id):
+    """
+    Delete a user account identified by user ID.
+
+    Args:
+        user_id (int): ID of the user to delete.
+
+    Response:
+        200: User account deleted successfully.
+        404: User not found.
+        500: Internal server error.
+    """
+    response = {'success': False, 'message': None}
+    try:
+        # Buscar el usuario por ID
+        user = session.query(User).filter_by(user_id=user_id).first()
+        
+        if not user:
+            response['message'] = 'User not found'
+            return jsonify(response), 404
+
+        # Eliminar el usuario de la base de datos
+        session.delete(user)
+        session.commit()
+        
+        response['success'] = True
+        response['message'] = 'User account deleted successfully'
+        return jsonify(response), 200
+
+    except exc.SQLAlchemyError as e:
+        session.rollback()
+        response['message'] = f'Database error: {str(e)}'
+        return jsonify(response), 500
+    
+    except Exception as e:
+        response['message'] = str(e)
+        return jsonify(response), 500
