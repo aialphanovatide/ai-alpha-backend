@@ -399,7 +399,7 @@ def delete_user_account():
             return jsonify({'success': False, 'message': 'User ID not provided'}), 400
         
         # Buscar el usuario por ID
-        user = session.query(User).filter_by(user_id=user_id).first()
+        user = session.query(User).filter_by(auth0id=user_id).first()
         
         if not user:
             response['message'] = 'User not found'
