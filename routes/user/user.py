@@ -1,14 +1,33 @@
+import os
+import secrets
+import string
+import jwt
 from sqlalchemy import exc
 from config import PurchasedPlan, session, User
 from flask import jsonify, request, Blueprint
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy.exc import SQLAlchemyError
 
 user_bp = Blueprint('user', __name__)
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+def generate_unique_short_token(length=7):
+    """
+    Generate a unique short alphanumeric token.
+    """
+    characters = string.ascii_letters + string.digits
+    while True:
+        token = ''.join(secrets.choice(characters) for _ in range(length))
+        # Check for uniqueness
+        if not session.query(User).filter_by(auth_token=token).first():
+            return token
+    return token
 
 @user_bp.route('/register', methods=['POST'])
 def set_new_user():
     """
-    Create a new user with provided data.
+    Create a new user with provided data and generate a JWT token.
 
     Args:
         full_name (str): User's full name.
@@ -20,7 +39,7 @@ def set_new_user():
         provider (str): Authentication provider of the user.
 
     Response:
-        200: User created successfully.
+        200: User created successfully with authentication token.
         400: Missing required fields (full_name, nickname, email).
         500: Internal server error.
     """
@@ -35,6 +54,7 @@ def set_new_user():
                 response['message'] = f'Missing required field: {field}'
                 return jsonify(response), 400
         
+        # Crear el nuevo usuario
         new_user = User(
             full_name=data.get('full_name'),
             nickname=data.get('nickname'),
@@ -43,17 +63,25 @@ def set_new_user():
             picture=data.get('picture'),
             auth0id=data.get('auth0id'),
             provider=data.get('provider'),
-            created_at=datetime.now()
+            created_at=datetime.utcnow()
         )
 
         session.add(new_user)
         session.commit()
+
+        # Generar el token
+        token = generate_unique_short_token()
+        
+        # Actualizar el usuario con el token
+        new_user.auth_token = token
+        session.commit()
         
         response['success'] = True
         response['message'] = 'User created successfully'
+        response['auth_token'] = token
         return jsonify(response), 200
                 
-    except exc.SQLAlchemyError as e:
+    except SQLAlchemyError as e:
         session.rollback()
         response['message'] = f'Database error: {str(e)}'
         return jsonify(response), 500
@@ -61,7 +89,6 @@ def set_new_user():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
-    
     
 @user_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 def edit_user_data(user_id):

@@ -155,19 +155,20 @@ class AdminRole(Base):
 class User(Base):
     """
     Represents a user in the system.
-
+    
     This class defines the structure for storing user information, including
     authentication details and related purchased plans.
 
     Attributes:
         user_id (int): The primary key for the user.
         nickname (str): The user's nickname or display name.
-        full_name (str): The user's fullname.
+        full_name (str): The user's full name.
         email (str): The user's email address.
         email_verified (str): Indicates if the user's email has been verified.
         picture (str): URL or path to the user's profile picture.
         auth0id (str): The user's Auth0 ID for authentication.
         provider (str): The authentication provider used by the user.
+        auth_token (str): The user's authentication token.
         created_at (datetime): Timestamp of when the user was created.
         updated_at (datetime): Timestamp of the last update to the user record.
         purchased_plans (relationship): Relationship to the user's purchased plans.
@@ -182,8 +183,10 @@ class User(Base):
     picture = Column(String)
     auth0id = Column(String)
     provider = Column(String)
+    auth_token = Column(String)  
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
 
     purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
     

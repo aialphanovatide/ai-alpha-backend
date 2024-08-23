@@ -1213,7 +1213,7 @@
               "name": "product_id",
               "in": "path",
               "required": true,
-              "type": "integer"
+              "type": "string"
             }
           ],
           "responses": {
