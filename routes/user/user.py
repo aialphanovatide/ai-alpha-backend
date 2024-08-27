@@ -24,6 +24,9 @@ def generate_unique_short_token(length=7):
             return token
     return token
 
+
+
+
 @user_bp.route('/register', methods=['POST'])
 def set_new_user():
     """
@@ -89,6 +92,8 @@ def set_new_user():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+    
+
     
 @user_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 def edit_user_data(user_id):
