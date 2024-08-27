@@ -405,13 +405,58 @@ def unsubscribe_package():
     
 
     
+# @user_bp.route('/delete_user', methods=['DELETE'])
+# def delete_user_account():
+#     """
+#     Delete a user account identified by user ID.
+
+#     Args:
+#         user_id (int): ID of the user to delete.
+
+#     Response:
+#         200: User account deleted successfully.
+#         404: User not found.
+#         500: Internal server error.
+#     """
+#     response = {'success': False, 'message': None}
+#     try:
+#         data = request.get_json()
+#         user_id = data.get('user_id')
+#         if not user_id:
+#             return jsonify({'success': False, 'message': 'User ID not provided'}), 400
+        
+#         # Buscar el usuario por ID
+#         user = session.query(User).filter_by(auth0id=user_id).first()
+        
+#         if not user:
+#             response['message'] = 'User not found'
+#             return jsonify(response), 404
+
+#         # Eliminar el usuario de la base de datos
+#         session.delete(user)
+#         session.commit()
+        
+#         response['success'] = True
+#         response['message'] = 'User account deleted successfully'
+#         return jsonify(response), 200
+
+#     except exc.SQLAlchemyError as e:
+#         session.rollback()
+#         response['message'] = f'Database error: {str(e)}'
+#         return jsonify(response), 500
+    
+#     except Exception as e:
+#         response['message'] = str(e)
+#         return jsonify(response), 500
+
+
 @user_bp.route('/delete_user', methods=['DELETE'])
 def delete_user_account():
     """
     Delete a user account identified by user ID.
 
     Args:
-        user_id (int): ID of the user to delete.
+        user_id (str): Partial or full auth0id of the user to delete.
 
     Response:
         200: User account deleted successfully.
@@ -425,8 +470,8 @@ def delete_user_account():
         if not user_id:
             return jsonify({'success': False, 'message': 'User ID not provided'}), 400
         
-        # Buscar el usuario por ID
-        user = session.query(User).filter_by(auth0id=user_id).first()
+        # Buscar el usuario por ID parcial o completo usando like
+        user = session.query(User).filter(User.auth0id.like(f'%{user_id}%')).first()
         
         if not user:
             response['message'] = 'User not found'
