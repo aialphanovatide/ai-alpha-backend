@@ -183,8 +183,6 @@ def post_narrative_trading():
 
         if new_narrative_trading:
             image = generate_poster_prompt(new_narrative_trading.narrative_trading)
-            print("image:", image)
-            print("image generated")
             narrative_trading_id = new_narrative_trading.narrative_trading_id
             print('id narrative_trading', narrative_trading_id)
             image_filename = f"{narrative_trading_id}.jpg"    

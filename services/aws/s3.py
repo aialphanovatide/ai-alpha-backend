@@ -100,7 +100,7 @@ class ImageProcessor:
                                  image_url: str, 
                                  bucket_name: str, 
                                  image_filename: str, 
-                                 target_size: Tuple[int, int] = (256, 256)) -> Optional[str]:
+                                 target_size: Tuple[int, int] = (1024, 1024)) -> Optional[str]:
         """
         Fetch, resize, and upload an image to S3.
 

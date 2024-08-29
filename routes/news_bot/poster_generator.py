@@ -16,7 +16,7 @@ client = OpenAI(
     api_key=OPENAI_API_KEY,
 )
 
-def resize_image(image_data, target_size=(500, 500)): 
+def resize_image(image_data, target_size=(1024, 1024)): 
     image_binary = base64.b64decode(image_data)
     image = Image.open(BytesIO(image_binary))
     resized_image = image.resize(target_size)
