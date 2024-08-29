@@ -1,13 +1,19 @@
 import os
 import requests
 from http import HTTPStatus
-from sqlalchemy import desc
+from sqlalchemy import Interval, desc
 from dotenv import load_dotenv
 from sqlalchemy.exc import SQLAlchemyError
 from cachetools.func import ttl_cache
 from config import Chart, session, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  
 from operator import itemgetter
+from tvDatafeed import TvDatafeed, Interval
+
+load_dotenv()
+
+TW_USER = os.getenv('TW_USER')
+TW_PASS = os.getenv('TW_PASS')
 
 
 chart_bp = Blueprint('chart', __name__)
@@ -188,6 +194,36 @@ def get_chart_values():
     return jsonify(response), response["status"]
 
 
+def get_total_3_data():
+    username = TW_USER
+    password = TW_PASS
+
+    tv = TvDatafeed(username, password)
+
+    symbol = 'CRYPTOCAP:TOTAL3'
+    exchange = 'CRYPTOCAP'
+    interval = Interval.in_daily
+    days = 15
+
+    data = tv.get_hist(symbol=symbol, exchange=exchange, interval=interval, n_bars=days, fut_contract=None, extended_session=False)
+
+    data = data.iloc[::-1]
+
+    results = []
+
+    for i, (index, row) in enumerate(data.iterrows(), start=1):
+        package = {
+            'date': index.strftime('%Y-%m-%d'),  # Date format YYYY-MM-DD
+            'open': round(row['open'], 2),
+            'high': round(row['high'], 2),
+            'low': round(row['low'], 2),
+            'close': round(row['close'], 2)
+        }
+        results.append(package)
+    
+    return results
+
+
 @chart_bp.route('/api/total_3_data', methods=['GET'])
 def get_total_3_data():
     """
@@ -212,7 +248,7 @@ def get_total_3_data():
     }
 
     try:
-        total3 = calculate_total_3_data()
+        total3 = get_total_3_data()
         response["message"] = total3
     except requests.exceptions.RequestException as e:
         response["error"] = f"API request failed: {str(e)}"
@@ -227,44 +263,5 @@ def get_total_3_data():
     return jsonify(response), response["status"]
 
 
-@ttl_cache(maxsize=1, ttl=3600)  # Cache for 1 hour
-def calculate_total_3_data():
-    """
-    Calculate the market cap data for the third largest cryptocurrency.
 
-    This function fetches data from the CoinGecko API for Bitcoin, Ethereum, and the total market,
-    then calculates the difference to determine the market cap of the third largest cryptocurrency.
-
-    Returns:
-        list: A list of market cap values for the third largest cryptocurrency over 7 days.
-
-    Raises:
-        requests.exceptions.RequestException: If there's an error in the API requests.
-    """
-    base_url = "https://pro-api.coingecko.com/api/v3"
-    endpoints = {
-        "btc": f"{base_url}/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily",
-        "eth": f"{base_url}/coins/ethereum/market_chart?vs_currency=usd&days=7&interval=daily",
-        "total": f"{base_url}/global/market_cap_chart?days=7"
-    }
-    headers = {"x-cg-pro-api-key": COINGECKO_API_KEY}
-
-    responses = {}
-    for coin, url in endpoints.items():
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            responses[coin] = response.json()
-        except requests.exceptions.RequestException as e:
-            raise requests.exceptions.RequestException(f"Error fetching {coin} data: {str(e)}")
-
-    btc_market_caps = [entry[1] for entry in responses["btc"]["market_caps"]]
-    eth_market_caps = [entry[1] for entry in responses["eth"]["market_caps"]]
-    total_market_caps = [entry[1] for entry in responses["total"]["market_cap_chart"]["market_cap"]]
-
-    eth_btc_market_caps = [btc + eth for btc, eth in zip(btc_market_caps, eth_market_caps)]
-    total3 = [total - eth_btc for total, eth_btc in zip(total_market_caps, eth_btc_market_caps)]
-
-    return total3
-
-
+get_total_3_data()
