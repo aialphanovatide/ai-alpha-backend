@@ -305,7 +305,6 @@ def get_all_analysis():
     return jsonify(response), status_code
 
 
-
 @analysis_bp.route('/post_analysis', methods=['POST'])
 def post_analysis():
     """
@@ -363,21 +362,29 @@ def post_analysis():
             # Commit the session to save the new_analysis to the database
             session.commit()
 
-            # Generate and upload image
-            image = generate_poster_prompt(new_analysis.analysis)
-            if not image:
-                raise ValueError("Image not generated")
+            try:
+                # Generate and upload image
+                image = generate_poster_prompt(new_analysis.analysis)
+                if not image:
+                    raise ValueError("Image not generated")
 
-            image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
+                image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
 
-            image_filename = f"{new_analysis.analysis_id}.jpg"
-            resized_image_url = image_processor.process_and_upload_image(
-                image_url=image,
-                bucket_name='appanalysisimages',
-                image_filename=image_filename
-            )
-            if not resized_image_url:
-                raise ValueError("Error resizing and uploading the image to S3")
+                image_filename = f"{new_analysis.analysis_id}.jpg"
+                resized_image_url = image_processor.process_and_upload_image(
+                    image_url=image,
+                    bucket_name='appanalysisimages',
+                    image_filename=image_filename
+                )
+                if not resized_image_url:
+                    raise ValueError("Error resizing and uploading the image to S3")
+
+            except Exception as e:
+                # Rollback the session and delete the newly created analysis if image processing fails
+                session.delete(new_analysis)
+                session.commit()
+                response["error"] = f"Failed to generate or upload image: {str(e)}"
+                return jsonify(response), 500
 
             # Update the response data with analysis details
             response["data"] = {
@@ -387,8 +394,8 @@ def post_analysis():
             }
             response["success"] = True
             status_code = 200
-            title, body = extract_title_and_body(new_analysis.analysis)
 
+            title, body = extract_title_and_body(new_analysis.analysis)
             topic = f"{str(new_analysis.category_name).lower()}_4999_m1_analysis"
             
             # Send coin name in the notification or empty string
@@ -396,24 +403,19 @@ def post_analysis():
             if not coin_bot_name:
                 coin_bot_name = ""
 
-            
-            send_notification(topic=topic,
-                            title=title,
-                            body=body,
-                            type="analysis",
-                            coin=coin_bot_name.bot_name
-                            )
+            send_notification(
+                topic=topic,
+                title=title,
+                body=body,
+                type="analysis",
+                coin=coin_bot_name.bot_name
+            )
             print("--- Notification Sent ---")
 
         except SQLAlchemyError as e:
             # Rollback the session in case of any database error
             session.rollback()
             response["error"] = f"Database error occurred: {str(e)}"
-            status_code = 500
-        except ValueError as e:
-            # Rollback the session in case of image processing error
-            session.rollback()
-            response["error"] = str(e)
             status_code = 500
         except Exception as e:
             # Rollback the session in case of any unexpected error
