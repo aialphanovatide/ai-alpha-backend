@@ -12,49 +12,28 @@ user_bp = Blueprint('user', __name__)
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-def generate_unique_short_token(length=7):
-    """
-    Generate a unique short alphanumeric token.
-    """
+def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
-    while True:
+    
+    for _ in range(max_attempts):
         token = ''.join(secrets.choice(characters) for _ in range(length))
-        # Check for uniqueness
         if not session.query(User).filter_by(auth_token=token).first():
             return token
-    return token
+    
+    raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
 
 @user_bp.route('/register', methods=['POST'])
 def set_new_user():
-    """
-    Create a new user with provided data and generate a JWT token.
-
-    Args:
-        full_name (str): User's full name.
-        nickname (str): User's nickname.
-        email (str): User's email.
-        email_verified (bool): Whether the user's email is verified.
-        picture (str): URL of the user's profile picture.
-        auth0id (str): Auth0 ID of the user.
-        provider (str): Authentication provider of the user.
-
-    Response:
-        200: User created successfully with authentication token.
-        400: Missing required fields (full_name, nickname, email).
-        500: Internal server error.
-    """
     response = {'success': False, 'message': None}
     try:
         data = request.json
         
-        # Validar que los campos obligatorios estén presentes
         required_fields = ['full_name', 'nickname', 'email']
         for field in required_fields:
             if field not in data:
                 response['message'] = f'Missing required field: {field}'
                 return jsonify(response), 400
         
-        # Crear el nuevo usuario
         new_user = User(
             full_name=data.get('full_name'),
             nickname=data.get('nickname'),
@@ -62,17 +41,18 @@ def set_new_user():
             email_verified=data.get('email_verified', False),
             picture=data.get('picture'),
             auth0id=data.get('auth0id'),
-            provider=data.get('provider'),
-            created_at=datetime.utcnow()
+            provider=data.get('provider')
         )
 
         session.add(new_user)
         session.commit()
 
-        # Generar el token
-        token = generate_unique_short_token()
-        
-        # Actualizar el usuario con el token
+        try:
+            token = generate_unique_short_token()
+        except ValueError as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
+
         new_user.auth_token = token
         session.commit()
         
