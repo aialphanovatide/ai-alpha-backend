@@ -13,35 +13,36 @@ user_bp = Blueprint('user', __name__)
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-
 @user_bp.route('/register', methods=['POST'])
 def set_new_user():
     """
     Register a new user in the system.
 
-    This function handles the registration of a new user by processing the provided
-    JSON data, generating a unique authentication token, and storing the user
+    This endpoint handles the registration process for a new user by processing
+    the provided JSON data. It checks for existing users with the same email or
+    nickname, generates a unique authentication token, and stores the user
     information in the database.
 
     Request JSON:
-    - full_name (str): The full name of the user.
-    - nickname (str): The nickname or username of the user.
-    - email (str): The email address of the user.
-    - email_verified (bool, optional): Whether the email has been verified. Defaults to False.
-    - picture (str, optional): URL to the user's profile picture.
-    - auth0id (str, optional): The Auth0 ID of the user.
-    - provider (str, optional): The authentication provider used.
+        - full_name (str): The full name of the user.
+        - nickname (str): The nickname or username of the user.
+        - email (str): The email address of the user.
+        - email_verified (bool, optional): Whether the email has been verified. Defaults to False.
+        - picture (str, optional): URL to the user's profile picture.
+        - auth0id (str, optional): The Auth0 ID of the user.
+        - provider (str, optional): The authentication provider used.
 
     Returns:
-    - JSON response with the following structure:
-        - success (bool): Indicates if the operation was successful.
-        - message (str): A descriptive message about the result of the operation.
-        - user (dict): The complete newly created user object.
-    
+        Response: JSON response with the following structure:
+            - success (bool): Indicates if the operation was successful.
+            - message (str): A descriptive message about the result of the operation.
+            - user (dict): The complete newly created user object, if successful.
+
     Status Codes:
-    - 201: User successfully created.
-    - 400: Missing required field in the request.
-    - 500: Internal server error or database error.
+        - 201: User successfully created.
+        - 400: Missing required field in the request.
+        - 409: User with this email or nickname already exists.
+        - 500: Internal server error or database error.
     """
     response = {'success': False, 'message': None}
     try:
@@ -51,6 +52,15 @@ def set_new_user():
             if field not in data:
                 response['message'] = f'Missing required field: {field}'
                 return jsonify(response), 400
+
+        # Check for existing user
+        existing_user = session.query(User).filter(
+            (User.email == data['email']) | (User.nickname == data['nickname'])
+        ).first()
+
+        if existing_user:
+            response['message'] = 'User with this email or nickname already exists'
+            return jsonify(response), 409
 
         try:
             token = generate_unique_short_token()
@@ -84,7 +94,9 @@ def set_new_user():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
-
+    
+    
+    
 @user_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 def edit_user_data(user_id):
     """
