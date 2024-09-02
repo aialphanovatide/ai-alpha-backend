@@ -182,6 +182,7 @@ class User(Base):
     email_verified = Column(String)
     picture = Column(String)
     auth0id = Column(String)
+    user_group = Column(String)
     provider = Column(String)
     auth_token = Column(String)  
     created_at = Column(TIMESTAMP, default=datetime.now)
@@ -192,6 +193,39 @@ class User(Base):
     
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    
+class Notification(Base):
+    """
+    Represents a notification sent to users.
+
+    This class defines the structure of notifications, including the topic, message,
+    and related timestamps.
+
+    Attributes:
+        id (int): The primary key for the notification.
+        topic (str): The topic or ID for filtering the intended recipients.
+        message (str): The message content of the notification.
+        created_at (datetime): Timestamp of when the notification was created.
+        updated_at (datetime): Timestamp of the last update to the notification.
+    """
+    __tablename__ = 'notifications'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    topic = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'topic': self.topic,
+            'message': self.message,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
 
 class PurchasedPlan(Base):
     """

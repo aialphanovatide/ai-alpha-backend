@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 import datetime
+from sqlalchemy.exc import SQLAlchemyError
+from flask import session
+from config import User
 from utils.external_apis_values import  CAPITALCOM_RESOLUTION_VALUES
 
 def extract_title_and_body(html_content):
@@ -52,6 +55,14 @@ def validate_resolution(resolution: str):
         )
     return resolution
 
+
+def get_users_by_group(user_group):
+    try:
+        users = session.query(User).filter(User.user_group == user_group).all()
+        return users
+    except SQLAlchemyError as e:
+        print(f"Error querying users: {str(e)}")
+        return []
 
 def validate_max(max_value: str):
     if max_value is not None:

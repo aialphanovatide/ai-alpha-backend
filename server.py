@@ -33,9 +33,10 @@ from routes.external_apis.coinalyze import coinalyze_bp
 from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
 from routes.coin_bot.coinbot import coin_bot_bp
+from routes.notification.notification import notification_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
-from sqlalchemy.exc import SQLAlchemyError
+
 
 app = Flask(__name__)
 app.name = 'AI Alpha'
@@ -83,6 +84,7 @@ app.register_blueprint(competitor_bp)
 app.register_blueprint(tradingview_bp)
 app.register_blueprint(slack_events_bp)
 app.register_blueprint(analysis_bp)
+app.register_blueprint(notification_bp)
 app.register_blueprint(hacks_bp)
 app.register_blueprint(revenue_model_bp)
 app.register_blueprint(introduction)
