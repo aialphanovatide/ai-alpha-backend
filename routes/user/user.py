@@ -13,6 +13,7 @@ user_bp = Blueprint('user', __name__)
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+
 @user_bp.route('/register', methods=['POST'])
 def set_new_user():
     """
@@ -35,10 +36,10 @@ def set_new_user():
     - JSON response with the following structure:
         - success (bool): Indicates if the operation was successful.
         - message (str): A descriptive message about the result of the operation.
-        - auth_token (str): The generated unique authentication token for the user.
+        - user (dict): The complete newly created user object.
     
     Status Codes:
-    - 200: User successfully created.
+    - 201: User successfully created.
     - 400: Missing required field in the request.
     - 500: Internal server error or database error.
     """
@@ -73,8 +74,8 @@ def set_new_user():
 
         response['success'] = True
         response['message'] = 'User created successfully'
-        response['auth_token'] = token
-        return jsonify(response), 200
+        response['user'] = new_user.as_dict()
+        return jsonify(response), 201
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -83,7 +84,7 @@ def set_new_user():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
-    
+
 @user_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 def edit_user_data(user_id):
     """
