@@ -7,45 +7,49 @@ from config import PurchasedPlan, session, User
 from flask import jsonify, request, Blueprint
 from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
+from utils.general import generate_unique_short_token
 
 user_bp = Blueprint('user', __name__)
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-def generate_unique_short_token(length=7, max_attempts=100):
-    characters = string.ascii_letters + string.digits
-    
-    for _ in range(max_attempts):
-        token = ''.join(secrets.choice(characters) for _ in range(length))
-        if not session.query(User).filter_by(auth_token=token).first():
-            return token
-    
-    raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
-
 @user_bp.route('/register', methods=['POST'])
 def set_new_user():
+    """
+    Register a new user in the system.
+
+    This function handles the registration of a new user by processing the provided
+    JSON data, generating a unique authentication token, and storing the user
+    information in the database.
+
+    Request JSON:
+    - full_name (str): The full name of the user.
+    - nickname (str): The nickname or username of the user.
+    - email (str): The email address of the user.
+    - email_verified (bool, optional): Whether the email has been verified. Defaults to False.
+    - picture (str, optional): URL to the user's profile picture.
+    - auth0id (str, optional): The Auth0 ID of the user.
+    - provider (str, optional): The authentication provider used.
+
+    Returns:
+    - JSON response with the following structure:
+        - success (bool): Indicates if the operation was successful.
+        - message (str): A descriptive message about the result of the operation.
+        - auth_token (str): The generated unique authentication token for the user.
+    
+    Status Codes:
+    - 200: User successfully created.
+    - 400: Missing required field in the request.
+    - 500: Internal server error or database error.
+    """
     response = {'success': False, 'message': None}
     try:
         data = request.json
-        
         required_fields = ['full_name', 'nickname', 'email']
         for field in required_fields:
             if field not in data:
                 response['message'] = f'Missing required field: {field}'
                 return jsonify(response), 400
-        
-        new_user = User(
-            full_name=data.get('full_name'),
-            nickname=data.get('nickname'),
-            email=data.get('email'),
-            email_verified=data.get('email_verified', False),
-            picture=data.get('picture'),
-            auth0id=data.get('auth0id'),
-            provider=data.get('provider')
-        )
-
-        session.add(new_user)
-        session.commit()
 
         try:
             token = generate_unique_short_token()
@@ -53,19 +57,29 @@ def set_new_user():
             response['message'] = str(e)
             return jsonify(response), 500
 
-        new_user.auth_token = token
+        new_user = User(
+            full_name=data.get('full_name'),
+            nickname=data.get('nickname'),
+            email=data.get('email'),
+            email_verified=data.get('email_verified', False),
+            picture=data.get('picture'),
+            auth0id=data.get('auth0id'),
+            provider=data.get('provider'),
+            auth_token=token
+        )
+
+        session.add(new_user)
         session.commit()
-        
+
         response['success'] = True
         response['message'] = 'User created successfully'
         response['auth_token'] = token
         return jsonify(response), 200
-                
+
     except SQLAlchemyError as e:
         session.rollback()
         response['message'] = f'Database error: {str(e)}'
         return jsonify(response), 500
-    
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500

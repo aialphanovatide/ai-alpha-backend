@@ -1,5 +1,8 @@
+import secrets
+import string
 from bs4 import BeautifulSoup
 import datetime
+from config import Session, User
 from utils.external_apis_values import  CAPITALCOM_RESOLUTION_VALUES
 
 def extract_title_and_body(html_content):
@@ -30,6 +33,14 @@ def create_response(success=False, data=None, error=None, **kwargs):
     }
     return response
 
+
+def generate_unique_short_token(Session, length=7, max_attempts=100):
+    characters = string.ascii_letters + string.digits
+    for _ in range(max_attempts):
+        token = ''.join(secrets.choice(characters) for _ in range(length))
+        if not Session.query(User).filter_by(auth_token=token).first():
+            return token
+    raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
 
 def validate_date(date_text: str):
     try:
