@@ -10,7 +10,7 @@ from flask import jsonify, request, Blueprint, jsonify
 from operator import itemgetter
 from tvDatafeed import TvDatafeed, Interval
 
-from routes.chart.total3 import fetch_data, process_data
+from routes.chart.total3 import get_total_3_data
 
 load_dotenv()
 
@@ -196,13 +196,11 @@ def get_chart_values():
     return jsonify(response), response["status"]
 
 @chart_bp.route('/api/total_3_data', methods=['GET'])
-def get_total_3_data():
+def get_total_3_data_route():
     """
     Retrieve and calculate total market cap data for the top 3 cryptocurrencies.
 
-    This endpoint fetches market cap data for Bitcoin, Ethereum, and the total market,
-    then calculates the market cap for the third largest cryptocurrency by subtracting
-    Bitcoin and Ethereum from the total.
+    This endpoint fetches market cap data for the top 3 cryptocurrencies.
 
     Returns:
         dict: A JSON response containing either the calculated data or an error message.
@@ -215,10 +213,7 @@ def get_total_3_data():
     }
 
     try:
-        username = TW_USER
-        password = TW_PASS
-        raw_data = fetch_data(username, password, 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP', Interval.in_daily, 15)
-        total3 = process_data(raw_data)
+        total3 = get_total_3_data()
         response["message"] = total3
     except RuntimeError as e:
         response["error"] = str(e)

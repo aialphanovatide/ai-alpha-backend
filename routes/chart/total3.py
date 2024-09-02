@@ -1,93 +1,80 @@
-from http import HTTPStatus
-from flask import jsonify
-import requests
-from sqlalchemy import Interval
-import os
-import requests
-from http import HTTPStatus
-from sqlalchemy import Interval
-from dotenv import load_dotenv
-from sqlalchemy.exc import SQLAlchemyError
+# chart/total3.py
+
+from typing import List, Dict, Any
 from tvDatafeed import TvDatafeed, Interval
-
-
+from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
 TW_USER = os.getenv('TW_USER')
 TW_PASS = os.getenv('TW_PASS')
 
+def fetch_total_3_data(days: int = 15) -> Any:
+    """
+    Fetch raw data for CRYPTOCAP:TOTAL3 from TradingView.
 
-chart_bp = Blueprint('chart', __name__)
+    Args:
+        days (int): Number of days of data to fetch. Defaults to 15.
 
-def get_total_3_data():
-    username = TW_USER
-    password = TW_PASS
+    Returns:
+        Any: Raw data from TvDatafeed.
 
-    tv = TvDatafeed(username, password)
+    Raises:
+        RuntimeError: If there's an error fetching data from TradingView.
+    """
+    try:
+        tv = TvDatafeed(TW_USER, TW_PASS)
+        data = tv.get_hist(
+            symbol='CRYPTOCAP:TOTAL3',
+            exchange='CRYPTOCAP',
+            interval=Interval.in_daily,
+            n_bars=days,
+            fut_contract=None,
+            extended_session=False
+        )
+        return data.iloc[::-1]
+    except Exception as e:
+        raise RuntimeError(f"Error fetching data from TradingView: {str(e)}")
 
-    symbol = 'CRYPTOCAP:TOTAL3'
-    exchange = 'CRYPTOCAP'
-    interval = Interval.in_daily
-    days = 15
+def process_total_3_data(raw_data: Any) -> List[Dict[str, Any]]:
+    """
+    Process raw data into a list of dictionaries.
 
-    data = tv.get_hist(symbol=symbol, exchange=exchange, interval=interval, n_bars=days, fut_contract=None, extended_session=False)
+    Args:
+        raw_data (Any): Raw data from TvDatafeed.
 
-    data = data.iloc[::-1]
-
+    Returns:
+        List[Dict[str, Any]]: Processed data as a list of dictionaries.
+    """
     results = []
-
-    for i, (index, row) in enumerate(data.iterrows(), start=1):
+    for index, row in raw_data.iterrows():
         package = {
-            'date': index.strftime('%Y-%m-%d'),  # Date format YYYY-MM-DD
+            'date': index.strftime('%Y-%m-%d'),
             'open': round(row['open'], 2),
             'high': round(row['high'], 2),
             'low': round(row['low'], 2),
             'close': round(row['close'], 2)
         }
         results.append(package)
-    
     return results
 
-
-@chart_bp.route('/api/total_3_data', methods=['GET'])
-def get_total_3_data():
+def get_total_3_data(days: int = 15) -> List[Dict[str, Any]]:
     """
-    Retrieve and calculate total market cap data for the top 3 cryptocurrencies.
+    Retrieve and process total market cap data for the top 3 cryptocurrencies.
 
-    This endpoint fetches market cap data for Bitcoin, Ethereum, and the total market,
-    then calculates the market cap for the third largest cryptocurrency by subtracting
-    Bitcoin and Ethereum from the total.
+    Args:
+        days (int): Number of days of data to fetch. Defaults to 15.
 
     Returns:
-        dict: A JSON response containing either the calculated data or an error message.
-            Format: {"message": list or None, "error": str or None, "status": int}
+        List[Dict[str, Any]]: Processed data as a list of dictionaries.
 
     Raises:
-        requests.exceptions.RequestException: If there's an error in the API requests.
-        SQLAlchemyError: If there's a database-related error.
+        RuntimeError: If there's an error fetching or processing the data.
     """
-    response = {
-        "message": None,
-        "error": None,
-        "status": 200
-    }
-
     try:
-        total3 = get_total_3_data()
-        response["message"] = total3
-    except requests.exceptions.RequestException as e:
-        response["error"] = f"API request failed: {str(e)}"
-        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
-    except SQLAlchemyError as e:
-        response["error"] = "Database error occurred"
-        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
+        raw_data = fetch_total_3_data(days)
+        return process_total_3_data(raw_data)
     except Exception as e:
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
-
-    return jsonify(response), response["status"]
-
-
-
-get_total_3_data()
+        raise RuntimeError(f"Error in get_total_3_data: {str(e)}")
