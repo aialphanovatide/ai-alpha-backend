@@ -63,7 +63,7 @@ def set_new_user():
             return jsonify(response), 409
 
         try:
-            token = generate_unique_short_token()
+            token = generate_unique_short_token(session)
         except ValueError as e:
             response['message'] = str(e)
             return jsonify(response), 500
