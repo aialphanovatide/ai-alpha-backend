@@ -8,13 +8,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask import jsonify, Blueprint, request
 from apscheduler.triggers.date import DateTrigger
 from sqlalchemy.orm.exc import NoResultFound
-from utils.general import create_response, extract_title_and_body
 from apscheduler.jobstores.base import JobLookupError
 from services.firebase.firebase import send_notification
 from config import Analysis, AnalysisImage, Category, session, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.news_bot.poster_generator import generate_poster_prompt
 from services.aws.s3 import ImageProcessor as image_proccessor
+from utils.session_management import handle_db_session
 
 sched = BackgroundScheduler()
 if sched.state != 1:
@@ -29,7 +29,8 @@ AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
 
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
-def get_analysis(coin_bot_id):
+@handle_db_session
+def get_analysis(coin_bot_id, session=None):
     """
     Retrieve analyses for a specific coin bot ID with pagination.
 
@@ -78,47 +79,46 @@ def get_analysis(coin_bot_id):
             status_code = 400
             return jsonify(response), status_code
 
-        with Session() as session:
-            # Get total count
-            total_analyses = session.query(Analysis).filter(Analysis.coin_bot_id == coin_bot_id).count()
+        # Get total count
+        total_analyses = session.query(Analysis).filter(Analysis.coin_bot_id == coin_bot_id).count()
 
-            if total_analyses == 0:
-                response["error"] = f"No analyses found for coin bot ID: {coin_bot_id}"
-                status_code = 404
-                return jsonify(response), status_code
+        if total_analyses == 0:
+            response["error"] = f"No analyses found for coin bot ID: {coin_bot_id}"
+            status_code = 404
+            return jsonify(response), status_code
 
-            # Calculate pagination values
-            total_pages = (total_analyses + limit - 1) // limit
-            offset = (page - 1) * limit
+        # Calculate pagination values
+        total_pages = (total_analyses + limit - 1) // limit
+        offset = (page - 1) * limit
 
-            # Query for analyses and their associated images with pagination
-            analysis_query = session.query(Analysis, AnalysisImage)\
-                .outerjoin(AnalysisImage, Analysis.analysis_id == AnalysisImage.analysis_id)\
-                .filter(Analysis.coin_bot_id == coin_bot_id)\
-                .order_by(desc(Analysis.created_at))\
-                .offset(offset)\
-                .limit(limit)
+        # Query for analyses and their associated images with pagination
+        analysis_query = session.query(Analysis, AnalysisImage)\
+            .outerjoin(AnalysisImage, Analysis.analysis_id == AnalysisImage.analysis_id)\
+            .filter(Analysis.coin_bot_id == coin_bot_id)\
+            .order_by(desc(Analysis.created_at))\
+            .offset(offset)\
+            .limit(limit)
 
-            analysis_data = {}
-            for analysis, image in analysis_query:
-                if analysis.analysis_id not in analysis_data:
-                    analysis_dict = analysis.to_dict()
-                    analysis_dict['analysis_images'] = []
-                    analysis_data[analysis.analysis_id] = analysis_dict
-                
-                if image:
-                    analysis_data[analysis.analysis_id]['analysis_images'].append({
-                        'image_id': image.image_id,
-                        'image': image.image
-                    })
+        analysis_data = {}
+        for analysis, image in analysis_query:
+            if analysis.analysis_id not in analysis_data:
+                analysis_dict = analysis.to_dict()
+                analysis_dict['analysis_images'] = []
+                analysis_data[analysis.analysis_id] = analysis_dict
+            
+            if image:
+                analysis_data[analysis.analysis_id]['analysis_images'].append({
+                    'image_id': image.image_id,
+                    'image': image.image
+                })
 
-            response["data"] = list(analysis_data.values())
-            response["success"] = True
-            response["total"] = total_analyses
-            response["page"] = page
-            response["limit"] = limit
-            response["total_pages"] = total_pages
-            status_code = 200
+        response["data"] = list(analysis_data.values())
+        response["success"] = True
+        response["total"] = total_analyses
+        response["page"] = page
+        response["limit"] = limit
+        response["total_pages"] = total_pages
+        status_code = 200  # Use 200 for successful responses
 
     except SQLAlchemyError as e:
         response["error"] = f"Database error occurred: {str(e)}"
@@ -131,7 +131,8 @@ def get_analysis(coin_bot_id):
 
 
 @analysis_bp.route('/get_analysis_by_coin', methods=['GET'])
-def get_analysis_by_coin():
+@handle_db_session
+def get_analysis_by_coin(session=None):
     """
     Retrieve analyses for a specific coin by name or ID.
 
@@ -170,40 +171,39 @@ def get_analysis_by_coin():
             status_code = 400
             return jsonify(response), status_code
         
-        with Session() as session:
-            # Query for analyses
-            query = session.query(Analysis)
-            if coin_bot_id:
-                query = query.filter(Analysis.coin_bot_id == coin_bot_id)
-            elif coin_bot_name:
-                coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_bot_name).first()
-                if not coin:
-                    response["error"] = f"No coin found with name: {coin_bot_name}"
-                    status_code = 404
-                    return jsonify(response), status_code
-                query = query.filter(Analysis.coin_bot_id == coin.bot_id)
-
-            analysis_objects = query.order_by(desc(Analysis.created_at)).all()
-
-            if not analysis_objects:
-                response["error"] = "No analysis found for the specified coin"
+        # Query for analyses
+        query = session.query(Analysis)
+        if coin_bot_id:
+            query = query.filter(Analysis.coin_bot_id == coin_bot_id)
+        elif coin_bot_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_bot_name).first()
+            if not coin:
+                response["error"] = f"No coin found with name: {coin_bot_name}"
                 status_code = 404
                 return jsonify(response), status_code
+            query = query.filter(Analysis.coin_bot_id == coin.bot_id)
 
-            analysis_data = []
-            for analy in analysis_objects:
-                analysis_dict = analy.to_dict()
-                
-                # Get associated images
-                images = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
-                images_data = [{'image_id': img.image_id, 'image': img.image} for img in images]
-                
-                analysis_dict['analysis_images'] = images_data
-                analysis_data.append(analysis_dict)
+        analysis_objects = query.order_by(desc(Analysis.created_at)).all()
 
-            response["data"] = analysis_data
-            response["success"] = True
-            status_code = 200
+        if not analysis_objects:
+            response["error"] = "No analysis found for the specified coin"
+            status_code = 404
+            return jsonify(response), status_code
+
+        analysis_data = []
+        for analy in analysis_objects:
+            analysis_dict = analy.to_dict()
+            
+            # Get associated images
+            images = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
+            images_data = [{'image_id': img.image_id, 'image': img.image} for img in images]
+            
+            analysis_dict['analysis_images'] = images_data
+            analysis_data.append(analysis_dict)
+
+        response["data"] = analysis_data
+        response["success"] = True
+        status_code = 200  # Use 200 for successful responses
 
     except SQLAlchemyError as e:
         response["error"] = f"Database error occurred: {str(e)}"
@@ -214,9 +214,9 @@ def get_analysis_by_coin():
 
     return jsonify(response), status_code
 
-
 @analysis_bp.route('/get_analysis', methods=['GET'])
-def get_all_analysis():
+@handle_db_session
+def get_all_analysis(session=None):
     """
     Retrieve analyses with their associated images, with pagination.
 
@@ -262,38 +262,41 @@ def get_all_analysis():
             response["error"] = "Invalid pagination parameters"
             status_code = 400
             return jsonify(response), status_code
-        
-        with Session() as session:
-            # Query for total count
-            total_analyses = session.query(Analysis).count()
 
-            # Calculate pagination values
-            total_pages = (total_analyses + limit - 1) // limit
-            offset = (page - 1) * limit
+        # Query for total count
+        total_analyses = session.query(Analysis).count()
 
-            # Query with pagination
-            analysis_objects = session.query(Analysis).order_by(desc(Analysis.created_at)).offset(offset).limit(limit).all()
+        # Calculate pagination values
+        total_pages = (total_analyses + limit - 1) // limit
+        offset = (page - 1) * limit
 
-            analysis_data = []
+        # Query with pagination
+        analysis_objects = session.query(Analysis)\
+            .order_by(desc(Analysis.created_at))\
+            .offset(offset)\
+            .limit(limit)\
+            .all()
 
-            for analy in analysis_objects:
-                analysis_dict = analy.to_dict()
+        analysis_data = []
 
-                images_objects = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
-                images_data = [{'image_id': img.image_id, 'image': img.image} for img in images_objects]
-                
-                analysis_dict['category_name'] = analy.category_name
-                analysis_dict['analysis_images'] = images_data
-                analysis_dict['coin_bot_id'] = analy.coin_bot_id
-                analysis_data.append(analysis_dict)
+        for analy in analysis_objects:
+            analysis_dict = analy.to_dict()
 
-            response["data"] = analysis_data
-            response["success"] = True
-            response["total"] = total_analyses
-            response["page"] = page
-            response["limit"] = limit
-            response["total_pages"] = total_pages
-            status_code = 200
+            images_objects = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
+            images_data = [{'image_id': img.image_id, 'image': img.image} for img in images_objects]
+            
+            analysis_dict['category_name'] = analy.category_name
+            analysis_dict['analysis_images'] = images_data
+            analysis_dict['coin_bot_id'] = analy.coin_bot_id
+            analysis_data.append(analysis_dict)
+
+        response["data"] = analysis_data
+        response["success"] = True
+        response["total"] = total_analyses
+        response["page"] = page
+        response["limit"] = limit
+        response["total_pages"] = total_pages
+        status_code = 200  # Use 200 for successful responses
 
     except SQLAlchemyError as e:
         response["error"] = f"Database error occurred: {str(e)}"
@@ -306,7 +309,8 @@ def get_all_analysis():
 
 
 @analysis_bp.route('/post_analysis', methods=['POST'])
-def post_analysis():
+@handle_db_session
+def post_analysis(session=None):
     """
     Create a new analysis and generate an associated image.
 
@@ -345,86 +349,35 @@ def post_analysis():
             response["error"] = "One or more required values are missing or null"
             return jsonify(response), 400
 
-        # Create a new session
-        session = Session()
-
+        # Convert coin_bot_id to integer
         try:
-            # Create a new Analysis object
-            new_analysis = Analysis(
-                analysis=content,
-                coin_bot_id=coin_bot_id,
-                category_name=category_name
-            )
+            coin_bot_id = int(coin_bot_id)
+        except ValueError:
+            response["error"] = "Invalid 'coinBot' parameter. It must be an integer."
+            return jsonify(response), 400
 
-            # Add the new_analysis object to the session
-            session.add(new_analysis)
-
-            # Commit the session to save the new_analysis to the database
-            session.commit()
-
-            try:
-                # Generate and upload image
-                image = generate_poster_prompt(new_analysis.analysis)
-                if not image:
-                    raise ValueError("Image not generated")
-
-                image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
-
-                image_filename = f"{new_analysis.analysis_id}.jpg"
-                resized_image_url = image_processor.process_and_upload_image(
-                    image_url=image,
-                    bucket_name='appanalysisimages',
-                    image_filename=image_filename
-                )
-                if not resized_image_url:
-                    raise ValueError("Error resizing and uploading the image to S3")
-
-            except Exception as e:
-                # Rollback the session and delete the newly created analysis if image processing fails
-                session.delete(new_analysis)
-                session.commit()
-                response["error"] = f"Failed to generate or upload image: {str(e)}"
-                return jsonify(response), 500
+        # Use the publish_analysis function
+        try:
+            publish_analysis(coin_bot_id, content, category_name, session)
 
             # Update the response data with analysis details
             response["data"] = {
-                "analysis_id": new_analysis.analysis_id,
-                "content": new_analysis.analysis,
-                "coin_bot_id": new_analysis.coin_bot_id
+                "analysis_id": coin_bot_id,
+                "content": content,
+                "coin_bot_id": coin_bot_id
             }
             response["success"] = True
-            status_code = 200
+            status_code = 201
 
-            title, body = extract_title_and_body(new_analysis.analysis)
-            topic = f"{str(new_analysis.category_name).lower()}_4999_m1_analysis"
-            
-            # Send coin name in the notification or empty string
-            coin_bot_name = session.query(CoinBot).filter_by(bot_id=new_analysis.coin_bot_id).first()
-            if not coin_bot_name:
-                coin_bot_name = ""
-
-            send_notification(
-                topic=topic,
-                title=title,
-                body=body,
-                type="analysis",
-                coin=coin_bot_name.bot_name
-            )
-            print("--- Notification Sent ---")
-
+        except ValueError as e:
+            response["error"] = str(e)
+            status_code = 500
         except SQLAlchemyError as e:
-            # Rollback the session in case of any database error
-            session.rollback()
             response["error"] = f"Database error occurred: {str(e)}"
             status_code = 500
         except Exception as e:
-            # Rollback the session in case of any unexpected error
-            session.rollback()
             response["error"] = f"An unexpected error occurred: {str(e)}"
             status_code = 500
-        finally:
-            # Close the session
-            session.close()
 
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
@@ -432,9 +385,9 @@ def post_analysis():
 
     return jsonify(response), status_code
 
-
 @analysis_bp.route('/delete_analysis/<int:analysis_id>', methods=['DELETE'])
-def delete_analysis(analysis_id):
+@handle_db_session
+def delete_analysis(analysis_id, session=None):
     """
     Delete an existing analysis and its associated image.
 
@@ -488,7 +441,7 @@ def delete_analysis(analysis_id):
 
         response["data"] = deleted_analysis_data
         response["success"] = True
-        status_code = 200
+        status_code = 201
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -502,7 +455,8 @@ def delete_analysis(analysis_id):
 
 
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
-def edit_analysis(analysis_id):
+@handle_db_session
+def edit_analysis(analysis_id, session=None):
     """
     Edit the content of an existing analysis.
 
@@ -536,7 +490,6 @@ def edit_analysis(analysis_id):
         response["error"] = "New content is required to edit the Analysis"
         return jsonify(response), 400
 
-    session = Session()
     try:
         # Check if the analysis_id exists
         analysis_to_edit = session.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
@@ -553,27 +506,25 @@ def edit_analysis(analysis_id):
         response["data"] = {
             "analysis_id": analysis_to_edit.analysis_id,
             "content": analysis_to_edit.analysis,
-            "updated_at": analysis_to_edit.updated_at.strftime('%Y-%m-%d %H:%M:%S') 
+            "updated_at": analysis_to_edit.updated_at.strftime('%Y-%m-%d %H:%M:%S')
         }
         response["success"] = True
-        status_code = 200
+        status_code = 201
 
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
-        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
-    finally:
-        session.close()
 
     return jsonify(response), status_code
 
 
 @analysis_bp.route('/get_last_analysis', methods=['GET'])
-def get_last_analysis():
+@handle_db_session
+def get_last_analysis(session=None):
     """
     Retrieve the name and date of the last analysis created.
 
@@ -601,7 +552,6 @@ def get_last_analysis():
     }
     status_code = 500  # Default to server error
 
-    session = Session()
     try:
         # Retrieve the last analysis created
         last_analysis = session.query(Analysis).order_by(desc(Analysis.created_at)).first()
@@ -630,7 +580,7 @@ def get_last_analysis():
 
         response["data"] = analysis_data
         response["success"] = True
-        status_code = 200
+        status_code = 201
 
     except SQLAlchemyError as e:
         response["error"] = f"Database error occurred: {str(e)}"
@@ -638,53 +588,81 @@ def get_last_analysis():
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
-    finally:
-        session.close()
 
     return jsonify(response), status_code
+
     
 
-def publish_analysis(coin_bot_id: int, content: str, category_name: str) -> None:
+@handle_db_session
+def publish_analysis(coin_bot_id: int, content: str, category_name: str, session=None) -> None:
     """
-    Function to be executed by the scheduler to publish an analysis.
+    Function to publish an analysis.
 
     Args:
         coin_bot_id (int): The ID of the coin bot
         content (str): The content of the analysis
         category_name (str): The name of the category
+        session (Session): The database session object
 
     Raises:
         SQLAlchemyError: If there's an error with the database operation
     """
-    session = Session()
+    image_filename = None
     try:
+        # Extract title and adjust content
         title_end_index = content.find('\n')
         if title_end_index != -1:
             title = content[:title_end_index].strip()
             content = content[title_end_index+1:]
         else:
-            title = ''
+            title = content[:50]  # Fallback title if no newline is found
 
-        new_analysis = Analysis(analysis=content, category_name=category_name, coin_bot_id=coin_bot_id)
+        # Generate and upload image
+        image = generate_poster_prompt(content)
+        if not image:
+            raise ValueError("Image not generated")
+
+        image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
+        image_filename = f"{title}.jpg"
+        resized_image_url = image_processor.process_and_upload_image(
+            image_url=image,
+            bucket_name='appanalysisimages',
+            image_filename=image_filename
+        )
+        if not resized_image_url:
+            raise ValueError("Error resizing and uploading the image to S3")
+        
+        image_url = f"https://appanalysisimages.s3.us-east-2.amazonaws.com/{image_filename}"
+
+        # Create and save the Analysis object
+        new_analysis = Analysis(
+            analysis=content,
+            category_name=category_name,
+            coin_bot_id=coin_bot_id,
+            image=image_url
+        )
         session.add(new_analysis)
         session.commit()
-        # Send a notification to the phone
-        title = new_analysis.analysis
-        body = new_analysis.analysis
+
+        # Send notification
         topic = f"{str(new_analysis.category_name).lower()}-analysis"
-        coin=session.query(CoinBot).filter_by(bot_id=coin_bot_id).first()
-        send_notification(topic=topic,
-                          title=title,
-                          body=body,
-                          type="analysis",
-                          coin=coin.bot_name
-                          )
-        print("notification sent")
+        coin = session.query(CoinBot).filter_by(bot_id=coin_bot_id).first()
+        coin_name = coin.bot_name if coin else "Unknown"
+
+        send_notification(
+            topic=topic,
+            title=title,
+            body=content,
+            type="analysis",
+            coin=coin_name
+        )
+        
     except SQLAlchemyError as e:
         session.rollback()
-        print(f"Error publishing analysis: {str(e)}")
-    finally:
-        session.close()
+        print(f"Database error: {str(e)}")
+    except ValueError as e:
+        print(f"Value error: {str(e)}")
+
 
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post() -> Tuple[Dict, int]:
@@ -699,7 +677,7 @@ def schedule_post() -> Tuple[Dict, int]:
 
     Returns:
         JSON response with status code:
-        - 200: Post scheduled successfully
+        - 201: Post scheduled successfully
         - 400: Bad request (missing or invalid data)
         - 500: Server error
     """
@@ -734,7 +712,7 @@ def schedule_post() -> Tuple[Dict, int]:
         response["message"] = "Post scheduled successfully"
         response["job_id"] = job.id
         response["success"] = True
-        status_code = 200
+        status_code = 201
 
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
@@ -753,7 +731,7 @@ def delete_scheduled_job(job_id):
 
     Returns:
         JSON response with status code:
-        - 200: Job deleted successfully
+        - 201: Job deleted successfully
         - 404: Job not found
         - 500: Server error
     """
@@ -772,7 +750,7 @@ def delete_scheduled_job(job_id):
             sched.remove_job(job_id)
             response["message"] = "Scheduled job deleted successfully"
             response["success"] = True
-            status_code = 200
+            status_code = 201
 
     except JobLookupError as e:
         response["error"] = f"Error looking up job: {str(e)}"
@@ -794,7 +772,7 @@ def get_scheduled_job(job_id):
 
     Returns:
         JSON response with status code:
-        - 200: Job information retrieved successfully
+        - 201: Job information retrieved successfully
         - 404: Job not found
         - 500: Server error
     """
@@ -817,7 +795,7 @@ def get_scheduled_job(job_id):
                 "next_run_time": str(job.next_run_time) if hasattr(job, 'next_run_time') else None
             }
             response["success"] = True
-            status_code = 200
+            status_code = 201
 
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
@@ -841,7 +819,7 @@ def get_jobs():
             }
             job_listing.append(job_info)
 
-        return jsonify({'jobs': job_listing, 'status': 200, 'success': True}), 200
+        return jsonify({'jobs': job_listing, 'status': 201, 'success': True}), 201
 
     except Exception as e:
         return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
@@ -854,7 +832,7 @@ def get_bot_ids_by_category(category_name):
     Args:
         category_name (str): The name of the category to find bots for.
     Response:
-        200: List of bot IDs retrieved successfully.
+        201: List of bot IDs retrieved successfully.
         404: Category not found.
         500: Internal server error.
     """
@@ -877,7 +855,7 @@ def get_bot_ids_by_category(category_name):
 
         response["data"] = {'bot_ids': bot_ids}
         response["success"] = True
-        status_code = 200
+        status_code = 201
 
     except Exception as e:
         response["error"] = f'Error retrieving bots for category "{category_name}": {str(e)}'

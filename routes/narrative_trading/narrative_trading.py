@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import datetime
-from config import NarrativeTrading, session, CoinBot
+from config import NarrativeTrading, Session, session, CoinBot
 from flask import jsonify, Blueprint, request
 from sqlalchemy import desc
 from datetime import datetime
@@ -11,6 +11,8 @@ from apscheduler.jobstores.base import JobLookupError
 from routes.news_bot.poster_generator import generate_poster_prompt
 from utils.session_management import handle_db_session, create_response
 from services.aws.s3 import ImageProcessor as image_proccessor
+from sqlalchemy.exc import SQLAlchemyError
+
 
 sched = BackgroundScheduler()
 if sched.state != 1:
@@ -139,7 +141,6 @@ def get_all_narrative_trading():
         return jsonify(create_response(success=True, data=narrative_trading_data)), 200
 
     except Exception as e:
-        session.rollback()
         return jsonify(create_response(success=False, error=str(e))), 500
 
 
@@ -168,50 +169,14 @@ def post_narrative_trading():
         if not (coin_bot_id and content):
             return jsonify(create_response(success=False, error='One or more required values are missing')), 400
 
-        new_narrative_trading = NarrativeTrading(
-            narrative_trading=content,
-            coin_bot_id=coin_bot_id,
-            category_name=category_name
-        )
-    
-
-        session.add(new_narrative_trading)
-        session.commit()
+        # Call the function to handle posting
+        narrative_trading_post = publish_narrative_trading(coin_bot_id, content, category_name)
         
-        
-        image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
-
-        if new_narrative_trading:
-            image = generate_poster_prompt(new_narrative_trading.narrative_trading)
-            narrative_trading_id = new_narrative_trading.narrative_trading_id
-            print('id narrative_trading', narrative_trading_id)
-            image_filename = f"{narrative_trading_id}.jpg"    
-            print('filename: ', image_filename)
-            
-            if image:
-                try:
-                    # Resize and upload the image to S3
-                    resized_image_url = image_processor.process_and_upload_image(
-                        image_url=image,
-                        bucket_name='appnarrativetradingimages',
-                        image_filename=image_filename
-                    )
-
-                    if resized_image_url:
-                        print("Image resized and uploaded to S3 successfully.")
-                    else:
-                        print("Error resizing and uploading the image to S3.")
-                except Exception as e:
-                    print("Error:", e)
-            else:
-                print("Image not generated.")
-
-
-            return jsonify(create_response(success=True, message='narrative_trading posted successfully')), 200
+        return jsonify(create_response(success=True,data=narrative_trading_post, message='narrative_trading posted successfully')), 200
 
     except Exception as e:
-        session.rollback()
         return jsonify(create_response(success=False, error=str(e))), 500
+
     
 
 @narrative_trading_bp.route('/delete_narrative_trading/<int:narrative_trading_id>', methods=['DELETE'])
@@ -242,7 +207,6 @@ def delete_narrative_trading(narrative_trading_id):
         return jsonify(create_response(success=True, message='narrative_trading deleted successfully')), 200
 
     except Exception as e:
-        session.rollback()
         return jsonify(create_response(success=False, error=str(e))), 500
 
 @narrative_trading_bp.route('/edit_narrative_trading/<int:narrative_trading_id>', methods=['PUT'])
@@ -272,13 +236,12 @@ def edit_narrative_trading(narrative_trading_id):
         if not new_content:
             return jsonify(create_response(success=False, error='New content is required to edit the narrative_trading')), 400
 
-#         narrative_trading_to_edit.narrative_trading = new_content
-#         session.commit()
+        narrative_trading_to_edit.narrative_trading = new_content
+        session.commit()
 
         return jsonify(create_response(success=True, message='narrative_trading edited successfully')), 200
 
     except Exception as e:
-        session.rollback()
         return jsonify(create_response(success=False, error=str(e))), 500
 
 
@@ -315,26 +278,70 @@ def get_last_narrative_trading():
         return jsonify(create_response(success=True, data={'last_narrative_trading': narrative_trading_data})), 200
 
     except Exception as e:
-        session.rollback()
         return jsonify(create_response(success=False, error=str(e))), 500
 
 
-# Funtion to execute by the scheduler post
-def publish_narrative_trading(coin_bot_id, content, category_name):
+@handle_db_session
+def publish_narrative_trading(coin_bot_id, content, category_name, session=None):
+    """
+    Publish a narrative trading post. Generate an image, upload it to S3, and then create the narrative trading post.
 
-    title_end_index = content.find('\n')
-    if title_end_index != -1:
-        # Extract title and remove leading/trailing spaces
-        title = content[:title_end_index].strip()
-        # Extract content after the title
-        content = content[title_end_index+1:]
-    else:
-        title = ''  # If no newline found, set title to empty string
-    # Create new narrative_trading instance
-    new_narrative_trading = NarrativeTrading(narrative_trading=content, category_name=category_name, coin_bot_id=coin_bot_id)
-    session.add(new_narrative_trading)
-    session.commit()
-    print("Publishing narrative_trading with title:", title)
+    Args:
+        coin_bot_id (int): The ID of the coin bot
+        content (str): The content of the narrative trading post
+        category_name (str): The name of the category
+        session (Session): The database session, provided by the decorator
+
+    Returns:
+        dict: The created NarrativeTrading object as a dictionary, or None if an error occurred
+    """
+    try:
+        # Extract title and adjust content
+        title_end_index = content.find('\n')
+        if title_end_index != -1:
+            title = content[:title_end_index].strip()
+            content = content[title_end_index+1:]
+        else:
+            title = ""
+
+        # Generate and upload image
+        image = generate_poster_prompt(content)
+        if not image:
+            raise ValueError("Image not generated")
+
+        image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
+        image_filename = f"{title}.jpg"
+        resized_image_url = image_processor.process_and_upload_image(
+            image_url=image,
+            bucket_name='appnarrativetradingimages',
+            image_filename=image_filename
+        )
+        if not resized_image_url:
+            raise ValueError("Error resizing and uploading the image to S3")
+
+        image_url = f"https://appnarrativetradingimages.s3.us-east-2.amazonaws.com/{image_filename}"
+
+        # Create and save the NarrativeTrading object
+        new_narrative_trading = NarrativeTrading(
+            narrative_trading=content,
+            category_name=category_name,
+            coin_bot_id=coin_bot_id,
+            image=image_url
+        )
+        session.add(new_narrative_trading)
+        session.commit()
+        
+        return new_narrative_trading.to_dict()
+
+    except ValueError as e:
+        print(f"Value error: {str(e)}")
+        return None
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Database error: {str(e)}")
+        return None
+
+
 
 @narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
 def schedule_post():
@@ -375,6 +382,7 @@ def schedule_post():
 
     except Exception as e:
         return jsonify(create_response(success=False, error=str(e))), 500
+
 
 @narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
 def get_jobs():

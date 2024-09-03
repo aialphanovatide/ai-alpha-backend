@@ -21,35 +21,33 @@ def create_response(success=False, data=None, error=None, **kwargs):
     }
     return response
 
+
 def handle_db_session(func):
     """
-    Decorator to handle the database session.
-
-    Wraps the function to manage the database session, ensuring 
-    commit on success and rollback on error.
-
-    :param func: The function to decorate.
-    :return: Decorated function.
+    Decorator to handle the database session for functions.
+    Wraps the function to manage the database session.
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
         session = Session()
         try:
+            # Add session to kwargs so the decorated function can use it
+            kwargs['session'] = session
             # Execute the decorated function
-            response = func(*args, **kwargs)
+            result = func(*args, **kwargs)
             # Commit the session if there are no errors
             session.commit()
-            return response
+            return result
         except SQLAlchemyError as e:
             # Rollback the session in case of a database error
             session.rollback()
-            response = create_response(error=f"Database error: {str(e)}")
-            return jsonify(response), 500
+            print(f"Database error: {str(e)}")
+            return None
         except Exception as e:
             # Rollback the session in case of any other error
             session.rollback()
-            response = create_response(error=f"Internal server error: {str(e)}")
-            return jsonify(response), 500
+            print(f"Internal server error: {str(e)}")
+            return None
         finally:
             # Close the session in any case
             session.close()
