@@ -1,14 +1,11 @@
 import os
-import requests
 from http import HTTPStatus
-from sqlalchemy import Interval, desc
+from sqlalchemy import desc
 from dotenv import load_dotenv
 from sqlalchemy.exc import SQLAlchemyError
-from cachetools.func import ttl_cache
-from config import Chart, session, CoinBot, Session
+from config import Chart, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  
-from operator import itemgetter
-from tvDatafeed import TvDatafeed, Interval
+
 
 from routes.chart.total3 import get_total_3_data
 
@@ -202,6 +199,9 @@ def get_total_3_data_route():
 
     This endpoint fetches market cap data for the top 3 cryptocurrencies.
 
+    Query Parameters:
+        days (int): Number of days of data to fetch. Defaults to 15.
+
     Returns:
         dict: A JSON response containing either the calculated data or an error message.
             Format: {"message": list or None, "error": str or None, "status": int}
@@ -213,8 +213,12 @@ def get_total_3_data_route():
     }
 
     try:
-        total3 = get_total_3_data()
+        days = int(request.args.get('days', 15))
+        total3 = get_total_3_data(days)
         response["message"] = total3
+    except ValueError:
+        response["error"] = "Invalid 'days' parameter. It must be an integer."
+        response["status"] = HTTPStatus.BAD_REQUEST
     except RuntimeError as e:
         response["error"] = str(e)
         response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR

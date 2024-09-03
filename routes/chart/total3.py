@@ -2,7 +2,6 @@
 
 from typing import List, Dict, Any
 from tvDatafeed import TvDatafeed, Interval
-from datetime import datetime
 import os
 from dotenv import load_dotenv
 
