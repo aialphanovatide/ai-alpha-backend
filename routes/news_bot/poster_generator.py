@@ -16,13 +16,6 @@ client = OpenAI(
     api_key=OPENAI_API_KEY,
 )
 
-def resize_image(image_data, target_size=(1024, 1024)): 
-    image_binary = base64.b64decode(image_data)
-    image = Image.open(BytesIO(image_binary))
-    resized_image = image.resize(target_size)
-    resized_image_data = base64.b64encode(
-        resized_image.tobytes()).decode('utf-8')
-    return resized_image_data
 
 def generate_poster_prompt(article):
     prompt = f'Generate a DALL-E prompt related to this {article}. It should be 400 characters or less and avoid specific names focused on abstract image without mention letters, numbers or words..'

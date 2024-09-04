@@ -262,6 +262,3 @@ def get_total_3_data():
 
     return jsonify(response), response["status"]
 
-
-
-get_total_3_data()

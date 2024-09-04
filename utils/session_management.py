@@ -19,8 +19,7 @@ def create_response(success=False, data=None, error=None, **kwargs):
         'error': error,
         **kwargs
     }
-    return response
-
+    return (response) 
 
 def handle_db_session(func):
     """
@@ -37,17 +36,18 @@ def handle_db_session(func):
             result = func(*args, **kwargs)
             # Commit the session if there are no errors
             session.commit()
-            return result
+            # Return the result of the function call, wrapped in create_response
+            return create_response(success=True, data=result)
         except SQLAlchemyError as e:
             # Rollback the session in case of a database error
             session.rollback()
             print(f"Database error: {str(e)}")
-            return None
+            return create_response(success=False, error="Database error occurred.")
         except Exception as e:
             # Rollback the session in case of any other error
             session.rollback()
             print(f"Internal server error: {str(e)}")
-            return None
+            return create_response(success=False, error="Internal server error occurred.")
         finally:
             # Close the session in any case
             session.close()

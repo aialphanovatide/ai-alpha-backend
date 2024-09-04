@@ -660,7 +660,7 @@ class Analysis(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category_name = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    image = Column(String)
+    image = Column(String, nullable=False)
     
     images = relationship('AnalysisImage', back_populates='analysis')
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
@@ -691,7 +691,7 @@ class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
 
     image_id = Column(Integer, primary_key=True, autoincrement=True)
-    image = Column(String)
+    image = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
@@ -751,7 +751,7 @@ class NarrativeTrading(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category_name = Column(String, nullable=False)
-    image = Column(String)
+    image = Column(String, nullable=False)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)

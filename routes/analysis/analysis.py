@@ -14,7 +14,6 @@ from config import Analysis, AnalysisImage, Category, session, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.news_bot.poster_generator import generate_poster_prompt
 from services.aws.s3 import ImageProcessor as image_proccessor
-from utils.session_management import handle_db_session
 
 sched = BackgroundScheduler()
 if sched.state != 1:
@@ -27,10 +26,8 @@ load_dotenv()
 AWS_ACCESS = os.getenv('AWS_ACCESS')
 AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
-
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
-@handle_db_session
-def get_analysis(coin_bot_id, session=None):
+def get_analysis(coin_bot_id):
     """
     Retrieve analyses for a specific coin bot ID with pagination.
 
@@ -69,6 +66,7 @@ def get_analysis(coin_bot_id, session=None):
     }
     status_code = 500  # Default to server error
 
+    session = Session()
     try:
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
@@ -121,18 +119,20 @@ def get_analysis(coin_bot_id, session=None):
         status_code = 200  # Use 200 for successful responses
 
     except SQLAlchemyError as e:
+        session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
+        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close()
 
     return jsonify(response), status_code
 
-
 @analysis_bp.route('/get_analysis_by_coin', methods=['GET'])
-@handle_db_session
-def get_analysis_by_coin(session=None):
+def get_analysis_by_coin():
     """
     Retrieve analyses for a specific coin by name or ID.
 
@@ -162,6 +162,7 @@ def get_analysis_by_coin(session=None):
     }
     status_code = 500  # Default to server error
 
+    session = Session()  # Create a database session
     try:
         coin_bot_name = request.args.get('coin_bot_name')
         coin_bot_id = request.args.get('coin_bot_id')
@@ -206,17 +207,20 @@ def get_analysis_by_coin(session=None):
         status_code = 200  # Use 200 for successful responses
 
     except SQLAlchemyError as e:
+        session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
+        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close() 
 
     return jsonify(response), status_code
 
 @analysis_bp.route('/get_analysis', methods=['GET'])
-@handle_db_session
-def get_all_analysis(session=None):
+def get_all_analysis():
     """
     Retrieve analyses with their associated images, with pagination.
 
@@ -253,6 +257,7 @@ def get_all_analysis(session=None):
     }
     status_code = 500  # Default to server error
 
+    session = Session()
     try:
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
@@ -299,18 +304,20 @@ def get_all_analysis(session=None):
         status_code = 200  # Use 200 for successful responses
 
     except SQLAlchemyError as e:
+        session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
+        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close()
 
     return jsonify(response), status_code
 
-
 @analysis_bp.route('/post_analysis', methods=['POST'])
-@handle_db_session
-def post_analysis(session=None):
+def post_analysis():
     """
     Create a new analysis and generate an associated image.
 
@@ -338,6 +345,7 @@ def post_analysis(session=None):
     }
     status_code = 500  # Default to server error
 
+    session = Session()
     try:
         # Extract data from the request
         coin_bot_id = request.form.get('coinBot')
@@ -370,24 +378,29 @@ def post_analysis(session=None):
             status_code = 201
 
         except ValueError as e:
+            session.rollback()
             response["error"] = str(e)
             status_code = 500
         except SQLAlchemyError as e:
+            session.rollback()
             response["error"] = f"Database error occurred: {str(e)}"
             status_code = 500
         except Exception as e:
+            session.rollback()
             response["error"] = f"An unexpected error occurred: {str(e)}"
             status_code = 500
 
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close()
 
     return jsonify(response), status_code
 
+
 @analysis_bp.route('/delete_analysis/<int:analysis_id>', methods=['DELETE'])
-@handle_db_session
-def delete_analysis(analysis_id, session=None):
+def delete_analysis(analysis_id):
     """
     Delete an existing analysis and its associated image.
 
@@ -414,6 +427,7 @@ def delete_analysis(analysis_id, session=None):
     }
     status_code = 500  # Default to server error
 
+    session = Session()
     try:
         # Check if the analysis_id exists
         analysis_to_delete = session.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
@@ -441,22 +455,24 @@ def delete_analysis(analysis_id, session=None):
 
         response["data"] = deleted_analysis_data
         response["success"] = True
-        status_code = 201
+        status_code = 200  # Use 200 for successful deletion
 
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
+        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close()
 
     return jsonify(response), status_code
 
 
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
-@handle_db_session
-def edit_analysis(analysis_id, session=None):
+def edit_analysis(analysis_id):
     """
     Edit the content of an existing analysis.
 
@@ -490,6 +506,7 @@ def edit_analysis(analysis_id, session=None):
         response["error"] = "New content is required to edit the Analysis"
         return jsonify(response), 400
 
+    session = Session()
     try:
         # Check if the analysis_id exists
         analysis_to_edit = session.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
@@ -509,22 +526,24 @@ def edit_analysis(analysis_id, session=None):
             "updated_at": analysis_to_edit.updated_at.strftime('%Y-%m-%d %H:%M:%S')
         }
         response["success"] = True
-        status_code = 201
+        status_code = 200  # Use 200 for successful update
 
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
+        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close()
 
     return jsonify(response), status_code
 
 
 @analysis_bp.route('/get_last_analysis', methods=['GET'])
-@handle_db_session
-def get_last_analysis(session=None):
+def get_last_analysis():
     """
     Retrieve the name and date of the last analysis created.
 
@@ -552,6 +571,7 @@ def get_last_analysis(session=None):
     }
     status_code = 500  # Default to server error
 
+    session = Session()
     try:
         # Retrieve the last analysis created
         last_analysis = session.query(Analysis).order_by(desc(Analysis.created_at)).first()
@@ -580,21 +600,22 @@ def get_last_analysis(session=None):
 
         response["data"] = analysis_data
         response["success"] = True
-        status_code = 201
+        status_code = 200  
 
     except SQLAlchemyError as e:
+        session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
+        session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+    finally:
+        session.close()
 
     return jsonify(response), status_code
-
     
-
-@handle_db_session
-def publish_analysis(coin_bot_id: int, content: str, category_name: str, session=None) -> None:
+def publish_analysis(coin_bot_id: int, content: str, category_name: str) -> None:
     """
     Function to publish an analysis.
 
@@ -602,11 +623,11 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str, session
         coin_bot_id (int): The ID of the coin bot
         content (str): The content of the analysis
         category_name (str): The name of the category
-        session (Session): The database session object
 
     Raises:
         SQLAlchemyError: If there's an error with the database operation
     """
+    session = Session()
     image_filename = None
     try:
         # Extract title and adjust content
@@ -615,7 +636,7 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str, session
             title = content[:title_end_index].strip()
             content = content[title_end_index+1:]
         else:
-            title = content[:50]  # Fallback title if no newline is found
+            title = "" # Fallback title if no newline is found
 
         # Generate and upload image
         image = generate_poster_prompt(content)
@@ -632,14 +653,12 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str, session
         if not resized_image_url:
             raise ValueError("Error resizing and uploading the image to S3")
         
-        image_url = f"https://appanalysisimages.s3.us-east-2.amazonaws.com/{image_filename}"
-
         # Create and save the Analysis object
         new_analysis = Analysis(
             analysis=content,
             category_name=category_name,
             coin_bot_id=coin_bot_id,
-            image=image_url
+            image=resized_image_url
         )
         session.add(new_analysis)
         session.commit()
@@ -662,7 +681,10 @@ def publish_analysis(coin_bot_id: int, content: str, category_name: str, session
         print(f"Database error: {str(e)}")
     except ValueError as e:
         print(f"Value error: {str(e)}")
-
+    finally:
+        session.close()
+        
+        
 
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post() -> Tuple[Dict, int]:
