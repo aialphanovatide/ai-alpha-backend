@@ -177,6 +177,7 @@ def post_narrative_trading():
 
         session.add(new_narrative_trading)
         session.commit()
+        new_narrative_trading.to_dict()
         
         
         image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
@@ -205,6 +206,7 @@ def post_narrative_trading():
                     print("Error:", e)
             else:
                 print("Image not generated.")
+            
 
 
             return jsonify(create_response(success=True, message='narrative_trading posted successfully')), 200
@@ -375,6 +377,71 @@ def schedule_post():
 
     except Exception as e:
         return jsonify(create_response(success=False, error=str(e))), 500
+
+
+
+@narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
+def schedule_post():
+    """
+    Schedule a narrative trading post for future publishing.
+
+    Args (form parameters):
+        coin_bot_id (str): ID of the coin bot
+        category_name (str): Name of the category
+        content (str): Content of the post
+        scheduled_date (str): Scheduled date and time for publishing (format: '%Y-%m-%d %H:%M:%S')
+
+    Returns:
+        JSON response:
+            - 'message': Success or error message
+            - 'success': True if successful, False otherwise
+            - 'status': HTTP status code
+    """
+    try:
+        # Extract and validate input parameters
+        coin_bot_id = request.form.get('coin_bot_id')
+        category_name = request.form.get('category_name')
+        content = request.form.get('content')
+        scheduled_date_str = request.form.get('scheduled_date')
+
+        if not all([coin_bot_id, content, scheduled_date_str]):
+            raise BadRequest('Missing required parameters')
+
+        # Validate and parse the scheduled date
+        try:
+            scheduled_datetime = datetime.strptime(scheduled_date_str, '%Y-%m-%d %H:%M:%S')
+            if scheduled_datetime <= datetime.now():
+                raise ValueError("Scheduled date must be in the future")
+        except ValueError as e:
+            raise BadRequest(f"Invalid date format or value: {str(e)}")
+
+        # Schedule the job
+        job = sched.add_job(
+            publish_narrative_trading,
+            args=[coin_bot_id, content, category_name],
+            trigger=DateTrigger(run_date=scheduled_datetime)
+        )
+
+        return jsonify({
+            'success': True,
+            'message': 'Post scheduled successfully',
+            'job_id': job.id,
+            'scheduled_time': scheduled_datetime.isoformat()
+        }), 200
+
+    except BadRequest as e:
+        return jsonify({
+            'success': False,
+            'message': str(e),
+            'status': 400
+        }), 400
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'An unexpected error occurred',
+            'status': 500
+        }), 500
 
 @narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
 def get_jobs():

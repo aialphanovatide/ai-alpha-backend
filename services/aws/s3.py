@@ -127,7 +127,7 @@ class ImageProcessor:
             logger.error(f"Unexpected error: {str(e)}")
         return None
 
-
+  
 
 # Initialize the ImageProcessor
 image = ImageProcessor(aws_access_key="YOUR_ACCESS_KEY", aws_secret_key="YOUR_SECRET_KEY")
