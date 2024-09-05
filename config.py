@@ -234,12 +234,12 @@ class Category(Base):
 
     Attributes:
         category_id (int): The primary key for the category.
-        category (str): The main identifier for the category.
-        category_name (str): A user-friendly name for the category.
-        time_interval (int): The time interval associated with the category.
-        is_active (bool): Indicates if the category is currently active.
+        name (str): The main identifier for the category (required).
+        alias (str): An alternative identifier for the category (required).
+        icon (str): The URL of the SVG icon associated with the category.
         border_color (str): The color used for visual representation of the category.
-        icon (str): The icon or image associated with the category.
+        category_name (str): A legacy field for backwards compatibility.
+        is_active (bool): Indicates if the category is currently active.
         created_at (datetime): Timestamp of when the category was created.
         updated_at (datetime): Timestamp of the last update to the category record.
         coin_bot (relationship): Relationship to the associated CoinBots.
@@ -247,19 +247,25 @@ class Category(Base):
     __tablename__ = 'category'
 
     category_id = Column(Integer, primary_key=True, autoincrement=True)
-    category = Column(String, nullable=False)
+    name = Column(String, nullable=False)
+    alias = Column(String, nullable=False)
+    icon = Column(String)
+    border_color = Column(String)
     category_name = Column(String)
-    time_interval = Column(Integer, default=50)
-    is_active = Column(Boolean, default=False)
-    border_color = Column(String, default='No Color')
-    icon = Column(String, default='No Image')
+    is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
     
     def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+        """
+        Convert the Category object to a dictionary.
+
+        Returns:
+            dict: A dictionary representation of the Category object.
+        """
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class CoinBot(Base):
     """

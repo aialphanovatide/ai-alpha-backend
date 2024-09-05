@@ -95,6 +95,33 @@ class ImageProcessor:
                 ExtraArgs={'ContentType': 'image/jpeg'}
             )
         return f"https://{bucket_name}.s3.{self.aws_region}.amazonaws.com/{image_filename}"
+    
+    def upload_svg_to_s3(self, svg_file, bucket_name: str, svg_filename: str) -> Optional[str]:
+        """
+        Upload an SVG file to S3.
+
+        Args:
+            svg_file: The SVG file to upload (typically from request.files).
+            bucket_name (str): Name of the S3 bucket.
+            svg_filename (str): Desired filename for the SVG in S3.
+
+        Returns:
+            Optional[str]: URL of the uploaded SVG in S3, or None if upload failed.
+        """
+        if svg_file and svg_file.filename.lower().endswith('.svg'):
+            try:
+                filename = svg_filename
+                self.s3_client.upload_fileobj(
+                    svg_file,
+                    bucket_name,
+                    filename,
+                    ExtraArgs={'ContentType': 'image/svg+xml'}
+                )
+                return f"https://{bucket_name}.s3.{self.aws_region}.amazonaws.com/{filename}"
+            except (BotoCoreError, ClientError) as e:
+                logging.error(f"Error uploading SVG to S3: {str(e)}")
+                return None
+        return None
 
     def process_and_upload_image(self, 
                                  image_url: str, 
@@ -126,6 +153,22 @@ class ImageProcessor:
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
         return None
+    
+    def delete_from_s3(self, bucket_name, file_name):
+        """
+        Delete a file from an S3 bucket.
+
+        :param bucket_name: String name of the S3 bucket
+        :param file_name: String name of the file to delete
+        :return: True if file was deleted, else False
+        """
+        try:
+            self.s3_client.delete_object(Bucket=bucket_name, Key=file_name)
+            print(f"File {file_name} deleted successfully from {bucket_name}")
+            return True
+        except ClientError as e:
+            print(f"Error deleting file {file_name} from {bucket_name}: {e}")
+            return False
 
 
 
