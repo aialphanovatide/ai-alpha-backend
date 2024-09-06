@@ -1,9 +1,10 @@
 import os
 from sqlalchemy.exc import SQLAlchemyError
 from flask import jsonify, Blueprint, request
-from config import Category, CoinBot, session
+from config import Category, Chart, CoinBot, session
 from services.aws.s3 import ImageProcessor
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import joinedload
 
 category_bp = Blueprint('category_bp', __name__)
 
@@ -247,3 +248,214 @@ def update_category(category_id):
         status_code = 500
 
     return jsonify(response), status_code
+
+
+
+
+@category_bp.route('/categories/<int:category_id>/toggle-coins', methods=['POST'])
+def toggle_category_coins(category_id):
+    """
+    Activate or deactivate all coins within a specific category.
+
+    Args:
+        category_id (int): The ID of the category to process.
+
+    Request JSON:
+        action (str): Either "activate" or "deactivate"
+
+    Returns:
+        JSON: A response detailing the status of each processed coin bot and the category.
+    """
+    action = request.json.get('action')
+    if action not in ['activate', 'deactivate']:
+        return jsonify({'error': 'Invalid action. Must be "activate" or "deactivate"'}), 400
+
+    try:
+        category = session.query(Category).get(category_id)
+        if not category:
+            return jsonify({'error': f'Category with ID {category_id} not found'}), 404
+
+        coin_bots = session.query(CoinBot).filter_by(category_id=category_id).all()
+        response = {'success': True, 'processed_coin_bots': [], 'category_status': ''}
+
+        all_valid = True
+        for coin_bot in coin_bots:
+            result = {
+                'bot_id': coin_bot.bot_id,
+                'bot_name': coin_bot.bot_name,
+                'status': 'unchanged',
+                'message': ''
+            }
+
+            if action == 'activate':
+                if validate_coin_bot(coin_bot):
+                    result['status'] = 'valid'
+                else:
+                    result['status'] = 'invalid'
+                    result['message'] = 'Failed validation'
+                    all_valid = False
+            else:  # deactivate
+                result['status'] = 'deactivated'
+
+            response['processed_coin_bots'].append(result)
+
+        if action == 'activate' and all_valid:
+            category.is_active = True
+            response['category_status'] = 'activated'
+        elif action == 'deactivate':
+            category.is_active = False
+            response['category_status'] = 'deactivated'
+        else:
+            response['category_status'] = 'unchanged'
+            response['message'] = 'Not all coin bots passed validation'
+
+        session.commit()
+        return jsonify(response), 200
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Database error: {str(e)}")
+        return jsonify({'error': 'Database error occurred'}), 500
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
+    
+
+@category_bp.route('/coins/global-toggle', methods=['POST'])
+def global_toggle_coins():
+    """
+    Activate or deactivate all coins across all categories.
+
+    Request JSON:
+        action (str): Either "activate" or "deactivate"
+
+    Returns:
+        JSON: A response detailing the status of each processed category and its coin bots.
+    """
+    action = request.json.get('action')
+    if action not in ['activate', 'deactivate']:
+        return jsonify({'error': 'Invalid action. Must be "activate" or "deactivate"'}), 400
+
+    try:
+        categories = session.query(Category).options(joinedload(Category.coin_bot)).all()
+        response = {'success': True, 'processed_categories': []}
+
+        for category in categories:
+            category_result = {
+                'category_id': category.category_id,
+                'name': category.name,
+                'status': 'unchanged',
+                'processed_coin_bots': []
+            }
+
+            all_valid = True
+            for coin_bot in category.coin_bot:
+                bot_result = {
+                    'bot_id': coin_bot.bot_id,
+                    'bot_name': coin_bot.bot_name,
+                    'status': 'unchanged',
+                    'message': ''
+                }
+
+                if action == 'activate':
+                    if validate_coin_bot(coin_bot):
+                        coin_bot.is_active = True
+                        bot_result['status'] = 'activated'
+                    else:
+                        bot_result['status'] = 'invalid'
+                        bot_result['message'] = 'Failed validation'
+                        all_valid = False
+                else:  # deactivate
+                    coin_bot.is_active = False
+                    bot_result['status'] = 'deactivated'
+
+                category_result['processed_coin_bots'].append(bot_result)
+
+            if action == 'activate' and all_valid:
+                category.is_active = True
+                category_result['status'] = 'activated'
+            elif action == 'deactivate':
+                category.is_active = False
+                category_result['status'] = 'deactivated'
+            else:
+                category_result['status'] = 'unchanged'
+                category_result['message'] = 'Not all coin bots passed validation'
+
+            response['processed_categories'].append(category_result)
+
+        session.commit()
+        return jsonify(response), 200
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Database error: {str(e)}")
+        return jsonify({'error': 'Database error occurred'}), 500
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
+
+def validate_coin_bot(coin_bot):
+    """
+    Validate if a coin bot meets all requirements for activation.
+    
+    Args:
+        coin_bot (CoinBot): The CoinBot object to validate.
+
+    Returns:
+        bool: True if the coin bot passes all validations, False otherwise.
+    """
+    # Check if fundamentals exist and are complete
+    fundamentals = session.query(fundamentals).filter_by(bot_id=coin_bot.bot_id).first()
+    if not fundamentals or not are_fundamentals_complete(fundamentals):
+        return False
+
+    # Check if chart exists and has support and resistance lines
+    chart = session.query(Chart).filter_by(bot_id=coin_bot.bot_id).first()
+    if not chart or not has_support_resistance_lines(chart):
+        return False
+
+    return True
+
+def are_fundamentals_complete(coin_bot):
+    """
+    Check if all required sections of fundamentals are complete for a given CoinBot.
+    
+    Args:
+        coin_bot (CoinBot): The CoinBot object to check.
+
+    Returns:
+        bool: True if all fundamental sections are complete, False otherwise.
+    """
+    # Check if each fundamental section exists and has content
+    has_introduction = coin_bot.introduction and coin_bot.introduction.content
+    has_tokenomics = coin_bot.tokenomics and coin_bot.tokenomics.token and coin_bot.tokenomics.total_supply
+    has_token_distribution = any(td.holder_category and td.percentage_held for td in coin_bot.token_distribution)
+    has_token_utility = any(tu.token_application and tu.description for tu in coin_bot.token_utility)
+    has_value_accrual = any(vam.mechanism and vam.description for vam in coin_bot.value_accrual_mechanisms)
+    has_competitor = any(comp.name for comp in coin_bot.competitor)
+    has_revenue_model = coin_bot.revenue_model and coin_bot.revenue_model.analized_revenue
+
+    return all([
+        has_introduction,
+        has_tokenomics,
+        has_token_distribution,
+        has_token_utility,
+        has_value_accrual,
+        has_competitor,
+        has_revenue_model
+    ])
+
+def has_support_resistance_lines(chart):
+    """
+    Check if the chart has at least one support and one resistance line.
+    
+    Args:
+        chart (Chart): The Chart object to check.
+
+    Returns:
+        bool: True if the chart has at least one support and one resistance line, False otherwise.
+    """
+    has_support = any([chart.support_1, chart.support_2, chart.support_3, chart.support_4])
+    has_resistance = any([chart.resistance_1, chart.resistance_2, chart.resistance_3, chart.resistance_4])
+    
+    return has_support and has_resistance
