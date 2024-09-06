@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Dict, Union, Tuple, Optional
 from flask import request, jsonify, Blueprint
 from ws.socket import socketio, emit
@@ -6,6 +7,7 @@ from dotenv import load_dotenv
 import requests
 import logging
 import os
+from datetime import datetime, timedelta
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +21,7 @@ load_dotenv()
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 COINGECKO_API_URL = "https://pro-api.coingecko.com/api/v3"
 BINANCE_API_URL = "https://api3.binance.com/api/v3"
-headers = {'X-Cg-Pro-Api-Key': COINGECKO_API_KEY}
+headers = {'X-Cg-Pro-Api-Key': "CG-xXCJJaHa7QmvQNWyNheKmSfG"}
 
 
 # List of cryptocurrencies we have available
@@ -100,12 +102,43 @@ def get_ohlc_binance_data(coin: str, vs_currency: str, interval: str, precision:
         return None, 404
     except requests.exceptions.RequestException as e:
         return None, 500
+    
 
+def consolidate_ohlc_data(data, interval):
+    consolidated = {}
+    for entry in data:
+        timestamp = datetime.fromtimestamp(entry[0] / 1000)
+        if interval == '1d':
+            key = timestamp.date()
+        elif interval == '1w':
+            key = timestamp.date() - timedelta(days=timestamp.weekday())
+        else:
+            # Para otros intervalos, puedes agregar más lógica aquí
+            key = timestamp
+
+        if key not in consolidated:
+            consolidated[key] = {
+                'open': entry[1],
+                'high': entry[2],
+                'low': entry[3],
+                'close': entry[4]
+            }
+        else:
+            consolidated[key]['high'] = max(consolidated[key]['high'], entry[2])
+            consolidated[key]['low'] = min(consolidated[key]['low'], entry[3])
+            consolidated[key]['close'] = entry[4]
+
+    return [
+        [int(key.timestamp() * 1000) if isinstance(key, datetime) else int(datetime.combine(key, datetime.min.time()).timestamp() * 1000),
+         data['open'], data['high'], data['low'], data['close']]
+        for key, data in sorted(consolidated.items())
+    ]
 
 def get_ohlc_coingecko_data(coin: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
     binance_data, binance_status = get_ohlc_binance_data(coin, vs_currency, interval, precision)
     if binance_data:
-        return binance_data, binance_status
+        consolidated_data = consolidate_ohlc_data(binance_data, interval)
+        return consolidated_data, binance_status
 
     coingecko_id = next((crypto['coingecko_id'] for crypto in crypto_data if crypto['symbol'].lower() == coin.lower() or crypto['name'].lower() == coin.lower()), None)
     
@@ -116,18 +149,22 @@ def get_ohlc_coingecko_data(coin: str, vs_currency: str, interval: str, precisio
         endpoint = f"{COINGECKO_API_URL}/coins/{coingecko_id}/ohlc"
         params = {
             'vs_currency': vs_currency,
-            'days': '30'
+            'days': '180' if interval == '1w' else '30'
         }
         if precision:
             params['precision'] = precision
 
         response = requests.get(endpoint, params=params, headers=headers)
         response.raise_for_status()
-        return response.json(), 200
+        
+        raw_data = response.json()
+        consolidated_data = consolidate_ohlc_data(raw_data, interval)
+        return consolidated_data, 200
     except requests.exceptions.HTTPError as http_err:
         return {"error": str(http_err)}, response.status_code
     except requests.exceptions.RequestException as req_err:
         return {"error": str(req_err)}, 500
+
 
 @chart_graphs_bp.route('/api/chart/ohlc', methods=['GET'])
 def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]]]]], int]:
