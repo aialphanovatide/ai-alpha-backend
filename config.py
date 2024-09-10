@@ -305,9 +305,12 @@ class CoinBot(Base):
     __tablename__ = 'coin_bot'
 
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
-    bot_name = Column(String)
-    image = Column(String, default='No Image')
+    name = Column(String)
+    alias = Column(String)
+    icon = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
+    background_color = Column(String)
+    is_active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
