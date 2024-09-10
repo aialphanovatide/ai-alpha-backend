@@ -70,6 +70,7 @@ def set_new_user():
         response['message'] = str(e)
         return jsonify(response), 500
     
+  
 @user_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 def edit_user_data(user_id):
     """
@@ -93,7 +94,7 @@ def edit_user_data(user_id):
             response['message'] = 'No valid fields provided for update'
             return jsonify(response), 400
         
-        user = session.query(User).filter_by(user_id=user_id).first()
+        user = session.query(User).filter(User.auth0id.like(f'%{user_id}%')).first()
         
         if not user:
             response['message'] = 'User not found'

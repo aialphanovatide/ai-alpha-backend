@@ -1059,20 +1059,21 @@
           }
         }
       },
-      "/edit_user/{user_id}": {
-  "put": { 
+     "/edit_user/{auth0id}": {
+  "post": {
     "tags": [
       "User"
     ],
-    "summary": "Edit user data identified by user ID.",
+    "summary": "Edit user data identified by auth0id.",
     "parameters": [
       {
-        "name": "user_id",
+        "name": "auth0id",
         "in": "path",
         "required": true,
         "schema": {
-          "type": "integer"
-        }
+          "type": "string"
+        },
+        "description": "Auth0 ID of the user to edit"
       },
       {
         "name": "body",
@@ -1083,28 +1084,70 @@
           "properties": {
             "nickname": { "type": "string" },
             "full_name": { "type": "string" }
-          },
-          "required": [] 
+          }
         }
       }
     ],
     "responses": {
       "200": {
-        "description": "User data updated successfully."
+        "description": "User data updated successfully.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
       },
       "400": {
-        "description": "No valid fields provided for update or missing user ID."
+        "description": "No valid fields provided for update.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
       },
       "404": {
-        "description": "User not found."
+        "description": "User not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
       },
       "500": {
-        "description": "Internal server error."
+        "description": "Internal server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
       }
     }
   }
 },
-
       "/users": {
         "get": {
           "tags": [
