@@ -152,23 +152,59 @@ class AdminRole(Base):
 # __________________________ AI ALPHA APP TABLES __________________________________________
 
 class User(Base):
+    """
+    Represents a user in the system.
+
+    This class defines the structure and behavior of a user entity in the database.
+    It includes personal information, authentication details, and timestamps for
+    record keeping.
+
+    Attributes:
+        user_id (int): The unique identifier for the user. Primary key, auto-incremented.
+        nickname (str): The user's unique nickname. Cannot be null and must be unique.
+        full_name (str): The full name of the user.
+        email (str): The user's email address. Cannot be null and must be unique.
+        email_verified (bool): Indicates if the user's email has been verified. Defaults to False.
+        picture (str): URL to the user's profile picture.
+        auth0id (str): The user's Auth0 ID, if applicable.
+        provider (str): The authentication provider used by the user.
+        auth_token (str): A unique authentication token for the user. Cannot be null and must be unique.
+        created_at (datetime): Timestamp of when the user record was created.
+        updated_at (datetime): Timestamp of the last update to the user record.
+
+    Relationships:
+        purchased_plans: One-to-many relationship with PurchasedPlan model.
+
+    Methods:
+        as_dict(): Returns a dictionary representation of the user object.
+    """
+
     __tablename__ = 'user_table'
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
-    nickname = Column(String)
+    nickname = Column(String, nullable=False, unique=True)
     full_name = Column(String)
-    email = Column(String)
-    email_verified = Column(Boolean, default=False)  
+    email = Column(String, nullable=False, unique=True)
+    email_verified = Column(Boolean, default=False)
     picture = Column(String)
     auth0id = Column(String)
     provider = Column(String)
-    auth_token = Column(String)  
+    auth_token = Column(String, nullable=False, unique=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    # Relationship with PurchasedPlan model
     purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
     
+    
+    
     def as_dict(self):
+        """
+        Convert the User object to a dictionary.
+
+        Returns:
+            dict: A dictionary containing all the columns of the User object.
+        """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class PurchasedPlan(Base):
@@ -624,7 +660,8 @@ class Analysis(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category_name = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-
+    image = Column(String, nullable=False)
+    
     images = relationship('AnalysisImage', back_populates='analysis')
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
 
@@ -654,7 +691,7 @@ class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
 
     image_id = Column(Integer, primary_key=True, autoincrement=True)
-    image = Column(String)
+    image = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
@@ -714,6 +751,7 @@ class NarrativeTrading(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category_name = Column(String, nullable=False)
+    image = Column(String, nullable=False)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)

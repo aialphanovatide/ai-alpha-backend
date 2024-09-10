@@ -1,19 +1,15 @@
-import logging
-from typing import Tuple, Optional
+import os
+import boto3
 import requests
 from PIL import Image
 from io import BytesIO
-import boto3
-import os
 from dotenv import load_dotenv
+from typing import Tuple, Optional
 from botocore.exceptions import BotoCoreError, ClientError
 from requests.exceptions import RequestException
 
-logger = logging.getLogger(__name__)
 load_dotenv()
 
-AWS_ACCESS = os.getenv('AWS_ACCESS')
-AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 
 class ImageProcessor:
     def __init__(self, 
@@ -29,11 +25,17 @@ class ImageProcessor:
             aws_secret_key (Optional[str]): AWS secret key. If None, will use environment variables or IAM role.
         """
         self.aws_region = aws_region
+        self.aws_access_key = aws_access_key or os.getenv('AWS_ACCESS')
+        self.aws_secret_key = aws_secret_key or os.getenv('AWS_SECRET_KEY')
+
+        if not self.aws_access_key or not self.aws_secret_key:
+            raise ValueError("AWS access key and secret key must be provided.")
+
         self.s3_client = boto3.client(
             's3',
-            region_name=aws_region,
-            aws_access_key_id=aws_access_key,
-            aws_secret_access_key=aws_secret_key
+            region_name=self.aws_region,
+            aws_access_key_id=self.aws_access_key,
+            aws_secret_access_key=self.aws_secret_key
         )
 
     def fetch_image(self, image_url: str) -> bytes:
@@ -118,28 +120,25 @@ class ImageProcessor:
             resized_image = self.resize_image(image_content, target_size)
             return self.upload_to_s3(resized_image, bucket_name, image_filename)
         except RequestException as e:
-            logger.error(f"Error fetching image from {image_url}: {str(e)}")
+            print(f"Error fetching image from {image_url}: {str(e)}")
         except IOError as e:
-            logger.error(f"Error processing image: {str(e)}")
+            print(f"Error processing image: {str(e)}")
         except (BotoCoreError, ClientError) as e:
-            logger.error(f"Error uploading to S3: {str(e)}")
+            print(f"Error uploading to S3: {str(e)}")
         except Exception as e:
-            logger.error(f"Unexpected error: {str(e)}")
+            print(f"Unexpected error: {str(e)}")
         return None
 
-  
 
-# Initialize the ImageProcessor
-image = ImageProcessor(aws_access_key="YOUR_ACCESS_KEY", aws_secret_key="YOUR_SECRET_KEY")
 
-# Use the processor
-# image_url = "https://example.com/image.jpg"
-# bucket_name = "my-bucket"
-# image_filename = "resized_image.jpg"
+# Usage Example:
+# if __name__ == "__main__":
+#     image_processor = ImageProcessor()
+#     image_url = "https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg"
+#     bucket_name = "aialphaicons"
+#     image_filename = "test_image.jpg"
+#     target_size = (256, 256)
 
-# result_url = image.process_and_upload_image(image_url, bucket_name, image_filename)
+#     uploaded_url = image_processor.process_and_upload_image(image_url, bucket_name, image_filename, target_size)
+#     print(f"Uploaded image URL: {uploaded_url}")
 
-# if result_url:
-#     print(f"Image uploaded successfully. URL: {result_url}")
-# else:
-#     print("Failed to upload image.")
