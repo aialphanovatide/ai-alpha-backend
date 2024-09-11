@@ -634,20 +634,20 @@ class TopStoryImage(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
 class Analysis(Base):
     """
     Represents an analysis associated with a CoinBot.
 
     This class defines the structure for storing analysis information,
-    including the analysis content, category, and associated images.
+    including the analysis content, category, and associated image URL.
 
     Attributes:
         analysis_id (int): The primary key for the analysis.
         analysis (str): The content of the analysis.
+        image_url (str): The URL of the associated image, if any.
+        category_name (str): The name of the category for this analysis.
         created_at (datetime): Timestamp of when the analysis was created.
         updated_at (datetime): Timestamp of the last update to the analysis record.
-        category_name (str): The name of the category for this analysis.
         coin_bot_id (int): Foreign key referencing the associated CoinBot.
         images (relationship): Relationship to associated AnalysisImage objects.
         coin_bot (relationship): Relationship to the associated CoinBot.
@@ -656,23 +656,17 @@ class Analysis(Base):
 
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
     analysis = Column(String)
+    image_url = Column(String, nullable=True)
+    category_name = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    category_name = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-    image = Column(String, nullable=False)
     
     images = relationship('AnalysisImage', back_populates='analysis')
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
 
     def to_dict(self):
-        return {
-            'analysis_id': self.analysis_id,
-            'analysis': self.analysis,
-            'created_at': str(self.created_at),
-            'updated_at': str(self.updated_at),
-            'category_name': self.category_name
-        }
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class AnalysisImage(Base):
     """
@@ -751,19 +745,13 @@ class NarrativeTrading(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category_name = Column(String, nullable=False)
-    image = Column(String, nullable=False)
+    image_url = Column(String, nullable=True)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)
 
     def to_dict(self):
-        return {
-            'narrative_trading_id': self.narrative_trading_id,
-            'narrative_trading': self.narrative_trading,
-            'created_at': str(self.created_at),
-            'updated_at': str(self.updated_at),
-            'category_name': self.category_name
-        }
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Chart(Base):
     """

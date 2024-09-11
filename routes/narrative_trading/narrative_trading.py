@@ -1,5 +1,3 @@
-import os
-from dotenv import load_dotenv
 import datetime
 from config import NarrativeTrading, Session, session, CoinBot
 from flask import jsonify, Blueprint, request
@@ -8,22 +6,20 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.jobstores.base import JobLookupError
-from routes.news_bot.poster_generator import generate_poster_prompt
-from utils.session_management import handle_db_session, create_response
-from services.aws.s3 import ImageProcessor as image_proccessor
+from utils.session_management import create_response
 from sqlalchemy.exc import SQLAlchemyError
-
+from services.openai.dalle import ImageGenerator
+from services.aws.s3 import ImageProcessor
 
 sched = BackgroundScheduler()
 if sched.state != 1:
     sched.start()
+    print("Scheduler started for Narrative Trading")
 
 narrative_trading_bp = Blueprint('narrative_trading', __name__)
 
-load_dotenv()
-
-AWS_ACCESS = os.getenv('AWS_ACCESS')
-AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+image_generator = ImageGenerator()
+image_processor = ImageProcessor()
 
 
 @narrative_trading_bp.route('/get_narrative_trading/<int:coin_bot_id>', methods=['GET'])
@@ -382,12 +378,14 @@ def publish_narrative_trading(coin_bot_id, content, category_name, session):
         else:
             title = ""
 
+        print(f"Title: {title}")
+
         # Generate and upload image
-        image = generate_poster_prompt(content)
+        image = image_generator.generate_image(content)
         if not image:
             raise ValueError("Image not generated")
 
-        image_processor = image_proccessor(aws_access_key=AWS_ACCESS, aws_secret_key=AWS_SECRET_KEY)
+       
         image_filename = f"{title}.jpg"
         resized_image_url = image_processor.process_and_upload_image(
             image_url=image,
@@ -407,15 +405,24 @@ def publish_narrative_trading(coin_bot_id, content, category_name, session):
             image=image_url
         )
         session.add(new_narrative_trading)
-        
-        return new_narrative_trading.to_dict()
+        session.commit()
+        return create_response(success=True, 
+                               data=new_narrative_trading.to_dict(), 
+                               message='Narrative Trading posted successfully')
 
     except SQLAlchemyError as e:
         session.rollback()
-        print(f"Database error: {str(e)}")
-    except ValueError as e:
-        print(f"Value error: {str(e)}")
+        return create_response(success=False, error=f"Database error occurred: {str(e)}")
 
+    except ValueError as e:
+        session.rollback()
+        return create_response(success=False, error=f"Value error occurred: {str(e)}")
+
+    except Exception as e:
+        session.rollback()
+        return create_response(success=False, error=f"Internal server error occurred: {str(e)}")
+    finally:
+        session.close()
 
 
 @narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
