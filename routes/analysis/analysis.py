@@ -12,6 +12,7 @@ from config import Analysis, AnalysisImage, Category, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from services.aws.s3 import ImageProcessor
 from services.openai.dalle import ImageGenerator
+from bs4 import BeautifulSoup
 from utils.session_management import create_response
 
 sched = BackgroundScheduler()
@@ -22,7 +23,7 @@ if sched.state != 1:
 analysis_bp = Blueprint('analysis_bp', __name__)
 
 image_generator = ImageGenerator()
-image_proccessor = ImageProcessor()
+image_processor = ImageProcessor()
 
 # REVIEWED - DUPLICATED - ERASE THIS
 @analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
@@ -591,13 +592,12 @@ def get_last_analysis():
     finally:
         session.close()
     
-# REVIEWED
 def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
     """
     Function to publish an analysis.
 
     Args:
-        coin_bot_id (int): The ID of the coin bot
+        coin_id (int): The ID of the coin bot
         content (str): The content of the analysis
         category_name (str): The name of the category
 
@@ -608,27 +608,33 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
     image_filename = None
     try:
         # Extract title and adjust content
-        title_end_index = content.find('\n')
+        title_end_index = content.find('<br>')
         if title_end_index != -1:
             title = content[:title_end_index].strip()
-            content = content[title_end_index+1:]
+            content = content[title_end_index + 1:]
         else:
-            title = "" # Fallback title if no newline is found
+            title = ""  # Fallback title if no newline is found
+
+        # Clean HTML tags to get the filename
+        soup = BeautifulSoup(title, 'html.parser')
+        filename_with_html = soup.get_text()
+        # Remove unwanted characters like colons and replace spaces with underscores
+        filename = filename_with_html.replace(':', '').replace(' ', '_').strip()
+        image_filename = f"{filename}.jpg"
 
         # Generate and upload image
         image = image_generator.generate_image(content)
         if not image:
             raise ValueError("Image could not be generated")
 
-        image_filename = f"{title.replace(' ', '_')}.jpg"
-        resized_image_url = image_proccessor.process_and_upload_image(
+        resized_image_url = image_processor.process_and_upload_image(
             image_url=image,
             bucket_name='appanalysisimages',
             image_filename=image_filename
         )
         if not resized_image_url:
             raise ValueError("Error resizing and uploading the image to S3")
-        
+
         # Create and save the Analysis object
         new_analysis = Analysis(
             analysis=content,
@@ -686,6 +692,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         )
     finally:
         session.close()
+
         
 # TEST
 @analysis_bp.route('/schedule_post', methods=['POST'])
