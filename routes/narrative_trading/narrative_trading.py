@@ -37,7 +37,8 @@ def get_narrative_trading(coin_bot_id):
     """
     session = Session()
     try:
-        narrative_trading_objects = get_narrative_trading_by_id(coin_bot_id)
+        narrative_trading_objects = session.query(NarrativeTrading).filter_by(coin_bot_id=coin_bot_id).order_by(desc(NarrativeTrading.created_at)).all()
+
         if not narrative_trading_objects:
             return jsonify(create_response(success=False, error='No narrative trading found')), 404
 
@@ -64,16 +65,6 @@ def get_narrative_trading(coin_bot_id):
 
     finally:
         session.close()
-        
-        
-        
-def get_narrative_trading_by_id(coin_bot_id):
-    return session.query(NarrativeTrading).filter_by(coin_bot_id=coin_bot_id).order_by(desc(NarrativeTrading.created_at)).all()
-
-def get_narrative_trading_by_name(coin_bot_name):
-    coin = session.query(CoinBot).filter(
-        CoinBot.bot_name == coin_bot_name).first()
-    return session.query(NarrativeTrading).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
 @narrative_trading_bp.route('/get_narrative_trading_by_coin', methods=['GET'])
 def get_narrative_trading_by_coin():
@@ -99,9 +90,11 @@ def get_narrative_trading_by_coin():
 
         narrative_trading_objects = []
         if coin_bot_name:
-            narrative_trading_objects = get_narrative_trading_by_name(coin_bot_name, session)
+            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_bot_name).first()
+            if coin:
+                narrative_trading_objects = session.query(NarrativeTrading).filter_by(coin_bot_id=coin.bot_id).all()
         elif coin_bot_id:
-            narrative_trading_objects = get_narrative_trading_by_id(coin_bot_id, session)
+            narrative_trading_objects = session.query(NarrativeTrading).filter_by(coin_bot_id=coin_bot_id).order_by(desc(NarrativeTrading.created_at)).all()
 
         if not narrative_trading_objects:
             return jsonify(create_response(success=False, error='No narrative trading found')), 404

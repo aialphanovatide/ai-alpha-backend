@@ -24,7 +24,6 @@ class ImageGenerator:
             headers (dict): HTTP headers for API requests, including Content-Type and Authorization.
         """
         api_key = api_key or os.getenv('NEWS_BOT_API_KEY')
-        print(f"api_key: {api_key}")
         if not api_key:
             raise ValueError("OpenAI API key is not provided or not found in the environment variables.")
         
