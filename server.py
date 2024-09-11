@@ -36,7 +36,7 @@ from ws.socket import init_socketio
 
 app = Flask(__name__)
 app.name = 'AI Alpha API'
-swagger_template_path = os.path.join(app.root_path, 'static', 'swagger_template.json')
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
 
 # Initialize SocketIO
 socketio = init_socketio(app)
