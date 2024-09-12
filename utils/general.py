@@ -2,7 +2,6 @@ import secrets
 import string
 from bs4 import BeautifulSoup
 import datetime
-from config import Session, User
 from utils.external_apis_values import  CAPITALCOM_RESOLUTION_VALUES
 
 def extract_title_and_body(html_content):
