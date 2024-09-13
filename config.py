@@ -17,6 +17,8 @@ import json
 import os
 import uuid
 
+from utils.general import generate_unique_short_token
+
 
 
 load_dotenv()
@@ -189,7 +191,7 @@ class User(Base):
     picture = Column(String)
     auth0id = Column(String)
     provider = Column(String)
-    auth_token = Column(String, nullable=False, unique=True)
+    auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())  
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

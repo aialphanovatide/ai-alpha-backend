@@ -1,5 +1,7 @@
-from bs4 import BeautifulSoup
+import secrets
+import string
 import datetime
+from bs4 import BeautifulSoup
 from utils.external_apis_values import  CAPITALCOM_RESOLUTION_VALUES
 
 def extract_title_and_body(html_content):
@@ -29,6 +31,14 @@ def create_response(success=False, data=None, error=None, **kwargs):
         **kwargs
     }
     return response
+
+
+def generate_unique_short_token(length=7, max_attempts=100):
+    characters = string.ascii_lowercase + string.digits
+    for _ in range(max_attempts):
+        token = ''.join(secrets.choice(characters) for _ in range(length))
+        return token
+    raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
 
 
 def validate_date(date_text: str):

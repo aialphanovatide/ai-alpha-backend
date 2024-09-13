@@ -13,11 +13,27 @@ __pycache__/config.cpython-311.pyc
 *.db
 
 *account.json
+*.db
+
 
 # Temporary files
 *.swp
 *.swo
 *.swn
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
 
 # Database
 db.sqlite
