@@ -3,7 +3,7 @@ import secrets
 import string
 import jwt
 from sqlalchemy import exc
-from config import PurchasedPlan, session, User
+from config import PurchasedPlan, Session, User
 from flask import jsonify, request, Blueprint
 from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
@@ -45,55 +45,56 @@ def set_new_user():
         - 500: Internal server error or database error.
     """
     response = {'success': False, 'message': None}
-    try:
-        data = request.json
-        required_fields = ['full_name', 'nickname', 'email']
-        for field in required_fields:
-            if field not in data:
-                response['message'] = f'Missing required field: {field}'
-                return jsonify(response), 400
-
-        # Check for existing user
-        existing_user = session.query(User).filter(
-            (User.email == data['email']) | (User.nickname == data['nickname'])
-        ).first()
-
-        if existing_user:
-            response['message'] = 'User with this email or nickname already exists'
-            return jsonify(response), 409
-
+    with Session() as session:
         try:
-            token = generate_unique_short_token(session)
-        except ValueError as e:
+            data = request.json
+            required_fields = ['full_name', 'nickname', 'email']
+            for field in required_fields:
+                if field not in data:
+                    response['message'] = f'Missing required field: {field}'
+                    return jsonify(response), 400
+
+            # Check for existing user
+            existing_user = session.query(User).filter(
+                (User.email == data['email']) | (User.nickname == data['nickname'])
+            ).first()
+
+            if existing_user:
+                response['message'] = 'User with this email or nickname already exists'
+                return jsonify(response), 409
+
+            try:
+                token = generate_unique_short_token()
+            except ValueError as e:
+                response['message'] = str(e)
+                return jsonify(response), 500
+
+            new_user = User(
+                full_name=data.get('full_name'),
+                nickname=data.get('nickname'),
+                email=data.get('email'),
+                email_verified=data.get('email_verified', False),
+                picture=data.get('picture'),
+                auth0id=data.get('auth0id'),
+                provider=data.get('provider'),
+                auth_token=token
+            )
+
+            session.add(new_user)
+            session.commit()
+
+            response['success'] = True
+            response['message'] = 'User created successfully'
+            response['user'] = new_user.as_dict()
+            return jsonify(response), 201
+
+        except SQLAlchemyError as e:
+            session.rollback()
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
+        except Exception as e:
             response['message'] = str(e)
             return jsonify(response), 500
-
-        new_user = User(
-            full_name=data.get('full_name'),
-            nickname=data.get('nickname'),
-            email=data.get('email'),
-            email_verified=data.get('email_verified', False),
-            picture=data.get('picture'),
-            auth0id=data.get('auth0id'),
-            provider=data.get('provider'),
-            auth_token=token
-        )
-
-        session.add(new_user)
-        session.commit()
-
-        response['success'] = True
-        response['message'] = 'User created successfully'
-        response['user'] = new_user.as_dict()
-        return jsonify(response), 201
-
-    except SQLAlchemyError as e:
-        session.rollback()
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
     
     
     
@@ -112,39 +113,40 @@ def edit_user_data(user_id):
         500: Internal server error.
     """
     response = {'success': False, 'message': None}
-    try:
-        data = request.json
-        
-        # Solo permitir 'full_name' y 'nickname'
-        if not any(key in data for key in ['full_name', 'nickname']):
-            response['message'] = 'No valid fields provided for update'
-            return jsonify(response), 400
-        
-        user = session.query(User).filter_by(user_id=user_id).first()
-        
-        if not user:
-            response['message'] = 'User not found'
-            return jsonify(response), 404
-        
-        # Actualizar solo los campos permitidos
-        if 'full_name' in data:
-            user.full_name = data['full_name']
-        if 'nickname' in data:
-            user.nickname = data['nickname']
+    with Session() as session:
+        try:
+            data = request.json
+            
+            # Solo permitir 'full_name' y 'nickname'
+            if not any(key in data for key in ['full_name', 'nickname']):
+                response['message'] = 'No valid fields provided for update'
+                return jsonify(response), 400
+            
+            user = session.query(User).filter_by(user_id=user_id).first()
+            
+            if not user:
+                response['message'] = 'User not found'
+                return jsonify(response), 404
+            
+            # Actualizar solo los campos permitidos
+            if 'full_name' in data:
+                user.full_name = data['full_name']
+            if 'nickname' in data:
+                user.nickname = data['nickname']
 
-        session.commit()
+            session.commit()
+            
+            response['success'] = True
+            response['message'] = 'User data updated successfully'
+            return jsonify(response), 200
+                    
+        except exc.SQLAlchemyError as e:
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
         
-        response['success'] = True
-        response['message'] = 'User data updated successfully'
-        return jsonify(response), 200
-                
-    except exc.SQLAlchemyError as e:
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
-    
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
+        except Exception as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
     
 @user_bp.route('/users', methods=['GET'])
 def get_all_users_with_plans():
@@ -156,52 +158,53 @@ def get_all_users_with_plans():
         500: Internal server error.
     """
     response = {'success': False, 'data': None, 'message': None}
-    try:
-        # Realizar una consulta con un outer join para incluir todos los usuarios
-        users_with_plans = session.query(User).outerjoin(PurchasedPlan).all()
-        
-        result = []
-        for user in users_with_plans:
-            # Preparar los datos del usuario
-            user_data = {
-                'user_id': user.user_id,
-                'nickname': user.nickname,
-                'full_name': user.full_name,
-                'email': user.email,
-                'email_verified': user.email_verified,
-                'picture': user.picture,
-                'auth0id': user.auth0id,
-                'provider': user.provider,
-                'created_at': user.created_at,
-                'purchased_plans': []
-            }
+    with Session() as session:
+        try:
+            # Realizar una consulta con un outer join para incluir todos los usuarios
+            users_with_plans = session.query(User).outerjoin(PurchasedPlan).all()
             
-            # Agregar los planes del usuario si existen
-            if user.purchased_plans:
-                for plan in user.purchased_plans:
-                    plan_data = {
-                        'product_id': plan.product_id,
-                        'reference_name': plan.reference_name,
-                        'price': plan.price,
-                        'is_subscribed': plan.is_subscribed,
-                        'created_at': plan.created_at
-                    }
-                    user_data['purchased_plans'].append(plan_data)
+            result = []
+            for user in users_with_plans:
+                # Preparar los datos del usuario
+                user_data = {
+                    'user_id': user.user_id,
+                    'nickname': user.nickname,
+                    'full_name': user.full_name,
+                    'email': user.email,
+                    'email_verified': user.email_verified,
+                    'picture': user.picture,
+                    'auth0id': user.auth0id,
+                    'provider': user.provider,
+                    'created_at': user.created_at,
+                    'purchased_plans': []
+                }
+                
+                # Agregar los planes del usuario si existen
+                if user.purchased_plans:
+                    for plan in user.purchased_plans:
+                        plan_data = {
+                            'product_id': plan.product_id,
+                            'reference_name': plan.reference_name,
+                            'price': plan.price,
+                            'is_subscribed': plan.is_subscribed,
+                            'created_at': plan.created_at
+                        }
+                        user_data['purchased_plans'].append(plan_data)
+                
+                # Agregar la información del usuario a la lista de resultados
+                result.append(user_data)
             
-            # Agregar la información del usuario a la lista de resultados
-            result.append(user_data)
-        
-        response['success'] = True
-        response['data'] = result
-        return jsonify(response), 200
+            response['success'] = True
+            response['data'] = result
+            return jsonify(response), 200
 
-    except exc.SQLAlchemyError as e:
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
-    
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
+        except exc.SQLAlchemyError as e:
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
+        
+        except Exception as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
 
 @user_bp.route('/user', methods=['GET'])
 def get_user_with_plans():
@@ -221,74 +224,75 @@ def get_user_with_plans():
         500: Internal server error.
     """
     response = {'success': False, 'data': None, 'message': None}
-    try:
-        user_id = request.args.get('user_id')
-        email = request.args.get('email')
-        nickname = request.args.get('nickname')
-        full_name = request.args.get('full_name')
-        auth0id = request.args.get('auth0id')
-        
-        query = session.query(User).outerjoin(PurchasedPlan)
-        
-        if not any([user_id, email, nickname, auth0id]):
-            response['message'] = 'User identifier not provided'
-            return jsonify(response), 400
-        
-        if user_id:
-            user = query.filter(User.user_id == user_id).first()
-        elif email:
-            user = query.filter(User.email == email).first()
-        elif nickname:
-            user = query.filter(User.nickname == nickname).first()
-        elif auth0id:
-            user = query.filter(User.auth0id == auth0id).first()
-        elif full_name:
-            user = query.filter(User.full_name == full_name).first()
-        
-        if not user:
-            response['message'] = 'User not found'
-            return jsonify(response), 404
-        
-        user_data = {
-            'user_id': user.user_id,
-            'nickname': user.nickname,
-            'full_name': user.full_name,
-            'email': user.email,
-            'email_verified': user.email_verified,
-            'picture': user.picture,
-            'auth0id': user.auth0id,
-            'provider': user.provider,
-            'created_at': user.created_at,
-            'purchased_plans': []
-        }
-        
-        for plan in user.purchased_plans:
-            plan_data = {
-                'product_id': plan.product_id,
-                'reference_name': plan.reference_name,
-                'price': plan.price,
-                'is_subscribed': plan.is_subscribed,
-                'created_at': plan.created_at
+    with Session() as session:
+        try:
+            user_id = request.args.get('user_id')
+            email = request.args.get('email')
+            nickname = request.args.get('nickname')
+            full_name = request.args.get('full_name')
+            auth0id = request.args.get('auth0id')
+            
+            query = session.query(User).outerjoin(PurchasedPlan)
+            
+            if not any([user_id, email, nickname, auth0id]):
+                response['message'] = 'User identifier not provided'
+                return jsonify(response), 400
+            
+            if user_id:
+                user = query.filter(User.user_id == user_id).first()
+            elif email:
+                user = query.filter(User.email == email).first()
+            elif nickname:
+                user = query.filter(User.nickname == nickname).first()
+            elif auth0id:
+                user = query.filter(User.auth0id == auth0id).first()
+            elif full_name:
+                user = query.filter(User.full_name == full_name).first()
+            
+            if not user:
+                response['message'] = 'User not found'
+                return jsonify(response), 404
+            
+            user_data = {
+                'user_id': user.user_id,
+                'nickname': user.nickname,
+                'full_name': user.full_name,
+                'email': user.email,
+                'email_verified': user.email_verified,
+                'picture': user.picture,
+                'auth0id': user.auth0id,
+                'provider': user.provider,
+                'created_at': user.created_at,
+                'purchased_plans': []
             }
-            user_data['purchased_plans'].append(plan_data)
-        
-        response['success'] = True
-        response['data'] = user_data
-        
-        # Check if user has no active plans
-        if not user.purchased_plans:
-            response['message'] = 'User does not have any purchased plans'
+            
+            for plan in user.purchased_plans:
+                plan_data = {
+                    'product_id': plan.product_id,
+                    'reference_name': plan.reference_name,
+                    'price': plan.price,
+                    'is_subscribed': plan.is_subscribed,
+                    'created_at': plan.created_at
+                }
+                user_data['purchased_plans'].append(plan_data)
+            
+            response['success'] = True
+            response['data'] = user_data
+            
+            # Check if user has no active plans
+            if not user.purchased_plans:
+                response['message'] = 'User does not have any purchased plans'
+                return jsonify(response), 200
+            
             return jsonify(response), 200
-        
-        return jsonify(response), 200
 
-    except exc.SQLAlchemyError as e:
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
-    
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
+        except exc.SQLAlchemyError as e:
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
+        
+        except Exception as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
 
 
 
@@ -312,45 +316,46 @@ def save_package():
         500: Internal server error.
     """
     response = {'success': False, 'message': None}
-    try:
-        data = request.json
-        
-        # Validar que los campos obligatorios estén presentes
-        required_fields = ['reference_name', 'price', 'auth0id']
-        for field in required_fields:
-            if field not in data:
-                response['message'] = f'Missing required field: {field}'
-                return jsonify(response), 400
-        
-        # Buscar el usuario por auth0id para obtener el user_id
-        user = session.query(User).filter_by(auth0id=data['auth0id']).first()
-        if not user:
-            response['message'] = 'User not found for provided auth0id'
-            return jsonify(response), 404
-        
-        new_plan = PurchasedPlan(
-            reference_name=data.get('reference_name'),
-            price=data.get('price'),
-            is_subscribed=data.get('is_subscribed', True),
-            user_id=user.user_id,  # Usar el user_id encontrado
-            created_at=datetime.now()
-        )
+    with Session() as session:
+        try:
+            data = request.json
+            
+            # Validar que los campos obligatorios estén presentes
+            required_fields = ['reference_name', 'price', 'auth0id']
+            for field in required_fields:
+                if field not in data:
+                    response['message'] = f'Missing required field: {field}'
+                    return jsonify(response), 400
+            
+            # Buscar el usuario por auth0id para obtener el user_id
+            user = session.query(User).filter_by(auth0id=data['auth0id']).first()
+            if not user:
+                response['message'] = 'User not found for provided auth0id'
+                return jsonify(response), 404
+            
+            new_plan = PurchasedPlan(
+                reference_name=data.get('reference_name'),
+                price=data.get('price'),
+                is_subscribed=data.get('is_subscribed', True),
+                user_id=user.user_id,  # Usar el user_id encontrado
+                created_at=datetime.now()
+            )
 
-        session.add(new_plan)
-        session.commit()
+            session.add(new_plan)
+            session.commit()
+            
+            response['success'] = True
+            response['message'] = 'Package saved successfully'
+            return jsonify(response), 200
+                    
+        except exc.SQLAlchemyError as e:
+            session.rollback()
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
         
-        response['success'] = True
-        response['message'] = 'Package saved successfully'
-        return jsonify(response), 200
-                
-    except exc.SQLAlchemyError as e:
-        session.rollback()
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
-    
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
+        except Exception as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
     
     
 
@@ -370,91 +375,47 @@ def unsubscribe_package():
         500: Internal server error.
     """
     response = {'success': False, 'message': None}
-    try:
-        data = request.json
-        
-        # Validar que los campos obligatorios estén presentes
-        required_fields = ['auth0id', 'reference_name']
-        for field in required_fields:
-            if field not in data:
-                response['message'] = f'Missing required field: {field}'
-                return jsonify(response), 400
-        
-        # Buscar el usuario por auth0id para obtener el user_id
-        user = session.query(User).filter_by(auth0id=data['auth0id']).first()
-        if not user:
-            response['message'] = 'User not found for provided auth0id'
-            return jsonify(response), 404
-        
-        # Buscar el plan por reference_name y user_id
-        plan = session.query(PurchasedPlan).filter_by(user_id=user.user_id, reference_name=data['reference_name']).first()
-        if not plan:
-            response['message'] = 'Package not found'
-            return jsonify(response), 404
-        
-        # Actualizar el estado de suscripción
-        plan.is_subscribed = False  
+    with Session() as session:
+        try:
+            data = request.json
+            
+            # Validar que los campos obligatorios estén presentes
+            required_fields = ['auth0id', 'reference_name']
+            for field in required_fields:
+                if field not in data:
+                    response['message'] = f'Missing required field: {field}'
+                    return jsonify(response), 400
+            
+            # Buscar el usuario por auth0id para obtener el user_id
+            user = session.query(User).filter_by(auth0id=data['auth0id']).first()
+            if not user:
+                response['message'] = 'User not found for provided auth0id'
+                return jsonify(response), 404
+            
+            # Buscar el plan por reference_name y user_id
+            plan = session.query(PurchasedPlan).filter_by(user_id=user.user_id, reference_name=data['reference_name']).first()
+            if not plan:
+                response['message'] = 'Package not found'
+                return jsonify(response), 404
+            
+            # Actualizar el estado de suscripción
+            plan.is_subscribed = False  
 
-        session.commit()
+            session.commit()
+            
+            response['success'] = True
+            response['message'] = 'User unsubscribed from package successfully'
+            return jsonify(response), 200
+                    
+        except exc.SQLAlchemyError as e:
+            session.rollback()
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
         
-        response['success'] = True
-        response['message'] = 'User unsubscribed from package successfully'
-        return jsonify(response), 200
-                
-    except exc.SQLAlchemyError as e:
-        session.rollback()
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
+        except Exception as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
     
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
-    
-
-    
-# @user_bp.route('/delete_user', methods=['DELETE'])
-# def delete_user_account():
-#     """
-#     Delete a user account identified by user ID.
-
-#     Args:
-#         user_id (int): ID of the user to delete.
-
-#     Response:
-#         200: User account deleted successfully.
-#         404: User not found.
-#         500: Internal server error.
-#     """
-#     response = {'success': False, 'message': None}
-#     try:
-#         data = request.get_json()
-#         user_id = data.get('user_id')
-#         if not user_id:
-#             return jsonify({'success': False, 'message': 'User ID not provided'}), 400
-        
-#         # Buscar el usuario por ID
-#         user = session.query(User).filter_by(auth0id=user_id).first()
-        
-#         if not user:
-#             response['message'] = 'User not found'
-#             return jsonify(response), 404
-
-#         # Eliminar el usuario de la base de datos
-#         session.delete(user)
-#         session.commit()
-        
-#         response['success'] = True
-#         response['message'] = 'User account deleted successfully'
-#         return jsonify(response), 200
-
-#     except exc.SQLAlchemyError as e:
-#         session.rollback()
-#         response['message'] = f'Database error: {str(e)}'
-#         return jsonify(response), 500
-    
-#     except Exception as e:
-#         response['message'] = str(e)
-#         return jsonify(response), 500
 
 
 @user_bp.route('/delete_user', methods=['DELETE'])
@@ -471,32 +432,33 @@ def delete_user_account():
         500: Internal server error.
     """
     response = {'success': False, 'message': None}
-    try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-        if not user_id:
-            return jsonify({'success': False, 'message': 'User ID not provided'}), 400
-        
-        # Buscar el usuario por ID parcial o completo usando like
-        user = session.query(User).filter(User.auth0id.like(f'%{user_id}%')).first()
-        
-        if not user:
-            response['message'] = 'User not found'
-            return jsonify(response), 404
+    with Session() as session:
+        try:
+            data = request.get_json()
+            user_id = data.get('user_id')
+            if not user_id:
+                return jsonify({'success': False, 'message': 'User ID not provided'}), 400
+            
+            # Buscar el usuario por ID parcial o completo usando like
+            user = session.query(User).filter(User.auth0id.like(f'%{user_id}%')).first()
+            
+            if not user:
+                response['message'] = 'User not found'
+                return jsonify(response), 404
 
-        # Eliminar el usuario de la base de datos
-        session.delete(user)
-        session.commit()
-        
-        response['success'] = True
-        response['message'] = 'User account deleted successfully'
-        return jsonify(response), 200
+            # Eliminar el usuario de la base de datos
+            session.delete(user)
+            session.commit()
+            
+            response['success'] = True
+            response['message'] = 'User account deleted successfully'
+            return jsonify(response), 200
 
-    except exc.SQLAlchemyError as e:
-        session.rollback()
-        response['message'] = f'Database error: {str(e)}'
-        return jsonify(response), 500
-    
-    except Exception as e:
-        response['message'] = str(e)
-        return jsonify(response), 500
+        except exc.SQLAlchemyError as e:
+            session.rollback()
+            response['message'] = f'Database error: {str(e)}'
+            return jsonify(response), 500
+        
+        except Exception as e:
+            response['message'] = str(e)
+            return jsonify(response), 500
