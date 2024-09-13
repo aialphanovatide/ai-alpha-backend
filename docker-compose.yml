@@ -9,7 +9,7 @@ x-common-web-config: &common-web-config
       condition: service_started
 
 services:
-  server:
+  web:
     <<: *common-web-config
     ports:
       - "5000:5000"
@@ -30,7 +30,7 @@ services:
       sh -c "alembic upgrade head &&
              gunicorn --bind 0.0.0.0:5000 --workers 4 --threads 2 server:app"
 
-  server_dev:
+  web_dev:
     <<: *common-web-config
     ports:
       - "5001:5000"
@@ -92,6 +92,14 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+
+  redis_dev:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data_dev:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD_DEV}
 
   ngrok:
     image: ngrok/ngrok:latest
