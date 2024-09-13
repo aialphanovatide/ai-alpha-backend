@@ -1,16 +1,12 @@
-import os
 import secrets
 import string
-import jwt
 from sqlalchemy import exc
-from config import PurchasedPlan, session, User
-from flask import jsonify, request, Blueprint
-from datetime import datetime, timedelta
+from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
+from flask import jsonify, request, Blueprint
+from config import PurchasedPlan, session, User
 
 user_bp = Blueprint('user', __name__)
-
-SECRET_KEY = os.getenv('SECRET_KEY')
 
 def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
@@ -89,7 +85,7 @@ def edit_user_data(user_id):
     try:
         data = request.json
         
-        # Solo permitir 'full_name' y 'nickname'
+        # Allow for editing full_name and nickname
         if not any(key in data for key in ['full_name', 'nickname']):
             response['message'] = 'No valid fields provided for update'
             return jsonify(response), 400
@@ -100,7 +96,7 @@ def edit_user_data(user_id):
             response['message'] = 'User not found'
             return jsonify(response), 404
         
-        # Actualizar solo los campos permitidos
+        # Update only allowed fields
         if 'full_name' in data:
             user.full_name = data['full_name']
         if 'nickname' in data:
@@ -120,6 +116,7 @@ def edit_user_data(user_id):
         response['message'] = str(e)
         return jsonify(response), 500
     
+
 @user_bp.route('/users', methods=['GET'])
 def get_all_users_with_plans():
     """
@@ -176,6 +173,7 @@ def get_all_users_with_plans():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
+
 
 @user_bp.route('/user', methods=['GET'])
 def get_user_with_plans():
@@ -265,8 +263,6 @@ def get_user_with_plans():
         return jsonify(response), 500
 
 
-
-
 @user_bp.route('/purchase_plan', methods=['POST'])
 def save_package():
     """
@@ -326,7 +322,6 @@ def save_package():
         response['message'] = str(e)
         return jsonify(response), 500
     
-    
 
 @user_bp.route('/unsubscribe_package', methods=['PUT'])
 def unsubscribe_package():
@@ -383,52 +378,6 @@ def unsubscribe_package():
     except Exception as e:
         response['message'] = str(e)
         return jsonify(response), 500
-    
-
-    
-# @user_bp.route('/delete_user', methods=['DELETE'])
-# def delete_user_account():
-#     """
-#     Delete a user account identified by user ID.
-
-#     Args:
-#         user_id (int): ID of the user to delete.
-
-#     Response:
-#         200: User account deleted successfully.
-#         404: User not found.
-#         500: Internal server error.
-#     """
-#     response = {'success': False, 'message': None}
-#     try:
-#         data = request.get_json()
-#         user_id = data.get('user_id')
-#         if not user_id:
-#             return jsonify({'success': False, 'message': 'User ID not provided'}), 400
-        
-#         # Buscar el usuario por ID
-#         user = session.query(User).filter_by(auth0id=user_id).first()
-        
-#         if not user:
-#             response['message'] = 'User not found'
-#             return jsonify(response), 404
-
-#         # Eliminar el usuario de la base de datos
-#         session.delete(user)
-#         session.commit()
-        
-#         response['success'] = True
-#         response['message'] = 'User account deleted successfully'
-#         return jsonify(response), 200
-
-#     except exc.SQLAlchemyError as e:
-#         session.rollback()
-#         response['message'] = f'Database error: {str(e)}'
-#         return jsonify(response), 500
-    
-#     except Exception as e:
-#         response['message'] = str(e)
-#         return jsonify(response), 500
 
 
 @user_bp.route('/delete_user', methods=['DELETE'])
