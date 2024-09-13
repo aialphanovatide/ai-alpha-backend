@@ -2,27 +2,36 @@
 
 import os
 import json
+from typing import Tuple
 
 class Swagger:
     def __init__(self):
         self.path = os.path.join('static', 'swagger.json')
 
-    def load(self):
+    def load(self) -> dict:
+        """
+        Load and parse the Swagger JSON file.
+
+        Returns:
+            dict: The parsed Swagger JSON data.
+
+        Raises:
+            FileNotFoundError: If the Swagger file is not found at the specified path.
+            json.JSONDecodeError: If the Swagger file contains invalid JSON.
+            Exception: For any other unexpected errors during file loading.
+        """
         try:
             with open(self.path, 'r') as file:
                 self.swagger_json = json.load(file)
             return self.swagger_json
         except FileNotFoundError:
-            print(f"Error: Swagger file not found at {self.path}")
-            return None
+            raise FileNotFoundError(f"Error: Swagger file not found at {self.path}")
         except json.JSONDecodeError:
-            print(f"Error: Invalid JSON in Swagger file at {self.path}")
-            return None
+            raise json.JSONDecodeError(f"Error: Invalid JSON in Swagger file at {self.path}")
         except Exception as e:
-            print(f"Unexpected error loading Swagger file: {str(e)}")
-            return None
+            raise Exception(f"Unexpected error loading Swagger file: {str(e)}")
 
-    def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, description: str, params: list, responses: dict):
+    def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, description: str, params: list, responses: dict) -> Tuple[bool, str]:
         """
         Add a new endpoint to the Swagger JSON file or update an existing one
         """
@@ -74,7 +83,7 @@ class Swagger:
         except Exception as e:
             return False, f'Error adding/updating endpoint {endpoint_route} [{method}]: {str(e)}'
 
-    def delete_endpoint(self, endpoint_route: str):
+    def delete_endpoint(self, endpoint_route: str) -> Tuple[bool, str]:
         """
         Delete an endpoint from the Swagger JSON file
         """

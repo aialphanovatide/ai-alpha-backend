@@ -634,6 +634,7 @@ class TopStoryImage(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
 class Analysis(Base):
     """
     Represents an analysis associated with a CoinBot.

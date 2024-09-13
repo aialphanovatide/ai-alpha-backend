@@ -31,45 +31,56 @@ class ImageGenerator:
 
 
     def generate_image(self, article: str, size: str = "1024x1024") -> str:
-            """
-            Generate an image based on the given article.
-            """
-            try:
-                # Generate DALL-E prompt using GPT-4
-                gpt_prompt = f'Generate a DALL-E prompt related to this {article}. It should be 400 characters or less and avoid specific names focused on abstract image without mention letters, numbers or words.'
-                
-                gpt_response = self.client.chat.completions.create(
-                    model="gpt-4",
-                    messages=[
-                        {"role": "system", "content": gpt_prompt},
-                        {"role": "user", "content": gpt_prompt}
-                    ],
-                    temperature=0.6,
-                    max_tokens=1024,
-                )
-                final_prompt = gpt_response.choices[0].message.content[:450]
-                print(f"final_prompt: {final_prompt}")
+        """
+        Generate an image based on the given article using DALL-E.
 
-                # Generate image using DALL-E
-                dalle_prompt = f'{final_prompt} - depicting an anime style.'
-                
-                dalle_response = self.client.images.generate(
-                    model="dall-e-3",
-                    prompt=dalle_prompt,
-                    n=1,
-                    size=size
-                )
-                image_url = dalle_response.data[0].url
-                return image_url
+        This method performs the following steps:
+        1. Generates a DALL-E prompt using GPT-4 based on the input article.
+        2. Uses the generated prompt to create an image with DALL-E.
+
+        Args:
+            article (str): The article text to base the image on.
+            size (str, optional): The size of the generated image. Default is "1024x1024".
+
+        Returns:
+            str: The URL of the generated image.
+
+        Raises:
+            Exception: If there's an error during the image generation process.
+
+        Note:
+            The method uses GPT-4 to create a prompt that is abstract and avoids specific names,
+            letters, numbers, or words. The final image is generated in an anime style.
+        """
+        try:
+            # Generate DALL-E prompt using GPT-4
+            gpt_prompt = f'Generate a DALL-E prompt related to this {article}. It should be 400 characters or less and avoid specific names focused on abstract image without mention letters, numbers or words.'
             
-            except Exception as e:
-                print(f"Error generating DALL-E image: {str(e)}")
-                # send_INFO_message_to_slack_channel(
-                #     title_message="Error generating DALL-E image",
-                #     sub_title="Response",
-                #     message=f"Article: {article[:60]}\nError: {str(e)}"
-                # )
-                return None
+            gpt_response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": gpt_prompt},
+                    {"role": "user", "content": gpt_prompt}
+                ],
+                temperature=0.6,
+                max_tokens=1024,
+            )
+            final_prompt = gpt_response.choices[0].message.content[:450]
+
+            # Generate image using DALL-E
+            dalle_prompt = f'{final_prompt} - depicting an anime style.'
+            
+            dalle_response = self.client.images.generate(
+                model="dall-e-3",
+                prompt=dalle_prompt,
+                n=1,
+                size=size
+            )
+            image_url = dalle_response.data[0].url
+            return image_url
+        
+        except Exception as e:
+            raise Exception(f"Error generating image: {str(e)}")
             
 
 

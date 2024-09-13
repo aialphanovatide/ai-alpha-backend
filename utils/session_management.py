@@ -1,6 +1,5 @@
-from flask import jsonify
 from sqlalchemy.exc import SQLAlchemyError
-from config import Session, db_url, session
+from config import Session
 from functools import wraps
 
 def create_response(success=False, data=None, error=None, **kwargs):

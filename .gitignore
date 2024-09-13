@@ -10,6 +10,7 @@ __pycache__/config.cpython-311.pyc
 
 # Logs
 *.log
+*.db
 
 *account.json
 

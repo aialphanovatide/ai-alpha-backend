@@ -1,58 +1,89 @@
+import os
 import datetime
+import pytz
+from pytz import timezone as tz
 from sqlalchemy import desc
-from datetime import datetime
+from bs4 import BeautifulSoup
 from typing import Tuple, Dict
 from sqlalchemy.exc import SQLAlchemyError
+from services.aws.s3 import ImageProcessor
 from flask import jsonify, Blueprint, request
+from services.openai.dalle import ImageGenerator
+from datetime import datetime, timezone
 from apscheduler.triggers.date import DateTrigger
-from sqlalchemy.orm.exc import NoResultFound
 from apscheduler.jobstores.base import JobLookupError
 from services.firebase.firebase import send_notification
-from config import Analysis, AnalysisImage, Category, CoinBot, Session
+from config import Analysis, Category, CoinBot, Session
 from apscheduler.schedulers.background import BackgroundScheduler
-from services.aws.s3 import ImageProcessor
-from services.openai.dalle import ImageGenerator
-from bs4 import BeautifulSoup
 from utils.session_management import create_response
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor
+from sqlalchemy.engine.url import make_url
 
-sched = BackgroundScheduler()
+# Create a file-based SQLite database URL
+base_dir = os.path.abspath(os.path.dirname(__file__))
+db_path = os.path.join(base_dir, 'analysis_scheduler.db')
+sqlite_url = make_url(f'sqlite:///{db_path}')
+
+# Configure the job stores and executors
+job_stores = {
+    'default': SQLAlchemyJobStore(url=sqlite_url)
+}
+executors = {
+    'default': ThreadPoolExecutor(20)
+}
+job_defaults = {
+    'coalesce': False,
+    'max_instances': 1
+}
+
+chosen_timezone = tz('America/Argentina/Buenos_Aires')
+
+# Create the scheduler with the SQLite job store
+sched = BackgroundScheduler(
+    jobstores=job_stores,
+    executors=executors,
+    job_defaults=job_defaults,
+    timezone=chosen_timezone
+)
+
 if sched.state != 1:
     sched.start()
-    print('Scheduler started for the Analysis')
+    print('---- Scheduler started for the Analysis ----')
 
 analysis_bp = Blueprint('analysis_bp', __name__)
 
 image_generator = ImageGenerator()
 image_processor = ImageProcessor()
 
-# REVIEWED - DUPLICATED - ERASE THIS
-@analysis_bp.route('/get_analysis/<int:coin_bot_id>', methods=['GET'])
-def get_analysis(coin_bot_id):
+@analysis_bp.route('/get_coin_analysis', methods=['GET'])
+def get_coin_analysis():
     """
-    Retrieve analyses for a specific coin bot ID with pagination.
+    Retrieve analyses for a specific coin by ID or name, with optional pagination.
 
-    This endpoint queries the database for analyses related to a specific coin bot,
-    ordered by creation date descending, and includes their associated images.
+    This endpoint queries the database for analyses related to a specific coin,
+    identified either by ID or name, ordered by creation date descending.
 
     Args:
-        coin_bot_id (int): The ID of the coin bot
+        coin_bot_id (int): The ID of the coin bot (optional)
+        coin_bot_name (str): The name of the coin bot (optional)
         page (int): The page number (default: 1)
         limit (int): The number of items per page (default: 10, max: 100)
 
     Returns:
         JSON: A JSON object containing:
-            - data (list): List of analysis objects with their associated images
+            - data (list): List of analysis objects
             - error (str or None): Error message, if any
             - success (bool): Indicates if the operation was successful
             - total (int): Total number of analyses for this coin bot
-            - page (int): Current page number
-            - limit (int): Number of items per page
-            - total_pages (int): Total number of pages
+            - page (int): Current page number (if pagination is used)
+            - limit (int): Number of items per page (if pagination is used)
+            - total_pages (int): Total number of pages (if pagination is used)
         HTTP Status Code
 
     Raises:
-        400 Bad Request: If invalid pagination parameters are provided
-        404 Not Found: If no analyses are found for the specified coin bot ID
+        400 Bad Request: If neither coin ID nor name is provided, or if invalid pagination parameters are provided
+        404 Not Found: If no analyses are found for the specified coin
         500 Internal Server Error: If there's an unexpected error during execution
     """
     response = {
@@ -60,63 +91,71 @@ def get_analysis(coin_bot_id):
         "error": None,
         "success": False,
         "total": 0,
-        "page": 1,
-        "limit": 10,
-        "total_pages": 0
+        "page": None,
+        "limit": None,
+        "total_pages": None
     }
     status_code = 500  # Default to server error
 
     session = Session()
     try:
+        # Get coin identification parameters
+        coin_id = request.args.get('coin_id', type=int)
+        coin_name = request.args.get('coin_name')
+
+        if not coin_id and not coin_name:
+            response["error"] = "Either coin_id or coin_name is required"
+            status_code = 400
+            return jsonify(response), status_code
+
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
-        limit = min(request.args.get('limit', 10, type=int), 100)  # Cap at 100
+        limit = request.args.get('limit', 10, type=int)
 
+        # Build the query
+        query = session.query(Analysis)
+        if coin_id:
+            query = query.filter(Analysis.coin_bot_id == coin_id)
+        elif coin_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+            if not coin:
+                response["error"] = f"No coin found with name: {coin_name}"
+                status_code = 404
+                return jsonify(response), status_code
+            query = query.filter(Analysis.coin_bot_id == coin.bot_id)
+
+        # Get total count
+        total_analyses = query.count()
+
+        if total_analyses == 0:
+            response["error"] = "No analyses found for the specified coin"
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Apply pagination
         if page < 1 or limit < 1:
             response["error"] = "Invalid pagination parameters"
             status_code = 400
             return jsonify(response), status_code
 
-        # Get total count
-        total_analyses = session.query(Analysis).filter(Analysis.coin_bot_id == coin_bot_id).count()
-
-        if total_analyses == 0:
-            response["error"] = f"No analyses found for coin bot ID: {coin_bot_id}"
-            status_code = 404
-            return jsonify(response), status_code
-
-        # Calculate pagination values
+        limit = min(limit, 100)  # Cap at 100
         total_pages = (total_analyses + limit - 1) // limit
         offset = (page - 1) * limit
+        query = query.order_by(desc(Analysis.created_at)).offset(offset).limit(limit)
 
-        # Query for analyses and their associated images with pagination
-        analysis_query = session.query(Analysis, AnalysisImage)\
-            .outerjoin(AnalysisImage, Analysis.analysis_id == AnalysisImage.analysis_id)\
-            .filter(Analysis.coin_bot_id == coin_bot_id)\
-            .order_by(desc(Analysis.created_at))\
-            .offset(offset)\
-            .limit(limit)
+        # Execute the query
+        analysis_objects = query.all()
 
-        analysis_data = {}
-        for analysis, image in analysis_query:
-            if analysis.analysis_id not in analysis_data:
-                analysis_dict = analysis.to_dict()
-                analysis_dict['analysis_images'] = []
-                analysis_data[analysis.analysis_id] = analysis_dict
-            
-            if image:
-                analysis_data[analysis.analysis_id]['analysis_images'].append({
-                    'image_id': image.image_id,
-                    'image': image.image
-                })
+        # Prepare the response data
+        analysis_data = [analy.to_dict() for analy in analysis_objects]
 
-        response["data"] = list(analysis_data.values())
+        response["data"] = analysis_data
         response["success"] = True
         response["total"] = total_analyses
         response["page"] = page
         response["limit"] = limit
         response["total_pages"] = total_pages
-        status_code = 200  # Use 200 for successful responses
+        status_code = 200
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -131,103 +170,14 @@ def get_analysis(coin_bot_id):
 
     return jsonify(response), status_code
 
-# duplicated - use this one for all
-@analysis_bp.route('/get_analysis_by_coin', methods=['GET'])
-def get_analysis_by_coin():
-    """
-    Retrieve analyses for a specific coin by name or ID.
 
-    This endpoint queries the database for analyses related to a specific coin,
-    identified either by name or ID.
-
-    Args:
-        coin_bot_name (str): The name of the coin (optional)
-        coin_bot_id (str): The ID of the coin (optional)
-
-    Returns:
-        JSON: A JSON object containing:
-            - data (list): List of analysis objects with their associated images
-            - error (str or None): Error message, if any
-            - success (bool): Indicates if the operation was successful
-        HTTP Status Code
-
-    Raises:
-        400 Bad Request: If neither coin name nor ID is provided
-        404 Not Found: If no analyses are found for the specified coin
-        500 Internal Server Error: If there's an unexpected error during execution
-    """
-    response = {
-        "data": None,
-        "error": None,
-        "success": False
-    }
-    status_code = 500  # Default to server error
-
-    session = Session()  # Create a database session
-    try:
-        coin_bot_name = request.args.get('coin_bot_name')
-        coin_bot_id = request.args.get('coin_bot_id')
-
-        if not coin_bot_id and not coin_bot_name:
-            response["error"] = "Coin ID or name is required"
-            status_code = 400
-            return jsonify(response), status_code
-        
-        # Query for analyses
-        query = session.query(Analysis)
-        if coin_bot_id:
-            query = query.filter(Analysis.coin_bot_id == coin_bot_id)
-        elif coin_bot_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_bot_name).first()
-            if not coin:
-                response["error"] = f"No coin found with name: {coin_bot_name}"
-                status_code = 404
-                return jsonify(response), status_code
-            query = query.filter(Analysis.coin_bot_id == coin.bot_id)
-
-        analysis_objects = query.order_by(desc(Analysis.created_at)).all()
-
-        if not analysis_objects:
-            response["error"] = "No analysis found for the specified coin"
-            status_code = 404
-            return jsonify(response), status_code
-
-        analysis_data = []
-        for analy in analysis_objects:
-            analysis_dict = analy.to_dict()
-            
-            # Get associated images
-            images = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
-            images_data = [{'image_id': img.image_id, 'image': img.image} for img in images]
-            
-            analysis_dict['analysis_images'] = images_data
-            analysis_data.append(analysis_dict)
-
-        response["data"] = analysis_data
-        response["success"] = True
-        status_code = 200  # Use 200 for successful responses
-
-    except SQLAlchemyError as e:
-        session.rollback()
-        response["error"] = f"Database error occurred: {str(e)}"
-        status_code = 500
-    except Exception as e:
-        session.rollback()
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        status_code = 500
-    finally:
-        session.close() 
-
-    return jsonify(response), status_code
-
-# REVIEWED
 @analysis_bp.route('/get_analysis', methods=['GET'])
 def get_all_analysis():
     """
-    Retrieve analyses with their associated images, with pagination.
+    Retrieve all analyses with pagination.
 
-    This endpoint queries the database for analyses, ordered by creation date descending,
-    and includes their associated images. It supports pagination and a configurable limit.
+    This endpoint queries the database for analyses, ordered by creation date descending.
+    It supports pagination and a configurable limit.
 
     Args:
         page (int): The page number (default: 1)
@@ -235,7 +185,7 @@ def get_all_analysis():
 
     Returns:
         JSON: A JSON object containing:
-            - data (list): List of analysis objects with their associated images
+            - data (list): List of analysis objects
             - error (str or None): Error message, if any
             - success (bool): Indicates if the operation was successful
             - total (int): Total number of analyses
@@ -284,18 +234,8 @@ def get_all_analysis():
             .limit(limit)\
             .all()
 
-        analysis_data = []
-
-        for analy in analysis_objects:
-            analysis_dict = analy.to_dict()
-
-            images_objects = session.query(AnalysisImage).filter_by(analysis_id=analy.analysis_id).all()
-            images_data = [{'image_id': img.image_id, 'image': img.image} for img in images_objects]
-            
-            analysis_dict['category_name'] = analy.category_name
-            analysis_dict['analysis_images'] = images_data
-            analysis_dict['coin_bot_id'] = analy.coin_bot_id
-            analysis_data.append(analysis_dict)
+        # Prepare the response data
+        analysis_data = [analy.to_dict() for analy in analysis_objects]
 
         response["data"] = analysis_data
         response["success"] = True
@@ -318,27 +258,34 @@ def get_all_analysis():
 
     return jsonify(response), status_code
 
-# REVIEWED
+
 @analysis_bp.route('/post_analysis', methods=['POST'])
 def post_analysis():
     """
-    Create a new analysis and generate an associated image.
+    Create a new analysis and publish it.
 
-    This endpoint creates a new analysis based on the provided data,
-    generates an image for the analysis, and uploads it to S3.
+    This endpoint creates a new analysis based on the provided data and publishes it.
 
     Args:
         None (data is expected in the request form)
+
+    Expected form data:
+        coin_id (str): The ID of the coin
+        content (str): The content of the analysis
+        category_name (str): The name of the category
 
     Returns:
         JSON: A JSON object containing:
             - data (dict or None): Details of the created analysis, if successful
             - error (str or None): Error message, if any
             - success (bool): Indicates if the operation was successful
-        HTTP Status Code
+        HTTP Status Code:
+            - 201: Created successfully
+            - 400: Bad Request (missing or invalid data)
+            - 500: Internal Server Error
 
     Raises:
-        400 Bad Request: If required data is missing
+        400 Bad Request: If required data is missing or null
         500 Internal Server Error: If there's an unexpected error during execution
     """
     response = {
@@ -351,13 +298,15 @@ def post_analysis():
     session = Session()
     try:
         # Extract data from the request
-        coin_id = request.form.get('coinBot')
+        coin_id = request.form.get('coin_id')
         content = request.form.get('content')
         category_name = request.form.get('category_name')
 
         # Check if any of the required values is missing or null
-        if not all([coin_id, content, category_name]) or any(value == 'null' for value in [coin_id, content, category_name]):
-            response["error"] = "One or more required values are missing or null"
+        missing_params = [param for param in ['coin_id', 'content', 'category_name'] if not locals()[param] or locals()[param] == 'null']
+        if missing_params:
+            response["error"] = f"The following required values are missing or null: {', '.join(missing_params)}"
+            response["success"] = False
             return jsonify(response), 400
 
         try:
@@ -395,7 +344,7 @@ def post_analysis():
 
     return jsonify(response), status_code
 
-# Pending
+
 @analysis_bp.route('/delete_analysis/<int:analysis_id>', methods=['DELETE'])
 def delete_analysis(analysis_id):
     """
@@ -428,31 +377,26 @@ def delete_analysis(analysis_id):
     try:
         # Check if the analysis_id exists
         analysis_to_delete = session.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
-        if analysis_to_delete is None:
+        if not analysis_to_delete:
             response["error"] = "Analysis not found"
             status_code = 404
             return jsonify(response), status_code
 
-        # Store some data about the analysis for the response
-        deleted_analysis_data = {
-            "analysis_id": analysis_to_delete.analysis_id,
-            "created_at": analysis_to_delete.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            "had_image": False
-        }
-
-        # Delete the associated image if it exists
-        analysis_image_to_delete = session.query(AnalysisImage).filter_by(analysis_id=analysis_id).first()
-        if analysis_image_to_delete:
-            session.delete(analysis_image_to_delete)
-            deleted_analysis_data["had_image"] = True
+        # Delete the associated image from S3 if it exists
+        if analysis_to_delete.image_url:
+            try:
+                image_processor.delete_from_s3(image_url=analysis_to_delete.image_url)
+            except Exception as e:
+                response["error"] = f"Error deleting image from S3: {str(e)}"
+                return jsonify(response), 500
 
         # Delete the analysis
         session.delete(analysis_to_delete)
         session.commit()
 
-        response["data"] = deleted_analysis_data
+        response["data"] = f'Analysis deleted successfully with its image'
         response["success"] = True
-        status_code = 200  # Use 200 for successful deletion
+        status_code = 200
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -467,7 +411,7 @@ def delete_analysis(analysis_id):
 
     return jsonify(response), status_code
 
-# Pending
+
 @analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
 def edit_analysis(analysis_id):
     """
@@ -535,7 +479,7 @@ def edit_analysis(analysis_id):
 
     return jsonify(response), status_code
 
-# REVIEWED
+
 @analysis_bp.route('/get_last_analysis', methods=['GET'])
 def get_last_analysis():
     """
@@ -592,6 +536,7 @@ def get_last_analysis():
     finally:
         session.close()
     
+    
 def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
     """
     Function to publish an analysis.
@@ -613,26 +558,26 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
             title = content[:title_end_index].strip()
             content = content[title_end_index + 1:]
         else:
-            title = ""  # Fallback title if no newline is found
+            raise ValueError("No newline found in the content, please add a space after the title")
 
-        # Clean HTML tags to get the filename
-        soup = BeautifulSoup(title, 'html.parser')
-        filename_with_html = soup.get_text()
-        # Remove unwanted characters like colons and replace spaces with underscores
-        filename = filename_with_html.replace(':', '').replace(' ', '_').strip()
-        image_filename = f"{filename}.jpg"
+        # Extract title and format it
+        title = BeautifulSoup(title, 'html.parser').get_text()
+        formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
+        image_filename = f"{formatted_title}.jpg"
 
-        # Generate and upload image
-        image = image_generator.generate_image(content)
-        if not image:
-            raise ValueError("Image could not be generated")
-
-        resized_image_url = image_processor.process_and_upload_image(
-            image_url=image,
-            bucket_name='appanalysisimages',
-            image_filename=image_filename
-        )
-        if not resized_image_url:
+        # Generate image
+        try:
+            image = image_generator.generate_image(content)
+        except Exception as e:
+            raise ValueError(str(e))
+        
+        try:
+            resized_image_url = image_processor.process_and_upload_image(
+                image_url=image,
+                bucket_name='appanalysisimages',
+                image_filename=image_filename
+            )
+        except Exception as e:
             raise ValueError("Error resizing and uploading the image to S3")
 
         # Create and save the Analysis object
@@ -646,21 +591,19 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         session.commit()
 
         # Send notification
-        topic = f"{str(new_analysis.category_name).lower()}-analysis"
-        print(f"topic: {topic}")
+        topic = f"{str(category_name).lower()}-analysis"
         coin = session.query(CoinBot).filter_by(bot_id=coin_id).first()
-        print(f"coin: {coin}")
         coin_name = coin.bot_name if coin else "Unknown"
-        print(f"coin_name: {coin_name}")
 
-        send_notification(
-            topic=topic,
-            title=title,
-            body=content,
-            type="analysis",
-            coin=coin_name
-        )
-
+        # Send notification
+        # send_notification(
+        #     topic=topic,
+        #     title=title,
+        #     body=content,
+        #     type="analysis",
+        #     coin=coin_name
+        # )
+       
         return create_response(
             data=new_analysis.to_dict(),
             message="Analysis published successfully",
@@ -693,50 +636,90 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
     finally:
         session.close()
 
+
+# ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
-# TEST
 @analysis_bp.route('/schedule_post', methods=['POST'])
 def schedule_post() -> Tuple[Dict, int]:
     """
     Schedule a post for future publication.
 
-    Expected form data:
-        coinBot (str): The ID of the coin bot
+    This endpoint allows scheduling an analysis post for a specific coin bot at a future date and time.
+    It validates the input data, checks if the scheduled time is in the future, and adds the job to the scheduler.
+
+    Expected JSON payload:
+        coin_id (int): The ID of the coin bot
         category_name (str): The name of the category
         content (str): The content of the post
-        scheduledDate (str): The scheduled date and time in the format 'Mon, Jan 01, 2023, 12:00:00 AM'
+        scheduled_date (str): The scheduled date and time in ISO 8601 format (e.g., '2023-01-01T12:00:00.000Z')
 
     Returns:
-        JSON response with status code:
-        - 201: Post scheduled successfully
-        - 400: Bad request (missing or invalid data)
-        - 500: Server error
+        Tuple[Dict, int]: A tuple containing:
+            - Dict: JSON response with the following keys:
+                - message (str): Success message if the post was scheduled
+                - error (str): Error message if there was a problem
+                - success (bool): True if the post was scheduled successfully, False otherwise
+                - job_id (str): The ID of the scheduled job (if successful)
+            - int: HTTP status code
+                - 201: Post scheduled successfully
+                - 400: Bad request (missing or invalid data)
+                - 500: Server error
+
+    Raises:
+        ValueError: If the date format is invalid
+        Exception: For any unexpected errors during execution
+
+    Note:
+        The scheduled date is expected to be in UTC and will be converted to the chosen timezone
+        (America/Argentina/Buenos_Aires) for scheduling.
     """
     response = {"message": None, "error": None, "success": False, "job_id": None}
     status_code = 500  # Default to server error
 
     try:
-        coin_bot_id = request.form.get('coinBot')
+        coin_id = request.form.get('coin_id')
         category_name = request.form.get('category_name')
         content = request.form.get('content')
-        scheduled_date_str = request.form.get('scheduledDate')
+        scheduled_date = request.form.get('scheduled_date')
 
-        if not all([coin_bot_id, category_name, content, scheduled_date_str]):
-            response["error"] = "One or more required values are missing"
+        missing_params = []
+        if not coin_id:
+            missing_params.append("coin_id")
+        if not category_name:
+            missing_params.append("category_name")
+        if not content:
+            missing_params.append("content")
+        if not scheduled_date:
+            missing_params.append("scheduled_date")
+        
+        if missing_params:
+            response["error"] = f"The following required values are missing: {', '.join(missing_params)}"
             status_code = 400
             return jsonify(response), status_code
 
         try:
-            coin_bot_id = int(coin_bot_id)
-            scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
+            coin_id = int(coin_id)
+            # Parse the ISO 8601 format as UTC, then convert to Buenos Aires time
+            scheduled_datetime = datetime.strptime(scheduled_date, '%Y-%m-%dT%H:%M:%S.%fZ')
+            scheduled_datetime = pytz.utc.localize(scheduled_datetime).astimezone(chosen_timezone)
+
+            # Get current time in Buenos Aires
+            current_time = datetime.now(chosen_timezone)
+
+            if scheduled_datetime <= current_time:
+                response["error"] = "Scheduled date must be in the future"
+                status_code = 400
+                return jsonify(response), status_code
+
         except ValueError as e:
-            response["error"] = f"Invalid input format: {str(e)}"
+            response["error"] = f"Invalid date format. Expected 'YYYY-MM-DDTHH:MM:SS.sssZ': {str(e)}"
             status_code = 400
             return jsonify(response), status_code
 
+
         job = sched.add_job(
             publish_analysis, 
-            args=[coin_bot_id, content, category_name], 
+            args=[coin_id, content, category_name], 
             trigger=DateTrigger(run_date=scheduled_datetime)
         )
 
@@ -751,7 +734,7 @@ def schedule_post() -> Tuple[Dict, int]:
 
     return jsonify(response), status_code
 
-# TEST
+
 @analysis_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
     """
@@ -766,7 +749,7 @@ def delete_scheduled_job(job_id):
         - 404: Job not found
         - 500: Server error
     """
-    response = {"message": None, "error": None, "job_id": job_id, "success": False}
+    response = {"message": None, "error": None, "success": False}
     status_code = 500  # Default to server error
 
     try:
@@ -792,7 +775,7 @@ def delete_scheduled_job(job_id):
     
     return jsonify(response), status_code
 
-# TEST
+
 @analysis_bp.route('/get_scheduled_job/<string:job_id>', methods=['GET'])
 def get_scheduled_job(job_id):
     """
@@ -807,7 +790,7 @@ def get_scheduled_job(job_id):
         - 404: Job not found
         - 500: Server error
     """
-    response = {"data": None, "error": None, "job_id": job_id, "success": False}
+    response = {"data": None, "error": None, "success": False}
     status_code = 500  # Default to server error
     
     try:
@@ -835,9 +818,19 @@ def get_scheduled_job(job_id):
     return jsonify(response), status_code
 
 
-# TEST
 @analysis_bp.route('/get_scheduled_jobs', methods=['GET'])
-def get_jobs():
+def get_scheduled_jobs():
+    """
+    Retrieve information about all scheduled jobs.
+
+    Returns:
+        JSON response with status code:
+        - 200: Jobs information retrieved successfully
+        - 500: Server error
+    """
+    response = {"data": None, "error": None, "success": False}
+    status_code = 500  # Default to server error
+
     try:
         job_listing = []
         for job in sched.get_jobs():
@@ -846,54 +839,75 @@ def get_jobs():
                 'name': job.name,
                 'trigger': str(job.trigger),
                 'args': str(job.args),
-                'next_run_time': str(job.next_run_time) if hasattr(job, 'next_run_time') else None
+                'next_run_time': str(job.next_run_time) if job.next_run_time else None
             }
             job_listing.append(job_info)
 
-        return jsonify({'jobs': job_listing, 'status': 201, 'success': True}), 201
+        response["data"] = {"jobs": job_listing}
+        response["success"] = True
+        status_code = 200
 
     except Exception as e:
-        return jsonify({'error': str(e), 'status': 500, 'success': False}), 500
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+
+    return jsonify(response), status_code
     
-# test
-@analysis_bp.route('/get_bot_ids_by_category/<category_name>', methods=['GET'])
-def get_bot_ids_by_category(category_name):
+@analysis_bp.route('/get_coins_ids/<category_name>', methods=['GET'])
+def get_coins_ids(category_name):
     """
-    Retrieve bot IDs associated with a given category name.
+    Retrieve coins IDs associated with a given category name.
+
+    This endpoint queries the database for all coins instances associated with the specified category
+    and returns their coin IDs.
+
     Args:
         category_name (str): The name of the category to find bots for.
-    Response:
-        201: List of bot IDs retrieved successfully.
-        404: Category not found.
-        500: Internal server error.
+
+    Returns:
+        Tuple[Dict, int]: A tuple containing:
+            - Dict: JSON response with the following structure:
+                {
+                    "data": {"coin_ids": List[int]} or None,
+                    "error": str or None,
+                    "success": bool
+                }
+            - int: HTTP status code
+                - 200: List of bot IDs retrieved successfully
+                - 404: Category not found
+                - 500: Internal server error
+
+    Raises:
+        SQLAlchemyError: If there's an issue with the database query.
+        Exception: For any other unexpected errors.
+
+    Note:
+        This function uses a SQLAlchemy session to query the database. The session is always
+        closed at the end of the function execution, even if an exception occurs.
     """
     response = {"data": None, "error": None, "success": False}
     status_code = 500  # Default to server error
 
-    session = None
+    session = Session()
     try:
-        session = Session()
-        # Fetch the category from the database
         category = session.query(Category).filter_by(category_name=category_name).first()
         if not category:
             response["error"] = 'Category not found'
             status_code = 404
             return jsonify(response), status_code
 
-        # Fetch all bots associated with the category
-        bots = session.query(CoinBot).filter_by(category_id=category.category_id).all()
-        bot_ids = [bot.bot_id for bot in bots]
+        # Fetch all coins associated with the category
+        coins = session.query(CoinBot).filter_by(category_id=category.category_id).all()
+        coin_ids = [coin.bot_id for coin in coins]
 
-        response["data"] = {'bot_ids': bot_ids}
+        response["data"] = {'coin_ids': coin_ids}
         response["success"] = True
-        status_code = 201
+        status_code = 200
 
     except Exception as e:
-        response["error"] = f'Error retrieving bots for category "{category_name}": {str(e)}'
+        response["error"] = f'Error retrieving coins for category "{category_name}": {str(e)}'
         status_code = 500
 
     finally:
-        if session:
-            session.close()
+        session.close()
 
     return jsonify(response), status_code
