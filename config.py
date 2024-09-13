@@ -1315,3 +1315,8 @@ def init_superadmin():
 
 # Create SuperAdmin
 init_superadmin()
+
+
+# ------------- POPULATE THE DB WITH USERS.JSON -------------------
+
+

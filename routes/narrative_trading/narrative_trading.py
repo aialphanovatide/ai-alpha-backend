@@ -1,5 +1,5 @@
 import datetime
-from config import NarrativeTrading, Session, session, CoinBot
+from config import NarrativeTrading, Session, CoinBot
 from flask import jsonify, Blueprint, request
 from sqlalchemy import desc
 from datetime import datetime

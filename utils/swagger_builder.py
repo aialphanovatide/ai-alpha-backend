@@ -129,7 +129,7 @@ swagger = Swagger()
 #     params=[
 #         {
 #             'name': 'page',
-#             'in': 'query',
+#             'in': 'query', # body, query.
 #             'type': 'integer',
 #             'description': 'The page number (default: 1)',
 #             'required': False,

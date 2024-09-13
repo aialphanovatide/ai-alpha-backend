@@ -1,55 +1,20 @@
-import os
-import datetime
+
 import pytz
-from pytz import timezone as tz
+import datetime
 from sqlalchemy import desc
 from bs4 import BeautifulSoup
+from datetime import datetime
 from typing import Tuple, Dict
 from sqlalchemy.exc import SQLAlchemyError
 from services.aws.s3 import ImageProcessor
 from flask import jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
-from datetime import datetime, timezone
 from apscheduler.triggers.date import DateTrigger
-from apscheduler.jobstores.base import JobLookupError
-from services.firebase.firebase import send_notification
-from config import Analysis, Category, CoinBot, Session
-from apscheduler.schedulers.background import BackgroundScheduler
 from utils.session_management import create_response
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.executors.pool import ThreadPoolExecutor
-from sqlalchemy.engine.url import make_url
-
-# Create a file-based SQLite database URL
-base_dir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(base_dir, 'analysis_scheduler.db')
-sqlite_url = make_url(f'sqlite:///{db_path}')
-
-# Configure the job stores and executors
-job_stores = {
-    'default': SQLAlchemyJobStore(url=sqlite_url)
-}
-executors = {
-    'default': ThreadPoolExecutor(20)
-}
-job_defaults = {
-    'coalesce': False,
-    'max_instances': 1
-}
-
-chosen_timezone = tz('America/Argentina/Buenos_Aires')
-
-# Create the scheduler with the SQLite job store
-sched = BackgroundScheduler(
-    jobstores=job_stores,
-    executors=executors,
-    job_defaults=job_defaults,
-    timezone=chosen_timezone
-)
-
-if sched.state != 1:
-    sched.start()
-    print('---- Scheduler started for the Analysis ----')
+from apscheduler.jobstores.base import JobLookupError
+from config import Analysis, Category, CoinBot, Session
+from services.firebase.firebase import send_notification
+from routes.analysis.analysis_scheduler import sched, chosen_timezone
 
 analysis_bp = Blueprint('analysis_bp', __name__)
 
@@ -578,7 +543,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
                 image_filename=image_filename
             )
         except Exception as e:
-            raise ValueError("Error resizing and uploading the image to S3")
+            raise ValueError(str(e))
 
         # Create and save the Analysis object
         new_analysis = Analysis(
