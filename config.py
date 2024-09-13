@@ -20,7 +20,6 @@ import uuid
 from utils.general import generate_unique_short_token
 
 
-
 load_dotenv()
 
 DB_PORT = os.getenv('DB_PORT')
@@ -28,6 +27,7 @@ DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 engine = create_engine(db_url, pool_size=30, max_overflow=20)
@@ -1183,66 +1183,117 @@ ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 # ------------- POPULATE THE DB WITH DATA.JSON -------------------
 
+def build_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
+    return {
+        "auth0id": user_id,
+        "email": email,
+        "full_name": full_name,
+        "nickname": nickname,
+        "created_at": created_at,
+        "updated_at": updated_at,
+        "email_verified": email_verified
+    }
+
+def get_user_data(user_id: str):
+    session = Session()
+    user = session.query(User).filter(User.auth0id == user_id).first()
+    session.close()
+    return user
+
+
+def create_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
+    session = Session()
+    user = User(auth0id=user_id, email=email, full_name=full_name, nickname=nickname, created_at=created_at, updated_at=updated_at, email_verified=email_verified)
+    session.add(user)
+    session.commit()
+    session.close()
+    return user
+
+def load_json_file(file_path: str):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
 def populate_database():
     """
-    Populate the database with initial data from a JSON file.
-    This function creates categories, coins, keywords, blacklists, and sites.
+    Populate the database with initial data from JSON files.
+    This function creates categories, coins, keywords, blacklists, sites, and users.
     """
     session = Session()
     
     try:
-        # Check if the database is already populated
+        # Check if the database is already populated with categories and sites
         if not session.query(Category).first() and not session.query(Site).first():
             with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
-                for item in config:
-                    main_keyword = item['main_keyword']
-                    alias = item['alias']
-                    coins = item['coins']
+            for item in config:
+                main_keyword = item['main_keyword']
+                alias = item['alias']
+                coins = item['coins']
 
-                    new_category = Category(
-                        category=main_keyword,
-                        category_name=alias,
-                        icon=item['icon'],
-                        border_color=item['borderColor'],
-                    )
+                new_category = Category(
+                    category=main_keyword,
+                    category_name=alias,
+                    icon=item['icon'],
+                    border_color=item['borderColor'],
+                )
 
-                    for coin in coins:
-                        coin_keyword = coin['coin_keyword'].casefold()
-                        keywords = coin['keywords']
-                        sites = coin['sites']
-                        black_list = coin['black_list']
+                for coin in coins:
+                    coin_keyword = coin['coin_keyword'].casefold()
+                    keywords = coin['keywords']
+                    sites = coin['sites']
+                    black_list = coin['black_list']
 
-                        new_coin = CoinBot(bot_name=coin_keyword)
-                        new_coin.category = new_category
+                    new_coin = CoinBot(bot_name=coin_keyword)
+                    new_coin.category = new_category
 
-                        for keyword in keywords:
-                            new_coin.keywords.append(Keyword(word=keyword.casefold()))
+                    for keyword in keywords:
+                        new_coin.keywords.append(Keyword(word=keyword.casefold()))
 
-                        for word in black_list:
-                            new_coin.blacklist.append(Blacklist(word=word.casefold()))
+                    for word in black_list:
+                        new_coin.blacklist.append(Blacklist(word=word.casefold()))
 
-                        for site_data in sites:
-                            site = Site(
-                                site_name=str(site_data['website_name']),
-                                base_url=str(site_data['base_url']).casefold(),
-                                data_source_url=str(site_data['site']).capitalize(),
-                                is_URL_complete=site_data['is_URL_complete'],
-                                main_container=str(site_data['main_container'])
-                            )
-                            new_coin.sites.append(site)
+                    for site_data in sites:
+                        site = Site(
+                            site_name=str(site_data['website_name']),
+                            base_url=str(site_data['base_url']).casefold(),
+                            data_source_url=str(site_data['site']).capitalize(),
+                            is_URL_complete=site_data['is_URL_complete'],
+                            main_container=str(site_data['main_container'])
+                        )
+                        new_coin.sites.append(site)
 
-                        session.add(new_coin)
-                        print(f'-----CoinBot data saved for {coin_keyword}-----')
+                    session.add(new_coin)
+                    print(f'-----CoinBot data saved for {coin_keyword}-----')
 
-                    session.add(new_category)
-                    print(f'-----Category {main_keyword} populated-----')
-                    
-                session.commit()
-                print('-----All data successfully populated-----')
+                session.add(new_category)
+                print(f'-----Category {main_keyword} populated-----')
+                
+            session.commit()
+            print('-----All category and site data successfully populated-----')
         else:
-            print('-----Database is already populated. Skipping population process-----')
+            print('-----Categories and sites are already populated. Skipping this process-----')
+
+        # Now, let's handle the users
+        users_json_path = os.path.join(BASE_DIR, 'users.json')
+        users = load_json_file(users_json_path)
+        for user in users:
+            existing_user = get_user_data(user['user_id'])
+            if existing_user:
+                print(f"User {user['user_id']} Already exists.")
+            else:
+                create_user_data(
+                    user_id=user['user_id'],
+                    email=user['email'],
+                    full_name=user['full_name'],
+                    nickname=user['nickname'],
+                    created_at=user['created_at'],
+                    updated_at=user['updated_at'],
+                    email_verified=user['email_verified']
+                )
+                print(f"Usuario {user['user_id']} creado exitosamente.")
+        
+        print('-----User check and creation process completed-----')
 
     except SQLAlchemyError as e:
         print(f'---Database error while populating the database: {str(e)}---')
@@ -1257,7 +1308,6 @@ def populate_database():
         session.rollback()
     finally:
         session.close()
-
 
 # Populates the DB
 populate_database()
