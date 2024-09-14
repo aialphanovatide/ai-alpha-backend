@@ -1,16 +1,25 @@
 import secrets
 import string
 from sqlalchemy import exc
-from config import Session, User
 from sqlalchemy.orm import joinedload
 from flask import jsonify, request, Blueprint
 from config import PurchasedPlan, Session, User
-from utils.general import generate_unique_short_token
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
 
 user_bp = Blueprint('user', __name__)
+
+def generate_unique_short_token(length=7, max_attempts=100):
+    characters = string.ascii_letters + string.digits
+    
+    with Session() as session:
+        for _ in range(max_attempts):
+            token = ''.join(secrets.choice(characters) for _ in range(length))
+            if not session.query(User).filter_by(auth_token=token).first():
+                return token
+    
+    raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
 
 
 @user_bp.route('/register', methods=['POST'])

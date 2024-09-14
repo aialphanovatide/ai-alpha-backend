@@ -2,19 +2,7 @@ import datetime
 import secrets
 import string
 from bs4 import BeautifulSoup
-from config import Session, User
 from utils.external_apis_values import  CAPITALCOM_RESOLUTION_VALUES
-
-def generate_unique_short_token(length=7, max_attempts=100):
-    characters = string.ascii_letters + string.digits
-    
-    with Session() as session:
-        for _ in range(max_attempts):
-            token = ''.join(secrets.choice(characters) for _ in range(length))
-            if not session.query(User).filter_by(auth_token=token).first():
-                return token
-    
-    raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
 
 
 def extract_title_and_body(html_content):

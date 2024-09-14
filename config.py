@@ -18,8 +18,6 @@ import json
 import os
 import uuid
 
-from utils.general import generate_unique_short_token
-
 
 
 load_dotenv()
