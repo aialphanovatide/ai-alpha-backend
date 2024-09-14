@@ -37,6 +37,8 @@ Desktop.ini
 # Database
 db.sqlite
 
+*.db
+
 # Site packages (if using a virtual environment)
 /lib/
 /lib64/
