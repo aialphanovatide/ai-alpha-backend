@@ -21,6 +21,8 @@ __pycache__/config.cpython-311.pyc
 # Database
 db.sqlite
 
+*.db
+
 # Site packages (if using a virtual environment)
 /lib/
 /lib64/
