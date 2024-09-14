@@ -234,6 +234,7 @@ def receive_data_from_tv():
                 token_name = str(symbol).casefold().split('usdt')[0] # btc, eth...
                 categories = {
                     'baseblock_4999_m1': ['ada', 'sol', 'avax'],
+                    'baseblock_4999_m1_nofreetrial': ['ada', 'sol', 'avax'],
                     'corechain_4999_m1': ['near', 'ftm', 'kas'],
                     'rootlink_4999_m1': ['atom', 'dot', 'qnt'],
                     'xpayments_4999_m1': ['xlm', 'algo', 'xrp'],
@@ -249,7 +250,7 @@ def receive_data_from_tv():
                     'founders_14999_m1': []
                 }
 
-               
+
 
                 # Iterate over the keys and update 'founders_14999_m1' value list
                 for key, value in categories.items():
