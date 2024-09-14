@@ -1,16 +1,17 @@
 from sqlalchemy import (
     Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
-    create_engine, Text, Enum, Date, DateTime, JSON
+    create_engine
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.ext.declarative import declarative_base
+from utils.general import generate_unique_short_token
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import func
 from pathlib import Path
 import json
