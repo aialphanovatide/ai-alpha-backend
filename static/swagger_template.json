@@ -1027,40 +1027,69 @@
         }
       },
       "/register": {
-        "post": {
-          "tags": [
-            "User"
-          ],
-          "summary": "Create a new user with provided data.",
-          "parameters": [
-            {
-              "name": "body",
-              "in": "body",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "required": ["nickname", "email"],
-                "properties": {
-                  "nickname": { "type": "string" },
-                  "full_name": { "type": "string"},
-                  "email": { "type": "string" },
-                  "email_verified": { "type": "boolean", "default": false },
-                  "picture": { "type": "string" },
-                  "auth0id": { "type": "string" },
-                  "provider": { "type": "string" }
-                }
+  "post": {
+    "tags": [
+      "User"
+    ],
+    "summary": "Create a new user with provided data.",
+    "parameters": [
+      {
+        "name": "body",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": ["full_name", "nickname", "email"],
+          "properties": {
+            "full_name": { "type": "string" },
+            "nickname": { "type": "string" },
+            "email": { "type": "string" },
+            "email_verified": { "type": "boolean", "default": false },
+            "picture": { "type": "string" },
+            "auth0id": { "type": "string" },
+            "provider": { "type": "string" }
+          }
+        }
+      }
+    ],
+    "responses": {
+      "201": {
+        "description": "User created successfully.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": { "type": "boolean" },
+            "message": { "type": "string" },
+            "user": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer" },
+                "full_name": { "type": "string" },
+                "nickname": { "type": "string" },
+                "email": { "type": "string" },
+                "email_verified": { "type": "boolean" },
+                "picture": { "type": "string" },
+                "auth0id": { "type": "string" },
+                "provider": { "type": "string" },
+                "auth_token": { "type": "string" },
+                "created_at": { "type": "string", "format": "date-time" },
+                "updated_at": { "type": "string", "format": "date-time" }
               }
             }
-          ],
-          "responses": {
-            "200": { "description": "User created successfully." },
-            "400": { "description": "Missing required fields (nickname, email)." },
-            "500": { "description": "Internal server error." }
           }
         }
       },
-     "/edit_user/{auth0id}": {
-  "post": {
+      "400": {
+        "description": "Missing required fields (full_name, nickname, email)."
+      },
+      "500": {
+        "description": "Internal server error."
+      }
+    }
+  }
+},
+      "/edit_user/{user_id}": {
+  "put": { 
     "tags": [
       "User"
     ],

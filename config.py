@@ -18,6 +18,8 @@ import json
 import os
 import uuid
 
+from utils.general import generate_unique_short_token
+
 
 
 load_dotenv()
@@ -180,11 +182,41 @@ class User(Base):
         as_dict(): Returns a dictionary representation of the user object.
     """
 
+    """
+    Represents a user in the system.
+
+    This class defines the structure and behavior of a user entity in the database.
+    It includes personal information, authentication details, and timestamps for
+    record keeping.
+
+    Attributes:
+        user_id (int): The unique identifier for the user. Primary key, auto-incremented.
+        nickname (str): The user's unique nickname. Cannot be null and must be unique.
+        full_name (str): The full name of the user.
+        email (str): The user's email address. Cannot be null and must be unique.
+        email_verified (bool): Indicates if the user's email has been verified. Defaults to False.
+        picture (str): URL to the user's profile picture.
+        auth0id (str): The user's Auth0 ID, if applicable.
+        provider (str): The authentication provider used by the user.
+        auth_token (str): A unique authentication token for the user. Cannot be null and must be unique.
+        created_at (datetime): Timestamp of when the user record was created.
+        updated_at (datetime): Timestamp of the last update to the user record.
+
+    Relationships:
+        purchased_plans: One-to-many relationship with PurchasedPlan model.
+
+    Methods:
+        as_dict(): Returns a dictionary representation of the user object.
+    """
+
     __tablename__ = 'user_table'
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     nickname = Column(String, nullable=False, unique=True)
+    nickname = Column(String, nullable=False, unique=True)
     full_name = Column(String)
+    email = Column(String, nullable=False, unique=True)
+    email_verified = Column(Boolean, default=False)
     email = Column(String, nullable=False, unique=True)
     email_verified = Column(Boolean, default=False)
     picture = Column(String)
@@ -192,9 +224,12 @@ class User(Base):
     provider = Column(String)
     birth_date = Column(String)
     auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())  
+    birth_date = Column(String)
+    auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())  
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    # Relationship with PurchasedPlan model
     # Relationship with PurchasedPlan model
     purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
     
@@ -205,7 +240,15 @@ class User(Base):
         Returns:
             dict: A dictionary containing all the columns of the User object.
         """
+        """
+        Convert the User object to a dictionary.
+
+        Returns:
+            dict: A dictionary containing all the columns of the User object.
+        """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+from sqlalchemy import UniqueConstraint
 
 from sqlalchemy import UniqueConstraint
 
@@ -228,10 +271,17 @@ class PurchasedPlan(Base):
 
     Constraints:
         - UniqueConstraint on user_id and reference_name to prevent duplicate purchases.
+
+    Constraints:
+        - UniqueConstraint on user_id and reference_name to prevent duplicate purchases.
     """
     __tablename__ = 'purchased_plan'
 
     product_id = Column(Integer, primary_key=True, autoincrement=True)
+    reference_name = Column(String, nullable=False)
+    price = Column(Integer, nullable=False)
+    is_subscribed = Column(Boolean, nullable=False, default=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False)
     reference_name = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
     is_subscribed = Column(Boolean, nullable=False, default=True)
@@ -245,8 +295,13 @@ class PurchasedPlan(Base):
         UniqueConstraint('user_id', 'reference_name', name='uq_user_plan'),
     )
     
+    __table_args__ = (
+        UniqueConstraint('user_id', 'reference_name', name='uq_user_plan'),
+    )
+    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
 
 class Category(Base):
     """
