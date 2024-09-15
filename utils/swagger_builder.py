@@ -43,7 +43,6 @@ class Swagger:
 
             # Check if the endpoint already exists
             endpoint_exists = endpoint_route in swagger_json['paths'] and method in swagger_json['paths'][endpoint_route]
-            endpoint_exists = endpoint_route in swagger_json['paths'] and method in swagger_json['paths'][endpoint_route]
             
             if endpoint_exists:
                 print(f'Endpoint {endpoint_route} [{method}] already exists. Updating...')

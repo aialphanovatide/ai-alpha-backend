@@ -136,7 +136,7 @@ def get_coin_analysis():
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/get_analysis', methods=['GET'])
+@analysis_bp.route('/get-analysis', methods=['GET'])
 def get_all_analysis():
     """
     Retrieve all analyses with pagination.
@@ -224,7 +224,7 @@ def get_all_analysis():
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/post_analysis', methods=['POST'])
+@analysis_bp.route('/post-analysis', methods=['POST'])
 def post_analysis():
     """
     Create a new analysis and publish it.
@@ -310,7 +310,7 @@ def post_analysis():
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/delete_analysis/<int:analysis_id>', methods=['DELETE'])
+@analysis_bp.route('/delete-analysis/<int:analysis_id>', methods=['DELETE'])
 def delete_analysis(analysis_id):
     """
     Delete an existing analysis and its associated image.
@@ -377,7 +377,7 @@ def delete_analysis(analysis_id):
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/edit_analysis/<int:analysis_id>', methods=['PUT'])
+@analysis_bp.route('/edit-analysis/<int:analysis_id>', methods=['PUT'])
 def edit_analysis(analysis_id):
     """
     Edit the content of an existing analysis.
@@ -445,7 +445,7 @@ def edit_analysis(analysis_id):
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/get_last_analysis', methods=['GET'])
+@analysis_bp.route('/get-last-analysis', methods=['GET'])
 def get_last_analysis():
     """
     Retrieve the name and date of the last analysis created.
@@ -604,7 +604,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
 
 # ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
-@analysis_bp.route('/schedule_post', methods=['POST'])
+@analysis_bp.route('/schedule-post', methods=['POST'])
 def schedule_post() -> Tuple[Dict, int]:
     """
     Schedule a post for future publication.
@@ -700,7 +700,7 @@ def schedule_post() -> Tuple[Dict, int]:
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/delete_scheduled_job/<string:job_id>', methods=['DELETE'])
+@analysis_bp.route('/delete-scheduled-job/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
     """
     Delete a scheduled job by its ID.
@@ -741,7 +741,7 @@ def delete_scheduled_job(job_id):
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/get_scheduled_job/<string:job_id>', methods=['GET'])
+@analysis_bp.route('/get-scheduled-job/<string:job_id>', methods=['GET'])
 def get_scheduled_job(job_id):
     """
     Get information about a scheduled job by its ID.
@@ -783,7 +783,7 @@ def get_scheduled_job(job_id):
     return jsonify(response), status_code
 
 
-@analysis_bp.route('/get_scheduled_jobs', methods=['GET'])
+@analysis_bp.route('/get-scheduled-jobs', methods=['GET'])
 def get_scheduled_jobs():
     """
     Retrieve information about all scheduled jobs.
@@ -817,7 +817,8 @@ def get_scheduled_jobs():
 
     return jsonify(response), status_code
     
-@analysis_bp.route('/get_coins_ids/<category_name>', methods=['GET'])
+    
+@analysis_bp.route('/get-coins-ids/<category_name>', methods=['GET'])
 def get_coins_ids(category_name):
     """
     Retrieve coins IDs associated with a given category name.

@@ -752,11 +752,11 @@ class NarrativeTrading(Base):
 
     narrative_trading_id = Column(Integer, primary_key=True, autoincrement=True)
     narrative_trading = Column(String)
+    category_name = Column(String, nullable=False)
+    image_url = Column(String, nullable=False, default='')
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    category_name = Column(String, nullable=False)
-    image_url = Column(String, nullable=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)
 
@@ -1066,7 +1066,6 @@ class Hacks(Base):
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-# -----------------------   NEW COMPETITOR TABLE ------------------------------------------------
 
 
 class Competitor(Base):
@@ -1207,7 +1206,6 @@ def get_user_data(user_id: str):
     session.close()
     return user
 
-
 def create_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
     session = Session()
     user = User(auth0id=user_id, email=email, full_name=full_name, nickname=nickname, created_at=created_at, updated_at=updated_at, email_verified=email_verified)
@@ -1217,7 +1215,7 @@ def create_user_data(user_id: str, email: str, full_name: str, nickname: str, cr
     return user
 
 def load_json_file(file_path: str):
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 
 def populate_database():
@@ -1287,7 +1285,7 @@ def populate_database():
         for user in users:
             existing_user = get_user_data(user['user_id'])
             if existing_user:
-                print(f"User {user['user_id']} Already exists.")
+                continue
             else:
                 create_user_data(
                     user_id=user['user_id'],
