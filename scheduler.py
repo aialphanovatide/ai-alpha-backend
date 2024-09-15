@@ -1,7 +1,7 @@
 from config import db_url
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
-from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_MISSED
 
 SLACK_LOGS_CHANNEL_ID = "C06FTS38JRX"
 
@@ -26,9 +26,20 @@ def job_max_instances_reached(event):
                                     sub_title="Response", 
                                     message='Maximum number of running instances reached, *Upgrade* the time interval'
                                     )          
+
+def job_missed(event):
+    job_id = str(event.job_id).capitalize()
+    send_INFO_message_to_slack_channel(channel_id=SLACK_LOGS_CHANNEL_ID,
+                                    title_message=f'{job_id} News Bot has missed a scheduled execution', 
+                                    sub_title="Response", 
+                                    message='Missed execution, check the job details and configuration'
+                                    )
   
    
 
    
 scheduler.add_listener(job_error, EVENT_JOB_ERROR)
 scheduler.add_listener(job_max_instances_reached, EVENT_JOB_MAX_INSTANCES)
+scheduler.add_listener(job_missed, EVENT_JOB_MISSED)
+
+

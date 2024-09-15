@@ -17,71 +17,43 @@ narrative_trading_bp = Blueprint('narrative_trading', __name__)
 image_generator = ImageGenerator()
 image_processor = ImageProcessor()
 
-@narrative_trading_bp.route('/get-narrative-trading/<int:coin_bot_id>', methods=['GET'])
-def get_narrative_trading(coin_bot_id):
+@narrative_trading_bp.route('/narrative-trading', methods=['GET'])
+def get_narrative_trading():
+    """
+    Retrieve narrative trading entries for a specific coin, with pagination.
+
+    Query Parameters:
+    - coin_id (int, optional): ID of the coin
+    - coin_name (str, optional): Name of the coin
+    - page (int, optional): Page number (default: 1)
+    - limit (int, optional): Items per page (default: 10, max: 100)
+
+    Returns:
+    JSON with narrative trading data, total count, and pagination info.
+    """
     session = Session()
     try:
+        coin_id = request.args.get('coin_id', type=int)
+        coin_name = request.args.get('coin_name')
         page = request.args.get('page', 1, type=int)
         limit = request.args.get('limit', 10, type=int)
+        limit = min(limit, 100)  # Cap at 100
 
-        narrative_trading_objects = (session.query(NarrativeTrading)
-                                     .filter_by(coin_bot_id=coin_bot_id)
-                                     .order_by(desc(NarrativeTrading.created_at))
-                                     .offset((page - 1) * limit)
-                                     .limit(limit)
-                                     .all())
+        if not coin_id and not coin_name:
+            return jsonify(create_response(success=False, error='Coin ID or name is required')), 400
 
-        if not narrative_trading_objects:
-            return jsonify(create_response(success=False, error='No narrative trading found')), 404
+        query = session.query(NarrativeTrading).options(joinedload(NarrativeTrading.coin_bot))
 
-        narrative_trading_data = []
-        for nt in narrative_trading_objects:
-            nt_dict = nt.to_dict()
-            # nt_dict.pop('narrative_trading_images', None)
-            # nt_dict.pop('image', None)
-            nt_dict['category_name'] = nt.category_name
-            nt_dict['coin_bot_id'] = nt.coin_bot_id 
-            narrative_trading_data.append(nt_dict)
-
-        total_count = session.query(NarrativeTrading).filter_by(coin_bot_id=coin_bot_id).count()
-        total_pages = (total_count + limit - 1) // limit
-
-        return jsonify(create_response(success=True, data=narrative_trading_data, total_count=total_count, total_pages=total_pages, page=page, limit=limit)), 200
-
-    except SQLAlchemyError as e:
-        session.rollback()
-        print(f"Database error: {str(e)}")
-        return jsonify(create_response(success=False, error="Database error occurred.")), 500
-
-    except Exception as e:
-        session.rollback()
-        print(f"Internal server error: {str(e)}")
-        return jsonify(create_response(success=False, error="Internal server error occurred.")), 500
-
-    finally:
-        session.close()
-
-@narrative_trading_bp.route('/get_narrative_trading_by_coin', methods=['GET'])
-def get_narrative_trading_by_coin():
-    session = Session()
-    try:
-        coin_bot_name = request.args.get('coin_bot_name')
-        coin_bot_id = request.args.get('coin_bot_id')
-        page = request.args.get('page', 1, type=int)
-        limit = request.args.get('limit', 10, type=int)
-
-        if not coin_bot_id and not coin_bot_name:
-            return jsonify(create_response(success=False, error='Coin ID or name is missing')), 400
-
-        query = session.query(NarrativeTrading)
-        if coin_bot_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_bot_name).first()
-            if coin:
-                query = query.filter_by(coin_bot_id=coin.bot_id)
-        elif coin_bot_id:
-            query = query.filter_by(coin_bot_id=coin_bot_id)
+        if coin_name:
+            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+            if not coin:
+                return jsonify(create_response(success=False, error='Coin not found')), 404
+            query = query.filter(NarrativeTrading.coin_bot_id == coin.bot_id)
+        elif coin_id:
+            query = query.filter(NarrativeTrading.coin_bot_id == coin_id)
 
         total_count = query.count()
+        
         narrative_trading_objects = (query.order_by(desc(NarrativeTrading.created_at))
                                      .offset((page - 1) * limit)
                                      .limit(limit)
@@ -90,34 +62,34 @@ def get_narrative_trading_by_coin():
         if not narrative_trading_objects:
             return jsonify(create_response(success=False, error='No narrative trading found')), 404
 
-        narrative_trading_data = []
-        for nt in narrative_trading_objects:
-            nt_dict = nt.to_dict()
-            nt_dict.pop('narrative_trading_images', None)
-            nt_dict.pop('image', None)
-            nt_dict['category_name'] = nt.category_name
-            nt_dict['coin_bot_id'] = nt.coin_bot_id 
-            narrative_trading_data.append(nt_dict)
+        narrative_trading_data = [nt.to_dict() for nt in narrative_trading_objects]
+        for nt_dict, nt in zip(narrative_trading_data, narrative_trading_objects):
+            nt_dict['coin_bot_name'] = nt.coin_bot.bot_name if nt.coin_bot else None
 
         total_pages = (total_count + limit - 1) // limit
 
-        return jsonify(create_response(success=True, data=narrative_trading_data, total_count=total_count, total_pages=total_pages, page=page, limit=limit)), 200
+        return jsonify(create_response(
+            success=True, 
+            data=narrative_trading_data, 
+            total_count=total_count, 
+            total_pages=total_pages, 
+            page=page, 
+            limit=limit
+        )), 200
 
     except SQLAlchemyError as e:
         session.rollback()
-        print(f"Database error: {str(e)}")
-        return jsonify(create_response(success=False, error="Database error occurred.")), 500
+        return jsonify(create_response(success=False, error=f"Database error occurred: {str(e)}")), 500
 
     except Exception as e:
         session.rollback()
-        print(f"Internal server error: {str(e)}")
-        return jsonify(create_response(success=False, error="Internal server error occurred.")), 500
+        return jsonify(create_response(success=False, error=f"Internal server error occurred: {str(e)}")), 500
 
     finally:
         session.close()
         
         
-@narrative_trading_bp.route('/get-narrative-tradings', methods=['GET'])
+@narrative_trading_bp.route('/narrative-tradings', methods=['GET'])
 def get_all_narrative_trading():
     """
     Retrieve all narrative trading entries with optional pagination.
@@ -146,9 +118,6 @@ def get_all_narrative_trading():
         page = request.args.get('page', type=int)
         limit = request.args.get('limit', type=int)
 
-        print('page: ', page)
-        print('limit: ', limit)
-
         # Build the query
         query = session.query(NarrativeTrading).options(joinedload(NarrativeTrading.coin_bot))
         query = query.order_by(desc(NarrativeTrading.created_at))
@@ -163,8 +132,6 @@ def get_all_narrative_trading():
 
         # Apply pagination only if both page and limit are provided
         if page and limit:
-            print(page, limit)
-            print('type: ', type(page), type(limit))
             if page < 1 or limit < 1:
                 response["error"] = "Invalid pagination parameters"
                 status_code = 400
@@ -211,7 +178,7 @@ def get_all_narrative_trading():
     return jsonify(response), status_code
 
 
-@narrative_trading_bp.route('/post_narrative_trading', methods=['POST'])
+@narrative_trading_bp.route('/narrative-trading', methods=['POST'])
 def post_narrative_trading():
     """
     Create a new narrative trading post.
@@ -238,10 +205,6 @@ def post_narrative_trading():
             return jsonify(create_response(success=False, 
                                            error='One or more required values are missing')), 400
 
-        print('coin_id', coin_id)
-        print('content', content)
-        print('category_name', category_name)
-
         # Call the function to handle posting
         narrative_trading_post = publish_narrative_trading(coin_id, content, category_name)
         
@@ -266,7 +229,7 @@ def post_narrative_trading():
         session.close()
 
     
-@narrative_trading_bp.route('/delete_narrative_trading/<int:narrative_trading_id>', methods=['DELETE'])
+@narrative_trading_bp.route('/narrative-trading/<int:narrative_trading_id>', methods=['DELETE'])
 def delete_narrative_trading(narrative_trading_id):
     """
     Delete a narrative trading post by narrative_trading_id and its associated S3 image.
@@ -287,12 +250,12 @@ def delete_narrative_trading(narrative_trading_id):
 
         if not narrative_trading_to_delete:
             return jsonify(create_response(success=False, 
-                                           error='narrative_trading not found')), 404
+                                           error='Narrative trading not found')), 404
 
         # Delete associated S3 image if it exists
         if narrative_trading_to_delete.image_url:
             try:
-                ImageProcessor.delete_from_s3(narrative_trading_to_delete.image_url)
+                image_processor.delete_from_s3(narrative_trading_to_delete.image_url)
             except Exception as e:
                 raise ValueError(f"Error: {str(e)}")
                 
@@ -310,11 +273,12 @@ def delete_narrative_trading(narrative_trading_id):
     except Exception as e:
         session.rollback()
         return jsonify(create_response(success=False, 
-                                       error=f"Internal server error occurred: {str(e)}")), 500
+                                       error=f"Internal server error while deleting: {str(e)}")), 500
     finally:
         session.close()
 
-@narrative_trading_bp.route('/edit_narrative_trading/<int:narrative_trading_id>', methods=['PUT'])
+
+@narrative_trading_bp.route('/narrative-trading/<int:narrative_trading_id>', methods=['PUT'])
 def edit_narrative_trading(narrative_trading_id):
     """
     Edit an existing narrative trading post.
@@ -334,33 +298,37 @@ def edit_narrative_trading(narrative_trading_id):
             NarrativeTrading.narrative_trading_id == narrative_trading_id).first()
 
         if not narrative_trading_to_edit:
-            return jsonify(create_response(success=False, error='narrative_trading not found')), 404
+            return jsonify(create_response(success=False, 
+                                           error='Narrative trading not found')), 404
 
         new_content = request.json.get('content')
 
         if not new_content:
-            return jsonify(create_response(success=False, error='New content is required to edit the narrative_trading')), 400
+            return jsonify(create_response(success=False, 
+                                           error='New content is required to edit the narrative trading')), 400
 
         narrative_trading_to_edit.narrative_trading = new_content
         session.commit()
 
-        return jsonify(create_response(success=True, message='narrative_trading edited successfully')), 200
+        return jsonify(create_response(success=True, 
+                                       data=narrative_trading_to_edit.to_dict(),
+                                       message='Narrative trading edited successfully')), 200
 
     except SQLAlchemyError as e:
         session.rollback()
-        print(f"Database error: {str(e)}")
-        return jsonify(create_response(success=False, error="Database error occurred.")), 500
+        return jsonify(create_response(success=False, 
+                                       error=f"Database error occurred, {str(e)}")), 500
 
     except Exception as e:
         session.rollback()
-        print(f"Internal server error: {str(e)}")
-        return jsonify(create_response(success=False, error="Internal server error occurred.")), 500
+        return jsonify(create_response(success=False, 
+                                       error=f"Internal server error occurred, {str(e)}")), 500
 
     finally:
         session.close()
 
 
-@narrative_trading_bp.route('/last-narrative-trading', methods=['GET'])
+@narrative_trading_bp.route('/narrative-trading/last', methods=['GET'])
 def get_last_narrative_trading():
     """
     Retrieve the most recent narrative trading entry.
@@ -432,7 +400,6 @@ def publish_narrative_trading(coin_bot_id, content, category_name):
             raise ValueError(f"Error generating and uploading image: {str(e)}")
 
         try:
-            print(coin_bot_id, content, category_name, image_url)
             new_narrative_trading = create_narrative_trading(coin_bot_id, content, category_name, image_url)
         except Exception as e:
             raise ValueError(f"Error creating narrative trading: {str(e)}")
@@ -460,16 +427,16 @@ def extract_title_and_content(content):
         title = content[:title_end_index].strip()
         content = content[title_end_index+1:]
     else:
-        title = ""
+        raise ValueError("Error extracting title and content")
+    
     return title, content
 
 def generate_and_upload_image(title, content):
     try:
         image = image_generator.generate_image(content)
-        if not image:
-            raise ValueError("Could not generate image")
         
-        image_filename = f"{title}.jpg"
+        formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
+        image_filename = f"{formatted_title}.jpg"
         resized_image_url = image_processor.process_and_upload_image(
             image_url=image,
             bucket_name='appnarrativetradingimages',
@@ -491,7 +458,6 @@ def create_narrative_trading(coin_bot_id, content, category_name, image_url):
                 coin_bot_id=coin_bot_id,
                 image_url=image_url
             )
-            print(new_narrative_trading)
             session.add(new_narrative_trading)
             session.commit()
             return new_narrative_trading
@@ -499,16 +465,14 @@ def create_narrative_trading(coin_bot_id, content, category_name, image_url):
         except SQLAlchemyError as e:
             session.rollback()
             error_message = f"Failed to save to the database: {str(e)}"
-            print(error_message)
             raise ValueError(error_message)
         except Exception as e:
             session.rollback()
             error_message = f"An unexpected error occurred: {str(e)}"
-            print(error_message)
             raise ValueError(error_message)
         
         
-@narrative_trading_bp.route('/schedule_narrative_post', methods=['POST'])
+@narrative_trading_bp.route('/schedule-narrative-trading', methods=['POST'])
 def schedule_post():
     """
     Schedule a narrative trading post for future publishing.
@@ -537,31 +501,43 @@ def schedule_post():
         Exception: For any other unexpected errors
     """
     try:
-        coin_bot_id = request.form.get('coinBot')
+        coin_id = request.form.get('coin_id')
         category_name = request.form.get('category_name')
         content = request.form.get('content')
-        scheduled_date_str = request.form.get('scheduledDate')
+        scheduled_date_str = request.form.get('scheduled_date')
 
-        if not all([coin_bot_id, content, scheduled_date_str]):
-            return jsonify(create_response(success=False, error='One or more required values are missing')), 400
+        missing_params = []
+        if not coin_id:
+            missing_params.append('coin_id')
+        if not content:
+            missing_params.append('content')
+        if not scheduled_date_str:
+            missing_params.append('scheduledDate')
+
+        if missing_params:
+            error_message = f"The following required parameters are missing: {', '.join(missing_params)}"
+            return jsonify(create_response(success=False, 
+                                           error=error_message)), 400
 
         try:
             scheduled_datetime = datetime.strptime(scheduled_date_str, '%a, %b %d, %Y, %I:%M:%S %p')
         except ValueError as e:
-            return jsonify(create_response(success=False, error=f'Invalid date format: {str(e)}')), 400
+            return jsonify(create_response(success=False, 
+                                           error=f'Invalid date format: {str(e)}')), 400
 
         job = sched.add_job(publish_narrative_trading, 
-                            args=[coin_bot_id, content, category_name],
+                            args=[coin_id, content, category_name],
                             trigger=DateTrigger(run_date=scheduled_datetime))
 
-        return jsonify(create_response(success=True, message=f'Post scheduled successfully. Job ID: {job.id}')), 200
+        return jsonify(create_response(success=True, 
+                                       message=f'Post scheduled successfully - Job ID: {job.id}')), 200
 
     except Exception as e:
-        print(f"Error in schedule_post: {str(e)}")
-        return jsonify(create_response(success=False, error='An unexpected error occurred')), 500
+        return jsonify(create_response(success=False, 
+                                       error=f'An unexpected error occurred: {str(e)}')), 500
 
 
-@narrative_trading_bp.route('/get_narrative_trading_jobs', methods=['GET'])
+@narrative_trading_bp.route('/scheduled-narrative-tradings', methods=['GET'])
 def get_jobs():
     """
     Retrieve a list of all scheduled narrative trading jobs.
@@ -584,13 +560,15 @@ def get_jobs():
             }
             job_listing.append(job_info)
 
-        return jsonify(create_response(success=True, data={'jobs': job_listing})), 200
+        return jsonify(create_response(success=True, 
+                                       data={'jobs': job_listing})), 200
 
     except Exception as e:
-        print(f"Error retrieving jobs: {str(e)}")
-        return jsonify(create_response(success=False, error="Failed to retrieve jobs.")), 500
+        return jsonify(create_response(success=False, 
+                                       error=f"Failed to retrieve jobs, {str(e)}")), 500
 
-@narrative_trading_bp.route('/delete_scheduled_narrative_job/<string:job_id>', methods=['DELETE'])
+
+@narrative_trading_bp.route('/scheduled-narrative-tradings/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
     """
     Delete a scheduled narrative trading job by job ID.
@@ -607,17 +585,18 @@ def delete_scheduled_job(job_id):
     try:
         job = sched.get_job(job_id)
         if not job:
-            return jsonify(create_response(success=False, error='Scheduled job not found')), 404
+            return jsonify(create_response(success=False, 
+                                           error='Scheduled job not found')), 404
 
         sched.remove_job(job_id)
-
-        return jsonify(create_response(success=True, message='Scheduled job deleted successfully')), 200
+        return jsonify(create_response(success=True, 
+                                       message='Scheduled job deleted successfully')), 200
 
     except JobLookupError as e:
-        print(f"Job lookup error: {str(e)}")
-        return jsonify(create_response(success=False, error="Job not found.")), 404
+        return jsonify(create_response(success=False, 
+                                       error=f"Job not found, {str(e)}")), 404
 
     except Exception as e:
-        print(f"Error deleting job: {str(e)}")
-        return jsonify(create_response(success=False, error="Failed to delete job.")), 500
+        return jsonify(create_response(success=False, 
+                                       error=f"Failed to delete job, {str(e)}")), 500
     
