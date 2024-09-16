@@ -1,9 +1,7 @@
-import datetime
-import json
 import os
-from flask import Flask, session
+import json
+from flask import Flask
 from flask_cors import CORS
-from config import User
 from routes.chart.chart import chart_bp
 from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
@@ -35,15 +33,15 @@ from routes.external_apis.binance import binance_bp
 from routes.coin_bot.coinbot import coin_bot_bp
 from flasgger import Swagger
 from ws.socket import init_socketio
-from sqlalchemy.exc import SQLAlchemyError
 
 app = Flask(__name__)
-app.name = 'AI Alpha'
-swagger_template_path = os.path.join(app.root_path, 'static', 'swagger_template.json')
+app.name = 'AI Alpha API'
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
 
 # Initialize SocketIO
 socketio = init_socketio(app)
 
+# Swagger configuration
 with open(swagger_template_path, 'r') as f:
     swagger_template = json.load(f)
 
@@ -59,17 +57,20 @@ swagger_config = {
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/apidocs/"
+    "specs_route": "/apidocs/",
+    "logo": {
+        "url": "static/logo.png",
+        "backgroundColor": "#FFFFFF",
+        "altText": "AI Alpha Logo"
+    }
 }
 
 swagger = Swagger(app, template=swagger_template, config=swagger_config)
-
 CORS(app, origins='*', supports_credentials=True)
 
 
 app.static_folder = 'static'
 app.secret_key = os.urandom(24)
-
 
 # Register blueprints -  routes
 app.register_blueprint(scrapper_bp)
@@ -106,8 +107,8 @@ app.register_blueprint(coin_bot_bp)
 if __name__ == '__main__':
     try:
         with app.app_context():
-            print('---AI Alpha server is running---') 
-            app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+            print('---AI Alpha API is running---') 
+            app.run(port=9000, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
