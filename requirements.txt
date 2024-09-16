@@ -31,6 +31,6 @@ cachetools
 alembic
 flask-socketio
 pytz
-tvdatafeed
+# tvdatafeed
 marshmallow
 gunicorn
