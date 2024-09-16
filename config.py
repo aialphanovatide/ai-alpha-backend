@@ -8,16 +8,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from utils.general import generate_unique_short_token
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import UniqueConstraint
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
 from pathlib import Path
+import uuid
 import json
 import os
-import uuid
-
 
 
 load_dotenv()
@@ -27,6 +27,7 @@ DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 engine = create_engine(db_url, pool_size=30, max_overflow=20)
@@ -179,65 +180,25 @@ class User(Base):
     Methods:
         as_dict(): Returns a dictionary representation of the user object.
     """
-
-    """
-    Represents a user in the system.
-
-    This class defines the structure and behavior of a user entity in the database.
-    It includes personal information, authentication details, and timestamps for
-    record keeping.
-
-    Attributes:
-        user_id (int): The unique identifier for the user. Primary key, auto-incremented.
-        nickname (str): The user's unique nickname. Cannot be null and must be unique.
-        full_name (str): The full name of the user.
-        email (str): The user's email address. Cannot be null and must be unique.
-        email_verified (bool): Indicates if the user's email has been verified. Defaults to False.
-        picture (str): URL to the user's profile picture.
-        auth0id (str): The user's Auth0 ID, if applicable.
-        provider (str): The authentication provider used by the user.
-        auth_token (str): A unique authentication token for the user. Cannot be null and must be unique.
-        created_at (datetime): Timestamp of when the user record was created.
-        updated_at (datetime): Timestamp of the last update to the user record.
-
-    Relationships:
-        purchased_plans: One-to-many relationship with PurchasedPlan model.
-
-    Methods:
-        as_dict(): Returns a dictionary representation of the user object.
-    """
-
     __tablename__ = 'user_table'
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     nickname = Column(String, nullable=False, unique=True)
-    nickname = Column(String, nullable=False, unique=True)
     full_name = Column(String)
-    email = Column(String, nullable=False, unique=True)
-    email_verified = Column(Boolean, default=False)
     email = Column(String, nullable=False, unique=True)
     email_verified = Column(Boolean, default=False)
     picture = Column(String)
     auth0id = Column(String)
     provider = Column(String)
-    birth_date = Column(String)
     auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())  
-    birth_date = Column(String)
-    auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())  
+    birth_date = Column(String) 
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship with PurchasedPlan model
-    # Relationship with PurchasedPlan model
     purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
-    
-    def as_dict(self):
-        """
-        Convert the User object to a dictionary.
 
-        Returns:
-            dict: A dictionary containing all the columns of the User object.
-        """
+    def as_dict(self):
         """
         Convert the User object to a dictionary.
 
@@ -246,9 +207,6 @@ class User(Base):
         """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-from sqlalchemy import UniqueConstraint
-
-from sqlalchemy import UniqueConstraint
 
 class PurchasedPlan(Base):
     """
@@ -269,9 +227,6 @@ class PurchasedPlan(Base):
 
     Constraints:
         - UniqueConstraint on user_id and reference_name to prevent duplicate purchases.
-
-    Constraints:
-        - UniqueConstraint on user_id and reference_name to prevent duplicate purchases.
     """
     __tablename__ = 'purchased_plan'
 
@@ -280,18 +235,10 @@ class PurchasedPlan(Base):
     price = Column(Integer, nullable=False)
     is_subscribed = Column(Boolean, nullable=False, default=True)
     user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False)
-    reference_name = Column(String, nullable=False)
-    price = Column(Integer, nullable=False)
-    is_subscribed = Column(Boolean, nullable=False, default=True)
-    user_id = Column(Integer, ForeignKey('user_table.user_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     user = relationship('User', back_populates='purchased_plans')
-    
-    __table_args__ = (
-        UniqueConstraint('user_id', 'reference_name', name='uq_user_plan'),
-    )
     
     __table_args__ = (
         UniqueConstraint('user_id', 'reference_name', name='uq_user_plan'),
@@ -696,20 +643,21 @@ class TopStoryImage(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
+    
 class Analysis(Base):
     """
     Represents an analysis associated with a CoinBot.
 
     This class defines the structure for storing analysis information,
-    including the analysis content, category, and associated images.
+    including the analysis content, category, and associated image URL.
 
     Attributes:
         analysis_id (int): The primary key for the analysis.
         analysis (str): The content of the analysis.
+        image_url (str): The URL of the associated image, if any.
+        category_name (str): The name of the category for this analysis.
         created_at (datetime): Timestamp of when the analysis was created.
         updated_at (datetime): Timestamp of the last update to the analysis record.
-        category_name (str): The name of the category for this analysis.
         coin_bot_id (int): Foreign key referencing the associated CoinBot.
         images (relationship): Relationship to associated AnalysisImage objects.
         coin_bot (relationship): Relationship to the associated CoinBot.
@@ -718,22 +666,17 @@ class Analysis(Base):
 
     analysis_id = Column(Integer, primary_key=True, autoincrement=True)
     analysis = Column(String)
+    image_url = Column(String, nullable=True)
+    category_name = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    category_name = Column(String)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
-
+    
     images = relationship('AnalysisImage', back_populates='analysis')
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
 
     def to_dict(self):
-        return {
-            'analysis_id': self.analysis_id,
-            'analysis': self.analysis,
-            'created_at': str(self.created_at),
-            'updated_at': str(self.updated_at),
-            'category_name': self.category_name
-        }
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class AnalysisImage(Base):
     """
@@ -752,7 +695,7 @@ class AnalysisImage(Base):
     __tablename__ = 'analysis_image'
 
     image_id = Column(Integer, primary_key=True, autoincrement=True)
-    image = Column(String)
+    image = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
@@ -809,21 +752,16 @@ class NarrativeTrading(Base):
 
     narrative_trading_id = Column(Integer, primary_key=True, autoincrement=True)
     narrative_trading = Column(String)
+    category_name = Column(String, nullable=False)
+    image_url = Column(String, nullable=False, default='')
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    category_name = Column(String, nullable=False)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='narrative_trading', lazy=True)
 
     def to_dict(self):
-        return {
-            'narrative_trading_id': self.narrative_trading_id,
-            'narrative_trading': self.narrative_trading,
-            'created_at': str(self.created_at),
-            'updated_at': str(self.updated_at),
-            'category_name': self.category_name
-        }
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Chart(Base):
     """
@@ -1128,7 +1066,6 @@ class Hacks(Base):
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-# -----------------------   NEW COMPETITOR TABLE ------------------------------------------------
 
 
 class Competitor(Base):
@@ -1252,66 +1189,116 @@ ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 # ------------- POPULATE THE DB WITH DATA.JSON -------------------
 
+def build_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
+    return {
+        "auth0id": user_id,
+        "email": email,
+        "full_name": full_name,
+        "nickname": nickname,
+        "created_at": created_at,
+        "updated_at": updated_at,
+        "email_verified": email_verified
+    }
+
+def get_user_data(user_id: str):
+    session = Session()
+    user = session.query(User).filter(User.auth0id == user_id).first()
+    session.close()
+    return user
+
+def create_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
+    session = Session()
+    user = User(auth0id=user_id, email=email, full_name=full_name, nickname=nickname, created_at=created_at, updated_at=updated_at, email_verified=email_verified)
+    session.add(user)
+    session.commit()
+    session.close()
+    return user
+
+def load_json_file(file_path: str):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
 def populate_database():
     """
-    Populate the database with initial data from a JSON file.
-    This function creates categories, coins, keywords, blacklists, and sites.
+    Populate the database with initial data from JSON files.
+    This function creates categories, coins, keywords, blacklists, sites, and users.
     """
     session = Session()
     
     try:
-        # Check if the database is already populated
+        # Check if the database is already populated with categories and sites
         if not session.query(Category).first() and not session.query(Site).first():
             with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
-                for item in config:
-                    main_keyword = item['main_keyword']
-                    alias = item['alias']
-                    coins = item['coins']
+            for item in config:
+                main_keyword = item['main_keyword']
+                alias = item['alias']
+                coins = item['coins']
 
-                    new_category = Category(
-                        category=main_keyword,
-                        category_name=alias,
-                        icon=item['icon'],
-                        border_color=item['borderColor'],
-                    )
+                new_category = Category(
+                    category=main_keyword,
+                    category_name=alias,
+                    icon=item['icon'],
+                    border_color=item['borderColor'],
+                )
 
-                    for coin in coins:
-                        coin_keyword = coin['coin_keyword'].casefold()
-                        keywords = coin['keywords']
-                        sites = coin['sites']
-                        black_list = coin['black_list']
+                for coin in coins:
+                    coin_keyword = coin['coin_keyword'].casefold()
+                    keywords = coin['keywords']
+                    sites = coin['sites']
+                    black_list = coin['black_list']
 
-                        new_coin = CoinBot(bot_name=coin_keyword)
-                        new_coin.category = new_category
+                    new_coin = CoinBot(bot_name=coin_keyword)
+                    new_coin.category = new_category
 
-                        for keyword in keywords:
-                            new_coin.keywords.append(Keyword(word=keyword.casefold()))
+                    for keyword in keywords:
+                        new_coin.keywords.append(Keyword(word=keyword.casefold()))
 
-                        for word in black_list:
-                            new_coin.blacklist.append(Blacklist(word=word.casefold()))
+                    for word in black_list:
+                        new_coin.blacklist.append(Blacklist(word=word.casefold()))
 
-                        for site_data in sites:
-                            site = Site(
-                                site_name=str(site_data['website_name']),
-                                base_url=str(site_data['base_url']).casefold(),
-                                data_source_url=str(site_data['site']).capitalize(),
-                                is_URL_complete=site_data['is_URL_complete'],
-                                main_container=str(site_data['main_container'])
-                            )
-                            new_coin.sites.append(site)
+                    for site_data in sites:
+                        site = Site(
+                            site_name=str(site_data['website_name']),
+                            base_url=str(site_data['base_url']).casefold(),
+                            data_source_url=str(site_data['site']).capitalize(),
+                            is_URL_complete=site_data['is_URL_complete'],
+                            main_container=str(site_data['main_container'])
+                        )
+                        new_coin.sites.append(site)
 
-                        session.add(new_coin)
-                        print(f'-----CoinBot data saved for {coin_keyword}-----')
+                    session.add(new_coin)
+                    print(f'-----CoinBot data saved for {coin_keyword}-----')
 
-                    session.add(new_category)
-                    print(f'-----Category {main_keyword} populated-----')
-                    
-                session.commit()
-                print('-----All data successfully populated-----')
+                session.add(new_category)
+                print(f'-----Category {main_keyword} populated-----')
+                
+            session.commit()
+            print('-----All category and site data successfully populated-----')
         else:
-            print('-----Database is already populated. Skipping population process-----')
+            print('-----Categories and sites are already populated. Skipping this process-----')
+
+        # Now, let's handle the users
+        users_json_path = os.path.join(BASE_DIR, 'users.json')
+        users = load_json_file(users_json_path)
+        for user in users:
+            existing_user = get_user_data(user['user_id'])
+            if existing_user:
+                continue
+            else:
+                create_user_data(
+                    user_id=user['user_id'],
+                    email=user['email'],
+                    full_name=user['full_name'],
+                    nickname=user['nickname'],
+                    created_at=user['created_at'],
+                    updated_at=user['updated_at'],
+                    email_verified=user['email_verified']
+                )
+                print(f"Usuario {user['user_id']} creado exitosamente.")
+        
+        print('-----User check and creation process completed-----')
 
     except SQLAlchemyError as e:
         print(f'---Database error while populating the database: {str(e)}---')
@@ -1326,7 +1313,6 @@ def populate_database():
         session.rollback()
     finally:
         session.close()
-
 
 # Populates the DB
 populate_database()
@@ -1386,3 +1372,8 @@ def init_superadmin():
 
 # Create SuperAdmin
 init_superadmin()
+
+
+# ------------- POPULATE THE DB WITH USERS.JSON -------------------
+
+

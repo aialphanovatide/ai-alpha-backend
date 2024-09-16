@@ -1,30 +1,26 @@
 import os
 from http import HTTPStatus
-from sqlalchemy import desc
 from dotenv import load_dotenv
+from sqlalchemy import Interval, desc
 from sqlalchemy.exc import SQLAlchemyError
+from tvDatafeed import TvDatafeed, Interval
 from config import Chart, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  
 
-
-from routes.chart.total3 import get_total_3_data
 
 load_dotenv()
 
 TW_USER = os.getenv('TW_USER')
 TW_PASS = os.getenv('TW_PASS')
 
-
 chart_bp = Blueprint('chart', __name__)
-
 
 # Load environment variables
 load_dotenv()
 
-# Get WordPress API key from environment variables
+# Get CoinGecko API key from environment variables
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 COINGECKO_API_URL = "https://pro-api.coingecko.com/api/v3"
-
 
 
 @chart_bp.route('/api/chart/save_chart', methods=['POST'])
@@ -227,3 +223,4 @@ def get_total_3_data_route():
         response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
 
     return jsonify(response), response["status"]
+

@@ -22,7 +22,7 @@ def generate_unique_short_token(length=7, max_attempts=100):
     raise ValueError(f"Unable to generate a unique token after {max_attempts} attempts")
 
 
-@user_bp.route('/register', methods=['POST'])
+@user_bp.route('/user', methods=['POST'])
 def set_new_user():
     """
     Register a new user in the system.
@@ -91,7 +91,7 @@ def set_new_user():
             return jsonify(response), 500
     
     
-@user_bp.route('/edit-user/<int:user_id>', methods=['PUT'])
+@user_bp.route('/user/<int:user_id>', methods=['PUT'])
 def edit_user_data(user_id):
     """
     Edit user data identified by user ID.
@@ -384,7 +384,7 @@ def save_package():
             return jsonify(response), 500
     
 
-@user_bp.route('/unsubscribe-package', methods=['PUT'])
+@user_bp.route('/package', methods=['PUT'])
 def unsubscribe_package():
     """
     Unsubscribe a user from a purchased plan by setting is_subscribed to False.
@@ -456,7 +456,7 @@ def unsubscribe_package():
             return jsonify(response), 500
     
 
-@user_bp.route('/delete-user', methods=['DELETE'])
+@user_bp.route('/user', methods=['DELETE'])
 def delete_user_account():
     """
     Delete a user account identified by auth0id or email.
