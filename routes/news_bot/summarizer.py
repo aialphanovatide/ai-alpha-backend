@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OPENAI_KEY = os.getenv('OPENAI_KEY')
+OPENAI_APIKEY = os.getenv('OPENAI_APIKEY')
 
 client = OpenAI(
-    api_key=OPENAI_KEY,
+    api_key=OPENAI_APIKEY,
 )
 btc_prompt = """
 Imagine that you are one of the world's foremost experts on Bitcoin and also a globally renowned journalist skilled at summarizing articles about Bitcoin. Your job involves two steps.
