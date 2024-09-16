@@ -1221,7 +1221,7 @@ def populate_database():
     try:
         # Check if the database is already populated with categories and sites
         if not session.query(Category).first() and not session.query(Site).first():
-            with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
+            with open(f'{ROOT_DIRECTORY}/models/init_data/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
             for item in config:
@@ -1273,7 +1273,7 @@ def populate_database():
             print('-----Categories and sites are already populated. Skipping this process-----')
 
         # Now, let's handle the users
-        users_json_path = os.path.join(BASE_DIR, 'users.json')
+        users_json_path = os.path.join(ROOT_DIRECTORY, 'models', 'init_data', 'users.json')
         users = load_json_file(users_json_path)
         for user in users:
             existing_user = get_user_data(user['user_id'])

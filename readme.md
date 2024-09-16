@@ -28,12 +28,6 @@ pip install -r requirements.txt
 ```
 
 ### Database Migrations
-- We use Alembic for database migrations. Follow these steps to manage database schema changes:
-
-```bash
-alembic init alembic
-```
-
 - Create a new migration:
 
 ```bash
@@ -50,6 +44,32 @@ alembic upgrade head
 
 ```bash
 alembic downgrade -1
+```
+
+## Database Migration Workflow
+
+To manage database schema changes. Follow these steps to handle migrations effectively:
+
+```bash
+# Before starting work
+git pull
+alembic upgrade head
+
+# After making model changes
+alembic revision --autogenerate -m "description of changes"
+
+# Before committing
+git pull
+alembic heads  # Check for multiple heads
+
+# If multiple heads exist:
+alembic merge -m "merge heads: a simple description of the revisions" <revision1> <revision2>
+alembic upgrade head
+
+# Test your changes
+git add .
+git commit -m "Database changes with merge"
+git push
 ```
 
 ### WebSocket Events
