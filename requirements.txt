@@ -33,3 +33,4 @@ flask-socketio
 pytz
 tvdatafeed
 marshmallow
+gunicorn
