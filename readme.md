@@ -2,7 +2,13 @@
 
 Full rest API for AI Alpha
 
-## Installation
+## Docker Installation
+
+```
+docker compose -f docker-compose.dev.yml up --build
+```
+
+## Manual Installation
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to iniciate the project.
 

@@ -19,15 +19,17 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
     command: >
-      command: >
       sh -c "chmod +x /app/script.sh &&
-             alembic upgrade head &&
              /app/script.sh"
 
   db_dev:
     image: postgres:13
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     env_file:
       - .env.dev
     healthcheck:
