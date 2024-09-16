@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status.
 
-# Debug: Print current directory and list files
-echo "Current directory: $(pwd)"
-echo "Files in current directory:"
-ls -la
+# # Debug: Print current directory and list files
+# echo "Current directory: $(pwd)"
+# echo "Files in current directory:"
+# ls -la
 
 # Set environment variables
 export FLASK_APP=server.py
