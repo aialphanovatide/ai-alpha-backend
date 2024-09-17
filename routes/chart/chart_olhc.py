@@ -1,4 +1,5 @@
 import datetime
+import json
 from typing import List, Dict, Union, Tuple, Optional
 from flask import request, jsonify, Blueprint
 from ws.socket import socketio, emit
@@ -16,8 +17,9 @@ load_dotenv()
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 COINGECKO_API_URL = os.getenv('COINGECKO_API_URL')
 BINANCE_API_URL = os.getenv('BINANCE_API_URL')
-HEADERS = os.getenv('HEADERS')
 
+# Parse HEADERS from a JSON string to a dictionary
+HEADERS = {'X-Cg-Pro-Api-Key': COINGECKO_API_KEY}
 
 # List of cryptocurrencies we have available
 # Replace this using THE DATABASE
@@ -278,105 +280,6 @@ def get_top_movers_data(vs_currency: str = 'usd', order: str = 'market_cap_desc'
     except requests.RequestException as e:
         return None, 500, str(e)
     
-
-# @chart_graphs_bp.route('/api/top-movers', methods=['GET'])
-# def get_crypto_markets():
-#     """
-#     Retrieve top cryptocurrency movers based on specified criteria.
-
-#     This endpoint fetches cryptocurrency market data from CoinGecko and returns the top 10 gainers and top 10 losers
-#     based on the specified ordering criteria.
-
-#     Query Parameters:
-#     - vs_currency (str, optional): The target currency for market data (default: 'usd').
-#     - order (str, optional): The ordering criteria for the data. Valid options are:
-#       'market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc', 'price_change_desc', 'price_change_asc'
-#       (default: 'market_cap_desc').
-#     - precision (int, optional): The number of decimal places for price values.
-
-#     Returns:
-#     JSON object with the following structure:
-#     {
-#         "success": bool,
-#         "data": {
-#             "top_10_gainers": list,
-#             "top_10_losers": list
-#         },
-#         "order": str
-#     }
-
-#     On error, returns a JSON object with error details and an appropriate HTTP status code.
-
-#     Note: This function uses predefined cryptocurrency data (crypto_data) for fetching market information.
-#     """
-        
-#     vs_currency = request.args.get('vs_currency', 'usd')
-#     order = request.args.get('order', 'market_cap_desc')
-#     precision = request.args.get('precision')
-    
-#     valid_orders = ['market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc', 'price_change_desc', 'price_change_asc']
-#     if order not in valid_orders:
-#         return jsonify({"success": False, "error": {"code": 400, "message": "Invalid order parameter"}}), 400
-
-#     ids = [crypto["coingecko_id"] for crypto in crypto_data]
-#     ids_string = ",".join(ids)
-
-#     url = f'{COINGECKO_API_URL}/coins/markets'
-#     params = {
-#         'vs_currency': vs_currency,
-#         'ids': ids_string,
-#         'order': 'market_cap_desc',  # Default order for initial fetch
-#         'per_page': 250,
-#         'page': 1,
-#         'sparkline': False,
-#         'price_change_percentage': '24h'
-#     }
-
-#     if precision:
-#         params['precision'] = precision
-
-#     try:
-#         response = requests.get(url, params=params, headers=headers)
-#         if response.status_code == 200:
-#             data = response.json()
-            
-#             # Sort based on the order parameter
-#             if order.startswith('market_cap'):
-#                 sorted_data = sorted(data, key=lambda x: x['market_cap'] or 0, reverse=(order == 'market_cap_desc'))
-#             elif order.startswith('volume'):
-#                 sorted_data = sorted(data, key=lambda x: x['total_volume'] or 0, reverse=(order == 'volume_desc'))
-#             elif order.startswith('price_change'):
-#                 sorted_data = sorted(data, key=lambda x: x['price_change_percentage_24h'] or 0, reverse=(order == 'price_change_desc'))
-            
-#             # Get top 10 and bottom 10
-#             top_10 = sorted_data[:10]
-#             bottom_10 = sorted_data[-10:][::-1]
-
-#             result = {
-#                 "success": True,
-#                 "data": {
-#                     "top_10_gainers": top_10,
-#                     "top_10_losers": bottom_10
-#                 },
-#                 "order": order
-#             }
-#             return jsonify(result), 200
-#         else:
-#             return jsonify({
-#                 "success": False,
-#                 "error": {
-#                     "code": response.status_code,
-#                     "message": "Failed to fetch data from CoinGecko"
-#                 }
-#             }), response.status_code
-#     except requests.RequestException as e:
-#         return jsonify({
-#             "success": False,
-#             "error": {
-#                 "code": 500,
-#                 "message": str(e)
-#             }
-#         }), 500
     
 @chart_graphs_bp.route('/api/top-movers', methods=['GET'])
 def get_crypto_markets():
