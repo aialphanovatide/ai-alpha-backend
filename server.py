@@ -108,7 +108,7 @@ if __name__ == '__main__':
     try:
         with app.app_context():
             print('---AI Alpha API is running---') 
-            app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+            app.run(port=9000, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
