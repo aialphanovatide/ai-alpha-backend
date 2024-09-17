@@ -30,4 +30,6 @@ uuid
 cachetools
 alembic
 flask-socketio
-tvDatafeed
+pytz
+tvdatafeed
+marshmallow

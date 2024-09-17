@@ -6,12 +6,12 @@ from typing import Dict, Any, Optional, List
 # Load environment variables from the .env file
 load_dotenv()
 
-COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
+COINGECKO_APIKEY = os.getenv("COINGECKO_APIKEY")
 BASE_URL = 'https://pro-api.coingecko.com/api/v3'
 
 headers = {
             "Content-Type": "application/json",
-            "x-cg-pro-api-key": COINGECKO_API_KEY,
+            "x-cg-pro-api-key": COINGECKO_APIKEY,
         }
 
 def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -40,7 +40,6 @@ def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Opti
         'coins': [],
         'length': 0,
         'success': False,
-        'error': None,
     }
 
     try:
@@ -72,16 +71,15 @@ def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Opti
         result['length'] = len(result['coins'])
 
     except requests.exceptions.RequestException as e:
-        result['error'] = f"Error in CoinGecko API request: {str(e)}"
+        raise Exception(f"Error in CoinGecko API request in get_list_of_coins: {str(e)}")
     except ValueError as e:
-        result['error'] = f"Error decoding JSON response: {str(e)}"
+        raise Exception(f"Error decoding JSON response in get_list_of_coins: {str(e)}")
     except Exception as e:
-        result['error'] = f"Unexpected error: {str(e)}"
+        raise Exception(f"Unexpected error in get_list_of_coins: {str(e)}")
 
     return result
 
-# Example Usage
-# print(get_list_of_coins(coin_symbols=['Render']))
+print(get_list_of_coins(coin_symbols=['Matic']))
 
 
 

@@ -1,0 +1,4197 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "AI Alpha API",
+    "description": "API documentation for AI Alpha",
+    "version": "2.1"
+  },
+  "tags": [
+    {
+      "name": "User",
+      "description": "Operations related to the User"
+    },
+    {
+      "name": "Analysis",
+      "description": "Operations related to the Analysis"
+    },
+    {
+      "name": "Chart",
+      "description": "Operations related to the Charts"
+    },
+    {
+      "name": "Introduction",
+      "description": "Operations related to the Introduction"
+    },
+    {
+      "name": "Tokenomics",
+      "description": "Operations related to the Tokenomics"
+    },
+    {
+      "name": "Competitors",
+      "description": "Operations related to the Competitors"
+    },
+    {
+      "name": "Revenue Models",
+      "description": "Operations related to the Revenue Models"
+    },
+    {
+      "name": "Hacks",
+      "description": "Operations related to the Hacks"
+    },
+    {
+      "name": "Upgrades",
+      "description": "Operations related to the Upgrades"
+    },
+    {
+      "name": "DApps",
+      "description": "Operations related to the DApps"
+    },
+    {
+      "name": "Narrative Trading",
+      "description": "Operations related to the Narrative Trading"
+    },
+    {
+      "name": "TradingView",
+      "description": "Operations related to the TradingView"
+    },
+    {
+      "name": "Send Email",
+      "description": "Endpoints related to sending email notifications"
+    },
+    {
+      "name": "WebSocket",
+      "description": "WebSocket operations for real-time cryptocurrency data"
+    }
+  ],
+  "paths": {
+    "api/chart/save_chart": {
+      "post": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Adds a new support and resistance lines record for a coin",
+        "description": "This endpoint creates a new chart entry for a specified coin, pair, and temporality, regardless of whether a previous entry exists.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Chart data to be created",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer"
+                },
+                "pair": {
+                  "type": "string"
+                },
+                "temporality": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "support_1": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "support_2": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "support_3": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "support_4": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "resistance_1": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "resistance_2": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "resistance_3": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "resistance_4": {
+                  "type": "number",
+                  "format": "float"
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "pair",
+                "temporality",
+                "token"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "New chart record created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One or more required fields are missing or invalid",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coin-support-resistance": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Get the most recent support and resistance lines of a requested coin",
+        "description": "This endpoint retrieves the most recent chart values including support and resistance levels for a specified coin (by name or ID), temporality, and trading pair.",
+        "parameters": [
+          {
+            "name": "coin_name",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "coin_id",
+            "in": "query",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "name": "temporality",
+            "in": "query",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "pair",
+            "in": "query",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chart values retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "support_1": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "support_2": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "support_3": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "support_4": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "resistance_1": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "resistance_2": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "resistance_3": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "resistance_4": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "pair": {
+                      "type": "string"
+                    },
+                    "temporality": {
+                      "type": "string"
+                    },
+                    "coin_bot_id": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CoinBot not found or no chart found for the given parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/total_3_data": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Retrieve and calculate total market cap data for the top 3 cryptocurrencies",
+        "description": "This endpoint fetches market cap data for Bitcoin, Ethereum, and the total market, then calculates the market cap for the third largest cryptocurrency by subtracting Bitcoin and Ethereum from the total.",
+        "responses": {
+          "200": {
+            "description": "Market cap data retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "coin": {
+                        "type": "string"
+                      },
+                      "market_cap": {
+                        "type": "number",
+                        "format": "float"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/register": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Register a new admin with a specified role.",
+        "description": "Register a new admin with a specified role.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Admin registration details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "email",
+                "username",
+                "password",
+                "role"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Admin registered successfully"
+          },
+          "400": {
+            "description": "Bad request (missing data or invalid role)"
+          },
+          "409": {
+            "description": "Conflict (email or username already exists)"
+          },
+          "500": {
+            "description": "Database error or unexpected error"
+          }
+        }
+      }
+    },
+    "/admin/login": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Authenticate an admin.",
+        "description": "Authenticate an admin.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Admin login details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "username",
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "500": {
+            "description": "Database error or unexpected error"
+          }
+        }
+      }
+    },
+    "/admin/{admin_id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Retrieve admin information.",
+        "description": "Retrieve admin information.",
+        "parameters": [
+          {
+            "name": "admin_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin information retrieved successfully"
+          },
+          "404": {
+            "description": "Admin not found"
+          },
+          "500": {
+            "description": "Database error or unexpected error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Update admin information.",
+        "description": "Update admin information.",
+        "parameters": [
+          {
+            "name": "admin_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Admin update details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin updated successfully"
+          },
+          "400": {
+            "description": "Bad request (invalid data)"
+          },
+          "404": {
+            "description": "Admin not found"
+          },
+          "500": {
+            "description": "Database error or unexpected error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Delete admin.",
+        "description": "Delete admin.",
+        "parameters": [
+          {
+            "name": "admin_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin deleted successfully"
+          },
+          "404": {
+            "description": "Admin not found"
+          },
+          "500": {
+            "description": "Database error or unexpected error"
+          }
+        }
+      }
+    },
+    "/schedule_post": {
+      "post": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Schedule a post for future publication.",
+        "description": "Schedule a post for future publication.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Post scheduling details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coinBot": {
+                  "type": "string"
+                },
+                "category_name": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "scheduledDate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "coinBot",
+                "category_name",
+                "content",
+                "scheduledDate"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post scheduled successfully"
+          },
+          "400": {
+            "description": "Bad request (missing or invalid data)"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/delete_scheduled_job/{job_id}": {
+      "delete": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Delete a scheduled job by its ID.",
+        "description": "Delete a scheduled job by its ID.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job deleted successfully"
+          },
+          "404": {
+            "description": "Job not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/get_scheduled_job/{job_id}": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Get information about a scheduled job by its ID.",
+        "description": "Get information about a scheduled job by its ID.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job information retrieved successfully"
+          },
+          "404": {
+            "description": "Job not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/get_scheduled_jobs": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Get all scheduled jobs.",
+        "description": "Get all scheduled jobs.",
+        "responses": {
+          "200": {
+            "description": "Jobs retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/post_analysis": {
+      "post": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Create a new analysis and generate an associated image.",
+        "description": "Create a new analysis based on the provided data, generate an image for the analysis, and upload it to S3.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Analysis details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coinBot": {
+                  "type": "string"
+                },
+                "category_name": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "coinBot",
+                "category_name",
+                "content"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis created successfully"
+          },
+          "400": {
+            "description": "Bad request (missing or invalid data)"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/delete_analysis/{analysis_id}": {
+      "delete": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Delete an existing analysis and its associated image.",
+        "description": "Remove an analysis identified by its ID and any associated image.",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis deleted successfully"
+          },
+          "404": {
+            "description": "Analysis not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/edit_analysis/{analysis_id}": {
+      "put": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Edit the content of an existing analysis.",
+        "description": "Update the content of an analysis identified by its ID.",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New analysis content",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "content"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis edited successfully"
+          },
+          "400": {
+            "description": "Bad request (missing new content)"
+          },
+          "404": {
+            "description": "Analysis not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/get_last_analysis": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve the name and date of the last analysis created.",
+        "description": "Query the database for the most recently created analysis and return its details along with the associated coin information.",
+        "responses": {
+          "200": {
+            "description": "Last analysis retrieved successfully"
+          },
+          "404": {
+            "description": "No analysis found or associated coin not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/get_analysis/{coin_bot_id}": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve analyses for a specific coin bot ID with pagination",
+        "description": "This endpoint queries the database for analyses related to a specific coin bot, ordered by creation date descending, and includes their associated images.",
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "path",
+            "description": "The ID of the coin bot",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (default: 1)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of items per page (default: 10, max: 100)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Analysis"
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination parameters"
+          },
+          "404": {
+            "description": "No analyses found for the specified coin bot ID"
+          },
+          "500": {
+            "description": "Unexpected error during execution"
+          }
+        }
+      }
+    },
+    "/get_analysis_by_coin": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve analyses for a specific coin by name or ID",
+        "description": "This endpoint queries the database for analyses related to a specific coin, identified either by name or ID.",
+        "parameters": [
+          {
+            "name": "coin_bot_name",
+            "in": "query",
+            "description": "The name of the coin (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "coin_bot_id",
+            "in": "query",
+            "description": "The ID of the coin (optional)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Analysis"
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Coin ID or name is required"
+          },
+          "404": {
+            "description": "No analyses found for the specified coin"
+          },
+          "500": {
+            "description": "Unexpected error during execution"
+          }
+        }
+      }
+    },
+    "/get_analysis": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve analyses with their associated images, with pagination",
+        "description": "This endpoint queries the database for analyses, ordered by creation date descending, and includes their associated images. It supports pagination and a configurable limit.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (default: 1)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of items per page (default: 10, max: 100)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Analysis"
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination parameters"
+          },
+          "500": {
+            "description": "Unexpected error during execution"
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Create a new user with provided data.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "nickname",
+                "email"
+              ],
+              "properties": {
+                "nickname": {
+                  "type": "string"
+                },
+                "full_name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "email_verified": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "picture": {
+                  "type": "string"
+                },
+                "auth0id": {
+                  "type": "string"
+                },
+                "provider": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User created successfully."
+          },
+          "400": {
+            "description": "Missing required fields (nickname, email)."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/edit_user/{user_id}": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Edit user data identified by user ID.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nickname": {
+                  "type": "string"
+                },
+                "full_name": {
+                  "type": "string"
+                }
+              },
+              "required": []
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data updated successfully."
+          },
+          "400": {
+            "description": "No valid fields provided for update or missing user ID."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieve all users with their purchased plans.",
+        "responses": {
+          "200": {
+            "description": "Successful operation, returns list of users with plans.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserWithPlans"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieve a specific user with their purchased plans.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "nickname",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "full_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation, returns user data with plans.",
+            "schema": {
+              "$ref": "#/definitions/UserWithPlans"
+            }
+          },
+          "400": {
+            "description": "User identifier not provided."
+          },
+          "404": {
+            "description": "User not found or user has no active plans."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/purchase_plan": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Save a new purchased plan for a user.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "reference_name",
+                "price",
+                "auth0id"
+              ],
+              "properties": {
+                "reference_name": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "is_subscribed": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "user_id": {
+                  "type": "integer"
+                },
+                "auth0id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Package saved successfully."
+          },
+          "400": {
+            "description": "Missing required fields (reference_name, price, user_id, auth0id)."
+          },
+          "404": {
+            "description": "User not found for provided auth0id."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/unsubscribe_package/{product_id}": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Unsubscribe a user from a purchased plan identified by product ID.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User unsubscribed from package successfully."
+          },
+          "404": {
+            "description": "Package not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/delete_user": {
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Delete a user account identified by user ID.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "user_id"
+              ],
+              "properties": {
+                "user_id": {
+                  "type": "integer",
+                  "description": "ID of the user to delete."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User account deleted successfully."
+          },
+          "400": {
+            "description": "User ID not provided."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/tv/alerts": {
+      "get": {
+        "tags": [
+          "TradingView"
+        ],
+        "summary": "Get all alerts for a specific category.",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Category name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit number of alerts (optional)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "alert_id": {
+                    "type": "integer"
+                  },
+                  "alert_name": {
+                    "type": "string"
+                  },
+                  "alert_message": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "number"
+                  },
+                  "coin_bot_id": {
+                    "type": "integer"
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/tv/multiple_alert": {
+      "post": {
+        "tags": [
+          "TradingView"
+        ],
+        "summary": "Get alerts from multiple categories.",
+        "parameters": [
+          {
+            "name": "categories",
+            "in": "body",
+            "description": "List of category names",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "alert_id": {
+                      "type": "integer"
+                    },
+                    "alert_name": {
+                      "type": "string"
+                    },
+                    "alert_message": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "coin_bot_id": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/filter/alerts": {
+      "get": {
+        "tags": [
+          "TradingView"
+        ],
+        "summary": "Get filtered alerts by coin and date.",
+        "parameters": [
+          {
+            "name": "coin",
+            "in": "query",
+            "description": "Name of the coin/token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Date filter (optional)",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "today",
+              "this week",
+              "last week",
+              "4h",
+              "1h",
+              "1w",
+              "1d",
+              "24h"
+            ]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit number of alerts (optional)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "alerts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "alert_id": {
+                        "type": "integer"
+                      },
+                      "alert_name": {
+                        "type": "string"
+                      },
+                      "alert_message": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "number"
+                      },
+                      "coin_bot_id": {
+                        "type": "integer"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Coin not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/verification": {
+      "get": {
+        "tags": [
+          "Send Email"
+        ],
+        "summary": "Send email verification link.",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "description": "Status code"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Response content"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Client not registered"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Send Email"
+        ],
+        "summary": "Send email verification link.",
+        "parameters": [
+          {
+            "name": "request_body",
+            "in": "body",
+            "description": "Request body containing customer data and line items",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customer": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "description": "Status code"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Response content"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_narrative_trading/{coin_bot_id}": {
+      "get": {
+        "summary": "Get narrative trading posts by coin bot ID",
+        "description": "Retrieve narrative trading posts by coin bot ID.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "narrative_trading_id": {
+                            "type": "integer"
+                          },
+                          "narrative_trading": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "category_name": {
+                            "type": "string"
+                          },
+                          "coin_bot_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No narrative trading found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_narrative_trading_by_coin": {
+      "get": {
+        "summary": "Get narrative trading posts by coin",
+        "description": "Retrieve narrative trading posts by coin bot name or ID.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "parameters": [
+          {
+            "name": "coin_bot_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          },
+          {
+            "name": "coin_bot_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "narrative_trading_id": {
+                            "type": "integer"
+                          },
+                          "narrative_trading": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "category_name": {
+                            "type": "string"
+                          },
+                          "coin_bot_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "No narrative trading found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_narrative_trading": {
+      "get": {
+        "summary": "Get all narrative trading posts",
+        "description": "Retrieve all narrative trading posts.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "narrative_trading_id": {
+                            "type": "integer"
+                          },
+                          "narrative_trading": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "category_name": {
+                            "type": "string"
+                          },
+                          "coin_bot_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/post_narrative_trading": {
+      "post": {
+        "summary": "Create a new narrative trading post",
+        "description": "Create a new narrative trading post.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coinBot": {
+                    "type": "string",
+                    "description": "ID of the coin bot"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Content of the post"
+                  },
+                  "category_name": {
+                    "type": "string",
+                    "description": "Name of the category"
+                  }
+                },
+                "required": [
+                  "coinBot",
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/delete_narrative_trading/{narrative_trading_id}": {
+      "delete": {
+        "summary": "Delete a narrative trading post",
+        "description": "Delete a narrative trading post by narrative_trading_id.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "parameters": [
+          {
+            "name": "narrative_trading_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the narrative trading post to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Narrative trading not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/edit_narrative_trading/{narrative_trading_id}": {
+      "put": {
+        "summary": "Edit a narrative trading post",
+        "description": "Edit an existing narrative trading post.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "parameters": [
+          {
+            "name": "narrative_trading_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the narrative trading post to edit"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "New content for the narrative trading post"
+                  }
+                },
+                "required": [
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Narrative trading not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_last_narrative_trading": {
+      "get": {
+        "summary": "Get the last narrative trading",
+        "description": "Retrieve information about the last narrative trading created.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "last_narrative_trading": {
+                      "type": "object",
+                      "properties": {
+                        "narrative_trading_id": {
+                          "type": "integer"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "coin_name": {
+                          "type": "string"
+                        },
+                        "category_name": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No narrative trading found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/schedule_narrative_post": {
+      "post": {
+        "summary": "Schedule a narrative trading post",
+        "description": "Schedule a narrative trading post for future publishing.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coinBot": {
+                    "type": "string",
+                    "description": "ID of the coin bot"
+                  },
+                  "category_name": {
+                    "type": "string",
+                    "description": "Name of the category"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Content of the post"
+                  },
+                  "scheduledDate": {
+                    "type": "string",
+                    "description": "Scheduled date and time for publishing"
+                  }
+                },
+                "required": [
+                  "coinBot",
+                  "content",
+                  "scheduledDate"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_narrative_trading_jobs": {
+      "get": {
+        "summary": "Get scheduled narrative trading jobs",
+        "description": "Retrieve a list of all scheduled narrative trading jobs.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "type": "string"
+                          },
+                          "args": {
+                            "type": "string"
+                          },
+                          "next_run_time": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/delete_scheduled_narrative_job/{job_id}": {
+      "delete": {
+        "summary": "Delete a scheduled narrative trading job",
+        "description": "Delete a scheduled narrative trading job by job ID.",
+        "tags": [
+          "Narrative Trading"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the job to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_competitors/{coin_bot_id}": {
+      "get": {
+        "summary": "Get competitors data",
+        "description": "Retrieve a list of competitors for a specific coin bot",
+        "tags": [
+          "Competitors"
+        ],
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "competitors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "competitor": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "No data found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dapps": {
+      "get": {
+        "summary": "Get DApps data",
+        "description": "Retrieve DApps data for a specific coin bot",
+        "tags": [
+          "DApps"
+        ],
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          },
+          {
+            "name": "coin_bot_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "No DApps found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/hacks": {
+      "get": {
+        "summary": "Get hacks data",
+        "description": "Retrieve hacks data for a specific coin bot",
+        "tags": [
+          "Hacks"
+        ],
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          },
+          {
+            "name": "coin_bot_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/get_introduction": {
+      "get": {
+        "summary": "Get introduction data",
+        "description": "Retrieve introduction data for a specific coin bot",
+        "tags": [
+          "Introduction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          },
+          {
+            "name": "coin_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "No record found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/get_revenue_models": {
+      "get": {
+        "summary": "Get revenue models",
+        "description": "Retrieve revenue model data for a specific coin bot",
+        "tags": [
+          "Revenue Models"
+        ],
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          },
+          {
+            "name": "coin_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revenue_model": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "No revenue model found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/get_tokenomics": {
+      "get": {
+        "summary": "Get tokenomics data",
+        "description": "Retrieve tokenomics data for a specific coin bot",
+        "tags": [
+          "Tokenomics"
+        ],
+        "parameters": [
+          {
+            "name": "coin_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          },
+          {
+            "name": "coin_bot_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "token_distribution": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "token_utility": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "value_accrual_mechanisms": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "tokenomics_data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "No tokenomics found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_tokenomic/{id}": {
+      "get": {
+        "summary": "Get individual tokenomic",
+        "description": "Retrieve a specific tokenomic by ID",
+        "tags": [
+          "Tokenomics"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the tokenomic"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tokenomic not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_token_distribution/{id}": {
+      "get": {
+        "summary": "Get token distribution",
+        "description": "Retrieve a specific token distribution by ID",
+        "tags": [
+          "Tokenomics"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the token distribution"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token distribution not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_token_utility/{id}": {
+      "get": {
+        "summary": "Get token utility",
+        "description": "Retrieve a specific token utility by ID",
+        "tags": [
+          "Tokenomics"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the token utility"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token utility not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_value_accrual/{id}": {
+      "get": {
+        "summary": "Get value accrual mechanism",
+        "description": "Retrieve a specific value accrual mechanism by ID",
+        "tags": [
+          "Tokenomics"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the value accrual mechanism"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Value accrual mechanism not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/get_upgrades": {
+      "get": {
+        "summary": "Get upgrades data",
+        "description": "Retrieve upgrades data related to a specific coin",
+        "tags": [
+          "Upgrades"
+        ],
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the coin bot"
+          },
+          {
+            "name": "coin_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the coin bot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "upgrade": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Coin ID or name is missing"
+          },
+          "404": {
+            "description": "No upgrades found for the requested coin"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/get_competitors_by_coin_name": {
+      "get": {
+        "tags": [
+          "Competitors"
+        ],
+        "summary": "Get competitors data for a specific coin by name",
+        "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
+        "parameters": [
+          {
+            "name": "coin_name",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "The name of the coin to get competitors for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "competitors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "competitor": {
+                        "type": "object",
+                        "description": "Competitor details"
+                      }
+                    }
+                  }
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 200
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Coin name is required",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Coin name is required"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 400
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found - CoinBot not found or no data for the requested coin",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "CoinBot not found for the given coin name"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 404
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error getting competitors data: [error details]"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 500
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chart/ohlc": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Get OHLC data for a specific coin",
+        "description": "Fetch OHLC data for a specific cryptocurrency.",
+        "operationId": "getOhlcData",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "coin",
+            "in": "query",
+            "description": "The cryptocurrency to fetch data for (symbol or name).",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "vs_currency",
+            "in": "query",
+            "description": "The currency to compare against.",
+            "required": false,
+            "type": "string",
+            "default": "usd"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "description": "Data interval ('1h', '4h', '1d', '1w').",
+            "required": false,
+            "type": "string",
+            "default": "1h",
+            "enum": [
+              "1h",
+              "4h",
+              "1d",
+              "1w"
+            ]
+          },
+          {
+            "name": "precision",
+            "in": "query",
+            "description": "Decimal place for currency price value (optional).",
+            "required": false,
+            "type": "integer",
+            "default": 2,
+            "minimum": 0,
+            "maximum": 18
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Coin not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/top-movers": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Get top cryptocurrency movers",
+        "description": "Retrieve the top 10 gainers and top 10 losers based on specified criteria.",
+        "operationId": "getCryptoMarkets",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "vs_currency",
+            "in": "query",
+            "description": "The target currency for market data (default: 'usd').",
+            "required": false,
+            "type": "string",
+            "default": "usd",
+            "enum": [
+              "usd",
+              "btc",
+              "eth"
+            ]
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The ordering criteria for the data.",
+            "required": false,
+            "type": "string",
+            "default": "market_cap_desc",
+            "enum": [
+              "market_cap_desc",
+              "market_cap_asc",
+              "volume_desc",
+              "volume_asc",
+              "price_change_desc",
+              "price_change_asc"
+            ]
+          },
+          {
+            "name": "precision",
+            "in": "query",
+            "description": "The number of decimal places for price values.",
+            "required": false,
+            "type": "integer",
+            "default": null
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "top_10_gainers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/CryptoData"
+                      }
+                    },
+                    "top_10_losers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/CryptoData"
+                      }
+                    }
+                  }
+                },
+                "order": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid order parameter",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_crypto_events": {
+      "get": {
+        "tags": [
+          "Crypto Events"
+        ],
+        "summary": "Retrieve cryptocurrency events based on specified filters.",
+        "description": "This endpoint queries the Coindar API to retrieve events related to cryptocurrencies, filtered by date range, coin IDs, tags, and sorting options.",
+        "parameters": [
+          {
+            "name": "today_date",
+            "in": "query",
+            "description": "The lower limit of the event start date in the format yyyy-mm-dd (optional)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "The upper date limit of the event start date in the format yyyy-mm-dd (optional)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "filter_coins",
+            "in": "query",
+            "description": "Comma-separated list of cryptocurrency IDs related to the requested events (optional)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "description": "Parameter defining events sorting; possible values are 'date_start', 'date_added', or 'views' (optional)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "date_start",
+                "date_added",
+                "views"
+              ]
+            }
+          },
+          {
+            "name": "filter_tags",
+            "in": "query",
+            "description": "Comma-separated list of tag IDs (optional)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Sorting order; possible values are '0' (ascending) or '1' (descending) (optional)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cryptocurrency events retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid parameter value"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/get_economic_events": {
+      "get": {
+        "tags": [
+          "Economic Events"
+        ],
+        "summary": "Retrieve economic events based on specified filters.",
+        "description": "This endpoint queries the Profit API to retrieve economic events related to forex, filtered by date range, country ISO, currency, and impact.",
+        "parameters": [
+          {
+            "name": "country_iso",
+            "in": "query",
+            "description": "The country ISO code (optional). Expected values are 'US', 'GB', 'CN'.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "US",
+                "GB",
+                "CN"
+              ]
+            }
+          },
+          {
+            "name": "impact",
+            "in": "query",
+            "description": "Comma-separated list of impact levels ('high', 'medium', 'low') (optional).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "The lower limit of the event start date in the format yyyy-mm-dd (optional).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "The upper limit of the event end date in the format yyyy-mm-dd (optional).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Economic events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "The URL of the API request"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "List of event objects"
+                    },
+                    "error": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Error message, if any"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "The URL of the API request"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "List of event objects"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "The URL of the API request"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "List of event objects"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_revenuecat_user_info": {
+      "get": {
+        "tags": [
+          "revenuecat"
+        ],
+        "summary": "Retrieve RevenueCat User Info",
+        "description": "This endpoint queries the RevenueCat API to retrieve subscription and purchase information for a specific user, identified by their RevenueCat user ID.",
+        "operationId": "getRevenueCatUserInfo",
+        "parameters": [
+          {
+            "name": "revenuecat_user_id",
+            "in": "query",
+            "required": true,
+            "description": "The unique identifier of the RevenueCat user.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "description": "The user information from RevenueCat"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Error message, if any"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Missing or invalid RevenueCat user ID."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid API token."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected error occurred."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/post_capitalcom_session": {
+      "post": {
+        "summary": "Create a session with CapitalCom",
+        "description": "Creates a session with the CapitalCom API using the provided email (identifier) and password.",
+        "tags": [
+          "CapitalCom Session"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "description": "The email address of the user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password of the user"
+                  }
+                },
+                "required": [
+                  "identifier",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "description": "The response data from CapitalCom API if successful"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    },
+                    "X-SECURITY-TOKEN": {
+                      "type": "string",
+                      "description": "Security token returned by the API"
+                    },
+                    "CST": {
+                      "type": "string",
+                      "description": "Session token returned by the API"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "description": "HTTP status code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid identifier/password"
+          },
+          "401": {
+            "description": "Unauthorized - invalid credentials"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_symbol_prices": {
+      "get": {
+        "summary": "Retrieve historical prices for a specific symbol",
+        "description": "Queries the CapitalCom API to retrieve historical price data for a given financial instrument, based on the provided symbol and resolution.",
+        "tags": [
+          "CapitalCom Prices"
+        ],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the financial instrument",
+            "required": true
+          },
+          {
+            "name": "resolution",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MINUTE",
+                "MINUTE_5",
+                "MINUTE_15",
+                "MINUTE_30",
+                "HOUR",
+                "HOUR_4",
+                "DAY",
+                "WEEK"
+              ]
+            },
+            "description": "The time resolution for the price data, such as 'MINUTE', 'HOUR', or 'DAY' (default is 'HOUR')",
+            "required": false
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "The maximum number of data points to retrieve, between 1 and 1000",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "description": "The historical price data"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid or missing parameters"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid session or security token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "X-SECURITY-TOKEN": [],
+            "CST": []
+          }
+        ]
+      }
+    },
+    "/get_funding_rates": {
+      "get": {
+        "summary": "Retrieve funding rates for specified symbols",
+        "description": "This endpoint retrieves historical funding rates for a list of specified symbols from the Coinalyze API.",
+        "tags": [
+          "Coinalyze"
+        ],
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Comma-separated list of symbols to retrieve funding rates for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "description": "The historical funding rates data."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message, if any."
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid symbol parameter or symbol is missing."
+          },
+          "404": {
+            "description": "Not found - Symbol not found."
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_symbol_time_series": {
+      "get": {
+        "summary": "Retrieve historical time series data for a specified symbol",
+        "description": "This endpoint queries the TwelveData API to retrieve historical time series data for a given financial symbol, based on the provided interval and output size.",
+        "tags": [
+          "TwelveData"
+        ],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "VIX"
+            },
+            "description": "The symbol of the financial instrument"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "1h"
+            },
+            "description": "The time interval for the data points, such as '1min', '1h', or '1day'"
+          },
+          {
+            "name": "outputsize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "The maximum number of data points to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "description": "The historical time series data"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Error message, if any"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameter(s) provided"
+          },
+          "404": {
+            "description": "Not Found - The specified symbol was not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/get_symbol_klines": {
+      "get": {
+        "summary": "Retrieve Kline/Candlestick Data for a Specified Symbol",
+        "description": "Fetch Kline/Candlestick data for the given symbol and interval from Binance API.",
+        "tags": [
+          "Binance"
+        ],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "description": "Trading pair symbol, e.g., 'BTCUSDT'.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "BTCUSDT"
+            }
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "description": "Time interval for the Klines. Default is '1h'.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1m",
+                "3m",
+                "5m",
+                "15m",
+                "30m",
+                "1h",
+                "2h",
+                "4h",
+                "6h",
+                "8h",
+                "12h",
+                "1d",
+                "3d",
+                "1w",
+                "1M"
+              ],
+              "default": "1h"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with Kline data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kline_open_time": {
+                            "type": "string",
+                            "example": "2023-08-09 00:00:00"
+                          },
+                          "open_price": {
+                            "type": "string",
+                            "example": "29000.12"
+                          },
+                          "high_price": {
+                            "type": "string",
+                            "example": "29500.45"
+                          },
+                          "low_price": {
+                            "type": "string",
+                            "example": "28900.67"
+                          },
+                          "close_price": {
+                            "type": "string",
+                            "example": "29450.34"
+                          },
+                          "volume": {
+                            "type": "string",
+                            "example": "100.567"
+                          },
+                          "kline_close_time": {
+                            "type": "string",
+                            "example": "2023-08-09 01:00:00"
+                          },
+                          "quote_asset_volume": {
+                            "type": "string",
+                            "example": "2900000.23"
+                          },
+                          "number_of_trades": {
+                            "type": "integer",
+                            "example": 308
+                          },
+                          "taker_buy_base_asset_volume": {
+                            "type": "string",
+                            "example": "50.123"
+                          },
+                          "taker_buy_quote_asset_volume": {
+                            "type": "string",
+                            "example": "1450000.45"
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid symbol or missing parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Symbol param is required."
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "An unexpected error occurred: ..."
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_analysis/test": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve analyses with their associated images, with pagination.",
+        "description": "Retrieve analyses with their associated images, with pagination.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (default: 1)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of items per page (default: 10, max: 100)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad Request - Invalid pagination parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UserWithPlans": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "integer"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "email_verified": {
+          "type": "boolean"
+        },
+        "picture": {
+          "type": "string"
+        },
+        "auth0id": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "purchased_plans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "product_id": {
+                "type": "integer"
+              },
+              "reference_name": {
+                "type": "string"
+              },
+              "price": {
+                "type": "number"
+              },
+              "is_subscribed": {
+                "type": "boolean"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "CryptoData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "current_price": {
+          "type": "number"
+        },
+        "market_cap": {
+          "type": "number"
+        },
+        "market_cap_rank": {
+          "type": "integer"
+        },
+        "total_volume": {
+          "type": "number"
+        },
+        "high_24h": {
+          "type": "number"
+        },
+        "low_24h": {
+          "type": "number"
+        },
+        "price_change_24h": {
+          "type": "number"
+        },
+        "price_change_percentage_24h": {
+          "type": "number"
+        },
+        "market_cap_change_24h": {
+          "type": "number"
+        },
+        "market_cap_change_percentage_24h": {
+          "type": "number"
+        },
+        "circulating_supply": {
+          "type": "number"
+        },
+        "total_supply": {
+          "type": "number"
+        },
+        "max_supply": {
+          "type": "number"
+        },
+        "ath": {
+          "type": "number"
+        },
+        "ath_change_percentage": {
+          "type": "number"
+        },
+        "ath_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "atl": {
+          "type": "number"
+        },
+        "atl_change_percentage": {
+          "type": "number"
+        },
+        "atl_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "roi": {
+          "type": "object",
+          "properties": {
+            "times": {
+              "type": "number"
+            },
+            "currency": {
+              "type": "string"
+            },
+            "percentage": {
+              "type": "number"
+            }
+          }
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

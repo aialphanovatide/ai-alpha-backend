@@ -5,13 +5,8 @@ from ws.socket import socketio, emit
 from typing import Dict, Any, Tuple 
 from dotenv import load_dotenv
 import requests
-import logging
 import os
 from datetime import datetime, timedelta
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 chart_graphs_bp = Blueprint('chart_graphs_bp', __name__)
 
@@ -19,9 +14,9 @@ chart_graphs_bp = Blueprint('chart_graphs_bp', __name__)
 load_dotenv()
 
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
-COINGECKO_API_URL = "https://pro-api.coingecko.com/api/v3"
-BINANCE_API_URL = "https://api3.binance.com/api/v3"
-headers = {'X-Cg-Pro-Api-Key': "CG-xXCJJaHa7QmvQNWyNheKmSfG"}
+COINGECKO_API_URL = os.getenv('COINGECKO_API_URL')
+BINANCE_API_URL = os.getenv('BINANCE_API_URL')
+HEADERS = os.getenv('HEADERS')
 
 
 # List of cryptocurrencies we have available
@@ -70,7 +65,6 @@ def get_ohlc_binance_data(coin: str, vs_currency: str, interval: str, precision:
     symbol = next((crypto['symbol'] for crypto in crypto_data if crypto['symbol'].lower() == coin.lower() or crypto['name'].lower() == coin.lower()), None)
     
     if not symbol:
-        logger.warning(f"Coin {coin} not found in crypto_data")
         return None, 404
 
     pair = f"{symbol.upper()}{vs_currency.upper()}T"
@@ -154,7 +148,7 @@ def get_ohlc_coingecko_data(coin: str, vs_currency: str, interval: str, precisio
         if precision:
             params['precision'] = precision
 
-        response = requests.get(endpoint, params=params, headers=headers)
+        response = requests.get(endpoint, params=params, headers=HEADERS)
         response.raise_for_status()
         
         raw_data = response.json()
@@ -192,25 +186,20 @@ def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]
     precision = request.args.get('precision')
 
     if not coin:
-        logger.warning("Missing required parameter: 'coin'")
         return jsonify({"error": "Missing required parameter: 'coin'"}), 400
 
     if vs_currency not in ['usd', 'btc', 'eth']:
-        logger.warning(f"Unsupported VS currency: {vs_currency}")
         return jsonify({"error": "VS currency not supported. Must be 'usd', 'btc', or 'eth'"}), 400
 
     if interval not in ['1h', '4h', '1d', '1w']:
-        logger.warning(f"Invalid interval: {interval}")
         return jsonify({"error": "Invalid interval. Must be '1h', '4h', '1d', or '1w'"}), 400
 
     if precision:
         try:
             precision_int = int(precision)
             if precision_int < 0 or precision_int > 18:
-                logger.warning(f"Invalid precision: {precision}")
                 return jsonify({"error": "Precision must be a non-negative integer not exceeding 18"}), 400
         except ValueError:
-            logger.warning(f"Invalid precision value: {precision}")
             return jsonify({"error": "Precision must be a valid integer"}), 400
 
     data, status_code = get_ohlc_coingecko_data(coin, vs_currency, interval, precision)
@@ -259,7 +248,7 @@ def get_top_movers_data(vs_currency: str = 'usd', order: str = 'market_cap_desc'
         params['precision'] = precision
 
     try:
-        response: requests.Response = requests.get(url, params=params, headers=headers)
+        response: requests.Response = requests.get(url, params=params, headers=HEADERS)
         if response.status_code == 200:
             data: List[Dict[str, Any]] = response.json()
             

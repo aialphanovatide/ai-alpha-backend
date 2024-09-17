@@ -1,6 +1,8 @@
 from routes.slack.index import client
 from slack_sdk.errors import SlackApiError
 
+LOGS_CHANNEL = "C06FTS38JRX"
+
 # Sends an article to Slack
 def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image, category_name, extra_info):
 
@@ -101,7 +103,7 @@ def send_NEWS_message_to_slack(channel_id, title, date_time, url, summary, image
 
 
 # Send an info message to slack
-def send_INFO_message_to_slack_channel(title_message, sub_title, message, channel_id="C06FTS38JRX"):
+def send_INFO_message_to_slack_channel(title_message, sub_title, message, channel_id=LOGS_CHANNEL):
     blocks = [
         {
             "type": "section",
@@ -143,7 +145,7 @@ def send_INFO_message_to_slack_channel(title_message, sub_title, message, channe
 
 
 # Deletes a message in slack by TS - timestamp
-def delete_messages_in_channel(messages_list, channel_id="C06FTS38JRX"):
+def delete_messages_in_channel(messages_list, channel_id=LOGS_CHANNEL):
     try:
         for message in messages_list:
             response = client.chat_delete(
