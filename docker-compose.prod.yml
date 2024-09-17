@@ -16,9 +16,8 @@ services:
       - ./migrations:/app/migrations:ro
     env_file:
       - .env.prod
-    command: >
-      sh -c "chmod +x /app/script.sh &&
-             /app/script.sh"
+    environment:
+      - FLASK_ENV=production
 
   db:
     image: postgres:13

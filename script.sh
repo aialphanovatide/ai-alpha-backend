@@ -1,20 +1,17 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status.
 
-# Debug: Print current directory and list files
-echo "Current directory: $(pwd)"
-echo "Files in current directory:"
-ls -la
-
 # Set environment variables
 export FLASK_APP=server.py
-export FLASK_ENV=${FLASK_ENV:-development}
+export FLASK_ENV=${FLASK_ENV:-production}
 
 # Load environment variables from .env file
 if [ "$FLASK_ENV" = "development" ]; then
-    ENV_FILE=/app/.env.dev
+    ENV_FILE=.env.dev # Run locally
+    # ENV_FILE=/app/.env.dev # Run in docker container
 else
-    ENV_FILE=/app/.env.prod
+    ENV_FILE=.env.prod # Run locally
+    # ENV_FILE=/app/.env.prod # Run in docker container
 fi
 
 if [ -f "$ENV_FILE" ]; then
@@ -36,26 +33,6 @@ for var in "${required_vars[@]}"; do
     fi
 done
 
-# Function to check database connection
-check_db_connection() {
-    echo "Checking database connection..."
-    max_retries=5
-    count=0
-    while [ $count -lt $max_retries ]; do
-        if PGPASSWORD=$POSTGRES_PASSWORD psql -h db -U $POSTGRES_USER -d $POSTGRES_DB -c '\q' 2>/dev/null; then
-            echo "Successfully connected to the database."
-            return 0
-        fi
-        echo "Failed to connect to the database. Retrying in 5 seconds..."
-        sleep 5
-        count=$((count + 1))
-    done
-    echo "Error: Could not connect to the database after $max_retries attempts."
-    return 1
-}
-
-# Check database connection
-check_db_connection || exit 1
 
 # Function to check, create, and apply Alembic migrations
 check_create_and_apply_migrations() {
@@ -92,5 +69,13 @@ if [ "$FLASK_ENV" = "development" ]; then
     python server.py --host=0.0.0.0 --port=9000
 else
     echo "Starting Gunicorn production server..."
-    gunicorn --bind 0.0.0.0:9000 --workers 4 --threads 2 server:app
+    PORT=${PORT:-9000}
+    WORKERS=$(( 2 * $(nproc) + 1 ))
+    exec gunicorn --bind 0.0.0.0:$PORT \
+                  --workers $WORKERS \
+                  --threads 2 \
+                  --timeout 120 \
+                  --access-logfile - \
+                  --error-logfile - \
+                  server:app
 fi
