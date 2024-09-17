@@ -187,7 +187,43 @@ def update_coin(coin_id):
 
     return jsonify(response), status_code
 
+@coin_bp.route('/coins', methods=['GET'])
+def get_all_coins():
+    """
+    Retrieve all coins from the database.
 
+    This endpoint fetches all coin bots from the database and returns them as a list.
+    If no coins are found, it returns an empty list.
+
+    Returns:
+        JSON: A JSON object containing:
+            - success (bool): Indicates if the operation was successful
+            - coins (list): A list of dictionaries, each representing a coin bot
+            - error (str or None): Error message, if any
+        HTTP Status Code:
+            - 200: Successfully retrieved coins (even if the list is empty)
+            - 500: Internal server error
+    """
+    response = {
+        "success": False,
+        "coins": [],
+        "error": None
+    }
+    status_code = 500
+
+    with Session() as session:
+        try:
+            coins = session.query(CoinBot).all()
+            response["coins"] = [coin.as_dict() for coin in coins]
+            response["success"] = True
+            status_code = 200
+
+        except SQLAlchemyError as e:
+            response["error"] = f"Database error occurred: {str(e)}"
+        except Exception as e:
+            response["error"] = f"An unexpected error occurred: {str(e)}"
+
+    return jsonify(response), status_code
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['DELETE'])
