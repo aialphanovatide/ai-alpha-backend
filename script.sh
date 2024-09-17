@@ -3,13 +3,15 @@ set -e  # Exit immediately if a command exits with a non-zero status.
 
 # Set environment variables
 export FLASK_APP=server.py
-export FLASK_ENV=${FLASK_ENV:-development}
+export FLASK_ENV=${FLASK_ENV:-production}
 
 # Load environment variables from .env file
 if [ "$FLASK_ENV" = "development" ]; then
-    ENV_FILE=.env.dev
+    ENV_FILE=.env.dev # Run locally
+    # ENV_FILE=/app/.env.dev # Run in docker container
 else
-    ENV_FILE=.env.prod
+    ENV_FILE=.env.prod # Run locally
+    # ENV_FILE=/app/.env.prod # Run in docker container
 fi
 
 if [ -f "$ENV_FILE" ]; then
@@ -67,5 +69,13 @@ if [ "$FLASK_ENV" = "development" ]; then
     python server.py --host=0.0.0.0 --port=9000
 else
     echo "Starting Gunicorn production server..."
-    gunicorn --bind 0.0.0.0:9000 --workers 4 --threads 2 server:app
+    PORT=${PORT:-9000}
+    WORKERS=$(( 2 * $(nproc) + 1 ))
+    exec gunicorn --bind 0.0.0.0:$PORT \
+                  --workers $WORKERS \
+                  --threads 2 \
+                  --timeout 120 \
+                  --access-logfile - \
+                  --error-logfile - \
+                  server:app
 fi

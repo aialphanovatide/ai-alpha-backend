@@ -31,6 +31,6 @@ cachetools
 alembic
 flask-socketio
 pytz
-git+https://github.com/rongardF/tvdatafeed.git
+tradingview-datafeed
 marshmallow
 gunicorn
