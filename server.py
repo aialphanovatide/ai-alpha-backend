@@ -22,6 +22,7 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
+from routes.api_keys.api_keys import api_keys_bp
 from routes.category.category import category_bp
 from routes.external_apis.profit import profit_bp
 from routes.external_apis.coindar import coindar_bp
@@ -32,11 +33,19 @@ from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
 from routes.coin_bot.coinbot import coin_bot_bp
 from flasgger import Swagger
+from decorators.api_key import check_api_key
 from ws.socket import init_socketio
 
 app = Flask(__name__)
 app.name = 'AI Alpha API'
 swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
+
+# Check API key for all requests
+@app.before_request
+def before_request():
+    result = check_api_key()
+    if result is not None:
+        return result
 
 # Initialize SocketIO
 socketio = init_socketio(app)
@@ -79,6 +88,7 @@ app.register_blueprint(chart_bp)
 app.register_blueprint(chart_graphs_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
+app.register_blueprint(api_keys_bp)
 app.register_blueprint(send_email_bp)
 app.register_blueprint(competitor_bp)
 app.register_blueprint(tradingview_bp)
@@ -108,7 +118,7 @@ if __name__ == '__main__':
     try:
         with app.app_context():
             print('---AI Alpha API is running---') 
-            app.run(port=9000, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
+            app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
