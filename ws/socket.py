@@ -15,7 +15,6 @@ def handle_connect():
     print(f"  Remote address: {request.remote_addr}")
     print(f"  User agent: {request.headers.get('User-Agent')}")
     print(f"  Origin: {request.origin}")
-    emit('connection_info', {'client_id': client_id})
 
 @socketio.on('disconnect')
 def handle_disconnect():

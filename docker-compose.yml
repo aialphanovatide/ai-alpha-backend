@@ -1,28 +1,54 @@
 version: '3.8'
 
+x-common-web-config: &common-web-config
+  build: .
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
 services:
   web:
-    build: .
+    <<: *common-web-config
     ports:
       - "5000:5000"
+    volumes:
+      - .:/app:ro
     environment:
       - DB_HOST=db
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_DB=${REDIS_DB}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}
+    command: >
+      sh -c "alembic upgrade head &&
+             gunicorn --bind 0.0.0.0:5000 --workers 4 --threads 2 server:app"
+
+  web_dev:
+    <<: *common-web-config
+    ports:
+      - "5001:5000"
     volumes:
       - .:/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - DB_HOST=db_dev
+      - DB_PORT=${DB_PORT_DEV}
+      - DB_NAME=${DB_NAME_DEV}
+      - DB_USER=${DB_USER_DEV}
+      - DB_PASSWORD=${DB_PASSWORD_DEV}
+      - REDIS_HOST=redis_dev
+      - REDIS_PORT=${REDIS_PORT_DEV}
+      - REDIS_DB=${REDIS_DB_DEV}
+      - REDIS_PASSWORD=${REDIS_PASSWORD_DEV}
+      - DATABASE_URL=postgresql://${DB_USER_DEV}:${DB_PASSWORD_DEV}@db_dev:${DB_PORT_DEV}/${DB_NAME_DEV}
     command: >
       sh -c "alembic upgrade head &&
              python server.py"
@@ -43,15 +69,37 @@ services:
       timeout: 5s
       retries: 5
 
+  db_dev:
+    image: postgres:13
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME_DEV}
+      - POSTGRES_USER=${DB_USER_DEV}
+      - POSTGRES_PASSWORD=${DB_PASSWORD_DEV}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER_DEV} -d ${DB_NAME_DEV}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+
+  redis_dev:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data_dev:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD_DEV}
 
   ngrok:
     image: ngrok/ngrok:latest
@@ -67,4 +115,6 @@ services:
 
 volumes:
   postgres_data:
+  postgres_data_dev:
   redis_data:
+  redis_data_dev:
