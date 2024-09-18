@@ -6,13 +6,7 @@ export FLASK_APP=server.py
 export FLASK_ENV=${FLASK_ENV:-development}
 
 # Load environment variables from .env file
-if [ "$FLASK_ENV" = "development" ]; then
-    ENV_FILE=.env.dev # Run locally
-    # ENV_FILE=/app/.env.dev # Run in docker container
-else
-    ENV_FILE=.env.prod # Run locally
-    # ENV_FILE=/app/.env.prod # Run in docker container
-fi
+ENV_FILE=.env
 
 if [ -f "$ENV_FILE" ]; then
     echo "Loading environment from $ENV_FILE"
@@ -23,16 +17,6 @@ else
     echo "Error: $ENV_FILE not found."
     exit 1
 fi
-
-# Check if required environment variables are set
-required_vars=("POSTGRES_USER" "POSTGRES_PASSWORD" "POSTGRES_DB" "DATABASE_URL")
-for var in "${required_vars[@]}"; do
-    if [ -z "${!var}" ]; then
-        echo "Error: Required environment variable $var is not set."
-        exit 1
-    fi
-done
-
 
 # Function to check, create, and apply Alembic migrations
 check_create_and_apply_migrations() {

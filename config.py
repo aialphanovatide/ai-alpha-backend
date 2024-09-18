@@ -22,16 +22,15 @@ import uuid
 import json
 import os
 
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env = os.getenv('FLASK_ENV', 'development')
+DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
+if env == 'production':
+    DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
-# Determine the environment file to load based on the Flask environment
-flask_env = os.getenv('FLASK_ENV', 'development')
-env_file = '.env.dev' if flask_env == 'development' else '.env.prod'
-load_dotenv(env_file)
-
-DATABASE_URL = os.getenv('DATABASE_URL')
 engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
 Base = declarative_base()
 
