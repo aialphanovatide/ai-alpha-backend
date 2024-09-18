@@ -40,7 +40,6 @@ def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Opti
         'coins': [],
         'length': 0,
         'success': False,
-        'error': None,
     }
 
     try:
@@ -72,11 +71,11 @@ def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Opti
         result['length'] = len(result['coins'])
 
     except requests.exceptions.RequestException as e:
-        result['error'] = f"Error in CoinGecko API request: {str(e)}"
+        raise Exception(f"Error in CoinGecko API request in get_list_of_coins: {str(e)}")
     except ValueError as e:
-        result['error'] = f"Error decoding JSON response: {str(e)}"
+        raise Exception(f"Error decoding JSON response in get_list_of_coins: {str(e)}")
     except Exception as e:
-        result['error'] = f"Unexpected error: {str(e)}"
+        raise Exception(f"Unexpected error in get_list_of_coins: {str(e)}")
 
     return result
 
