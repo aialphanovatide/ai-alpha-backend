@@ -11,15 +11,17 @@ from botocore.exceptions import ClientError, BotoCoreError
 
 load_dotenv()
 
+import os
+import boto3
+from typing import Optional
 
 class ImageProcessor:
-    def __init__(self, 
+    def __init__(self,
                  aws_region: str = 'us-east-2',
                  aws_access_key: Optional[str] = None,
                  aws_secret_key: Optional[str] = None):
         """
         Resize and upload to an AWS S3 Bucket
-
         Args:
             aws_region (str): AWS region for S3. Default is 'us-east-2'.
             aws_access_key (Optional[str]): AWS access key. If None, will use environment variables or IAM role.
@@ -28,10 +30,10 @@ class ImageProcessor:
         self.aws_region = aws_region
         self.aws_access_key = aws_access_key or os.getenv('AWS_ACCESS')
         self.aws_secret_key = aws_secret_key or os.getenv('AWS_SECRET_KEY')
-
+        
         if not self.aws_access_key or not self.aws_secret_key:
             raise ValueError("AWS access key and secret key must be provided.")
-
+        
         self.s3_client = boto3.client(
             's3',
             region_name=self.aws_region,
@@ -97,7 +99,7 @@ class ImageProcessor:
         except ValueError as e:
             raise ValueError(f"Invalid or corrupted image data: {e}")
 
-    def delete_from_s3(self, image_url: str) -> None:
+    def delete_from_s3(self, bucket: str, image_url: str) -> None:
         """
         Delete an image from S3.
 
@@ -118,8 +120,7 @@ class ImageProcessor:
         """
         try:
             # Extract the bucket name and image key from the URL
-            parsed_url = urlparse(image_url)
-            bucket_name = parsed_url.netloc.split('.')[0]
+            bucket_name = bucket
             image_key = str(image_url).split('/')[-1]
 
             if not bucket_name or not image_key:
@@ -235,7 +236,8 @@ class ImageProcessor:
             return self.upload_to_s3(resized_image, bucket_name, image_filename)
         except Exception as e:
             raise Exception(f"Unexpected error processing and uploading image: {e}")
-       
+    
+
 
 
 

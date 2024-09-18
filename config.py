@@ -375,7 +375,6 @@ class Category(Base):
     alias = Column(String, nullable=False)
     icon = Column(String)
     border_color = Column(String)
-    category_name = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -434,6 +433,7 @@ class CoinBot(Base):
     icon = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
     background_color = Column(String)
+    symbol = Column(String)
     is_active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -1347,8 +1347,8 @@ def populate_database():
                 coins = item['coins']
 
                 new_category = Category(
-                    category=main_keyword,
-                    category_name=alias,
+                    name=main_keyword,
+                    alias=alias,
                     icon=item['icon'],
                     border_color=item['borderColor'],
                 )
@@ -1425,7 +1425,7 @@ def populate_database():
         session.close()
 
 # Populates the DB
-populate_database()
+# populate_database()
 
 # ------------- CREATE AN ADMIN USER -----------------------------
 
@@ -1479,7 +1479,7 @@ def init_superadmin():
 
 
 # Create SuperAdmin
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- POPULATE THE DB WITH USERS.JSON -------------------
