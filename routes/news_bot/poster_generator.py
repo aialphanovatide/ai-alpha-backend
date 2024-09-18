@@ -10,22 +10,16 @@ from routes.slack.templates.news_message import send_INFO_message_to_slack_chann
 
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+NEWS_BOT_API_KEY = os.getenv('NEWS_BOT_API_KEY')
 
 client = OpenAI(
-    api_key=OPENAI_API_KEY,
+    api_key=NEWS_BOT_API_KEY,
 )
 
-def resize_image(image_data, target_size=(500, 500)): 
-    image_binary = base64.b64decode(image_data)
-    image = Image.open(BytesIO(image_binary))
-    resized_image = image.resize(target_size)
-    resized_image_data = base64.b64encode(
-        resized_image.tobytes()).decode('utf-8')
-    return resized_image_data
 
 def generate_poster_prompt(article):
     prompt = f'Generate a DALL-E prompt related to this {article}. It should be 400 characters or less and avoid specific names focused on abstract image without mention letters, numbers or words..'
+    
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "system", "content": prompt},
@@ -38,7 +32,7 @@ def generate_poster_prompt(article):
 
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {OPENAI_API_KEY}'
+        'Authorization': f'Bearer {NEWS_BOT_API_KEY}'
     }
     data = {
         "model": "dall-e-3",

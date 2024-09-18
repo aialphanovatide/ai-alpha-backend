@@ -1,25 +1,26 @@
 import os
-import requests
 from http import HTTPStatus
-from sqlalchemy import desc
 from dotenv import load_dotenv
+from sqlalchemy import Interval, desc
 from sqlalchemy.exc import SQLAlchemyError
-from cachetools.func import ttl_cache
-from config import Chart, session, CoinBot, Session
+from tvDatafeed import TvDatafeed, Interval
+from config import Chart, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  
-from operator import itemgetter
 
+
+load_dotenv()
+
+TW_USER = os.getenv('TW_USER')
+TW_PASS = os.getenv('TW_PASS')
 
 chart_bp = Blueprint('chart', __name__)
-
 
 # Load environment variables
 load_dotenv()
 
-# Get WordPress API key from environment variables
+# Get CoinGecko API key from environment variables
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 COINGECKO_API_URL = "https://pro-api.coingecko.com/api/v3"
-
 
 
 @chart_bp.route('/api/chart/save_chart', methods=['POST'])
@@ -187,84 +188,39 @@ def get_chart_values():
 
     return jsonify(response), response["status"]
 
-
 @chart_bp.route('/api/total_3_data', methods=['GET'])
-def get_total_3_data():
+def get_total_3_data_route():
     """
     Retrieve and calculate total market cap data for the top 3 cryptocurrencies.
 
-    This endpoint fetches market cap data for Bitcoin, Ethereum, and the total market,
-    then calculates the market cap for the third largest cryptocurrency by subtracting
-    Bitcoin and Ethereum from the total.
+    This endpoint fetches market cap data for the top 3 cryptocurrencies.
+
+    Query Parameters:
+        days (int): Number of days of data to fetch. Defaults to 15.
 
     Returns:
         dict: A JSON response containing either the calculated data or an error message.
             Format: {"message": list or None, "error": str or None, "status": int}
-
-    Raises:
-        requests.exceptions.RequestException: If there's an error in the API requests.
-        SQLAlchemyError: If there's a database-related error.
     """
     response = {
         "message": None,
         "error": None,
-        "status": 200
+        "status": HTTPStatus.OK
     }
 
     try:
-        total3 = calculate_total_3_data()
+        days = int(request.args.get('days', 15))
+        total3 = get_total_3_data(days)
         response["message"] = total3
-    except requests.exceptions.RequestException as e:
-        response["error"] = f"API request failed: {str(e)}"
-        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
-    except SQLAlchemyError as e:
-        response["error"] = "Database error occurred"
+    except ValueError:
+        response["error"] = "Invalid 'days' parameter. It must be an integer."
+        response["status"] = HTTPStatus.BAD_REQUEST
+    except RuntimeError as e:
+        response["error"] = str(e)
         response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
         response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
 
     return jsonify(response), response["status"]
-
-
-@ttl_cache(maxsize=1, ttl=3600)  # Cache for 1 hour
-def calculate_total_3_data():
-    """
-    Calculate the market cap data for the third largest cryptocurrency.
-
-    This function fetches data from the CoinGecko API for Bitcoin, Ethereum, and the total market,
-    then calculates the difference to determine the market cap of the third largest cryptocurrency.
-
-    Returns:
-        list: A list of market cap values for the third largest cryptocurrency over 7 days.
-
-    Raises:
-        requests.exceptions.RequestException: If there's an error in the API requests.
-    """
-    base_url = "https://pro-api.coingecko.com/api/v3"
-    endpoints = {
-        "btc": f"{base_url}/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily",
-        "eth": f"{base_url}/coins/ethereum/market_chart?vs_currency=usd&days=7&interval=daily",
-        "total": f"{base_url}/global/market_cap_chart?days=7"
-    }
-    headers = {"x-cg-pro-api-key": COINGECKO_API_KEY}
-
-    responses = {}
-    for coin, url in endpoints.items():
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            responses[coin] = response.json()
-        except requests.exceptions.RequestException as e:
-            raise requests.exceptions.RequestException(f"Error fetching {coin} data: {str(e)}")
-
-    btc_market_caps = [entry[1] for entry in responses["btc"]["market_caps"]]
-    eth_market_caps = [entry[1] for entry in responses["eth"]["market_caps"]]
-    total_market_caps = [entry[1] for entry in responses["total"]["market_cap_chart"]["market_cap"]]
-
-    eth_btc_market_caps = [btc + eth for btc, eth in zip(btc_market_caps, eth_market_caps)]
-    total3 = [total - eth_btc for total, eth_btc in zip(total_market_caps, eth_btc_market_caps)]
-
-    return total3
-
 
