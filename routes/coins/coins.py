@@ -133,6 +133,62 @@ def create_coin():
     return jsonify(response), status_code
 
 
+@coin_bp.route('/coin/<int:coin_id>', methods=['GET'])
+def get_single_coin(coin_id):
+    """
+    Retrieve a single coin from the database with its full details, keywords, and blacklist.
+
+    This endpoint fetches a specific coin bot from the database and returns it
+    with full details, including related keywords and blacklist entries.
+
+    Args:
+        coin_id (int): The ID of the coin to retrieve.
+
+    Returns:
+        JSON: A JSON object containing:
+            - success (bool): Indicates if the operation was successful
+            - coin (dict or None): A dictionary representing the coin bot with full details,
+                                   including keywords and blacklist, or None if not found
+            - error (str or None): Error message, if any
+        HTTP Status Code:
+            - 200: Successfully retrieved the coin
+            - 404: Coin not found
+            - 500: Internal server error
+    """
+    response = {
+        "success": False,
+        "coin": None,
+        "error": None
+    }
+    status_code = 500
+
+    try:
+        with Session() as session:
+            coin = session.query(CoinBot).options(
+                joinedload(CoinBot.keywords),
+                joinedload(CoinBot.blacklist),
+                joinedload(CoinBot.category)
+            ).get(coin_id)
+
+            if not coin:
+                response["error"] = f"Coin with ID {coin_id} not found"
+                status_code = 404
+            else:
+                coin_dict = coin.as_dict()
+                coin_dict['whitelist'] = [keyword.as_dict() for keyword in coin.keywords]
+                coin_dict['blacklist'] = [item.as_dict() for item in coin.blacklist]
+                response["coin"] = coin_dict
+                response["success"] = True
+                status_code = 200
+
+    except SQLAlchemyError as e:
+        response["error"] = f"Database error occurred: {str(e)}"
+    except Exception as e:
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+
+    return jsonify(response), status_code
+
+
 @coin_bp.route('/coin/<int:coin_id>', methods=['PUT'])
 def update_coin(coin_id):
     """
