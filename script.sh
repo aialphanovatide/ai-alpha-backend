@@ -3,7 +3,7 @@ set -e  # Exit immediately if a command exits with a non-zero status.
 
 # Set environment variables
 export FLASK_APP=server.py
-export FLASK_ENV=${FLASK_ENV:-production}
+export FLASK_ENV=${FLASK_ENV:-development}
 
 # Load environment variables from .env file
 ENV_FILE=.env

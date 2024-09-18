@@ -6,12 +6,12 @@ from typing import Dict, Any, Optional, List
 # Load environment variables from the .env file
 load_dotenv()
 
-COINGECKO_APIKEY = os.getenv("COINGECKO_APIKEY")
+COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
 BASE_URL = 'https://pro-api.coingecko.com/api/v3'
 
 headers = {
             "Content-Type": "application/json",
-            "x-cg-pro-api-key": COINGECKO_APIKEY,
+            "x-cg-pro-api-key": COINGECKO_API_KEY,
         }
 
 def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -79,7 +79,8 @@ def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Opti
 
     return result
 
-print(get_list_of_coins(coin_symbols=['Matic']))
+# Example usage:
+# print(get_list_of_coins(coin_symbols=['Matic']))
 
 
 
