@@ -58,7 +58,8 @@ def create_coin():
             category_id = request.form.get('category_id')
             background_color = request.form.get('background_color')
             icon_file = request.files.get('icon')
-
+            symbol = request.files.get('symbol')
+            
             if not name or not alias or not category_id:
                 response["error"] = 'Name, alias, and category ID are required'
                 status_code = 400
@@ -89,6 +90,7 @@ def create_coin():
                 background_color=background_color,
                 icon=icon_url,
                 is_active=False,
+                symbol=symbol,
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
@@ -112,9 +114,39 @@ def create_coin():
 
 
 
-
 @coin_bp.route('/coin/<int:coin_id>', methods=['PUT'])
 def update_coin(coin_id):
+    """
+    Update a coin's information in the database.
+
+    This function handles PUT requests to update the details of a specific coin,
+    identified by its coin_id. It can update various fields including name, alias,
+    category, background color, and icon.
+
+    Args:
+        coin_id (int): The ID of the coin to be updated.
+
+    Returns:
+        tuple: A tuple containing:
+            - A JSON response with the following structure:
+                {
+                    "success": bool,
+                    "coin": dict or None,
+                    "error": str or None
+                }
+            - An HTTP status code (int)
+
+    Raises:
+        BadRequest: If no update data is provided.
+        ValueError: If the provided category_id is invalid or if there's an error processing the icon.
+        IntegrityError: If there's a database integrity violation.
+        SQLAlchemyError: If a database error occurs.
+        Exception: For any other unexpected errors.
+
+    Note:
+        This function interacts with the database using SQLAlchemy sessions and
+        handles file operations for icon updates using S3 bucket storage.
+    """
     response = {
         "success": False,
         "coin": None,
@@ -151,12 +183,16 @@ def update_coin(coin_id):
                 try:
                     if coin.icon:  # Delete old icon if exists
                         old_icon_filename = coin.icon.split('/')[-1]
-                        image_processor.delete_from_s3(S3_BUCKET_ICONS, old_icon_filename)
-                    
-                    new_icon_filename = secure_filename(f"{coin.alias or coin.name}_coin_icon.svg")
+                        image_processor.delete_from_s3(bucket=S3_BUCKET_ICONS, image_url=old_icon_filename)
+
+                    alias = coin.alias
+                    normalized_alias = alias.strip().lower().replace(" ", "")
+                    new_icon_filename = secure_filename(f"{normalized_alias}.svg")
                     icon_url = image_processor.upload_svg_to_s3(icon_svg_string, S3_BUCKET_ICONS, new_icon_filename)
+
                     if not icon_url:
                         raise ValueError('Failed to upload new SVG icon')
+
                     coin.icon = icon_url
                 except Exception as e:
                     raise ValueError(f"Error processing icon: {str(e)}")
@@ -245,7 +281,7 @@ def delete_coin(coin_id):
             if coin.icon:
                 icon_filename = coin.icon.split('/')[-1]
                 try:
-                    image_processor.delete_from_s3(S3_BUCKET_ICONS, icon_filename)
+                    image_processor.delete_from_s3(bucket=S3_BUCKET_ICONS, image_url=icon_filename)
                 except Exception as e:
                     return jsonify({"success": False, "error": f"Error deleting icon from S3: {str(e)}"}), 500
 

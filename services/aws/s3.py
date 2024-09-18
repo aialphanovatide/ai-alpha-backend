@@ -99,7 +99,7 @@ class ImageProcessor:
         except ValueError as e:
             raise ValueError(f"Invalid or corrupted image data: {e}")
 
-    def delete_from_s3(self, image_url: str) -> None:
+    def delete_from_s3(self,bucket: str, image_url: str) -> None:
         """
         Delete an image from S3.
 
@@ -120,8 +120,7 @@ class ImageProcessor:
         """
         try:
             # Extract the bucket name and image key from the URL
-            parsed_url = urlparse(image_url)
-            bucket_name = parsed_url.netloc.split('.')[0]
+            bucket_name = bucket
             image_key = str(image_url).split('/')[-1]
 
             if not bucket_name or not image_key:

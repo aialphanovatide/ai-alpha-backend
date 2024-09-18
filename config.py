@@ -6,6 +6,9 @@ from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
 from utils.general import generate_unique_short_token
+import secrets
+import hashlib
+import base64
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import UniqueConstraint
@@ -19,20 +22,16 @@ import uuid
 import json
 import os
 
-
 load_dotenv()
 
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env = os.getenv('FLASK_ENV', 'development')
+DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
-db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-engine = create_engine(db_url, pool_size=30, max_overflow=20)
+if env == 'production':
+    DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
-
+engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
 Base = declarative_base()
 
 # _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
@@ -65,6 +64,7 @@ class Admin(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     roles = relationship('Role', secondary='admin_roles', back_populates='admins')
+    api_key = relationship("APIKey", back_populates="admin", uselist=False)
 
     def to_dict(self):
         """
@@ -150,6 +150,107 @@ class AdminRole(Base):
     admin_id = Column(Integer, ForeignKey('admins.admin_id'), primary_key=True, nullable=False)
     role_id = Column(Integer, ForeignKey('roles.id'), primary_key=True, nullable=False)
 
+class APIKey(Base):
+    __tablename__ = 'api_keys'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    key = Column(String(64), unique=True, nullable=False)
+    last_used = Column(TIMESTAMP)
+    admin_id = Column(Integer, ForeignKey('admins.admin_id', ondelete='CASCADE'), unique=True, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    admin = relationship("Admin", back_populates="api_key")
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+    @staticmethod
+    def generate_api_key(prefix='alpha', length=32):
+        """
+        Generate a robust API key.
+        
+        :param prefix: A string prefix for the key (default: 'sk' for 'secret key')
+        :param length: The length of the random part of the key (default: 32)
+        :return: A string containing the full API key
+        """
+        # Generate random bytes
+        random_bytes = secrets.token_bytes(length)
+        
+        # Convert to base64 and remove padding
+        b64_string = base64.urlsafe_b64encode(random_bytes).decode('utf-8').rstrip('=')
+        
+        # Truncate to desired length
+        truncated = b64_string[:length]
+        
+        # Add prefix
+        prefixed_key = f"{prefix}_{truncated}"
+        
+        # Calculate checksum
+        checksum = hashlib.sha256(prefixed_key.encode('utf-8')).hexdigest()[:4]
+        
+        # Combine all parts
+        full_key = f"{prefixed_key}_{checksum}"
+        
+        return full_key
+
+    @classmethod
+    def create_new_key(cls, admin_id):
+        """
+        Create a new API key and store it in the database.
+        
+        :param admin_id: The ID of the admin associated with this key
+        :return: A dictionary containing the API key details
+        :raises SQLAlchemyError: If there's an error during database operations
+        """
+        session = Session()
+        try:
+            # Check if admin already has an API key
+            existing_key = session.query(cls).filter_by(admin_id=admin_id).first()
+            if existing_key:
+                raise ValueError("Admin already has an API key")
+
+            new_key = cls.generate_api_key()
+            api_key = cls(key=new_key, admin_id=admin_id)
+            session.add(api_key)
+            session.commit()
+            session.refresh(api_key)
+            return api_key.as_dict()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    @classmethod
+    def validate_api_key(cls, key):
+        """
+        Validate an API key.
+        
+        :param key: The API key to validate
+        :return: The API key object if valid, None otherwise
+        :raises SQLAlchemyError: If there's an error during database operations
+        """
+        parts = key.split('_')
+        if len(parts) != 3 or parts[0] != 'alpha' or len(parts[2]) != 4:
+            return None
+        
+        checksum = hashlib.sha256(f"{parts[0]}_{parts[1]}".encode('utf-8')).hexdigest()[:4]
+        if checksum != parts[2]:
+            return None
+        
+        session = Session()
+        try:
+            api_key = session.query(cls).filter_by(key=key).first()
+            if api_key:
+                api_key.last_used = func.now()
+                session.commit()
+                return api_key
+            return None
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
 # __________________________ AI ALPHA APP TABLES __________________________________________
 
@@ -274,7 +375,6 @@ class Category(Base):
     alias = Column(String, nullable=False)
     icon = Column(String)
     border_color = Column(String)
-    category_name = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -333,6 +433,7 @@ class CoinBot(Base):
     icon = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
     background_color = Column(String)
+    symbol = Column(String)
     is_active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -1237,7 +1338,7 @@ def populate_database():
     try:
         # Check if the database is already populated with categories and sites
         if not session.query(Category).first() and not session.query(Site).first():
-            with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
+            with open(f'{ROOT_DIRECTORY}/models/init_data/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
             for item in config:
@@ -1246,8 +1347,8 @@ def populate_database():
                 coins = item['coins']
 
                 new_category = Category(
-                    category=main_keyword,
-                    category_name=alias,
+                    name=main_keyword,
+                    alias=alias,
                     icon=item['icon'],
                     border_color=item['borderColor'],
                 )
@@ -1289,7 +1390,7 @@ def populate_database():
             print('-----Categories and sites are already populated. Skipping this process-----')
 
         # Now, let's handle the users
-        users_json_path = os.path.join(BASE_DIR, 'users.json')
+        users_json_path = os.path.join(ROOT_DIRECTORY, 'models', 'init_data', 'users.json')
         users = load_json_file(users_json_path)
         for user in users:
             existing_user = get_user_data(user['user_id'])
@@ -1366,8 +1467,6 @@ def init_superadmin():
 
             session.commit()
             print('---- Superadmin user created successfully ----')
-        else:
-            print('---- Superadmin user already exists ----')
 
     except SQLAlchemyError as e:
         print(f'---- Database error creating the superadmin user: {str(e)} ----')
