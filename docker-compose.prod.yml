@@ -15,17 +15,16 @@ services:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro
     env_file:
-      - .env.prod
-    command: >
-      sh -c "chmod +x /app/script.sh &&
-             /app/script.sh"
+      - .env
+    environment:
+      - FLASK_ENV=production
 
   db:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env.prod
+      - .env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -42,7 +41,7 @@ services:
       - "--domain=${NGROK_DOMAIN}"
       - "web:5000"
     env_file:
-      - .env.prod
+      - .env
     depends_on:
       - web
 

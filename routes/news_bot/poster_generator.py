@@ -10,10 +10,10 @@ from routes.slack.templates.news_message import send_INFO_message_to_slack_chann
 
 load_dotenv()
 
-OPENAI_APIKEY = os.getenv('OPENAI_APIKEY')
+NEWS_BOT_API_KEY = os.getenv('NEWS_BOT_API_KEY')
 
 client = OpenAI(
-    api_key=OPENAI_APIKEY,
+    api_key=NEWS_BOT_API_KEY,
 )
 
 
@@ -32,7 +32,7 @@ def generate_poster_prompt(article):
 
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {OPENAI_APIKEY}'
+        'Authorization': f'Bearer {NEWS_BOT_API_KEY}'
     }
     data = {
         "model": "dall-e-3",

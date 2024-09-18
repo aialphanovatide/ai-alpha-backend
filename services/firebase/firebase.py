@@ -2,11 +2,12 @@ import os
 from typing import Dict, Tuple
 from firebase_admin import initialize_app, credentials, messaging
 
-# Get the absolute path to the service account JSON file
-json_file_path = os.path.abspath('services/firebase/service-account.json')
+# Try the original path
+original_path = os.path.abspath('services/firebase/service-account.json')
+path = original_path if os.path.exists(original_path) else '/etc/secrets/service-account.json'
 
 # Creds
-cred = credentials.Certificate(json_file_path)
+cred = credentials.Certificate(path)
 default_app = initialize_app(credential=cred)
 
 def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None) -> None:

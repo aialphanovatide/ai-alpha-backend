@@ -14,29 +14,56 @@ services:
     volumes:
       - .:/app
     env_file:
-      - .env.dev
+      - .env
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
     command: >
-      sh -c "chmod +x /app/script.sh &&
-             /app/script.sh"
+      sh -c "
+        echo 'Current directory:'
+        pwd
+        echo 'Files in current directory:'
+        ls -la
+        echo '.env.dev file path:'
+        find / -name .env.dev 2>/dev/null
+        echo 'Contents of .env.dev file:'
+        cat .env.dev
+        echo 'Web service environment variables:'
+        echo POSTGRES_DB=$${POSTGRES_DB}
+        echo POSTGRES_USER=$${POSTGRES_USER}
+        echo POSTGRES_PASSWORD=$${POSTGRES_PASSWORD}
+        echo FLASK_ENV=$${FLASK_ENV}
+        echo FLASK_DEBUG=$${FLASK_DEBUG}
+        ./script.sh
+      "
 
   db_dev:
     image: postgres:13
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_PASSWORD}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
     env_file:
-      - .env.dev
+      - .env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    command: >
+      sh -c "
+        echo 'Current directory:'
+        pwd
+        echo 'Files in current directory:'
+        ls -la
+        echo '.env.dev file path:'
+        find / -name .env.dev 2>/dev/null
+        echo 'Contents of .env.dev file:'
+        cat .env.dev
+        echo 'Database service environment variables:'
+        echo POSTGRES_DB=$${POSTGRES_DB}
+        echo POSTGRES_USER=$${POSTGRES_USER}
+        echo POSTGRES_PASSWORD=$${POSTGRES_PASSWORD}
+        docker-entrypoint.sh postgres
+      "
 
 networks:
   default:
