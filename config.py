@@ -152,6 +152,42 @@ class Admin(Base):
             return None
         finally:
             session.close() 
+            
+            
+    def generate_reset_token(self, expires_in=3600):
+        """
+        Generate a password reset token for the admin.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            tuple: A tuple containing the reset token and its expiration timestamp.
+        """
+        reset_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        return reset_token, expires_at
+
+    @staticmethod
+    def verify_reset_token(reset_token):
+        """
+        Verify a password reset token and return the associated admin.
+
+        Args:
+            reset_token (str): The reset token to verify.
+
+        Returns:
+            Admin or None: The admin associated with the reset token if valid, None otherwise.
+        """
+        session = Session()
+        try:
+            admin = session.query(Admin).filter(
+                Admin.reset_token == reset_token,
+                Admin.reset_token_expires_at > datetime.utcnow()
+            ).first()
+            return admin
+        finally:
+            session.close()
     
 class Role(Base):
     """
