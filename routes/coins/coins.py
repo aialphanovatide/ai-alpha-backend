@@ -1,20 +1,23 @@
 import os
+from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from flask import jsonify, Blueprint, request
-from config import Category, CoinBot, Session, session
-from datetime import datetime
-from routes.category.category import are_fundamentals_complete, has_support_resistance_lines
+from config import Category, CoinBot, Session
 from services.aws.s3 import ImageProcessor
 from werkzeug.utils import secure_filename
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import BadRequest
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.orm import joinedload
+from routes.category.category import are_fundamentals_complete, has_support_resistance_lines
 
 coin_bp = Blueprint('coin_bp', __name__)
 
-S3_BUCKET_ICONS = os.getenv('S3_BUCKET')
+S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 
 # Initialize the ImageProcessor
 image_processor = ImageProcessor()
+
+from sqlalchemy import func
 
 @coin_bp.route('/coin', methods=['POST'])
 def create_coin():
@@ -30,6 +33,7 @@ def create_coin():
         category_id (int): The ID of the associated category (required)
         background_color (str): HEX code string for visual representation (optional)
         icon (file): An SVG file to be used as the coin bot icon (optional)
+        symbol (str): The symbol of the coin (optional)
 
     Returns:
         JSON: A JSON object containing:
@@ -38,7 +42,7 @@ def create_coin():
             - error (str or None): Error message, if any
         HTTP Status Code:
             - 201: Created successfully
-            - 400: Bad request (missing required fields or invalid SVG)
+            - 400: Bad request (missing required fields, invalid SVG, or name/alias already exists)
             - 404: Category not found
             - 500: Internal server error
     """
@@ -56,10 +60,28 @@ def create_coin():
             category_id = request.form.get('category_id')
             background_color = request.form.get('background_color')
             icon_file = request.files.get('icon')
-            symbol = request.files.get('symbol')
+            symbol = request.form.get('symbol')
+
             
             if not name or not alias or not category_id:
                 response["error"] = 'Name, alias, and category ID are required'
+                status_code = 400
+                return jsonify(response), status_code
+            
+            # Check if name or alias already exist (case-insensitive)
+            existing_coin = session.query(CoinBot).filter(
+                func.lower(CoinBot.name) == func.lower(name)
+            ).first()
+            if existing_coin:
+                response["error"] = f'A coin with the name "{name}" already exists'
+                status_code = 400
+                return jsonify(response), status_code
+
+            existing_coin = session.query(CoinBot).filter(
+                func.lower(CoinBot.alias) == func.lower(alias)
+            ).first()
+            if existing_coin:
+                response["error"] = f'A coin with the alias "{alias}" already exists'
                 status_code = 400
                 return jsonify(response), status_code
 
@@ -72,7 +94,7 @@ def create_coin():
 
             icon_url = None
             if icon_file:
-            # Normalize the alias
+                # Normalize the alias
                 normalized_alias = alias.strip().lower().replace(" ", "")
                 icon_filename = secure_filename(f"{normalized_alias}.svg")
                 icon_url = image_processor.upload_svg_to_s3(icon_file, S3_BUCKET_ICONS, icon_filename)
@@ -109,7 +131,6 @@ def create_coin():
             status_code = 500
 
     return jsonify(response), status_code
-
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['PUT'])
@@ -154,7 +175,8 @@ def update_coin(coin_id):
 
     with Session() as session:
         try:
-            data = request.json
+            data = request.form
+            icon_file = request.files.get('icon')
             if not data:
                 raise BadRequest('No update data provided')
 
@@ -164,7 +186,7 @@ def update_coin(coin_id):
                 return jsonify(response), 404
 
             # Update fields if provided
-            for field in ['name', 'alias', 'category_id', 'background_color']:
+            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol']:
                 if field in data:
                     setattr(coin, field, data[field])
 
@@ -175,9 +197,7 @@ def update_coin(coin_id):
                     raise ValueError(f"Category with ID {data['category_id']} not found")
                 coin.category = category
 
-            # Handle icon update
-            if 'icon' in data:
-                icon_svg_string = data['icon']
+            if icon_file:
                 try:
                     if coin.icon:  # Delete old icon if exists
                         old_icon_filename = coin.icon.split('/')[-1]
@@ -186,11 +206,9 @@ def update_coin(coin_id):
                     alias = coin.alias
                     normalized_alias = alias.strip().lower().replace(" ", "")
                     new_icon_filename = secure_filename(f"{normalized_alias}.svg")
-                    icon_url = image_processor.upload_svg_to_s3(icon_svg_string, S3_BUCKET_ICONS, new_icon_filename)
-
+                    icon_url = image_processor.upload_svg_to_s3(icon_file, S3_BUCKET_ICONS, new_icon_filename)
                     if not icon_url:
                         raise ValueError('Failed to upload new SVG icon')
-
                     coin.icon = icon_url
                 except Exception as e:
                     raise ValueError(f"Error processing icon: {str(e)}")
@@ -221,21 +239,27 @@ def update_coin(coin_id):
 
     return jsonify(response), status_code
 
+
 @coin_bp.route('/coins', methods=['GET'])
 def get_all_coins():
     """
-    Retrieve all coins from the database.
+    Retrieve all coins from the database with optional ordering and full details.
 
-    This endpoint fetches all coin bots from the database and returns them as a list.
-    If no coins are found, it returns an empty list.
+    This endpoint fetches all coin bots from the database and returns them as a list
+    with full details, including related entities.
+
+    Query Parameters:
+        order (str, optional): The order of the returned coins. 
+                               Accepts 'asc' or 'desc'. Defaults to 'asc'.
 
     Returns:
         JSON: A JSON object containing:
             - success (bool): Indicates if the operation was successful
-            - coins (list): A list of dictionaries, each representing a coin bot
+            - coins (list): A list of dictionaries, each representing a coin bot with full details
             - error (str or None): Error message, if any
         HTTP Status Code:
             - 200: Successfully retrieved coins (even if the list is empty)
+            - 400: Bad request (invalid order parameter)
             - 500: Internal server error
     """
     response = {
@@ -245,22 +269,64 @@ def get_all_coins():
     }
     status_code = 500
 
-    with Session() as session:
-        try:
-            coins = session.query(CoinBot.name).order_by(CoinBot.name).all()
-            response["coins"] = [coin[0] for coin in coins]
+    try:
+        order = request.args.get('order', 'asc').lower()
+        if order not in ['asc', 'desc']:
+            response["error"] = "Invalid order argument. Use 'asc' or 'desc'."
+            return jsonify(response), 400
+
+        with Session() as session:
+            query = session.query(CoinBot).options(
+                joinedload(CoinBot.keywords),
+                joinedload(CoinBot.blacklist),
+            )
+
+            if order == 'desc':
+                query = query.order_by(CoinBot.name.desc())
+            else:
+                query = query.order_by(CoinBot.name.asc())
+            
+            coins = query.all()
+            
+            response["coins"] = [coin.as_dict() for coin in coins]
             response["success"] = True
             status_code = 200
-        except SQLAlchemyError as e:
-            response["error"] = f"Database error occurred: {str(e)}"
-        except Exception as e:
-            response["error"] = f"An unexpected error occurred: {str(e)}"
+
+    except SQLAlchemyError as e:
+        response["error"] = f"Database error occurred: {str(e)}"
+    except Exception as e:
+        response["error"] = f"An unexpected error occurred: {str(e)}"
 
     return jsonify(response), status_code
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['DELETE'])
 def delete_coin(coin_id):
+    """
+    Delete a coin from the database.
+
+    This endpoint removes a coin and its associated icon from the system.
+    If the coin has an icon, it will be deleted from the S3 bucket as well.
+
+    Args:
+        coin_id (int): The ID of the coin to delete.
+
+    Returns:
+        tuple: A tuple containing:
+            - A JSON response with the following keys:
+                - success (bool): Indicates if the deletion was successful.
+                - error (str): Error message if any error occurred, otherwise None.
+            - An HTTP status code.
+
+    Raises:
+        SQLAlchemyError: If a database error occurs.
+        Exception: For any other unexpected errors, including S3 deletion errors.
+
+    Status Codes:
+        200: Success
+        404: Coin not found
+        500: Server error (database error, S3 deletion error, or unexpected error)
+    """
     response = {
         "success": False,
         "error": None
@@ -300,9 +366,37 @@ def delete_coin(coin_id):
     return jsonify(response), status_code
 
 
-
 @coin_bp.route('/coin/<int:coin_id>/toggle-publication', methods=['POST'])
 def toggle_coin_publication(coin_id):
+    """
+    Toggle the publication status of a coin.
+
+    This endpoint allows for activating or deactivating a coin based on its current status.
+    When activating, it checks if the coin's fundamentals are complete and if the chart
+    has valid support and resistance lines.
+
+    Args:
+        coin_id (int): The ID of the coin to toggle.
+
+    Returns:
+        tuple: A tuple containing:
+            - A JSON response with the following keys:
+                - success (bool): Indicates if the operation was successful.
+                - message (str): A descriptive message about the operation result.
+                - is_active (bool): The new active status of the coin.
+                - error (str): Error message if any error occurred, otherwise None.
+            - An HTTP status code.
+
+    Raises:
+        SQLAlchemyError: If a database error occurs.
+        Exception: For any other unexpected errors.
+
+    Status Codes:
+        200: Success
+        400: Bad Request (e.g., incomplete fundamentals or invalid chart)
+        404: Coin not found
+        500: Server error
+    """
     response = {
         "success": False,
         "message": "",

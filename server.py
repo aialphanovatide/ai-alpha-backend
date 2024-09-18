@@ -22,6 +22,7 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
+from routes.api_keys.api_keys import api_keys_bp
 from routes.category.category import category_bp
 from routes.external_apis.profit import profit_bp
 from routes.external_apis.coindar import coindar_bp
@@ -30,16 +31,27 @@ from routes.external_apis.capitalcom import capitalcom_bp
 from routes.external_apis.coinalyze import coinalyze_bp
 from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
-from routes.coin_bot.coinbot import coin_bp
+from routes.coins.coins import coin_bp
 from flasgger import Swagger
+from decorators.api_key import check_api_key
 from ws.socket import init_socketio
 
 app = Flask(__name__)
 app.name = 'AI Alpha API'
 swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
 
+# Check API key for all requests
+@app.before_request
+def before_request():
+    result = check_api_key()
+    if result is not None:
+        return result
+
 # Initialize SocketIO
 socketio = init_socketio(app)
+
+app.static_folder = 'static'
+app.secret_key = os.urandom(24)
 
 # Swagger configuration
 with open(swagger_template_path, 'r') as f:
@@ -49,28 +61,31 @@ swagger_config = {
     "headers": [],
     "specs": [
         {
-            "endpoint": 'apispec_1',
-            "route": '/apispec_1.json',
+            "endpoint": 'swagger',
+            "route": '/swagger.json',
             "rule_filter": lambda rule: True,
             "model_filter": lambda tag: True,
         }
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/apidocs/",
+    "specs_route": "/docs/",
+    "title": "AI Alpha API",
+    "description": "API for AI Alpha",
     "logo": {
         "url": "static/logo.png",
         "backgroundColor": "#FFFFFF",
         "altText": "AI Alpha Logo"
+    },
+    "swagger_ui_config": {
+        "docExpansion": "none",
+        "tagsSorter": "alpha"
     }
 }
 
 swagger = Swagger(app, template=swagger_template, config=swagger_config)
 CORS(app, origins='*', supports_credentials=True)
 
-
-app.static_folder = 'static'
-app.secret_key = os.urandom(24)
 
 # Register blueprints -  routes
 app.register_blueprint(scrapper_bp)
@@ -91,6 +106,7 @@ app.register_blueprint(upgrades_bp)
 app.register_blueprint(category_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
+app.register_blueprint(api_keys_bp)
 app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(profit_bp)
