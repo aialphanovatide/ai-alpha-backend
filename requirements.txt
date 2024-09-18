@@ -22,7 +22,7 @@ pillow
 tweepy
 playwright
 slack_sdk
-slackeventsapi
+# slackeventsapi
 apscheduler
 redis
 pyahocorasick
