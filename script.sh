@@ -18,6 +18,8 @@ else
     exit 1
 fi
 
+
+
 # Function to check, create, and apply Alembic migrations
 check_create_and_apply_migrations() {
     echo "Checking for pending database migrations..."
