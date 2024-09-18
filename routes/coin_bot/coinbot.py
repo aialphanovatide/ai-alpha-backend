@@ -249,11 +249,10 @@ def get_all_coins():
 
     with Session() as session:
         try:
-            coins = session.query(CoinBot).all()
-            response["coins"] = [coin.as_dict() for coin in coins]
+            coins = session.query(CoinBot.name).order_by(CoinBot.name).all()
+            response["coins"] = [coin[0] for coin in coins]
             response["success"] = True
             status_code = 200
-
         except SQLAlchemyError as e:
             response["error"] = f"Database error occurred: {str(e)}"
         except Exception as e:
