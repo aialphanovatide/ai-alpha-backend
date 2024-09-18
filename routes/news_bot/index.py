@@ -158,14 +158,45 @@ def get_news_by_bot_name():
     except Exception as e:
         return {'error': f'An error occurred getting the news: {str(e)}'}, 500
 
-
-
-# Gets all categories
 @scrapper_bp.route('/get_categories', methods=['GET'])
 def get_categories():
-    try:
+    """
+    Retrieve all categories and their associated coin bots, sorted alphabetically.
 
-        categories = session.query(Category).filter(Category.category != 'hacks').order_by(Category.category_id).all()
+    This endpoint fetches all categories (excluding 'hacks') from the database,
+    orders them alphabetically by category name, and includes their associated
+    coin bots (also sorted alphabetically by bot name).
+
+    Returns:
+        tuple: A tuple containing:
+            - dict: A dictionary with a 'categories' key, whose value is a list of
+                    category dictionaries. Each category dictionary contains:
+                    - category_id (int): The unique identifier for the category
+                    - category (str): The category slug
+                    - category_name (str): The display name of the category
+                    - time_interval (str): The time interval associated with the category
+                    - is_active (bool): Whether the category is active
+                    - icon (str): The icon associated with the category
+                    - borderColor (str): The border color for the category
+                    - created_at (datetime): The creation timestamp of the category
+                    - coin_bots (list): A list of dictionaries, each representing a coin bot
+                                        associated with the category. Each coin bot dictionary contains:
+                                        - bot_id (int): The unique identifier for the bot
+                                        - bot_name (str): The name of the bot
+                                        - image (str): The image associated with the bot
+                                        - created_at (datetime): The creation timestamp of the bot
+            - int: HTTP status code (200 for success, 500 for error)
+
+    Raises:
+        Exception: If there's an error retrieving the categories from the database.
+
+    Note:
+        - Categories are sorted alphabetically by category_name.
+        - Coin bots within each category are sorted alphabetically by bot_name.
+        - The 'hacks' category is excluded from the results.
+    """
+    try:
+        categories = session.query(Category).filter(Category.category != 'hacks').order_by(Category.category_name).all()
         category_data = []
 
         for category in categories:
@@ -183,15 +214,13 @@ def get_categories():
                     'bot_name': bot.bot_name,
                     'image': bot.image,
                     'created_at': bot.created_at
-                } for bot in category.coin_bot]
+                } for bot in sorted(category.coin_bot, key=lambda x: x.bot_name)]
             })
         
         return {'categories': category_data}, 200
 
     except Exception as e:
-        return {'Error ': f'Error getting the categories: {str(e)}'}, 500
-
-
+        return {'Error': f'Error getting the categories: {str(e)}'}, 500
 
 def activate_news_bot(category_name):
     try:

@@ -93,6 +93,50 @@ def create_category():
 
         return jsonify(response), status_code
 
+@category_bp.route('/categories', methods=['GET'])
+def get_all_categories():
+    """
+    Retrieve all categories, sorted alphabetically by name.
+
+    This endpoint fetches all categories (excluding 'hacks') from the database,
+    orders them alphabetically by name.
+
+    Returns:
+        tuple: A tuple containing:
+            - dict: A dictionary with a 'categories' key, whose value is a list of
+                    category dictionaries. Each category dictionary contains:
+                    - category_id (int): The unique identifier for the category
+                    - name (str): The main identifier for the category
+                    - alias (str): An alternative identifier for the category
+                    - icon (str): The URL of the SVG icon associated with the category
+                    - border_color (str): The color used for visual representation of the category
+                    - category_name (str): A legacy field for backwards compatibility
+                    - is_active (bool): Indicates if the category is currently active
+                    - created_at (datetime): The creation timestamp of the category
+                    - updated_at (datetime): The last update timestamp of the category
+            - int: HTTP status code (200 for success, 500 for error)
+
+    Raises:
+        Exception: If there's an error retrieving the categories from the database.
+
+    Note:
+        - Categories are sorted alphabetically by name.
+        - The 'hacks' category is excluded from the results.
+    """
+    try:
+        categories = session.query(Category).filter(Category.name != 'hacks').order_by(Category.name).all()
+        category_data = []
+
+        for category in categories:
+            category_data.append(category.as_dict())
+
+        return {'categories': category_data}, 200
+
+    except Exception as e:
+        return {'Error': f'Error getting the categories: {str(e)}'}, 500
+    
+    
+
 @category_bp.route('/categories/<int:category_id>', methods=['DELETE'])
 def delete_category(category_id):
     response = {
