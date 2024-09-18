@@ -1,4 +1,4 @@
-"""full token added
+"""full token added - curated.
 
 Revision ID: 7b2c360b1115
 Revises: e56c26ef855f
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '7b2c360b1115'
-down_revision: Union[str, None] = 'e56c26ef855f'
+down_revision: Union[str, None] = 'e9b1d398537c'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -25,8 +25,9 @@ def upgrade():
     columns = [col['name'] for col in inspector.get_columns('user_table')]
     if 'auth_token' not in columns:
         op.add_column('user_table', sa.Column('auth_token', sa.String(), nullable=True))
-    # ... rest of your upgrade logic ...
-
+    
+    if 'full_name' not in columns:
+        op.add_column('user_table', sa.Column('full_name', sa.String(), nullable=True))
 
 def downgrade():
     # Check if the column exists before dropping it
@@ -35,4 +36,7 @@ def downgrade():
     columns = [col['name'] for col in inspector.get_columns('user_table')]
     if 'auth_token' in columns:
         op.drop_column('user_table', 'auth_token')
-    # ... rest of your downgrade logic ...
+
+    if 'full_name' in columns:
+        op.drop_column('user_table', 'full_name')
+ 
