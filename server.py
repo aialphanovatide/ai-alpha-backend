@@ -50,6 +50,9 @@ def before_request():
 # Initialize SocketIO
 socketio = init_socketio(app)
 
+app.static_folder = 'static'
+app.secret_key = os.urandom(24)
+
 # Swagger configuration
 with open(swagger_template_path, 'r') as f:
     swagger_template = json.load(f)
@@ -58,28 +61,31 @@ swagger_config = {
     "headers": [],
     "specs": [
         {
-            "endpoint": 'apispec_1',
-            "route": '/apispec_1.json',
+            "endpoint": 'swagger',
+            "route": '/swagger.json',
             "rule_filter": lambda rule: True,
             "model_filter": lambda tag: True,
         }
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/apidocs/",
+    "specs_route": "/docs/",
+    "title": "AI Alpha API",
+    "description": "API for AI Alpha",
     "logo": {
         "url": "static/logo.png",
         "backgroundColor": "#FFFFFF",
         "altText": "AI Alpha Logo"
+    },
+    "swagger_ui_config": {
+        "docExpansion": "none",
+        "tagsSorter": "alpha"
     }
 }
 
 swagger = Swagger(app, template=swagger_template, config=swagger_config)
 CORS(app, origins='*', supports_credentials=True)
 
-
-app.static_folder = 'static'
-app.secret_key = os.urandom(24)
 
 # Register blueprints -  routes
 app.register_blueprint(scrapper_bp)
