@@ -1,4 +1,4 @@
-from config import db_url
+from config import DATABASE_URL
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_MISSED
@@ -6,7 +6,7 @@ from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_J
 SLACK_LOGS_CHANNEL_ID = "C06FTS38JRX"
 
 scheduler = BackgroundScheduler(executors={'default': {'type': 'threadpool', 'max_workers': 50}})
-scheduler.add_jobstore('sqlalchemy', url= db_url)
+scheduler.add_jobstore('sqlalchemy', url=DATABASE_URL)
 if scheduler.state != 1:
     scheduler.start()
     print("---- Main Scheduler started ----")

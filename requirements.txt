@@ -22,7 +22,7 @@ pillow
 tweepy
 playwright
 slack_sdk
-slackeventsapi
+# slackeventsapi
 apscheduler
 redis
 pyahocorasick
@@ -31,5 +31,7 @@ cachetools
 alembic
 flask-socketio
 pytz
-tvdatafeed
+tradingview-datafeed
 marshmallow
+gunicorn
+flask_mail

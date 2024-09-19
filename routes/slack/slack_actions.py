@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from urllib.parse import unquote
 from json import JSONDecodeError
 from flask import request, Blueprint
-from slackeventsapi import SlackEventAdapter
+# from slackeventsapi import SlackEventAdapter
 from config import session, Article, TopStory, TopStoryImage, ArticleImage
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 
@@ -13,9 +13,9 @@ load_dotenv()
 
 SLACK_SIGNING_SECRET=os.getenv("SLACK_SIGNING_SECRET")
 
-slack_events_adapter = SlackEventAdapter(signing_secret=SLACK_SIGNING_SECRET, 
-                                         endpoint="/slack/events", 
-                                         )
+# slack_events_adapter = SlackEventAdapter(signing_secret=SLACK_SIGNING_SECRET, 
+#                                          endpoint="/slack/events", 
+#                                          )
 
 slack_events_bp = Blueprint(
     'slack_events_bp', __name__,

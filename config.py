@@ -1,3 +1,4 @@
+import secrets
 from sqlalchemy import (
     Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
@@ -6,12 +7,15 @@ from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
 from utils.general import generate_unique_short_token
+import secrets
+import hashlib
+import base64
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import UniqueConstraint
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
 from pathlib import Path
@@ -19,20 +23,16 @@ import uuid
 import json
 import os
 
-
 load_dotenv()
 
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env = os.getenv('FLASK_ENV', 'development')
+DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
-db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-engine = create_engine(db_url, pool_size=30, max_overflow=20)
+if env == 'production':
+    DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
-
+engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
 Base = declarative_base()
 
 # _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
@@ -61,10 +61,13 @@ class Admin(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     _password = Column('password', String(255), nullable=False)
+    auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     roles = relationship('Role', secondary='admin_roles', back_populates='admins')
+    tokens = relationship('Token', back_populates='admin', cascade='all, delete-orphan')
+    api_key = relationship("APIKey", back_populates="admin", uselist=False)
 
     def to_dict(self):
         """
@@ -115,6 +118,77 @@ class Admin(Base):
         """
         return check_password_hash(self._password, password)
     
+    def generate_token(self, expires_in=3600):
+        """
+        Generate a new token for the admin.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            Token: The generated token object.
+        """
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        new_token = Token(token=token, admin_id=self.admin_id, expires_at=expires_at)
+        return new_token
+
+    @staticmethod
+    def verify_token(token):
+        """
+        Verify a token and return the associated admin.
+
+        Args:
+            token (str): The token to verify.
+
+        Returns:
+            Admin or None: The admin associated with the token if valid, None otherwise.
+        """
+        session = Session()  # Crea una nueva sesión
+        try:
+            token_obj = session.query(Token).filter_by(token=token).first()
+            if token_obj and token_obj.expires_at > datetime.utcnow():
+                return token_obj.admin
+            return None
+        finally:
+            session.close() 
+            
+            
+    def generate_reset_token(self, expires_in=3600):
+        """
+        Generate a password reset token for the admin.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            tuple: A tuple containing the reset token and its expiration timestamp.
+        """
+        reset_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        return reset_token, expires_at
+
+    @staticmethod
+    def verify_reset_token(reset_token):
+        """
+        Verify a password reset token and return the associated admin.
+
+        Args:
+            reset_token (str): The reset token to verify.
+
+        Returns:
+            Admin or None: The admin associated with the reset token if valid, None otherwise.
+        """
+        session = Session()
+        try:
+            admin = session.query(Admin).filter(
+                Admin.reset_token == reset_token,
+                Admin.reset_token_expires_at > datetime.utcnow()
+            ).first()
+            return admin
+        finally:
+            session.close()
+    
 class Role(Base):
     """
     Represents a role in the system.
@@ -149,7 +223,131 @@ class AdminRole(Base):
 
     admin_id = Column(Integer, ForeignKey('admins.admin_id'), primary_key=True, nullable=False)
     role_id = Column(Integer, ForeignKey('roles.id'), primary_key=True, nullable=False)
+    
+    
+class Token(Base):
+    """
+    Represents a token in the system.
 
+    This class defines the structure of tokens that can be assigned to admins.
+
+    Attributes:
+        id (int): The primary key for the token.
+        token (str): The unique token string.
+        admin_id (int): Foreign key referencing the admin.
+        expires_at (datetime): Expiration timestamp for the token.
+        admin (relationship): Relationship to the admin who owns this token.
+    """
+    __tablename__ = 'tokens'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    admin_id = Column(Integer, ForeignKey('admins.admin_id', ondelete='CASCADE'), nullable=False)
+    expires_at = Column(TIMESTAMP(timezone=True), nullable=False)
+
+    admin = relationship('Admin', back_populates='tokens')
+
+class APIKey(Base):
+    __tablename__ = 'api_keys'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    key = Column(String(64), unique=True, nullable=False)
+    last_used = Column(TIMESTAMP)
+    admin_id = Column(Integer, ForeignKey('admins.admin_id', ondelete='CASCADE'), unique=True, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    admin = relationship("Admin", back_populates="api_key")
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+    @staticmethod
+    def generate_api_key(prefix='alpha', length=32):
+        """
+        Generate a robust API key.
+        
+        :param prefix: A string prefix for the key (default: 'sk' for 'secret key')
+        :param length: The length of the random part of the key (default: 32)
+        :return: A string containing the full API key
+        """
+        # Generate random bytes
+        random_bytes = secrets.token_bytes(length)
+        
+        # Convert to base64 and remove padding
+        b64_string = base64.urlsafe_b64encode(random_bytes).decode('utf-8').rstrip('=')
+        
+        # Truncate to desired length
+        truncated = b64_string[:length]
+        
+        # Add prefix
+        prefixed_key = f"{prefix}_{truncated}"
+        
+        # Calculate checksum
+        checksum = hashlib.sha256(prefixed_key.encode('utf-8')).hexdigest()[:4]
+        
+        # Combine all parts
+        full_key = f"{prefixed_key}_{checksum}"
+        
+        return full_key
+
+    @classmethod
+    def create_new_key(cls, admin_id):
+        """
+        Create a new API key and store it in the database.
+        
+        :param admin_id: The ID of the admin associated with this key
+        :return: A dictionary containing the API key details
+        :raises SQLAlchemyError: If there's an error during database operations
+        """
+        session = Session()
+        try:
+            # Check if admin already has an API key
+            existing_key = session.query(cls).filter_by(admin_id=admin_id).first()
+            if existing_key:
+                raise ValueError("Admin already has an API key")
+
+            new_key = cls.generate_api_key()
+            api_key = cls(key=new_key, admin_id=admin_id)
+            session.add(api_key)
+            session.commit()
+            session.refresh(api_key)
+            return api_key.as_dict()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    @classmethod
+    def validate_api_key(cls, key):
+        """
+        Validate an API key.
+        
+        :param key: The API key to validate
+        :return: The API key object if valid, None otherwise
+        :raises SQLAlchemyError: If there's an error during database operations
+        """
+        parts = key.split('_')
+        if len(parts) != 3 or parts[0] != 'alpha' or len(parts[2]) != 4:
+            return None
+        
+        checksum = hashlib.sha256(f"{parts[0]}_{parts[1]}".encode('utf-8')).hexdigest()[:4]
+        if checksum != parts[2]:
+            return None
+        
+        session = Session()
+        try:
+            api_key = session.query(cls).filter_by(key=key).first()
+            if api_key:
+                api_key.last_used = func.now()
+                session.commit()
+                return api_key
+            return None
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
 # __________________________ AI ALPHA APP TABLES __________________________________________
 
@@ -257,12 +455,12 @@ class Category(Base):
 
     Attributes:
         category_id (int): The primary key for the category.
-        category (str): The main identifier for the category.
-        category_name (str): A user-friendly name for the category.
-        time_interval (int): The time interval associated with the category.
-        is_active (bool): Indicates if the category is currently active.
+        name (str): The main identifier for the category (required).
+        alias (str): An alternative identifier for the category (required).
+        icon (str): The URL of the SVG icon associated with the category.
         border_color (str): The color used for visual representation of the category.
-        icon (str): The icon or image associated with the category.
+        category_name (str): A legacy field for backwards compatibility.
+        is_active (bool): Indicates if the category is currently active.
         created_at (datetime): Timestamp of when the category was created.
         updated_at (datetime): Timestamp of the last update to the category record.
         coin_bot (relationship): Relationship to the associated CoinBots.
@@ -270,19 +468,24 @@ class Category(Base):
     __tablename__ = 'category'
 
     category_id = Column(Integer, primary_key=True, autoincrement=True)
-    category = Column(String, nullable=False)
-    category_name = Column(String)
-    time_interval = Column(Integer, default=50)
-    is_active = Column(Boolean, default=False)
-    border_color = Column(String, default='No Color')
-    icon = Column(String, default='No Image')
+    name = Column(String, nullable=False)
+    alias = Column(String, nullable=True)
+    icon = Column(String)
+    border_color = Column(String)
+    is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
+    coin_bot = relationship('CoinBot', back_populates='category', lazy=True, cascade="all, delete-orphan")
     
     def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+        """
+        Convert the Category object to a dictionary.
+
+        Returns:
+            dict: A dictionary representation of the Category object.
+        """
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class CoinBot(Base):
     """
@@ -293,8 +496,8 @@ class CoinBot(Base):
 
     Attributes:
         bot_id (int): The primary key for the CoinBot.
-        bot_name (str): The name of the CoinBot.
-        image (str): URL or path to the CoinBot's image.
+        name (str): The name of the CoinBot.
+        icon (str): URL or path to the CoinBot's image.
         category_id (int): Foreign key referencing the associated Category.
         created_at (datetime): Timestamp of when the CoinBot was created.
         updated_at (datetime): Timestamp of the last update to the CoinBot record.
@@ -322,32 +525,36 @@ class CoinBot(Base):
     __tablename__ = 'coin_bot'
 
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
-    bot_name = Column(String)
-    image = Column(String, default='No Image')
-    category_id = Column(Integer, ForeignKey('category.category_id'), nullable=False)
+    name = Column(String)
+    alias = Column(String)
+    icon = Column(String, default='No Image')
+    category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
+    background_color = Column(String)
+    symbol = Column(String, nullable=True)
+    is_active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    chart = relationship('Chart', back_populates='coin_bot')
-    alerts = relationship('Alert', back_populates='coin_bot')
-    sites = relationship('Site', back_populates='coin_bot')
-    keywords = relationship('Keyword', back_populates='coin_bot')
-    blacklist = relationship('Blacklist', back_populates='coin_bot')
-    article = relationship('Article', back_populates='coin_bot')
-    analysis = relationship('Analysis', back_populates='coin_bot')
-    top_story = relationship('TopStory', back_populates='coin_bot')
+    chart = relationship('Chart', back_populates='coin_bot', cascade="all, delete-orphan")
+    alerts = relationship('Alert', back_populates='coin_bot', cascade="all, delete-orphan")
+    sites = relationship('Site', back_populates='coin_bot', cascade="all, delete-orphan")
+    keywords = relationship('Keyword', back_populates='coin_bot', cascade="all, delete-orphan")
+    blacklist = relationship('Blacklist', back_populates='coin_bot', cascade="all, delete-orphan")
+    article = relationship('Article', back_populates='coin_bot', cascade="all, delete-orphan")
+    analysis = relationship('Analysis', back_populates='coin_bot', cascade="all, delete-orphan")
+    top_story = relationship('TopStory', back_populates='coin_bot', cascade="all, delete-orphan")
     category = relationship('Category', back_populates='coin_bot')
-    introduction = relationship("Introduction", back_populates="coin_bot", lazy=True)
-    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True)
-    token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True)
-    token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True)
-    value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
-    competitor = relationship("Competitor", back_populates="coin_bot", lazy=True)
-    revenue_model = relationship('Revenue_model', back_populates='coin_bot', lazy=True)
-    hacks = relationship('Hacks', back_populates='coin_bot', lazy=True)
-    dapps = relationship('DApps', back_populates='coin_bot', lazy=True)
-    upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True)
-    narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True)
+    introduction = relationship("Introduction", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    competitor = relationship("Competitor", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    revenue_model = relationship('Revenue_model', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    hacks = relationship('Hacks', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    dapps = relationship('DApps', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -371,7 +578,7 @@ class Keyword(Base):
 
     keyword_id = Column(Integer, primary_key=True, autoincrement=True)
     word = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -449,7 +656,7 @@ class Site(Base):
     data_source_url = Column(String)
     is_URL_complete = Column(Boolean)
     main_container = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -477,7 +684,7 @@ class Blacklist(Base):
 
     blacklist_id = Column(Integer, primary_key=True, autoincrement=True)
     word = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -511,7 +718,7 @@ class Alert(Base):
     alert_message = Column(String)
     symbol = Column(String)
     price = Column(Float)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -549,7 +756,7 @@ class Article(Base):
     summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
     images = relationship('ArticleImage', back_populates='article', lazy=True)
@@ -609,7 +816,7 @@ class TopStory(Base):
     summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='top_story', lazy=True)
     images = relationship('TopStoryImage', back_populates='top_story')
@@ -801,7 +1008,7 @@ class Chart(Base):
     token = Column(String)
     pair = Column(String)
     temporality = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -835,7 +1042,7 @@ class Introduction(Base):
     __tablename__ = 'introduction'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     content = Column(String)
     website = Column(String)
     whitepaper = Column(String)
@@ -874,7 +1081,7 @@ class Tokenomics(Base):
     __tablename__ = 'tokenomics'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     token = Column(String)
     total_supply = Column(String)
     circulating_supply = Column(String)
@@ -912,7 +1119,7 @@ class Token_distribution(Base):
     __tablename__ = 'token_distribution'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     holder_category = Column(String)
     percentage_held = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -946,7 +1153,7 @@ class Token_utility(Base):
     __tablename__ = 'token_utility'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     token_application = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -980,7 +1187,7 @@ class Value_accrual_mechanisms(Base):
     __tablename__ = 'value_accrual_mechanisms'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     mechanism = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -1014,7 +1221,7 @@ class Revenue_model(Base):
     __tablename__ = 'revenue_model'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     analized_revenue = Column(String)
     fees_1ys = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -1051,7 +1258,7 @@ class Hacks(Base):
     __tablename__ = 'hacks'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     hack_name = Column(String, nullable=False)
     date = Column(String, nullable=False)
     incident_description = Column(String, nullable=False)
@@ -1089,7 +1296,7 @@ class Competitor(Base):
     __tablename__ = 'competitor'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     token = Column(String)
     key = Column(String, nullable=False)
     value = Column(String, nullable=False)
@@ -1125,7 +1332,7 @@ class DApps(Base):
     __tablename__ = 'dapps'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     dapps = Column(String)
     description = Column(String)
     tvl = Column(String)
@@ -1162,7 +1369,7 @@ class Upgrades(Base):
     __tablename__ = 'upgrades'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     event = Column(String)
     date = Column(String)
     event_overview = Column(String)
@@ -1228,7 +1435,7 @@ def populate_database():
     try:
         # Check if the database is already populated with categories and sites
         if not session.query(Category).first() and not session.query(Site).first():
-            with open(f'{ROOT_DIRECTORY}/models/data.json', 'r', encoding="utf8") as data_file:
+            with open(f'{ROOT_DIRECTORY}/models/init_data/data.json', 'r', encoding="utf8") as data_file:
                 config = json.load(data_file)
 
             for item in config:
@@ -1237,8 +1444,8 @@ def populate_database():
                 coins = item['coins']
 
                 new_category = Category(
-                    category=main_keyword,
-                    category_name=alias,
+                    name=main_keyword,
+                    alias=alias,
                     icon=item['icon'],
                     border_color=item['borderColor'],
                 )
@@ -1280,7 +1487,7 @@ def populate_database():
             print('-----Categories and sites are already populated. Skipping this process-----')
 
         # Now, let's handle the users
-        users_json_path = os.path.join(BASE_DIR, 'users.json')
+        users_json_path = os.path.join(ROOT_DIRECTORY, 'models', 'init_data', 'users.json')
         users = load_json_file(users_json_path)
         for user in users:
             existing_user = get_user_data(user['user_id'])
@@ -1357,8 +1564,6 @@ def init_superadmin():
 
             session.commit()
             print('---- Superadmin user created successfully ----')
-        else:
-            print('---- Superadmin user already exists ----')
 
     except SQLAlchemyError as e:
         print(f'---- Database error creating the superadmin user: {str(e)} ----')
@@ -1371,7 +1576,7 @@ def init_superadmin():
 
 
 # Create SuperAdmin
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- POPULATE THE DB WITH USERS.JSON -------------------

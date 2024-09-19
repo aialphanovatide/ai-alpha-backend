@@ -1,0 +1,53 @@
+version: '3.8'
+
+x-common-web-config: &common-web-config
+  build: .
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *common-web-config
+    expose:
+      - "5000"
+    volumes:
+      - ./app:/app/app:ro
+      - ./migrations:/app/migrations:ro
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    expose:
+      - "5432"
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "http"
+      - "--domain=${NGROK_DOMAIN}"
+      - "web:5000"
+    env_file:
+      - .env
+    depends_on:
+      - web
+
+networks:
+  default:
+    name: myapp_network
+
+volumes:
+  postgres_data:

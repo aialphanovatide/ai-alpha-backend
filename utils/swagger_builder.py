@@ -121,14 +121,14 @@ swagger = Swagger()
 # ____Add or update an endpoint____
 
 # success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/get_analysis/test',
+#     endpoint_route='/analyses',
 #     method='get',
-#     tag='analysis',
-#     description='Retrieve analyses with their associated images, with pagination.',
+#     tag='Analysis',
+#     description='Retrieve all analyses with pagination, ordered by creation date descending.',
 #     params=[
 #         {
 #             'name': 'page',
-#             'in': 'query', # body, query.
+#             'in': 'query',
 #             'type': 'integer',
 #             'description': 'The page number (default: 1)',
 #             'required': False,
@@ -146,7 +146,31 @@ swagger = Swagger()
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Successful response',
+#             'description': 'Successful retrieval of analyses',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {
+#                         'type': 'array',
+#                         'items': {
+#                             'type': 'object',
+#                             'properties': {
+#                                 # Define properties of an analysis object here
+#                                 # For example:
+#                                 'id': {'type': 'integer'},
+#                                 'created_at': {'type': 'string', 'format': 'date-time'},
+#                                 # Add other properties as needed
+#                             }
+#                         }
+#                     },
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean'},
+#                     'total': {'type': 'integer'},
+#                     'page': {'type': 'integer'},
+#                     'limit': {'type': 'integer'},
+#                     'total_pages': {'type': 'integer'}
+#                 }
+#             }
 #         },
 #         '400': {
 #             'description': 'Bad Request - Invalid pagination parameters',
