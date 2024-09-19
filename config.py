@@ -61,7 +61,7 @@ class Admin(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     _password = Column('password', String(255), nullable=False)
-    auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())
+    # auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -86,6 +86,50 @@ class Admin(Base):
             'updated_at': self.updated_at.isoformat()
         }
     
+    @classmethod
+    def create_admin(cls, session, username: str, email: str, password: str, role_names: list[str]):
+        """
+        Create a new admin with the given details and roles.
+
+        Args:
+            db (Session): The database session.
+            username (str): The admin's username.
+            email (str): The admin's email address.
+            password (str): The admin's password (will be hashed).
+            role_names (list[str]): List of role names to assign to the admin.
+
+        Returns:
+            Admin: The newly created Admin object if successful.
+
+        Raises:
+            ValueError: If the username or email already exists, or if any role is not found.
+            SQLAlchemyError: If there's a database error.
+        """
+        try:
+            # Create new admin
+            new_admin = cls(
+                username=username,
+                email=email,
+                _password=password
+            )
+
+            # Assign roles
+            for role_name in role_names:
+                role = session.query(Role).filter(Role.name == role_name).first()
+                if not role:
+                    raise ValueError(f"Role '{role_name}' not found.")
+                new_admin.roles.append(role)
+
+            session.add(new_admin)
+            session.commit()
+            session.refresh(new_admin)
+
+            return new_admin
+
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise SQLAlchemyError(f"Database error: {str(e)}")
+
     @property
     def password(self):
         """
@@ -129,7 +173,7 @@ class Admin(Base):
             Token: The generated token object.
         """
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
         new_token = Token(token=token, admin_id=self.admin_id, expires_at=expires_at)
         return new_token
 
@@ -152,8 +196,7 @@ class Admin(Base):
             return None
         finally:
             session.close() 
-            
-            
+                    
     def generate_reset_token(self, expires_in=3600):
         """
         Generate a password reset token for the admin.
@@ -165,7 +208,7 @@ class Admin(Base):
             tuple: A tuple containing the reset token and its expiration timestamp.
         """
         reset_token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
         return reset_token, expires_at
 
     @staticmethod
@@ -1522,7 +1565,7 @@ def populate_database():
         session.close()
 
 # Populates the DB
-populate_database()
+# populate_database()
 
 # ------------- CREATE AN ADMIN USER -----------------------------
 
@@ -1579,6 +1622,41 @@ def init_superadmin():
 # init_superadmin()
 
 
-# ------------- POPULATE THE DB WITH USERS.JSON -------------------
+# ------------- POPULATE THE DB WITH DEFAULT ROLES  -------------------
 
+def initialize_default_roles():
+    """
+    Initialize default roles (superadmin and admin) in the database.
+    """
+    default_roles = [
+        {
+            "name": "superadmin",
+            "description": "Full system access with unrestricted permissions. Can manage all aspects of the application, including user management, system configuration, and critical operations."
+        },
+        {
+            "name": "admin",
+            "description": "Administrative access with elevated permissions. Can manage users, perform most system operations, but may have some restrictions on critical system changes."
+        },
+        {
+            "name": "guest",
+            "description": "Guest access with limited permissions. Can view content and perform basic operations, but cannot manage users or make significant system changes."
+        }
+    ]
 
+    session = Session()
+    try:
+        for role_data in default_roles:
+            existing_role = session.query(Role).filter_by(name=role_data["name"]).first()
+            if not existing_role:
+                new_role = Role(name=role_data["name"], description=role_data["description"])
+                session.add(new_role)
+        session.commit()
+        print("Default roles initialized successfully.")
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Error initializing default roles: {str(e)}")
+    finally:
+        session.close()
+
+# Default Roles
+initialize_default_roles()
