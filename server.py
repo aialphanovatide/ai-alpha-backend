@@ -119,7 +119,6 @@ app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
 
 
-
 if __name__ == '__main__':
     try:
         with app.app_context():

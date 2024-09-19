@@ -2,7 +2,7 @@ import jwt
 import logging
 from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
-from services.email.email import EmailService
+from services.email.email_service import EmailService
 from decorators.token_required import token_required
 from config import Admin, Session, Role, AdminRole, Token
 from flask import Blueprint, current_app, request, jsonify
