@@ -2,6 +2,7 @@ import os
 import json
 from flask import Flask
 from flask_cors import CORS
+from flask_mail import Mail
 from routes.chart.chart import chart_bp
 from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
@@ -34,11 +35,15 @@ from routes.external_apis.binance import binance_bp
 from routes.coins.coins import coin_bp
 from flasgger import Swagger
 from decorators.api_key import check_api_key
+from services.email.email_service import EmailService
 from ws.socket import init_socketio
 
 app = Flask(__name__)
 app.name = 'AI Alpha API'
 swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
+
+mail = Mail(app)
+email_service = EmailService(app)
 
 # Check API key for all requests
 @app.before_request

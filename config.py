@@ -118,7 +118,7 @@ class Admin(Base):
         """
         return check_password_hash(self._password, password)
     
-    def generate_token(self, expires_in=3600):
+    def generate_token(self, expires_in=10800):
         """
         Generate a new token for the admin.
 

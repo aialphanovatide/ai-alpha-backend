@@ -7,12 +7,14 @@ from decorators.token_required import token_required
 from config import Admin, Session, Role, AdminRole, Token
 from flask import Blueprint, current_app, request, jsonify
 
+
 dashboard_access_bp = Blueprint('dashboard_access_bp', __name__)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+email_service = EmailService(current_app)
 
 @dashboard_access_bp.route('/admin/register', methods=['POST'])
 def register_admin():
@@ -43,7 +45,7 @@ def register_admin():
         role_name = data.get('role', 'admin').lower()
         if role_name not in ['superadmin', 'admin']:
             return jsonify({"error": "Invalid role"}), 400
-
+       
         with Session() as session:
             # Check for existing admin
             existing_admin = session.query(Admin).filter(
@@ -60,6 +62,7 @@ def register_admin():
             )
             session.add(new_admin)
             session.flush()
+
 
             # Assign role
             role = session.query(Role).filter_by(name=role_name).first()
@@ -78,9 +81,7 @@ def register_admin():
                 algorithm='HS256'
             )
             session.commit()
-        
-        # Send welcome email
-        email_service = EmailService()
+
         email_service.send_registration_confirmation(new_admin.email, new_admin.username)
         
         response["message"] = "Admin registered successfully and welcome email sent"
