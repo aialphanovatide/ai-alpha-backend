@@ -1,9 +1,9 @@
 # chart/total3.py
 
-from typing import List, Dict, Any
-from tvDatafeed import TvDatafeed, Interval
 import os
 from dotenv import load_dotenv
+from typing import List, Dict, Any
+from tvDatafeed import TvDatafeed, Interval
 
 load_dotenv()
 

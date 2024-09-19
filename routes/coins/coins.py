@@ -110,7 +110,7 @@ def create_coin():
                 background_color=background_color,
                 icon=icon_url,
                 is_active=False,
-                symbol=symbol,
+                symbol=symbol, 
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )

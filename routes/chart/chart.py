@@ -1,9 +1,12 @@
-import os
 from http import HTTPStatus
+from sqlalchemy import desc
+import requests
+import os
 from dotenv import load_dotenv
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from config import Chart, CoinBot, Session
+from routes.chart.total3 import get_total_3_data
 from flask import jsonify, request, Blueprint, jsonify  
 from routes.chart.total3 import get_total_3_data
 
@@ -15,15 +18,19 @@ TW_PASS = os.getenv('TW_PASS')
 
 chart_bp = Blueprint('chart', __name__)
 
-# Load environment variables
+# Load environment variables from the .env file
 load_dotenv()
 
-# Get CoinGecko API key from environment variables
-COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
-COINGECKO_API_URL = "https://pro-api.coingecko.com/api/v3"
+COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
+COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3'
+
+HEADERS = {
+            "Content-Type": "application/json",
+            "x-cg-pro-api-key": COINGECKO_API_KEY,
+        }
 
 
-@chart_bp.route('/api/chart/save_chart', methods=['POST'])
+@chart_bp.route('/chart', methods=['POST'])
 def save_chart():
     """
     Adds a new support and resistance lines record for a coin.
@@ -114,7 +121,7 @@ def save_chart():
     return jsonify(response), response["status"]
 
 
-@chart_bp.route('/api/coin-support-resistance', methods=['GET'])
+@chart_bp.route('/chart', methods=['GET'])
 def get_chart_values():
     """
     Get the most recent support and resistance lines of a requested coin.
@@ -157,7 +164,7 @@ def get_chart_values():
         if coin_name:
             coinbot = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
             if not coinbot:
-                response["error"] = f"CoinBot not found for the coin name: {coin_name}"
+                response["error"] = f"Coin not found with name: {coin_name}"
                 response["status"] = HTTPStatus.NOT_FOUND
                 return jsonify(response), response["status"]
             coin_id = coinbot.bot_id
@@ -171,9 +178,6 @@ def get_chart_values():
 
         if chart:
             chart_values = chart.as_dict()
-            # Convert datetime objects to ISO format strings
-            chart_values['created_at'] = chart_values['created_at'].isoformat() if chart_values['created_at'] else None
-            chart_values['updated_at'] = chart_values['updated_at'].isoformat() if chart_values['updated_at'] else None
             response["message"] = chart_values
         else:
             response["error"] = "No chart found for the given parameters"
@@ -192,7 +196,8 @@ def get_chart_values():
 
     return jsonify(response), response["status"]
 
-@chart_bp.route('/api/total_3_data', methods=['GET'])
+
+@chart_bp.route('/chart/total3', methods=['GET'])
 def get_total_3_data_route():
     """
     Retrieve and calculate total market cap data for the top 3 cryptocurrencies.
@@ -228,3 +233,66 @@ def get_total_3_data_route():
 
     return jsonify(response), response["status"]
 
+
+@chart_bp.route('/chart/top-movers', methods=['GET'])
+def get_top_movers():
+    vs_currency = request.args.get('vs_currency', 'usd')
+    order = request.args.get('order', 'market_cap_desc')
+    precision = request.args.get('precision', type=int)
+
+    valid_orders = ['market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc', 'price_change_desc', 'price_change_asc']
+    if order not in valid_orders:
+        return jsonify({"success": False, "error": {"code": 400, "message": "Invalid order parameter"}}), 400
+
+    try:
+        crypto_data = []
+        # Fetch data from CoinGecko API
+        ids = ",".join(crypto["coingecko_id"] for crypto in crypto_data)
+        params = {
+            'vs_currency': vs_currency,
+            'ids': ids,
+            'order': 'market_cap_desc',
+            'per_page': 250,
+            'page': 1,
+            'sparkline': False,
+            'price_change_percentage': '24h'
+        }
+        if precision is not None:
+            params['precision'] = precision
+
+        response = requests.get(f'{COINGECKO_API_URL}/coins/markets', params=params, headers=HEADERS)
+        response.raise_for_status()
+        data = response.json()
+
+        # Sort data based on the order parameter
+        if order.startswith('market_cap'):
+            key = lambda x: x['market_cap'] or 0
+        elif order.startswith('volume'):
+            key = lambda x: x['total_volume'] or 0
+        elif order.startswith('price_change'):
+            key = lambda x: x['price_change_percentage_24h'] or 0
+        else:
+            raise ValueError(f"Unsupported order: {order}")
+
+        sorted_data = sorted(data, key=key, reverse=order.endswith('desc'))
+
+        # Get top 10 and bottom 10
+        top_10 = sorted_data[:10]
+        bottom_10 = sorted_data[-10:][::-1]
+
+        result = {
+            "success": True,
+            "data": {
+                "top_10_gainers": top_10,
+                "top_10_losers": bottom_10
+            },
+            "order": order
+        }
+        return jsonify(result), 200
+
+    except requests.RequestException as e:
+        return jsonify({"success": False, "error": {"code": 500, "message": f"API request failed: {str(e)}"}}), 500
+    except ValueError as e:
+        return jsonify({"success": False, "error": {"code": 400, "message": str(e)}}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": {"code": 500, "message": f"An unexpected error occurred: {str(e)}"}}), 500
