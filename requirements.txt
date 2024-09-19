@@ -34,3 +34,4 @@ pytz
 tradingview-datafeed
 marshmallow
 gunicorn
+flask_mail

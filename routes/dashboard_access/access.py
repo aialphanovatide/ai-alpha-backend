@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
-from functools import wraps
 import jwt
-from config import Admin, Session, Role, AdminRole, Token
-from flask import Blueprint, current_app, g, logging, request, jsonify
+import logging
+from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
-
 from services.email.email import EmailService
+from decorators.token_required import token_required
+from config import Admin, Session, Role, AdminRole, Token
+from flask import Blueprint, current_app, request, jsonify
 
 dashboard_access_bp = Blueprint('dashboard_access_bp', __name__)
 
@@ -13,27 +13,6 @@ dashboard_access_bp = Blueprint('dashboard_access_bp', __name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        if not token:
-            return jsonify({"error": "Token is missing"}), 401
-        
-        try:
-            data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
-            with Session() as session:
-                admin = session.query(Admin).get(data['admin_id'])
-                if not admin:
-                    return jsonify({"error": "Invalid token"}), 401
-                g.current_admin = admin
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Token has expired"}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "Invalid token"}), 401
-        
-        return f(*args, **kwargs)
-    return decorated
 
 @dashboard_access_bp.route('/admin/register', methods=['POST'])
 def register_admin():
@@ -178,6 +157,7 @@ def login_admin():
 
     return jsonify(response), status_code
 
+
 @dashboard_access_bp.route('/admin/logout', methods=['POST'])
 @token_required
 def logout_admin():
@@ -225,6 +205,7 @@ def logout_admin():
 
     return jsonify(response), status_code
 
+
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['GET'])
 def get_admin(admin_id):
     """
@@ -262,6 +243,7 @@ def get_admin(admin_id):
         session.close()
 
     return jsonify(response), status_code
+
 
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['PUT'])
 def update_admin(admin_id):
@@ -331,6 +313,7 @@ def update_admin(admin_id):
 
     return jsonify(response), status_code
 
+
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['DELETE'])
 def delete_admin(admin_id):
     """
@@ -371,6 +354,7 @@ def delete_admin(admin_id):
             session.close()
 
         return jsonify(response), status_code
+
 
 @dashboard_access_bp.route('/admin/request-password-reset', methods=['POST'])
 def request_password_reset():
@@ -423,6 +407,7 @@ def request_password_reset():
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
+
 
 @dashboard_access_bp.route('/admin/reset-password', methods=['POST'])
 def reset_password():

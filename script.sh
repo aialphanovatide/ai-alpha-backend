@@ -56,12 +56,6 @@ if [ "$FLASK_ENV" = "development" ]; then
 else
     echo "Starting Gunicorn production server..."
     PORT=${PORT:-9000}
-    # WORKERS=$(( 2 * $(nproc) + 1 ))
-    exec gunicorn --bind 0.0.0.0:$PORT \
-                  --workers 3 \
-                  --threads 2 \
-                  --timeout 120 \
-                  --access-logfile - \
-                  --error-logfile - \
-                  server:app
+    # exec gunicorn --workers 3 --threads 2 --timeout 120 server:app
+    exec gunicorn --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120 server:app
 fi

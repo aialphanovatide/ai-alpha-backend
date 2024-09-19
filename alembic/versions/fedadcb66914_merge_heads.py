@@ -8,7 +8,7 @@ from alembic import op
 import sqlalchemy as sa
 # revision identifiers, used by Alembic.
 revision: str = 'fedadcb66914'
-down_revision: Union[str, None] = 'e9b1d398537c'
+down_revision: Union[str, None] = '49f84e4fce31'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
