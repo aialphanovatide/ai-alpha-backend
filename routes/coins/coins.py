@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import BadRequest
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import joinedload
-from routes.category.category import are_fundamentals_complete, has_support_resistance_lines
+from routes.category.category import validate_coin
 
 coin_bp = Blueprint('coin_bp', __name__)
 
@@ -422,7 +422,7 @@ def delete_coin(coin_id):
     return jsonify(response), status_code
 
 
-@coin_bp.route('/coin/<int:coin_id>/toggle-publication', methods=['POST'])
+@coin_bp.route('/coin/<int:coin_id>/toggle-coin', methods=['POST'])
 def toggle_coin_publication(coin_id):
     """
     Toggle the publication status of a coin.
@@ -480,11 +480,8 @@ def toggle_coin_publication(coin_id):
                 status_code = 200
             else:
                 # Perform validations
-                fundamentals_complete = are_fundamentals_complete(coin)
-                chart = coin.chart[0] if coin.chart else None
-                chart_valid = chart and has_support_resistance_lines(chart)
-
-                if fundamentals_complete and chart_valid:
+                valid, messages = validate_coin(coin=coin)
+                if  valid:
                     coin.is_active = True
                     coin.updated_at = datetime.now()
                     session.commit()
@@ -493,13 +490,7 @@ def toggle_coin_publication(coin_id):
                     response["is_active"] = True
                     status_code = 200
                 else:
-                    error_messages = []
-                    if not fundamentals_complete:
-                        error_messages.append("Fundamentals are incomplete")
-                    if not chart_valid:
-                        error_messages.append("Chart is missing support or resistance lines")
-                    
-                    response["error"] = ". ".join(error_messages)
+                    response["error"] = ', '.join(messages)
                     status_code = 400
 
         except SQLAlchemyError as e:

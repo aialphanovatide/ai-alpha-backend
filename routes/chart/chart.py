@@ -1,11 +1,11 @@
 import os
 from http import HTTPStatus
 from dotenv import load_dotenv
-from sqlalchemy import Interval, desc
+from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
-from tvDatafeed import TvDatafeed, Interval
 from config import Chart, CoinBot, Session
 from flask import jsonify, request, Blueprint, jsonify  
+from routes.chart.total3 import get_total_3_data
 
 
 load_dotenv()
@@ -68,11 +68,15 @@ def save_chart():
         temporality = data['temporality'].casefold()
         token = data['token'].casefold()
 
+        print("data", data)
+
         if token == 'btc' and pair == 'btc':
             response["error"] = "Invalid coin/pair combination"
             response["status"] = HTTPStatus.BAD_REQUEST
             return jsonify(response), response["status"]
         
+       
+
         chart_data = {
             'support_1': float(data.get('support_1')),
             'support_2': float(data.get('support_2')),
@@ -88,7 +92,7 @@ def save_chart():
             'coin_bot_id': coin_bot_id
         }
 
-        print("data from charts", chart_data)
+        
 
         new_chart = Chart(**chart_data)
         session.add(new_chart)
