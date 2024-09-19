@@ -1,3 +1,4 @@
+import secrets
 from sqlalchemy import (
     Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
@@ -14,7 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import UniqueConstraint
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
 from pathlib import Path
@@ -60,10 +61,12 @@ class Admin(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     _password = Column('password', String(255), nullable=False)
+    auth_token = Column(String, nullable=False, unique=True, default=lambda: generate_unique_short_token())
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     roles = relationship('Role', secondary='admin_roles', back_populates='admins')
+    tokens = relationship('Token', back_populates='admin', cascade='all, delete-orphan')
     api_key = relationship("APIKey", back_populates="admin", uselist=False)
 
     def to_dict(self):
@@ -115,6 +118,77 @@ class Admin(Base):
         """
         return check_password_hash(self._password, password)
     
+    def generate_token(self, expires_in=3600):
+        """
+        Generate a new token for the admin.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            Token: The generated token object.
+        """
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        new_token = Token(token=token, admin_id=self.admin_id, expires_at=expires_at)
+        return new_token
+
+    @staticmethod
+    def verify_token(token):
+        """
+        Verify a token and return the associated admin.
+
+        Args:
+            token (str): The token to verify.
+
+        Returns:
+            Admin or None: The admin associated with the token if valid, None otherwise.
+        """
+        session = Session()  # Crea una nueva sesión
+        try:
+            token_obj = session.query(Token).filter_by(token=token).first()
+            if token_obj and token_obj.expires_at > datetime.utcnow():
+                return token_obj.admin
+            return None
+        finally:
+            session.close() 
+            
+            
+    def generate_reset_token(self, expires_in=3600):
+        """
+        Generate a password reset token for the admin.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            tuple: A tuple containing the reset token and its expiration timestamp.
+        """
+        reset_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        return reset_token, expires_at
+
+    @staticmethod
+    def verify_reset_token(reset_token):
+        """
+        Verify a password reset token and return the associated admin.
+
+        Args:
+            reset_token (str): The reset token to verify.
+
+        Returns:
+            Admin or None: The admin associated with the reset token if valid, None otherwise.
+        """
+        session = Session()
+        try:
+            admin = session.query(Admin).filter(
+                Admin.reset_token == reset_token,
+                Admin.reset_token_expires_at > datetime.utcnow()
+            ).first()
+            return admin
+        finally:
+            session.close()
+    
 class Role(Base):
     """
     Represents a role in the system.
@@ -149,6 +223,29 @@ class AdminRole(Base):
 
     admin_id = Column(Integer, ForeignKey('admins.admin_id'), primary_key=True, nullable=False)
     role_id = Column(Integer, ForeignKey('roles.id'), primary_key=True, nullable=False)
+    
+    
+class Token(Base):
+    """
+    Represents a token in the system.
+
+    This class defines the structure of tokens that can be assigned to admins.
+
+    Attributes:
+        id (int): The primary key for the token.
+        token (str): The unique token string.
+        admin_id (int): Foreign key referencing the admin.
+        expires_at (datetime): Expiration timestamp for the token.
+        admin (relationship): Relationship to the admin who owns this token.
+    """
+    __tablename__ = 'tokens'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    admin_id = Column(Integer, ForeignKey('admins.admin_id', ondelete='CASCADE'), nullable=False)
+    expires_at = Column(TIMESTAMP(timezone=True), nullable=False)
+
+    admin = relationship('Admin', back_populates='tokens')
 
 class APIKey(Base):
     __tablename__ = 'api_keys'
