@@ -455,12 +455,12 @@ class Category(Base):
 
     Attributes:
         category_id (int): The primary key for the category.
-        category (str): The main identifier for the category.
-        category_name (str): A user-friendly name for the category.
-        time_interval (int): The time interval associated with the category.
-        is_active (bool): Indicates if the category is currently active.
+        name (str): The main identifier for the category (required).
+        alias (str): An alternative identifier for the category (required).
+        icon (str): The URL of the SVG icon associated with the category.
         border_color (str): The color used for visual representation of the category.
-        icon (str): The icon or image associated with the category.
+        category_name (str): A legacy field for backwards compatibility.
+        is_active (bool): Indicates if the category is currently active.
         created_at (datetime): Timestamp of when the category was created.
         updated_at (datetime): Timestamp of the last update to the category record.
         coin_bot (relationship): Relationship to the associated CoinBots.
@@ -468,19 +468,24 @@ class Category(Base):
     __tablename__ = 'category'
 
     category_id = Column(Integer, primary_key=True, autoincrement=True)
-    category = Column(String, nullable=False)
-    category_name = Column(String)
-    time_interval = Column(Integer, default=50)
-    is_active = Column(Boolean, default=False)
-    border_color = Column(String, default='No Color')
-    icon = Column(String, default='No Image')
+    name = Column(String, nullable=False)
+    alias = Column(String, nullable=True)
+    icon = Column(String)
+    border_color = Column(String)
+    is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    coin_bot = relationship('CoinBot', back_populates='category', lazy=True)
+    coin_bot = relationship('CoinBot', back_populates='category', lazy=True, cascade="all, delete-orphan")
     
     def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns} 
+        """
+        Convert the Category object to a dictionary.
+
+        Returns:
+            dict: A dictionary representation of the Category object.
+        """
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class CoinBot(Base):
     """
@@ -491,8 +496,8 @@ class CoinBot(Base):
 
     Attributes:
         bot_id (int): The primary key for the CoinBot.
-        bot_name (str): The name of the CoinBot.
-        image (str): URL or path to the CoinBot's image.
+        name (str): The name of the CoinBot.
+        icon (str): URL or path to the CoinBot's image.
         category_id (int): Foreign key referencing the associated Category.
         created_at (datetime): Timestamp of when the CoinBot was created.
         updated_at (datetime): Timestamp of the last update to the CoinBot record.
@@ -520,32 +525,36 @@ class CoinBot(Base):
     __tablename__ = 'coin_bot'
 
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
-    bot_name = Column(String)
-    image = Column(String, default='No Image')
-    category_id = Column(Integer, ForeignKey('category.category_id'), nullable=False)
+    name = Column(String)
+    alias = Column(String)
+    icon = Column(String, default='No Image')
+    category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
+    background_color = Column(String)
+    symbol = Column(String, nullable=True)
+    is_active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    chart = relationship('Chart', back_populates='coin_bot')
-    alerts = relationship('Alert', back_populates='coin_bot')
-    sites = relationship('Site', back_populates='coin_bot')
-    keywords = relationship('Keyword', back_populates='coin_bot')
-    blacklist = relationship('Blacklist', back_populates='coin_bot')
-    article = relationship('Article', back_populates='coin_bot')
-    analysis = relationship('Analysis', back_populates='coin_bot')
-    top_story = relationship('TopStory', back_populates='coin_bot')
+    chart = relationship('Chart', back_populates='coin_bot', cascade="all, delete-orphan")
+    alerts = relationship('Alert', back_populates='coin_bot', cascade="all, delete-orphan")
+    sites = relationship('Site', back_populates='coin_bot', cascade="all, delete-orphan")
+    keywords = relationship('Keyword', back_populates='coin_bot', cascade="all, delete-orphan")
+    blacklist = relationship('Blacklist', back_populates='coin_bot', cascade="all, delete-orphan")
+    article = relationship('Article', back_populates='coin_bot', cascade="all, delete-orphan")
+    analysis = relationship('Analysis', back_populates='coin_bot', cascade="all, delete-orphan")
+    top_story = relationship('TopStory', back_populates='coin_bot', cascade="all, delete-orphan")
     category = relationship('Category', back_populates='coin_bot')
-    introduction = relationship("Introduction", back_populates="coin_bot", lazy=True)
-    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True)
-    token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True)
-    token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True)
-    value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True)
-    competitor = relationship("Competitor", back_populates="coin_bot", lazy=True)
-    revenue_model = relationship('Revenue_model', back_populates='coin_bot', lazy=True)
-    hacks = relationship('Hacks', back_populates='coin_bot', lazy=True)
-    dapps = relationship('DApps', back_populates='coin_bot', lazy=True)
-    upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True)
-    narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True)
+    introduction = relationship("Introduction", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    tokenomics = relationship("Tokenomics", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    token_distribution = relationship("Token_distribution", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    token_utility = relationship("Token_utility", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    value_accrual_mechanisms = relationship("Value_accrual_mechanisms", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    competitor = relationship("Competitor", back_populates="coin_bot", lazy=True, cascade="all, delete-orphan")
+    revenue_model = relationship('Revenue_model', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    hacks = relationship('Hacks', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    dapps = relationship('DApps', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -569,7 +578,7 @@ class Keyword(Base):
 
     keyword_id = Column(Integer, primary_key=True, autoincrement=True)
     word = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -647,7 +656,7 @@ class Site(Base):
     data_source_url = Column(String)
     is_URL_complete = Column(Boolean)
     main_container = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -675,7 +684,7 @@ class Blacklist(Base):
 
     blacklist_id = Column(Integer, primary_key=True, autoincrement=True)
     word = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -709,7 +718,7 @@ class Alert(Base):
     alert_message = Column(String)
     symbol = Column(String)
     price = Column(Float)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -747,7 +756,7 @@ class Article(Base):
     summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
     images = relationship('ArticleImage', back_populates='article', lazy=True)
@@ -807,7 +816,7 @@ class TopStory(Base):
     summary = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
 
     coin_bot = relationship('CoinBot', back_populates='top_story', lazy=True)
     images = relationship('TopStoryImage', back_populates='top_story')
@@ -999,7 +1008,7 @@ class Chart(Base):
     token = Column(String)
     pair = Column(String)
     temporality = Column(String)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -1033,7 +1042,7 @@ class Introduction(Base):
     __tablename__ = 'introduction'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     content = Column(String)
     website = Column(String)
     whitepaper = Column(String)
@@ -1072,7 +1081,7 @@ class Tokenomics(Base):
     __tablename__ = 'tokenomics'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     token = Column(String)
     total_supply = Column(String)
     circulating_supply = Column(String)
@@ -1110,7 +1119,7 @@ class Token_distribution(Base):
     __tablename__ = 'token_distribution'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     holder_category = Column(String)
     percentage_held = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -1144,7 +1153,7 @@ class Token_utility(Base):
     __tablename__ = 'token_utility'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     token_application = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -1178,7 +1187,7 @@ class Value_accrual_mechanisms(Base):
     __tablename__ = 'value_accrual_mechanisms'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     mechanism = Column(String)
     description = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -1212,7 +1221,7 @@ class Revenue_model(Base):
     __tablename__ = 'revenue_model'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     analized_revenue = Column(String)
     fees_1ys = Column(String)
     dynamic = Column(Boolean, default=True)
@@ -1249,7 +1258,7 @@ class Hacks(Base):
     __tablename__ = 'hacks'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     hack_name = Column(String, nullable=False)
     date = Column(String, nullable=False)
     incident_description = Column(String, nullable=False)
@@ -1287,7 +1296,7 @@ class Competitor(Base):
     __tablename__ = 'competitor'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     token = Column(String)
     key = Column(String, nullable=False)
     value = Column(String, nullable=False)
@@ -1323,7 +1332,7 @@ class DApps(Base):
     __tablename__ = 'dapps'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     dapps = Column(String)
     description = Column(String)
     tvl = Column(String)
@@ -1360,7 +1369,7 @@ class Upgrades(Base):
     __tablename__ = 'upgrades'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     event = Column(String)
     date = Column(String)
     event_overview = Column(String)
@@ -1435,8 +1444,8 @@ def populate_database():
                 coins = item['coins']
 
                 new_category = Category(
-                    category=main_keyword,
-                    category_name=alias,
+                    name=main_keyword,
+                    alias=alias,
                     icon=item['icon'],
                     border_color=item['borderColor'],
                 )
@@ -1567,7 +1576,7 @@ def init_superadmin():
 
 
 # Create SuperAdmin
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- POPULATE THE DB WITH USERS.JSON -------------------
