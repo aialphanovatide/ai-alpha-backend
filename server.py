@@ -31,7 +31,7 @@ from routes.external_apis.capitalcom import capitalcom_bp
 from routes.external_apis.coinalyze import coinalyze_bp
 from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
-from routes.coin_bot.coinbot import coin_bot_bp
+from routes.coins.coins import coin_bp
 from flasgger import Swagger
 from decorators.api_key import check_api_key
 from ws.socket import init_socketio
@@ -94,7 +94,6 @@ app.register_blueprint(chart_bp)
 app.register_blueprint(chart_graphs_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
-app.register_blueprint(api_keys_bp)
 app.register_blueprint(send_email_bp)
 app.register_blueprint(competitor_bp)
 app.register_blueprint(tradingview_bp)
@@ -107,6 +106,7 @@ app.register_blueprint(upgrades_bp)
 app.register_blueprint(category_bp)
 app.register_blueprint(dapps_bp)
 app.register_blueprint(tokenomics)
+app.register_blueprint(api_keys_bp)
 app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(profit_bp)
@@ -116,7 +116,7 @@ app.register_blueprint(capitalcom_bp)
 app.register_blueprint(coinalyze_bp)
 app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
-app.register_blueprint(coin_bot_bp)
+app.register_blueprint(coin_bp)
 
 
 

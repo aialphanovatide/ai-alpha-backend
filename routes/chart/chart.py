@@ -3,10 +3,18 @@ from sqlalchemy import desc
 import requests
 import os
 from dotenv import load_dotenv
+from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from config import Chart, CoinBot, Session
 from routes.chart.total3 import get_total_3_data
 from flask import jsonify, request, Blueprint, jsonify  
+from routes.chart.total3 import get_total_3_data
+
+
+load_dotenv()
+
+TW_USER = os.getenv('TW_USER')
+TW_PASS = os.getenv('TW_PASS')
 
 chart_bp = Blueprint('chart', __name__)
 
@@ -67,11 +75,15 @@ def save_chart():
         temporality = data['temporality'].casefold()
         token = data['token'].casefold()
 
+        print("data", data)
+
         if token == 'btc' and pair == 'btc':
             response["error"] = "Invalid coin/pair combination"
             response["status"] = HTTPStatus.BAD_REQUEST
             return jsonify(response), response["status"]
         
+       
+
         chart_data = {
             'support_1': float(data.get('support_1')),
             'support_2': float(data.get('support_2')),
@@ -86,6 +98,8 @@ def save_chart():
             'temporality': temporality,
             'coin_bot_id': coin_bot_id
         }
+
+        
 
         new_chart = Chart(**chart_data)
         session.add(new_chart)

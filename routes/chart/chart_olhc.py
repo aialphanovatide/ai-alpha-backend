@@ -181,13 +181,13 @@ def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]
         400: Bad Request - One or more parameters are invalid or missing.
     """
         
-    coin = request.args.get('coin', '').lower()
+    gecko_id = request.args.get('gecko_id', '').lower()
     vs_currency = request.args.get('vs_currency', 'usd')
     interval = request.args.get('interval', '1h')
     precision = request.args.get('precision')
 
-    if not coin:
-        return jsonify({"error": "Missing required parameter: 'coin'"}), 400
+    if not gecko_id:
+        return jsonify({"error": "Missing required parameter: 'gecko_id'"}), 400
 
     if vs_currency not in ['usd', 'btc', 'eth']:
         return jsonify({"error": "VS currency not supported. Must be 'usd', 'btc', or 'eth'"}), 400
@@ -203,8 +203,40 @@ def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]
         except ValueError:
             return jsonify({"error": "Precision must be a valid integer"}), 400
 
-    data, status_code = get_ohlc_coingecko_data(coin, vs_currency, interval, precision)
+    data, status_code = get_ohlc_coingecko_data(gecko_id, vs_currency, interval, precision)
     return jsonify(data), status_code
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # def get_top_movers_data(vs_currency: str = 'usd', order: str = 'market_cap_desc', precision: Optional[int] = None) -> Tuple[Optional[Dict[str, Union[bool, Dict[str, List[Dict[str, Any]]], str]]], int, Optional[str]]:
@@ -317,24 +349,5 @@ def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]
 #         emit('error', {'message': 'Failed to fetch OHLC data'})
 
 
-
-# @socketio.on('subscribe_to_top_movers')
-# def handle_subscribe_to_top_movers(data):
-#     vs_currency = data.get('vs_currency', 'usd')
-#     order = data.get('order', 'market_cap_desc')
-#     precision = data.get('precision')
-    
-#     result, status_code, error_message = get_top_movers_data(vs_currency, order, precision)
-    
-#     if result:
-#         emit('top_movers_data', result)
-#     else:
-#         emit('top_movers_error', {
-#             "success": False,
-#             "error": {
-#                 "code": status_code,
-#                 "message": error_message
-#             }
-#         })
 
 
