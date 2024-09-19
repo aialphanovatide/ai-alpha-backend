@@ -372,10 +372,9 @@ class Category(Base):
 
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    alias = Column(String, nullable=False)
+    alias = Column(String, nullable=True)
     icon = Column(String)
     border_color = Column(String)
-    category_name = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -400,8 +399,8 @@ class CoinBot(Base):
 
     Attributes:
         bot_id (int): The primary key for the CoinBot.
-        bot_name (str): The name of the CoinBot.
-        image (str): URL or path to the CoinBot's image.
+        name (str): The name of the CoinBot.
+        icon (str): URL or path to the CoinBot's image.
         category_id (int): Foreign key referencing the associated Category.
         created_at (datetime): Timestamp of when the CoinBot was created.
         updated_at (datetime): Timestamp of the last update to the CoinBot record.
@@ -429,9 +428,13 @@ class CoinBot(Base):
     __tablename__ = 'coin_bot'
 
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
-    bot_name = Column(String)
-    image = Column(String, default='No Image')
+    name = Column(String)
+    alias = Column(String)
+    icon = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
+    background_color = Column(String)
+    symbol = Column(String, nullable=True)
+    is_active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -1344,8 +1347,8 @@ def populate_database():
                 coins = item['coins']
 
                 new_category = Category(
-                    category=main_keyword,
-                    category_name=alias,
+                    name=main_keyword,
+                    alias=alias,
                     icon=item['icon'],
                     border_color=item['borderColor'],
                 )
@@ -1476,7 +1479,7 @@ def init_superadmin():
 
 
 # Create SuperAdmin
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- POPULATE THE DB WITH USERS.JSON -------------------

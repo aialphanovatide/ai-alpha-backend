@@ -202,8 +202,8 @@ def get_categories():
         for category in categories:
             category_data.append({
                 'category_id': category.category_id,
-                'category': category.category,
-                'category_name': category.category_name,
+                'alias': category.alias,
+                'name': category.name,
                 'time_interval': category.time_interval,
                 'is_active': category.is_active,
                 'icon': category.icon,

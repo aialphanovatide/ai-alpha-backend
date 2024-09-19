@@ -33,10 +33,8 @@ def create_or_regenerate_api_key(admin_id):
         else:
             # Create a new API key
             new_api_key = APIKey.create_new_key(admin_id)
-            session.add(new_api_key)
-            session.commit()
             message = 'API key created successfully'
-            api_key_data = new_api_key.as_dict()
+            api_key_data = new_api_key
 
         return jsonify({'message': message, 'data': api_key_data}), 200
 
