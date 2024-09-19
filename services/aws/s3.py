@@ -238,9 +238,6 @@ class ImageProcessor:
             raise Exception(f"Unexpected error processing and uploading image: {e}")
     
 
-
-
-
 # Usage Example:
 # if __name__ == "__main__":
 #     image_processor = ImageProcessor()
