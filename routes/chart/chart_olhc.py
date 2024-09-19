@@ -21,50 +21,8 @@ BINANCE_API_URL = os.getenv('BINANCE_API_URL')
 # Parse HEADERS from a JSON string to a dictionary
 HEADERS = {'X-Cg-Pro-Api-Key': COINGECKO_API_KEY}
 
-# List of cryptocurrencies we have available
-# Replace this using THE DATABASE
-crypto_data = [
-    {"symbol": "btc", "name": "Bitcoin", "coingecko_id": "bitcoin"},
-    {"symbol": "eth", "name": "Ethereum", "coingecko_id": "ethereum"},
-    {"symbol": "hacks", "name": "Hacks", "coingecko_id": "hacks"},
-    {"symbol": "ldo", "name": "Lido", "coingecko_id": "lido-dao"},
-    {"symbol": "rpl", "name": "Rocket Pool", "coingecko_id": "rocket-pool"},
-    {"symbol": "fxs", "name": "Frax Share", "coingecko_id": "frax-share"},
-    {"symbol": "atom", "name": "Cosmos", "coingecko_id": "cosmos"},
-    {"symbol": "dot", "name": "Polkadot", "coingecko_id": "polkadot"},
-    {"symbol": "qnt", "name": "Quant", "coingecko_id": "quant"},
-    {"symbol": "ada", "name": "Cardano", "coingecko_id": "cardano"},
-    {"symbol": "sol", "name": "Solana", "coingecko_id": "solana"},
-    {"symbol": "avax", "name": "Avalanche", "coingecko_id": "avalanche-2"},
-    {"symbol": "near", "name": "Near Protocol", "coingecko_id": "near"},
-    {"symbol": "ftm", "name": "Fantom", "coingecko_id": "fantom"},
-    {"symbol": "kas", "name": "Kaspa", "coingecko_id": "kaspa"},
-    {"symbol": "matic", "name": "Polygon", "coingecko_id": "matic-network"},
-    {"symbol": "arb", "name": "Arbitrum", "coingecko_id": "arbitrum"},
-    {"symbol": "op", "name": "Optimism", "coingecko_id": "optimism"},
-    {"symbol": "link", "name": "Chainlink", "coingecko_id": "chainlink"},
-    {"symbol": "api3", "name": "API3", "coingecko_id": "api3"},
-    {"symbol": "band", "name": "Band Protocol", "coingecko_id": "band-protocol"},
-    {"symbol": "xlm", "name": "Stellar", "coingecko_id": "stellar"},
-    {"symbol": "algo", "name": "Algorand", "coingecko_id": "algorand"},
-    {"symbol": "xrp", "name": "Ripple", "coingecko_id": "ripple"},
-    {"symbol": "dydx", "name": "dYdX", "coingecko_id": "dydx"},
-    {"symbol": "velo", "name": "Velodrome", "coingecko_id": "velodrome-finance"},
-    {"symbol": "gmx", "name": "GMX", "coingecko_id": "gmx"},
-    {"symbol": "uni", "name": "Uniswap", "coingecko_id": "uniswap"},
-    {"symbol": "sushi", "name": "SushiSwap", "coingecko_id": "sushi"},
-    {"symbol": "cake", "name": "PancakeSwap", "coingecko_id": "pancakeswap-token"},
-    {"symbol": "aave", "name": "Aave", "coingecko_id": "aave"},
-    {"symbol": "pendle", "name": "Pendle", "coingecko_id": "pendle"},
-    {"symbol": "1inch", "name": "1inch", "coingecko_id": "1inch"},
-    {"symbol": "ocean", "name": "Ocean Protocol", "coingecko_id": "ocean-protocol"},
-    {"symbol": "fet", "name": "Fetch.ai", "coingecko_id": "fetch-ai"},
-    {"symbol": "rndr", "name": "Render", "coingecko_id": "render-token"},
-]
-
-
-def get_ohlc_binance_data(coin: str, vs_currency: str, interval: str, precision: Optional[int] = None) -> Tuple[Optional[List[List[Union[int, float]]]], int]:
-    symbol = next((crypto['symbol'] for crypto in crypto_data if crypto['symbol'].lower() == coin.lower() or crypto['name'].lower() == coin.lower()), None)
+def get_ohlc_binance_data(symbol: str, vs_currency: str, interval: str, precision: Optional[int] = None) -> Tuple[Optional[List[List[Union[int, float]]]], int]:
+    symbol = symbol
     
     if not symbol:
         return None, 404
@@ -129,13 +87,13 @@ def consolidate_ohlc_data(data, interval):
         for key, data in sorted(consolidated.items())
     ]
 
-def get_ohlc_coingecko_data(coin: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
+def get_ohlc_coingecko_data(coin: str, gecko_id: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
     binance_data, binance_status = get_ohlc_binance_data(coin, vs_currency, interval, precision)
     if binance_data:
         consolidated_data = consolidate_ohlc_data(binance_data, interval)
         return consolidated_data, binance_status
 
-    coingecko_id = next((crypto['coingecko_id'] for crypto in crypto_data if crypto['symbol'].lower() == coin.lower() or crypto['name'].lower() == coin.lower()), None)
+    coingecko_id = gecko_id
     
     if not coingecko_id:
         return {"error": "Coin not found"}, 404
@@ -161,40 +119,54 @@ def get_ohlc_coingecko_data(coin: str, vs_currency: str, interval: str, precisio
         return {"error": str(req_err)}, 500
 
 
+def get_ohlc_data(coin: str,gecko_id: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
+    # Primero intentamos obtener datos de Binance
+    binance_data, binance_status = get_ohlc_binance_data(coin, vs_currency, interval, precision)
+    
+    if binance_data:
+        consolidated_data = consolidate_ohlc_data(binance_data, interval)
+        return consolidated_data, binance_status
+    
+    # Si no hay datos de Binance, consultamos a CoinGecko
+    coingecko_id = gecko_id
+    if not coingecko_id:
+        return {"error": "Coin not found"}, 404
+
+    try:
+        endpoint = f"{COINGECKO_API_URL}/coins/{coingecko_id}/ohlc"
+        params = {
+            'vs_currency': vs_currency,
+            'days': '180' if interval == '1w' else '30'
+        }
+        if precision:
+            params['precision'] = precision
+
+        response = requests.get(endpoint, params=params, headers=HEADERS)
+        response.raise_for_status()
+        raw_data = response.json()
+        consolidated_data = consolidate_ohlc_data(raw_data, interval)
+        return consolidated_data, 200
+    except requests.exceptions.HTTPError as http_err:
+        return {"error": str(http_err)}, response.status_code
+    except requests.exceptions.RequestException as req_err:
+        return {"error": str(req_err)}, 500
+
 @chart_graphs_bp.route('/api/chart/ohlc', methods=['GET'])
 def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]]]]], int]:
-    """
-    Retrieves OHLC (Open, High, Low, Close) data for a specified cryptocurrency.
-
-    Query Parameters:
-        coin (str): The cryptocurrency identifier (e.g., 'bitcoin').
-        vs_currency (str): The currency to compare against. Must be 'usd', 'btc', or 'eth'. Defaults to 'usd'.
-        interval (str): The time interval for the data. Must be '1h', '4h', '1d', or '1w'. Defaults to '1h'.
-        precision (str): The number of decimal places for the returned data. Must be a non-negative integer not exceeding 18.
-
-    Returns:
-        Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]]]]], int]: 
-            A JSON response containing the OHLC data if the parameters are valid, along with an HTTP status code.
-
-    Responses:
-        200: Success - The OHLC data is returned.
-        400: Bad Request - One or more parameters are invalid or missing.
-    """
-        
     gecko_id = request.args.get('gecko_id', '').lower()
     vs_currency = request.args.get('vs_currency', 'usd')
     interval = request.args.get('interval', '1h')
     precision = request.args.get('precision')
-
+    symbol = request.args.get('precision')
+    
     if not gecko_id:
         return jsonify({"error": "Missing required parameter: 'gecko_id'"}), 400
-
+    if not symbol:
+        return jsonify({"error": "Missing required parameter: 'symbol'"}), 400
     if vs_currency not in ['usd', 'btc', 'eth']:
         return jsonify({"error": "VS currency not supported. Must be 'usd', 'btc', or 'eth'"}), 400
-
     if interval not in ['1h', '4h', '1d', '1w']:
         return jsonify({"error": "Invalid interval. Must be '1h', '4h', '1d', or '1w'"}), 400
-
     if precision:
         try:
             precision_int = int(precision)
@@ -203,28 +175,8 @@ def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]
         except ValueError:
             return jsonify({"error": "Precision must be a valid integer"}), 400
 
-    data, status_code = get_ohlc_coingecko_data(gecko_id, vs_currency, interval, precision)
+    data, status_code = get_ohlc_data(symbol, gecko_id, vs_currency, interval, precision)
     return jsonify(data), status_code
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
