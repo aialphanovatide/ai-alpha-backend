@@ -1,9 +1,9 @@
 # chart/total3.py
 
-from typing import List, Dict, Any
-from tvDatafeed import TvDatafeed, Interval
 import os
 from dotenv import load_dotenv
+from typing import List, Dict, Any
+from tvDatafeed import TvDatafeed, Interval
 
 load_dotenv()
 
@@ -35,7 +35,7 @@ def fetch_total_3_data(days: int = 15) -> Any:
         )
         return data.iloc[::-1]
     except Exception as e:
-        raise RuntimeError(f"Error fetching data from TradingView: {str(e)}")
+        raise RuntimeError(f"Error fetching total3 data: {str(e)}")
 
 def process_total_3_data(raw_data: Any) -> List[Dict[str, Any]]:
     """
@@ -50,7 +50,7 @@ def process_total_3_data(raw_data: Any) -> List[Dict[str, Any]]:
     results = []
     for index, row in raw_data.iterrows():
         package = {
-            'date': index.strftime('%Y-%m-%d'),
+            'date': index,
             'open': round(row['open'], 2),
             'high': round(row['high'], 2),
             'low': round(row['low'], 2),

@@ -151,8 +151,7 @@ class Admin(Base):
                 return token_obj.admin
             return None
         finally:
-            session.close() 
-            
+            session.close()       
             
     def generate_reset_token(self, expires_in=3600):
         """
@@ -527,6 +526,7 @@ class CoinBot(Base):
     bot_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     alias = Column(String)
+    gecko_id = Column(String)
     icon = Column(String, default='No Image')
     category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=False)
     background_color = Column(String)
