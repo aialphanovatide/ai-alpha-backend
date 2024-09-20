@@ -1427,55 +1427,6 @@
         }
       }
     },
-    "/delete_narrative_trading/{narrative_trading_id}": {
-      "delete": {
-        "summary": "Delete a narrative trading post",
-        "description": "Delete a narrative trading post by narrative_trading_id.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "parameters": [
-          {
-            "name": "narrative_trading_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the narrative trading post to delete"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Narrative trading not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/get_competitors/{coin_bot_id}": {
       "get": {
         "summary": "Get competitors data",
