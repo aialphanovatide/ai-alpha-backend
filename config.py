@@ -66,9 +66,9 @@ class Admin(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    roles = relationship('Role', secondary='admin_roles', back_populates='admins')
+    roles = relationship('Role', secondary='admin_roles', back_populates='admins', cascade='all, delete')
     tokens = relationship('Token', back_populates='admin', cascade='all, delete-orphan')
-    api_key = relationship("APIKey", back_populates="admin", uselist=False)
+    api_key = relationship("APIKey", back_populates="admin", uselist=False, cascade='all, delete-orphan')
 
     def to_dict(self):
         """
@@ -130,7 +130,7 @@ class Admin(Base):
             Token: The generated token object.
         """
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
         new_token = Token(token=token, admin_id=self.admin_id, expires_at=expires_at)
         return new_token
 
@@ -148,7 +148,7 @@ class Admin(Base):
         session = Session()  # Crea una nueva sesión
         try:
             token_obj = session.query(Token).filter_by(token=token).first()
-            if token_obj and token_obj.expires_at > datetime.utcnow():
+            if token_obj and token_obj.expires_at > datetime.now():
                 return token_obj.admin
             return None
         finally:
@@ -166,7 +166,7 @@ class Admin(Base):
             tuple: A tuple containing the reset token and its expiration timestamp.
         """
         reset_token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
         return reset_token, expires_at
 
     @staticmethod
@@ -215,8 +215,8 @@ class AdminRole(Base):
     """
     __tablename__ = 'admin_roles'
 
-    admin_id = Column(Integer, ForeignKey('admins.admin_id'), primary_key=True, nullable=False)
-    role_id = Column(Integer, ForeignKey('roles.id'), primary_key=True, nullable=False)
+    admin_id = Column(Integer, ForeignKey('admins.admin_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), primary_key=True, nullable=False)
     
     
 class Token(Base):

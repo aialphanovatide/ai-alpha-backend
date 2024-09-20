@@ -298,28 +298,15 @@ def update_admin(admin_id):
 
     return jsonify(response), status_code
 
-
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['DELETE'])
 def delete_admin(admin_id):
-    """
-    Delete an admin.
-    
-    Args:
-        admin_id (int): The ID of the admin to delete
-    
-    Returns:
-        JSON response with status code:
-        - 200: Admin deleted successfully
-        - 404: Admin not found
-        - 500: Database error or unexpected error
-    """
     response = {"message": None, "error": None}
     status_code = 500  # Default to server error
-    with Session as session:
+    
+    with Session() as session:
         try:
             admin = session.query(Admin).get(admin_id)
             if admin:
-                session.query(AdminRole).filter_by(admin_id=admin_id).delete()
                 session.delete(admin)
                 session.commit()
                 response["message"] = "Admin deleted successfully"
@@ -335,10 +322,8 @@ def delete_admin(admin_id):
             session.rollback()
             response["error"] = f"An unexpected error occurred: {str(e)}"
             status_code = 500
-        finally:
-            session.close()
 
-        return jsonify(response), status_code
+    return jsonify(response), status_code
 
 @dashboard_access_bp.route('/admin/request-password-reset', methods=['POST'])
 def request_password_reset():
@@ -420,3 +405,29 @@ def reset_password(token):
             session.rollback()
             flash('An error occurred. Please try again.', 'error')
             return redirect(url_for('dashboard_access.login_admin'))
+        
+        
+@dashboard_access_bp.route('/admin/roles', methods=['GET'])
+def get_admin_roles():
+    """
+    Get all admin roles.
+    
+    Returns:
+        JSON response with status code:
+        - 200: List of admin roles retrieved successfully
+        - 500: Database error or unexpected error
+    """
+    response = {"roles": [], "error": None}
+    status_code = 500  # Default to server error
+
+    with Session() as session:
+        try:
+            roles = session.query(Role).all()
+            response["roles"] = [{"id": role.id, "name": role.name, "description": role.description} for role in roles]
+            status_code = 200
+        except SQLAlchemyError as e:
+            response["error"] = f"Database error: {str(e)}"
+        except Exception as e:
+            response["error"] = f"An unexpected error occurred: {str(e)}"
+
+    return jsonify(response), status_code
