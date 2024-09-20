@@ -5,18 +5,42 @@
     "description": "API documentation for AI Alpha",
     "version": "2.1"
   },
-  "tags": [
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "security": [
     {
-      "name": "User",
-      "description": "Operations related to the User"
-    },
+      "ApiKeyAuth": []
+    }
+  ],
+  "tags": [
     {
       "name": "Analysis",
       "description": "Operations related to the Analysis"
     },
     {
+      "name": "Coin",
+      "description": "Operations related to coins"
+    },
+    {
+      "name": "Category",
+      "description": "Operations related to the Category"
+    },
+    {
       "name": "Chart",
       "description": "Operations related to the Charts"
+    },
+    {
+      "name": "Narrative trading",
+      "description": "Operations related to the Narrative Trading"
+    },
+    {
+      "name": "User",
+      "description": "Operations related to the User"
     },
     {
       "name": "Introduction",
@@ -45,10 +69,6 @@
     {
       "name": "DApps",
       "description": "Operations related to the DApps"
-    },
-    {
-      "name": "Narrative Trading",
-      "description": "Operations related to the Narrative Trading"
     },
     {
       "name": "TradingView",
@@ -659,79 +679,6 @@
         }
       }
     },
-    "/delete_scheduled_job/{job_id}": {
-      "delete": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Delete a scheduled job by its ID.",
-        "description": "Delete a scheduled job by its ID.",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Job deleted successfully"
-          },
-          "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/get_scheduled_job/{job_id}": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Get information about a scheduled job by its ID.",
-        "description": "Get information about a scheduled job by its ID.",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Job information retrieved successfully"
-          },
-          "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/get_scheduled_jobs": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Get all scheduled jobs.",
-        "description": "Get all scheduled jobs.",
-        "responses": {
-          "200": {
-            "description": "Jobs retrieved successfully"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
     "/post_analysis": {
       "post": {
         "tags": [
@@ -775,298 +722,6 @@
           },
           "500": {
             "description": "Server error"
-          }
-        }
-      }
-    },
-    "/delete_analysis/{analysis_id}": {
-      "delete": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Delete an existing analysis and its associated image.",
-        "description": "Remove an analysis identified by its ID and any associated image.",
-        "parameters": [
-          {
-            "name": "analysis_id",
-            "in": "path",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Analysis deleted successfully"
-          },
-          "404": {
-            "description": "Analysis not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/edit_analysis/{analysis_id}": {
-      "put": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Edit the content of an existing analysis.",
-        "description": "Update the content of an analysis identified by its ID.",
-        "parameters": [
-          {
-            "name": "analysis_id",
-            "in": "path",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "New analysis content",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "content": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "content"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Analysis edited successfully"
-          },
-          "400": {
-            "description": "Bad request (missing new content)"
-          },
-          "404": {
-            "description": "Analysis not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/get_last_analysis": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Retrieve the name and date of the last analysis created.",
-        "description": "Query the database for the most recently created analysis and return its details along with the associated coin information.",
-        "responses": {
-          "200": {
-            "description": "Last analysis retrieved successfully"
-          },
-          "404": {
-            "description": "No analysis found or associated coin not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/get_analysis/{coin_bot_id}": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Retrieve analyses for a specific coin bot ID with pagination",
-        "description": "This endpoint queries the database for analyses related to a specific coin bot, ordered by creation date descending, and includes their associated images.",
-        "parameters": [
-          {
-            "name": "coin_bot_id",
-            "in": "path",
-            "description": "The ID of the coin bot",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "description": "The page number (default: 1)",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of items per page (default: 10, max: 100)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Analysis"
-                  }
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "integer"
-                },
-                "page": {
-                  "type": "integer"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "total_pages": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid pagination parameters"
-          },
-          "404": {
-            "description": "No analyses found for the specified coin bot ID"
-          },
-          "500": {
-            "description": "Unexpected error during execution"
-          }
-        }
-      }
-    },
-    "/get_analysis_by_coin": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Retrieve analyses for a specific coin by name or ID",
-        "description": "This endpoint queries the database for analyses related to a specific coin, identified either by name or ID.",
-        "parameters": [
-          {
-            "name": "coin_bot_name",
-            "in": "query",
-            "description": "The name of the coin (optional)",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "coin_bot_id",
-            "in": "query",
-            "description": "The ID of the coin (optional)",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Analysis"
-                  }
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Coin ID or name is required"
-          },
-          "404": {
-            "description": "No analyses found for the specified coin"
-          },
-          "500": {
-            "description": "Unexpected error during execution"
-          }
-        }
-      }
-    },
-    "/get_analysis": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Retrieve analyses with their associated images, with pagination",
-        "description": "This endpoint queries the database for analyses, ordered by creation date descending, and includes their associated images. It supports pagination and a configurable limit.",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "The page number (default: 1)",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of items per page (default: 10, max: 100)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Analysis"
-                  }
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "integer"
-                },
-                "page": {
-                  "type": "integer"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "total_pages": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid pagination parameters"
-          },
-          "500": {
-            "description": "Unexpected error during execution"
           }
         }
       }
@@ -1128,73 +783,93 @@
         }
       }
     },
-    "/edit_user/{user_id}": {
-      "put": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Edit user data identified by user ID.",
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "nickname": {
-                  "type": "string"
-                },
-                "full_name": {
-                  "type": "string"
-                }
-              },
-              "required": []
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User data updated successfully."
-          },
-          "400": {
-            "description": "No valid fields provided for update or missing user ID."
-          },
-          "404": {
-            "description": "User not found."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
     "/users": {
       "get": {
         "tags": [
           "User"
         ],
-        "summary": "Retrieve all users with their purchased plans.",
+        "summary": "Retrieve all users with their purchased plans, with optional pagination.",
+        "description": "Retrieve all users with their purchased plans, with optional pagination.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page (max: 100)",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful operation, returns list of users with plans.",
+            "description": "Successful operation, returns list of users with plans",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserWithPlans"
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "user": {
+                        "type": "object",
+                        "description": "User details"
+                      },
+                      "purchased_plans": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Plan details"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "pagination": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "total_items": {
+                      "type": "integer"
+                    },
+                    "total_pages": {
+                      "type": "integer"
+                    },
+                    "has_next": {
+                      "type": "boolean"
+                    },
+                    "has_prev": {
+                      "type": "boolean"
+                    }
+                  }
+                }
               }
             }
           },
+          "400": {
+            "description": "Invalid pagination parameters"
+          },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error"
           }
         }
       }
@@ -1205,153 +880,192 @@
           "User"
         ],
         "summary": "Retrieve a specific user with their purchased plans.",
+        "description": "Retrieve a specific user with their purchased plans.",
         "parameters": [
           {
             "name": "user_id",
             "in": "query",
+            "description": "ID of the user to retrieve",
             "required": false,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
           },
           {
             "name": "email",
             "in": "query",
+            "description": "Email address of the user to retrieve",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "schema": {}
           },
           {
             "name": "nickname",
             "in": "query",
+            "description": "Nickname of the user to retrieve",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "schema": {}
           },
           {
-            "name": "full_name",
+            "name": "auth0id",
             "in": "query",
+            "description": "Auth0 ID of the user to retrieve",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "schema": {}
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation, returns user data with plans.",
+            "description": "Successful operation, returns user data with plans",
             "schema": {
-              "$ref": "#/definitions/UserWithPlans"
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object"
+                    },
+                    "purchased_plans": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           },
           "400": {
-            "description": "User identifier not provided."
+            "description": "User identifier not provided or invalid"
           },
           "404": {
-            "description": "User not found or user has no active plans."
+            "description": "User not found"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error"
           }
         }
-      }
-    },
-    "/purchase_plan": {
+      },
       "post": {
         "tags": [
           "User"
         ],
-        "summary": "Save a new purchased plan for a user.",
+        "summary": "Register a new user in the system.",
+        "description": "Register a new user in the system.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "",
             "required": true,
+            "type": "string",
             "schema": {
               "type": "object",
-              "required": [
-                "reference_name",
-                "price",
-                "auth0id"
-              ],
               "properties": {
-                "reference_name": {
-                  "type": "string"
+                "full_name": {
+                  "type": "string",
+                  "description": "The full name of the user"
                 },
-                "price": {
-                  "type": "number"
+                "nickname": {
+                  "type": "string",
+                  "description": "The nickname or username of the user"
                 },
-                "is_subscribed": {
+                "email": {
+                  "type": "string",
+                  "description": "The email address of the user"
+                },
+                "email_verified": {
                   "type": "boolean",
-                  "default": true
+                  "description": "Whether the email has been verified",
+                  "default": false
                 },
-                "user_id": {
-                  "type": "integer"
+                "picture": {
+                  "type": "string",
+                  "description": "URL to the user's profile picture"
                 },
                 "auth0id": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "The Auth0 ID of the user"
+                },
+                "provider": {
+                  "type": "string",
+                  "description": "The authentication provider used"
+                },
+                "birth_date": {
+                  "type": "string",
+                  "description": "The birth date of the user"
                 }
-              }
+              },
+              "required": [
+                "full_name",
+                "nickname",
+                "email"
+              ]
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Package saved successfully."
+          "201": {
+            "description": "User successfully created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "object",
+                  "description": "The complete newly created user object"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Missing required fields (reference_name, price, user_id, auth0id)."
+            "description": "Invalid or missing data in the request"
           },
-          "404": {
-            "description": "User not found for provided auth0id."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/unsubscribe_package/{product_id}": {
-      "put": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Unsubscribe a user from a purchased plan identified by product ID.",
-        "parameters": [
-          {
-            "name": "product_id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User unsubscribed from package successfully."
-          },
-          "404": {
-            "description": "Package not found."
+          "409": {
+            "description": "User with this email or nickname already exists"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error or database error"
           }
         }
-      }
-    },
-    "/delete_user": {
+      },
       "delete": {
         "tags": [
           "User"
         ],
-        "summary": "Delete a user account identified by user ID.",
+        "summary": "Delete a user account identified by auth0id or email.",
+        "description": "Delete a user account identified by auth0id or email.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "",
             "required": true,
+            "type": "string",
             "schema": {
               "type": "object",
-              "required": [
-                "user_id"
-              ],
               "properties": {
-                "user_id": {
-                  "type": "integer",
-                  "description": "ID of the user to delete."
+                "auth0id": {
+                  "type": "string",
+                  "description": "Full or partial auth0id of the user to delete"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email of the user to delete"
                 }
               }
             }
@@ -1359,16 +1073,27 @@
         ],
         "responses": {
           "200": {
-            "description": "User account deleted successfully."
+            "description": "User account deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
-            "description": "User ID not provided."
+            "description": "Neither auth0id nor email provided"
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error"
           }
         }
       }
@@ -1695,620 +1420,6 @@
           },
           "400": {
             "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/get_narrative_trading/{coin_bot_id}": {
-      "get": {
-        "summary": "Get narrative trading posts by coin bot ID",
-        "description": "Retrieve narrative trading posts by coin bot ID.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "parameters": [
-          {
-            "name": "coin_bot_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the coin bot"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "narrative_trading_id": {
-                            "type": "integer"
-                          },
-                          "narrative_trading": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "category_name": {
-                            "type": "string"
-                          },
-                          "coin_bot_id": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No narrative trading found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/get_narrative_trading_by_coin": {
-      "get": {
-        "summary": "Get narrative trading posts by coin",
-        "description": "Retrieve narrative trading posts by coin bot name or ID.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "parameters": [
-          {
-            "name": "coin_bot_name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Name of the coin bot"
-          },
-          {
-            "name": "coin_bot_id",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the coin bot"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "narrative_trading_id": {
-                            "type": "integer"
-                          },
-                          "narrative_trading": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "category_name": {
-                            "type": "string"
-                          },
-                          "coin_bot_id": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "No narrative trading found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/get_narrative_trading": {
-      "get": {
-        "summary": "Get all narrative trading posts",
-        "description": "Retrieve all narrative trading posts.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "narrative_trading_id": {
-                            "type": "integer"
-                          },
-                          "narrative_trading": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "category_name": {
-                            "type": "string"
-                          },
-                          "coin_bot_id": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/post_narrative_trading": {
-      "post": {
-        "summary": "Create a new narrative trading post",
-        "description": "Create a new narrative trading post.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "coinBot": {
-                    "type": "string",
-                    "description": "ID of the coin bot"
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "Content of the post"
-                  },
-                  "category_name": {
-                    "type": "string",
-                    "description": "Name of the category"
-                  }
-                },
-                "required": [
-                  "coinBot",
-                  "content"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/delete_narrative_trading/{narrative_trading_id}": {
-      "delete": {
-        "summary": "Delete a narrative trading post",
-        "description": "Delete a narrative trading post by narrative_trading_id.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "parameters": [
-          {
-            "name": "narrative_trading_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the narrative trading post to delete"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Narrative trading not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/edit_narrative_trading/{narrative_trading_id}": {
-      "put": {
-        "summary": "Edit a narrative trading post",
-        "description": "Edit an existing narrative trading post.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "parameters": [
-          {
-            "name": "narrative_trading_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the narrative trading post to edit"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "content": {
-                    "type": "string",
-                    "description": "New content for the narrative trading post"
-                  }
-                },
-                "required": [
-                  "content"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Narrative trading not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/get_last_narrative_trading": {
-      "get": {
-        "summary": "Get the last narrative trading",
-        "description": "Retrieve information about the last narrative trading created.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "last_narrative_trading": {
-                      "type": "object",
-                      "properties": {
-                        "narrative_trading_id": {
-                          "type": "integer"
-                        },
-                        "content": {
-                          "type": "string"
-                        },
-                        "coin_name": {
-                          "type": "string"
-                        },
-                        "category_name": {
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No narrative trading found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/schedule_narrative_post": {
-      "post": {
-        "summary": "Schedule a narrative trading post",
-        "description": "Schedule a narrative trading post for future publishing.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "coinBot": {
-                    "type": "string",
-                    "description": "ID of the coin bot"
-                  },
-                  "category_name": {
-                    "type": "string",
-                    "description": "Name of the category"
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "Content of the post"
-                  },
-                  "scheduledDate": {
-                    "type": "string",
-                    "description": "Scheduled date and time for publishing"
-                  }
-                },
-                "required": [
-                  "coinBot",
-                  "content",
-                  "scheduledDate"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/get_narrative_trading_jobs": {
-      "get": {
-        "summary": "Get scheduled narrative trading jobs",
-        "description": "Retrieve a list of all scheduled narrative trading jobs.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "jobs": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "trigger": {
-                            "type": "string"
-                          },
-                          "args": {
-                            "type": "string"
-                          },
-                          "next_run_time": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/delete_scheduled_narrative_job/{job_id}": {
-      "delete": {
-        "summary": "Delete a scheduled narrative trading job",
-        "description": "Delete a scheduled narrative trading job by job ID.",
-        "tags": [
-          "Narrative Trading"
-        ],
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "ID of the job to delete"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Job not found"
           },
           "500": {
             "description": "Internal server error"
@@ -4007,13 +3118,122 @@
         }
       }
     },
-    "/get_analysis/test": {
+    "/analysis": {
       "get": {
         "tags": [
           "Analysis"
         ],
-        "summary": "Retrieve analyses with their associated images, with pagination.",
-        "description": "Retrieve analyses with their associated images, with pagination.",
+        "summary": "Retrieve analyses for a specific coin by id or name, with optional pagination.",
+        "description": "Retrieve analyses for a specific coin by id or name, with optional pagination.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "query",
+            "description": "The ID of the coin bot",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "coin_name",
+            "in": "query",
+            "description": "The name of the coin bot",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number (default: 1)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of items per page (default: 10, max: 100)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of analyses"
+          },
+          "400": {
+            "description": "Bad Request - Missing coin identification or invalid pagination parameters"
+          },
+          "404": {
+            "description": "Not Found - No analyses found for the specified coin"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Create a new analysis and publish it.",
+        "description": "Create a new analysis and publish it.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "formData",
+            "description": "The ID of the coin",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "The content of the analysis",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "The name of the category",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "description": "Details of the created analysis"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing or invalid data"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/analyses": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve all analyses with pagination, ordered by creation date descending.",
+        "description": "Retrieve all analyses with pagination, ordered by creation date descending.",
         "parameters": [
           {
             "name": "page",
@@ -4032,13 +3252,2081 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Successful retrieval of analyses",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request - Invalid pagination parameters"
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/analysis/{analysis_id}": {
+      "delete": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Delete an existing analysis and its associated image.",
+        "description": "Delete an existing analysis and its associated image.",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "description": "The ID of the analysis to delete",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string",
+                  "description": "Confirmation message of deletion"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Edit the content of an existing analysis.",
+        "description": "Edit the content of an existing analysis.",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "description": "The ID of the analysis to edit",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New content for the analysis",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "The new content of the analysis"
+                }
+              },
+              "required": [
+                "content"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis edited successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "description": "Details of the edited analysis"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - New content is not provided"
+          },
+          "404": {
+            "description": "Analysis not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/scheduled-analyses": {
+      "post": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Schedule a post for future publication.",
+        "description": "Schedule a post for future publication.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "formData",
+            "description": "The ID of the coin bot",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "The name of the category",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "The content of the post",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "scheduled_date",
+            "in": "formData",
+            "description": "The scheduled date and time in ISO 8601 format (e.g., \"2023-01-01T12:00:00.000Z\")",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Post scheduled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                },
+                "job_id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (missing or invalid data)"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Retrieve information about all scheduled jobs.",
+        "description": "Retrieve information about all scheduled jobs.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Jobs information retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "type": "string"
+                          },
+                          "args": {
+                            "type": "string"
+                          },
+                          "next_run_time": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/scheduled-analyses/{job_id}": {
+      "delete": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Delete a scheduled job by its id.",
+        "description": "Delete a scheduled job by its id.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "description": "The ID of the scheduled job to delete",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Job deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Get information about a scheduled job by its id.",
+        "description": "Get information about a scheduled job by its id.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "description": "The ID of the scheduled job to retrieve",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Job information retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "func": {
+                      "type": "string"
+                    },
+                    "trigger": {
+                      "type": "string"
+                    },
+                    "args": {
+                      "type": "string"
+                    },
+                    "next_run_time": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Edit user data identified by user id.",
+        "description": "Edit user data identified by user id.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "ID of the user to edit",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "full_name": {
+                  "type": "string",
+                  "description": "New full name for the user"
+                },
+                "nickname": {
+                  "type": "string",
+                  "description": "New nickname for the user"
+                },
+                "birth_date": {
+                  "type": "string",
+                  "description": "New birth date for the user"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Updated user data"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data provided for update"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Conflict (e.g., nickname already taken)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/package": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Save a new purchased plan for a user.",
+        "description": "Save a new purchased plan for a user.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reference_name": {
+                  "type": "string",
+                  "description": "Reference name of the purchased plan"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "Price of the plan"
+                },
+                "is_subscribed": {
+                  "type": "boolean",
+                  "description": "Subscription status"
+                },
+                "auth0id": {
+                  "type": "string",
+                  "description": "Auth0 ID of the user purchasing the plan"
+                }
+              },
+              "required": [
+                "reference_name",
+                "price",
+                "auth0id",
+                "is_subscribed"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Package saved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "404": {
+            "description": "User not found for provided auth0id"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Unsubscribe a user from a purchased plan.",
+        "description": "Unsubscribe a user from a purchased plan.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "auth0id": {
+                  "type": "string",
+                  "description": "Auth0 ID of the user"
+                },
+                "reference_name": {
+                  "type": "string",
+                  "description": "Reference name of the purchased plan"
+                }
+              },
+              "required": [
+                "auth0id",
+                "reference_name"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User unsubscribed from package successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or already unsubscribed"
+          },
+          "404": {
+            "description": "Package not found or user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/coin": {
+      "post": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Create a new coin bot in the database.",
+        "description": "Create a new coin bot in the database.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "The name of the coin bot",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "alias",
+            "in": "formData",
+            "description": "An alternative identifier for the coin bot",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "category_id",
+            "in": "formData",
+            "description": "The ID of the associated category",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "background_color",
+            "in": "formData",
+            "description": "HEX code string for visual representation",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "icon",
+            "in": "formData",
+            "description": "An SVG file to be used as the coin bot icon",
+            "required": false,
+            "type": "file",
+            "schema": {}
+          },
+          {
+            "name": "symbol",
+            "in": "formData",
+            "description": "The symbol of the coin",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "coin": {
+                  "type": "object",
+                  "description": "The created coin bot data"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (missing required fields, invalid SVG, or name/alias already exists)"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/coin/{coin_id}": {
+      "get": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Retrieve a single coin from the database with its full details, keywords, and blacklist.",
+        "description": "Retrieve a single coin from the database with its full details, keywords, and blacklist.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "The ID of the coin to retrieve",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the coin",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "coin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "alias": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "object"
+                    },
+                    "whitelist": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "blacklist": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Coin not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Update a coin's information in the database.",
+        "description": "Update a coin's information in the database.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "The ID of the coin to be updated",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "The new name of the coin bot",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "alias",
+            "in": "formData",
+            "description": "The new alias of the coin bot",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "category_id",
+            "in": "formData",
+            "description": "The new category ID for the coin bot",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "background_color",
+            "in": "formData",
+            "description": "The new background color for the coin bot",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "icon",
+            "in": "formData",
+            "description": "The new SVG icon file for the coin bot",
+            "required": false,
+            "type": "file",
+            "schema": {}
+          },
+          {
+            "name": "symbol",
+            "in": "formData",
+            "description": "The new symbol for the coin bot",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coin updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "coin": {
+                  "type": "object",
+                  "description": "The updated coin bot data"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (no update data provided or invalid data)"
+          },
+          "404": {
+            "description": "Coin not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Delete a coin from the database.",
+        "description": "Delete a coin from the database.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "The ID of the coin to delete",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coin deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Coin not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/coins": {
+      "get": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Retrieve all coins from the database with optional ordering and full details.",
+        "description": "Retrieve all coins from the database with optional ordering and full details.",
+        "parameters": [
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The order of the returned coins. Accepts 'asc' or 'desc'. Defaults to 'asc'.",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved coins",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "coins": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "description": "Coin bot with full details"
+                  }
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid order parameter)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/coin/{coin_id}/toggle-coin": {
+      "post": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Toggle the publication status of a coin.",
+        "description": "Toggle the publication status of a coin.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "The ID of the coin to toggle",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coin status toggled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (e.g., incomplete fundamentals or invalid chart)"
+          },
+          "404": {
+            "description": "Coin not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/coins-ids/{category_name}": {
+      "get": {
+        "tags": [
+          "Coin"
+        ],
+        "summary": "Retrieve coins ids associated with a given category name.",
+        "description": "Retrieve coins ids associated with a given category name.",
+        "parameters": [
+          {
+            "name": "category_name",
+            "in": "path",
+            "description": "The name of the category to find bots for",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of bot IDs retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "coin_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/category": {
+      "post": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Create a new category in the database.",
+        "description": "Create a new category in the database.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "The main identifier for the category",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "alias",
+            "in": "formData",
+            "description": "An alternative identifier for the category",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "border_color",
+            "in": "formData",
+            "description": "HEX code string for visual representation",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "icon",
+            "in": "formData",
+            "description": "An SVG file to be used as the category icon",
+            "required": false,
+            "type": "file",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "category": {
+                  "type": "object",
+                  "description": "The created category data"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (missing required fields, invalid SVG, or category already exists)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/category/{category_id}": {
+      "get": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Retrieve a single category with its associated coins.",
+        "description": "Retrieve a single category with its associated coins.",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "description": "The ID of the category to retrieve",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The order of the returned coins within the category. Accepts 'asc' or 'desc'.",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the category",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "category": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "alias": {
+                      "type": "string"
+                    },
+                    "border_color": {
+                      "type": "string"
+                    },
+                    "icon": {
+                      "type": "string"
+                    },
+                    "coins": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "description": "Associated coin data"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid order parameter)"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Delete a category and its associated icon from the database and s3 storage.",
+        "description": "Delete a category and its associated icon from the database and s3 storage.",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "description": "The ID of the category to be deleted",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the category",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Update a category's information in the database.",
+        "description": "Update a category's information in the database.",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "description": "The ID of the category to be updated",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "The new name of the category",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "alias",
+            "in": "formData",
+            "description": "The new alias of the category",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "border_color",
+            "in": "formData",
+            "description": "The new border color for the category",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "icon",
+            "in": "formData",
+            "description": "The new SVG icon file for the category",
+            "required": false,
+            "type": "file",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "category": {
+                  "type": "object",
+                  "description": "The updated category data"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (no update data provided or invalid data)"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
+        "description": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
+        "parameters": [
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The order of the returned categories. Accepts 'asc' or 'desc'.",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved categories",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "alias": {
+                        "type": "string"
+                      },
+                      "border_color": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "type": "string"
+                      },
+                      "coins": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Associated coin data"
+                        }
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid order parameter)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/categories/{category_id}/toggle-coins": {
+      "post": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Activate or deactivate all coins within a specific category.",
+        "description": "Activate or deactivate all coins within a specific category.",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "description": "The ID of the category to process",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "activate",
+                    "deactivate"
+                  ],
+                  "description": "The action to perform on the coins"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully processed the request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "processed_coins": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "category_status": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid action provided"
+          },
+          "404": {
+            "description": "Category not found or no coins found for the category"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/categories/global-toggle": {
+      "post": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Activate or deactivate all coins across all categories.",
+        "description": "Activate or deactivate all coins across all categories.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "activate",
+                    "deactivate"
+                  ],
+                  "description": "The action to perform on all coins"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully processed the request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "processed_categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "category_id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "processed_coin_bots": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "bot_id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid action provided"
+          },
+          "404": {
+            "description": "No categories found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/narrative-trading": {
+      "get": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Retrieve narrative trading entries for a specific coin, with pagination.",
+        "description": "Retrieve narrative trading entries for a specific coin, with pagination.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "query",
+            "description": "ID of the coin",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "coin_name",
+            "in": "query",
+            "description": "Name of the coin",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved narrative trading data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "coin_bot_name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "total_count": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Coin ID or name is required"
+          },
+          "404": {
+            "description": "Coin not found or no narrative trading found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Create a new narrative trading post.",
+        "description": "Create a new narrative trading post.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "formData",
+            "description": "ID of the coin bot",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Content of the post",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "Name of the category",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Narrative Trading posted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "object"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - One or more required values are missing"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/narrative-tradings": {
+      "get": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Retrieve all narrative trading entries with optional pagination.",
+        "description": "Retrieve all narrative trading entries with optional pagination.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page (max: 100)",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved narrative trading data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "coin_name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid pagination parameters"
+          },
+          "404": {
+            "description": "No narrative trading entries found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/narrative-trading/{narrative_trading_id}": {
+      "delete": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Delete a narrative trading post by narrative_trading_id and its associated s3 image.",
+        "description": "Delete a narrative trading post by narrative_trading_id and its associated s3 image.",
+        "parameters": [
+          {
+            "name": "narrative_trading_id",
+            "in": "path",
+            "description": "ID of the narrative trading post to delete",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Narrative trading and associated image deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Narrative trading not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Edit an existing narrative trading post.",
+        "description": "Edit an existing narrative trading post.",
+        "parameters": [
+          {
+            "name": "narrative_trading_id",
+            "in": "path",
+            "description": "ID of the narrative trading post to edit",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "New content for the narrative trading post"
+                }
+              },
+              "required": [
+                "content"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Narrative trading edited successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Updated narrative trading data"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "New content is required to edit the narrative trading"
+          },
+          "404": {
+            "description": "Narrative trading not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/schedule-narrative-trading": {
+      "post": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Schedule a narrative trading post for future publishing.",
+        "description": "Schedule a narrative trading post for future publishing.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "formData",
+            "description": "ID of the coin bot",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "Name of the category",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Content of the post",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "scheduled_date",
+            "in": "formData",
+            "description": "Scheduled date and time for publishing (format: \"%a, %b %d, %Y, %I:%M:%S %p\")",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post scheduled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Missing required parameters or invalid date format"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/scheduled-narrative-tradings": {
+      "get": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Retrieve a list of all scheduled narrative trading jobs.",
+        "description": "Retrieve a list of all scheduled narrative trading jobs.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved scheduled jobs",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "type": "string"
+                          },
+                          "args": {
+                            "type": "string"
+                          },
+                          "next_run_time": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/scheduled-narrative-tradings/{job_id}": {
+      "delete": {
+        "tags": [
+          "Narrative trading"
+        ],
+        "summary": "Delete a scheduled narrative trading job by job id.",
+        "description": "Delete a scheduled narrative trading job by job id.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "description": "ID of the job to delete",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scheduled job deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Scheduled job not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
