@@ -38,9 +38,10 @@ from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
 from ws.socket import init_socketio
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 app.name = 'AI Alpha API'
 swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
+template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 mail = Mail(app)
 email_service = EmailService(app)

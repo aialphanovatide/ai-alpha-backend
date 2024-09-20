@@ -63,15 +63,21 @@ class Swagger:
             }
             
             # Add parameters if they exist
-            for param in params:
-                parameter = {
-                    'name': param['name'],
-                    'in': param.get('in', 'query'),
-                    'description': param.get('description', ''),
-                    'required': param.get('required', False),
-                    'type': param['type']
-                }
-                swagger_json['paths'][endpoint_route][method]['parameters'].append(parameter)
+            try:
+                for param in params:
+                    parameter = {
+                        'name': param.get('name', ''),
+                        'in': param.get('in', 'query'),
+                        'description': param.get('description', ''),
+                        'required': param.get('required', False),
+                        'type': param.get('type', 'string'),  # Default to string if type is missing
+                        'schema': param.get('schema', {})  # Use an empty dict as fallback
+                    }
+                    # Only append valid parameters
+                    if parameter['name']:
+                        swagger_json['paths'][endpoint_route][method]['parameters'].append(parameter)
+            except Exception as e:
+                return False, f'Error processing parameters: {str(e)}'
 
             # Update the Swagger JSON file
             with open(self.path, 'w') as file:
@@ -120,72 +126,143 @@ swagger = Swagger()
 
 # ____Add or update an endpoint____
 
+
 # success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/analyses',
-#     method='get',
-#     tag='Analysis',
-#     description='Retrieve all analyses with pagination, ordered by creation date descending.',
+#     endpoint_route='/schedule-narrative-trading',
+#     method='post',
+#     tag='Narrative Trading',
+#     description='Schedule a narrative trading post for future publishing.',
 #     params=[
 #         {
-#             'name': 'page',
-#             'in': 'query',
-#             'type': 'integer',
-#             'description': 'The page number (default: 1)',
-#             'required': False,
-#             'default': 1
+#             'name': 'coin_id',
+#             'in': 'formData',
+#             'type': 'string',
+#             'description': 'ID of the coin bot',
+#             'required': True
 #         },
 #         {
-#             'name': 'limit',
-#             'in': 'query',
-#             'type': 'integer',
-#             'description': 'The number of items per page (default: 10, max: 100)',
-#             'required': False,
-#             'default': 10,
-#             'maximum': 100
+#             'name': 'category_name',
+#             'in': 'formData',
+#             'type': 'string',
+#             'description': 'Name of the category',
+#             'required': False
+#         },
+#         {
+#             'name': 'content',
+#             'in': 'formData',
+#             'type': 'string',
+#             'description': 'Content of the post',
+#             'required': True
+#         },
+#         {
+#             'name': 'scheduled_date',
+#             'in': 'formData',
+#             'type': 'string',
+#             'description': 'Scheduled date and time for publishing (format: "%a, %b %d, %Y, %I:%M:%S %p")',
+#             'required': True
 #         }
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Successful retrieval of analyses',
+#             'description': 'Post scheduled successfully',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'data': {
-#                         'type': 'array',
-#                         'items': {
-#                             'type': 'object',
-#                             'properties': {
-#                                 # Define properties of an analysis object here
-#                                 # For example:
-#                                 'id': {'type': 'integer'},
-#                                 'created_at': {'type': 'string', 'format': 'date-time'},
-#                                 # Add other properties as needed
-#                             }
-#                         }
-#                     },
-#                     'error': {'type': 'string'},
 #                     'success': {'type': 'boolean'},
-#                     'total': {'type': 'integer'},
-#                     'page': {'type': 'integer'},
-#                     'limit': {'type': 'integer'},
-#                     'total_pages': {'type': 'integer'}
+#                     'message': {'type': 'string'}
 #                 }
 #             }
 #         },
 #         '400': {
-#             'description': 'Bad Request - Invalid pagination parameters',
+#             'description': 'Bad request - Missing required parameters or invalid date format',
 #         },
 #         '500': {
-#             'description': 'Internal Server Error',
+#             'description': 'Internal server error',
+#         }
+#     }
+# )
+# print(message)
+
+# success, message = swagger.add_or_update_endpoint(
+#     endpoint_route='/scheduled-narrative-tradings',
+#     method='get',
+#     tag='Narrative Trading',
+#     description='Retrieve a list of all scheduled narrative trading jobs.',
+#     params=[],
+#     responses={
+#         '200': {
+#             'description': 'Successfully retrieved scheduled jobs',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean'},
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'jobs': {
+#                                 'type': 'array',
+#                                 'items': {
+#                                     'type': 'object',
+#                                     'properties': {
+#                                         'id': {'type': 'string'},
+#                                         'name': {'type': 'string'},
+#                                         'trigger': {'type': 'string'},
+#                                         'args': {'type': 'string'},
+#                                         'next_run_time': {'type': 'string'}
+#                                     }
+#                                 }
+#                             }
+#                         }
+#                     }
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Internal server error',
 #         }
 #     }
 # )
 # print(message)
 
 
+# success, message = swagger.add_or_update_endpoint(
+#     endpoint_route='/scheduled-narrative-tradings/{job_id}',
+#     method='delete',
+#     tag='Narrative Trading',
+#     description='Delete a scheduled narrative trading job by job ID.',
+#     params=[
+#         {
+#             'name': 'job_id',
+#             'in': 'path',
+#             'type': 'string',
+#             'description': 'ID of the job to delete',
+#             'required': True
+#         }
+#     ],
+#     responses={
+#         '200': {
+#             'description': 'Scheduled job deleted successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean'},
+#                     'message': {'type': 'string'}
+#                 }
+#             }
+#         },
+#         '404': {
+#             'description': 'Scheduled job not found',
+#         },
+#         '500': {
+#             'description': 'Internal server error',
+#         }
+#     }
+# )
+# print(message)
+
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/get_analysis/test')
+# success, message = swagger.delete_endpoint(endpoint_route='/delete_narrative_trading/{narrative_trading_id}')
 # print(message)
 
 

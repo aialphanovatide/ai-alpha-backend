@@ -1,4 +1,5 @@
 import secrets
+from time import timezone
 from sqlalchemy import (
     Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
@@ -123,7 +124,7 @@ class Admin(Base):
         Generate a new token for the admin.
 
         Args:
-            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+            expires_in (int): Token expiration time in seconds. Default is 3 hours.
 
         Returns:
             Token: The generated token object.
@@ -170,22 +171,15 @@ class Admin(Base):
 
     @staticmethod
     def verify_reset_token(reset_token):
-        """
-        Verify a password reset token and return the associated admin.
-
-        Args:
-            reset_token (str): The reset token to verify.
-
-        Returns:
-            Admin or None: The admin associated with the reset token if valid, None otherwise.
-        """
         session = Session()
         try:
-            admin = session.query(Admin).filter(
-                Admin.reset_token == reset_token,
-                Admin.reset_token_expires_at > datetime.utcnow()
-            ).first()
-            return admin
+            token_obj = session.query(Token).filter_by(token=reset_token).first()
+            if token_obj:
+                # Convertir expires_at a naive si es necesario
+                expires_at_naive = token_obj.expires_at.replace(tzinfo=None)
+                if expires_at_naive > (datetime.now() - timedelta(hours=3)):
+                    return token_obj.admin
+            return None
         finally:
             session.close()
     
@@ -472,7 +466,7 @@ class Category(Base):
     alias = Column(String, nullable=True)
     icon = Column(String)
     border_color = Column(String)
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -528,10 +522,10 @@ class CoinBot(Base):
     name = Column(String)
     alias = Column(String)
     icon = Column(String, default='No Image')
-    category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=True)
+    category_id = Column(Integer, ForeignKey('category.category_id', ondelete='CASCADE'), nullable=False)
     background_color = Column(String)
     symbol = Column(String, nullable=True)
-    is_active = Column(Boolean)
+    is_active = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -1393,138 +1387,210 @@ session = Session()
 
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
+# ------------- CREATE DEFAULT ROLES -------------------
 
-# ------------- POPULATE THE DB WITH DATA.JSON -------------------
-
-def build_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
-    return {
-        "auth0id": user_id,
-        "email": email,
-        "full_name": full_name,
-        "nickname": nickname,
-        "created_at": created_at,
-        "updated_at": updated_at,
-        "email_verified": email_verified
-    }
-
-def get_user_data(user_id: str):
-    session = Session()
-    user = session.query(User).filter(User.auth0id == user_id).first()
-    session.close()
-    return user
-
-def create_user_data(user_id: str, email: str, full_name: str, nickname: str, created_at: str, updated_at: str, email_verified: bool):
-    session = Session()
-    user = User(auth0id=user_id, email=email, full_name=full_name, nickname=nickname, created_at=created_at, updated_at=updated_at, email_verified=email_verified)
-    session.add(user)
-    session.commit()
-    session.close()
-    return user
-
-def load_json_file(file_path: str):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return json.load(file)
-
-def populate_database():
+def init_roles():
     """
-    Populate the database with initial data from JSON files.
-    This function creates categories, coins, keywords, blacklists, sites, and users.
+    Initialize predefined roles in the database.
+
+    This function checks for the existence of predefined roles ('superadmin' and 'admin') 
+    in the database. If a role does not exist, it creates the role and adds it to the database. 
+    The function commits the changes to the database after processing all roles.
+
+    Raises:
+        SQLAlchemyError: If there is a database error during the role initialization process.
+        Exception: For any unexpected errors that occur during execution.
+
+    Returns:
+        None
     """
+    session = Session()
+    roles = [
+        {'name': 'superadmin', 'description': 'Super Administrator'},
+        {'name': 'admin', 'description': 'Administrator'}
+    ]
+    
+    try:
+        for role in roles:
+            existing_role = session.query(Role).filter_by(name=role['name']).first()
+            if not existing_role:
+                new_role = Role(name=role['name'], description=role['description'])
+                session.add(new_role)
+                print(f'---- {role["name"].capitalize()} role created ----')
+
+        session.commit()
+        print('---- Role initialization completed ----')
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise SQLAlchemyError(f'Database error while initializing roles: {str(e)}')
+    except Exception as e:
+        session.rollback()
+        raise Exception(f'Unexpected error while initializing roles: {str(e)}')
+    finally:
+        session.close()
+
+init_roles()
+
+# ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
+
+def init_user_data():
+    """
+    Initialize user data from a JSON file. 
+    This function reads user data from a JSON file and creates User records in the database.
+    If a user already exists, it skips the creation of that user.
+
+    Raises:
+        SQLAlchemyError: If there is a database error during user initialization.
+        FileNotFoundError: If the JSON file is not found.
+        json.JSONDecodeError: If there is an error decoding the JSON file.
+        Exception: For any unexpected errors that occur during execution.
+
+    Returns:
+        None
+    """
+    users_json_path = os.path.join(ROOT_DIRECTORY, 'models', 'init_data', 'users.json')
+    
     session = Session()
     
     try:
-        # Check if the database is already populated with categories and sites
-        if not session.query(Category).first() and not session.query(Site).first():
-            with open(f'{ROOT_DIRECTORY}/models/init_data/data.json', 'r', encoding="utf8") as data_file:
+        with open(users_json_path, 'r', encoding='utf-8') as file:
+            users = json.load(file)  # Load user data from JSON file
+
+        for user in users:
+            existing_user = session.query(User).filter_by(auth0id=user['user_id']).first()
+            if existing_user:
+                continue
+
+            # Create new user
+            new_user = User(
+                auth0id=user['user_id'],
+                email=user['email'],
+                full_name=user['full_name'],
+                nickname=user['nickname'],
+                created_at=user['created_at'],
+                updated_at=user['updated_at'],
+                email_verified=user['email_verified']
+            )
+            session.add(new_user)
+            print(f'---- User {user["user_id"]} created successfully ----')
+
+        session.commit()
+        print('---- User data initialization completed ----')
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f'Error: JSON file not found: {str(e)}')
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f'Error decoding JSON file: {str(e)}')
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise SQLAlchemyError(f'Database error while initializing user data: {str(e)}')
+    except Exception as e:
+        session.rollback()
+        raise Exception(f'Unexpected error while initializing user data: {str(e)}')
+    finally:
+        session.close()
+
+init_user_data()
+
+# ------------- CREATE DEFAULR CATEGORIES AND COINS -------------------
+
+def populate_categories_and_coins():
+    """
+    Populate the database with categories and CoinBot data from a JSON file.
+    This function reads category and CoinBot data from a JSON file and creates
+    corresponding records in the database. If a category or CoinBot already exists,
+    it skips the creation of that entry.
+
+    Raises:
+        SQLAlchemyError: If there is a database error during population.
+        FileNotFoundError: If the JSON file is not found.
+        json.JSONDecodeError: If there is an error decoding the JSON file.
+        Exception: For any unexpected errors that occur during execution.
+
+    Returns:
+        None
+    """
+    json_path = os.path.join(ROOT_DIRECTORY, 'models', 'init_data', 'data.json')
+    session = Session()
+
+    try:
+        # Check if the database is already populated with categories and CoinBots
+        if not session.query(Category).first() and not session.query(CoinBot).first():
+            with open(json_path, 'r', encoding='utf-8') as data_file:
                 config = json.load(data_file)
 
             for item in config:
                 main_keyword = item['main_keyword']
                 alias = item['alias']
-                coins = item['coins']
+                icon = item['icon']
+                border_color = item['borderColor']
 
+                # Create new category
                 new_category = Category(
                     name=main_keyword,
                     alias=alias,
-                    icon=item['icon'],
-                    border_color=item['borderColor'],
+                    icon=icon,
+                    border_color=border_color,
                 )
+                session.add(new_category)
+                print(f'----- Category {main_keyword} populated -----')
 
-                for coin in coins:
+                # Process coins associated with the category
+                for coin in item['coins']:
                     coin_keyword = coin['coin_keyword'].casefold()
-                    keywords = coin['keywords']
-                    sites = coin['sites']
-                    black_list = coin['black_list']
 
-                    new_coin = CoinBot(bot_name=coin_keyword)
-                    new_coin.category = new_category
-
-                    for keyword in keywords:
+                    # Create new CoinBot
+                    new_coin = CoinBot(
+                        name=coin_keyword,
+                        icon=icon,  # Assuming the icon is the same for the CoinBot
+                        category=new_category  # Set the relationship to the category
+                    )
+                    
+                    # Add keywords to the CoinBot
+                    for keyword in coin['keywords']:
                         new_coin.keywords.append(Keyword(word=keyword.casefold()))
 
-                    for word in black_list:
+                    # Add blacklisted words to the CoinBot
+                    for word in coin['black_list']:
                         new_coin.blacklist.append(Blacklist(word=word.casefold()))
 
-                    for site_data in sites:
+                    # Add sites to the CoinBot
+                    for site_data in coin['sites']:
                         site = Site(
                             site_name=str(site_data['website_name']),
                             base_url=str(site_data['base_url']).casefold(),
                             data_source_url=str(site_data['site']).capitalize(),
                             is_URL_complete=site_data['is_URL_complete'],
-                            main_container=str(site_data['main_container'])
+                            main_container=str(site_data['main_container']),
+                            coin_bot=new_coin  # Set the relationship to the CoinBot
                         )
                         new_coin.sites.append(site)
 
                     session.add(new_coin)
-                    print(f'-----CoinBot data saved for {coin_keyword}-----')
+                    print(f'----- CoinBot data saved for {coin_keyword} -----')
 
-                session.add(new_category)
-                print(f'-----Category {main_keyword} populated-----')
-                
             session.commit()
-            print('-----All category and site data successfully populated-----')
+            print('----- All category and CoinBot data successfully populated -----')
         else:
-            print('-----Categories and sites are already populated. Skipping this process-----')
-
-        # Now, let's handle the users
-        users_json_path = os.path.join(ROOT_DIRECTORY, 'models', 'init_data', 'users.json')
-        users = load_json_file(users_json_path)
-        for user in users:
-            existing_user = get_user_data(user['user_id'])
-            if existing_user:
-                continue
-            else:
-                create_user_data(
-                    user_id=user['user_id'],
-                    email=user['email'],
-                    full_name=user['full_name'],
-                    nickname=user['nickname'],
-                    created_at=user['created_at'],
-                    updated_at=user['updated_at'],
-                    email_verified=user['email_verified']
-                )
-                print(f"Usuario {user['user_id']} creado exitosamente.")
-        
-        print('-----User check and creation process completed-----')
+            print('----- Categories and CoinBots are already populated. Skipping this process -----')
 
     except SQLAlchemyError as e:
-        print(f'---Database error while populating the database: {str(e)}---')
         session.rollback()
-    except json.JSONDecodeError as e:
-        print(f'---Error decoding JSON file: {str(e)}---')
-        session.rollback()
+        raise SQLAlchemyError(f'Database error while populating categories and CoinBots: {str(e)}')
     except FileNotFoundError as e:
-        print(f'---Error: JSON file not found: {str(e)}---')
+        raise FileNotFoundError(f'Error: JSON file not found: {str(e)}')
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f'Error decoding JSON file: {str(e)}')
     except Exception as e:
-        print(f'---Unexpected error while populating the database: {str(e)}---')
         session.rollback()
+        raise Exception(f'Unexpected error while populating categories and CoinBots: {str(e)}')
     finally:
         session.close()
 
-# Populates the DB
-populate_database()
+populate_categories_and_coins()
 
-# ------------- CREATE AN ADMIN USER -----------------------------
+# ------------- CREATE DEFAULT SUPERADMIN -----------------------------
 
 def init_superadmin():
     ADMIN_EMAIL = os.getenv('ADMIN_EMAIL')
@@ -1574,11 +1640,6 @@ def init_superadmin():
     finally:
         session.close()
 
-
-# Create SuperAdmin
-# init_superadmin()
-
-
-# ------------- POPULATE THE DB WITH USERS.JSON -------------------
+init_superadmin()
 
 

@@ -1,5 +1,5 @@
 import os
-from flask import current_app
+from flask import current_app, render_template
 from flask_mail import Message, Mail
 
 from dotenv import load_dotenv
@@ -78,49 +78,14 @@ class EmailService:
         
         self.send_email(to, subject, html_body)
 
-    def send_password_reset(self, to, username, reset_token):
-        subject = "Password Reset - AI Alpha Dashboard"
-        reset_link = f'https://your-dashboard-url.com/reset-password?token={reset_token}'  # Reemplaza con la URL real de tu página de restablecimiento de contraseña
-        
-        html_body = f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Password Reset - AI Alpha Dashboard</title>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #F4F4F4;">
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px; margin: auto; background-color: #FFFFFF;">
-                <tr>
-                    <td style="padding: 40px 30px; text-align: center; background-color: #0066CC;">
-                        <h1 style="color: #FFFFFF; font-size: 24px; margin: 0;">AI Alpha Dashboard Password Reset</h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 40px 30px;">
-                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.5;">Dear {username},</p>
-                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.5;">We received a request to reset your password for the AI Alpha Dashboard. If you made this request, please click the button below to set a new password:</p>
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: auto;">
-                            <tr>
-                                <td style="border-radius: 4px; background-color: #0066CC; text-align: center; padding: 10px 25px;">
-                                    <a href="{reset_link}" style="background-color: #0066CC; color: #FFFFFF; display: inline-block; font-size: 16px; text-decoration: none;">Reset Password</a>
-                                </td>
-                            </tr>
-                        </table>
-                        <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.5;">This link will expire in 24 hours for security reasons. If you didn't request a password reset, please ignore this email or contact our support team if you have concerns.</p>
-                        <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.5;">For your security, please do not share this email or the reset link with anyone.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 30px; text-align: center; background-color: #F4F4F4; color: #888888; font-size: 14px;">
-                        <p style="margin: 0;">© 2024 AI Alpha Dashboard. All rights reserved.</p>
-                        <p style="margin: 10px 0 0;">If you need assistance, please contact our support team.</p>
-                    </td>
-                </tr>
-            </table>
-        </body>
-        </html>
-        """
-        
-        self.send_email(to, subject, html_body)
+    def send_password_reset_email(self, user_email, username, reset_link):
+        subject = "Password Reset Request - AI Alpha Dashboard"
+        html_body = render_template('password_reset_email.html',
+                            username=username,
+                            reset_link=reset_link)
+        msg = Message(subject=subject,
+                    recipients=[user_email],
+                    html=html_body)
+        if not self.mail:
+            self.mail = Mail(current_app)
+        self.mail.send(msg)
