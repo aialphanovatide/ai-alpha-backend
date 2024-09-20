@@ -262,7 +262,7 @@ swagger = Swagger()
 
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/schedule_narrative_post')
+# success, message = swagger.delete_endpoint(endpoint_route='/delete_narrative_trading/{narrative_trading_id}')
 # print(message)
 
 
