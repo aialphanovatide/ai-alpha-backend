@@ -1,9 +1,6 @@
 import datetime
-import json
 from typing import List, Dict, Union, Tuple, Optional
 from flask import request, jsonify, Blueprint
-from ws.socket import socketio, emit
-from typing import Dict, Any, Tuple 
 from dotenv import load_dotenv
 import requests
 import os
@@ -118,7 +115,6 @@ def get_ohlc_coingecko_data(coin: str, gecko_id: str, vs_currency: str, interval
     except requests.exceptions.RequestException as req_err:
         return {"error": str(req_err)}, 500
 
-
 def get_ohlc_data(coin: str,gecko_id: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
     # Primero intentamos obtener datos de Binance
     binance_data, binance_status = get_ohlc_binance_data(coin, vs_currency, interval, precision)
@@ -151,7 +147,8 @@ def get_ohlc_data(coin: str,gecko_id: str, vs_currency: str, interval: str, prec
     except requests.exceptions.RequestException as req_err:
         return {"error": str(req_err)}, 500
 
-@chart_graphs_bp.route('/api/chart/ohlc', methods=['GET'])
+
+@chart_graphs_bp.route('/chart/ohlc', methods=['GET'])
 def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]]]]], int]:
     gecko_id = request.args.get('gecko_id', '').lower()
     vs_currency = request.args.get('vs_currency', 'usd')
@@ -185,120 +182,6 @@ def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]
 
 
 
-
-
-
-
-
-
-# def get_top_movers_data(vs_currency: str = 'usd', order: str = 'market_cap_desc', precision: Optional[int] = None) -> Tuple[Optional[Dict[str, Union[bool, Dict[str, List[Dict[str, Any]]], str]]], int, Optional[str]]:
-#     """
-#     Fetch and process top cryptocurrency movers data from CoinGecko API.
-
-#     This function retrieves cryptocurrency market data, sorts it based on the specified order,
-#     and returns the top 10 gainers and top 10 losers.
-
-#     Args:
-#         vs_currency (str): The target currency for market data (default: 'usd').
-#         order (str): The ordering criteria for the data (default: 'market_cap_desc').
-#             Valid options: 'market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc',
-#             'price_change_desc', 'price_change_asc'.
-#         precision (Optional[int]): The number of decimal places for price values (default: None).
-
-#     Returns:
-#         Tuple:
-#             - A dictionary containing the processed data if successful, None otherwise.
-#             - HTTP status code.
-#             - Error message if an error occurred, None otherwise.
-#     """
-#     valid_orders: List[str] = ['market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc', 'price_change_desc', 'price_change_asc']
-#     if order not in valid_orders:
-#         return None, 400, "Invalid order parameter"
-
-#     ids: List[str] = [crypto["coingecko_id"] for crypto in crypto_data]
-#     ids_string: str = ",".join(ids)
-
-#     url: str = f'{COINGECKO_API_URL}/coins/markets'
-#     params = {
-#         'vs_currency': vs_currency,
-#         'ids': ids_string,
-#         'order': 'market_cap_desc',  # Default order for initial fetch
-#         'per_page': 250,
-#         'page': 1,
-#         'sparkline': False,
-#         'price_change_percentage': '24h'
-#     }
-
-#     if precision is not None:
-#         params['precision'] = precision
-
-#     try:
-#         response: requests.Response = requests.get(url, params=params, headers=HEADERS)
-#         if response.status_code == 200:
-#             data: List[Dict[str, Any]] = response.json()
-            
-#             # Sort based on the order parameter
-#             if order.startswith('market_cap'):
-#                 sorted_data = sorted(data, key=lambda x: x['market_cap'] or 0, reverse=(order == 'market_cap_desc'))
-#             elif order.startswith('volume'):
-#                 sorted_data = sorted(data, key=lambda x: x['total_volume'] or 0, reverse=(order == 'volume_desc'))
-#             elif order.startswith('price_change'):
-#                 sorted_data = sorted(data, key=lambda x: x['price_change_percentage_24h'] or 0, reverse=(order == 'price_change_desc'))
-            
-#             # Get top 10 and bottom 10
-#             top_10 = sorted_data[:10]
-#             bottom_10 = sorted_data[-10:][::-1]
-
-#             result = {
-#                 "success": True,
-#                 "data": {
-#                     "top_10_gainers": top_10,
-#                     "top_10_losers": bottom_10
-#                 },
-#                 "order": order
-#             }
-#             return result, 200, None
-#         else:
-#             return None, response.status_code, "Failed to fetch data from CoinGecko"
-#     except requests.RequestException as e:
-#         return None, 500, str(e)
-    
-    
-# @chart_graphs_bp.route('/api/top-movers', methods=['GET'])
-# def get_crypto_markets():
-#     vs_currency = request.args.get('vs_currency', 'usd')
-#     order = request.args.get('order', 'market_cap_desc')
-#     precision = request.args.get('precision')
-    
-#     result, status_code, error_message = get_top_movers_data(vs_currency, order, precision)
-    
-#     if result:
-#         return jsonify(result), status_code
-#     else:
-#         return jsonify({
-#             "success": False,
-#             "error": {
-#                 "code": status_code,
-#                 "message": error_message
-#             }
-#         }), status_code
-    
-
-# # _________________________________ WEBSOCKET ________________________________
-
-# @socketio.on('subscribe_to_ohlc_data')
-# def handle_subscribe_to_ohlc_data(data):
-#     # New OHLC data subscription logic
-#     coin = data.get('coin')
-#     vs_currency = data.get('vs_currency', 'usd')
-#     interval = data.get('interval', '1h')
-#     precision = data.get('precision')
-    
-#     ohlc_data, status_code = get_ohlc_coingecko_data(coin, vs_currency, interval, precision)
-#     if status_code == 200:
-#         emit('ohlc_data', ohlc_data)
-#     else:
-#         emit('error', {'message': 'Failed to fetch OHLC data'})
 
 
 
