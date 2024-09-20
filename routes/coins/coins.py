@@ -513,3 +513,64 @@ def toggle_coin_publication(coin_id):
             status_code = 500
 
     return jsonify(response), status_code
+
+
+@coin_bp.route('/coins-ids/<category_name>', methods=['GET'])
+def get_coins_ids(category_name):
+    """
+    Retrieve coins IDs associated with a given category name.
+
+    This endpoint queries the database for all coins instances associated with the specified category
+    and returns their coin IDs.
+
+    Args:
+        category_name (str): The name of the category to find bots for.
+
+    Returns:
+        Tuple[Dict, int]: A tuple containing:
+            - Dict: JSON response with the following structure:
+                {
+                    "data": {"coin_ids": List[int]} or None,
+                    "error": str or None,
+                    "success": bool
+                }
+            - int: HTTP status code
+                - 200: List of bot IDs retrieved successfully
+                - 404: Category not found
+                - 500: Internal server error
+
+    Raises:
+        SQLAlchemyError: If there's an issue with the database query.
+        Exception: For any other unexpected errors.
+
+    Note:
+        This function uses a SQLAlchemy session to query the database. The session is always
+        closed at the end of the function execution, even if an exception occurs.
+    """
+    response = {"data": None, "error": None, "success": False}
+    status_code = 500  # Default to server error
+
+    session = Session()
+    try:
+        category = session.query(Category).filter_by(name=category_name).first()
+        if not category:
+            response["error"] = 'Category not found'
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Fetch all coins associated with the category
+        coins = session.query(CoinBot).filter_by(category_id=category.category_id).all()
+        coin_ids = [coin.bot_id for coin in coins]
+
+        response["data"] = {'coin_ids': coin_ids}
+        response["success"] = True
+        status_code = 200
+
+    except Exception as e:
+        response["error"] = f'Error retrieving coins for category "{category_name}": {str(e)}'
+        status_code = 500
+
+    finally:
+        session.close()
+
+    return jsonify(response), status_code
