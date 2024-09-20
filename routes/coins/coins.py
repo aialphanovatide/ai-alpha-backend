@@ -62,8 +62,8 @@ def create_coin():
             icon_file = request.files.get('icon')
             symbol = request.form.get('symbol')
             
-            if not name or not alias or not category_id:
-                response["error"] = 'Name, alias, and category ID are required'
+            if not name or not alias or not category_id or not symbol:
+                response["error"] = 'Name, alias, symbol and category are required'
                 status_code = 400
                 return jsonify(response), status_code
             
@@ -103,11 +103,11 @@ def create_coin():
                     return jsonify(response), status_code
 
             try:
-                coin_list_result = get_coin_data(coin_names=name, coin_symbols=symbol)
-                if coin_list_result['success'] and coin_list_result['coins']:
-                    gecko_id = coin_list_result['coins'][0]['id']
+                coin_list_result = get_coin_data(name=name.casefold().strip(), symbol=symbol.casefold().strip())
+                if coin_list_result['success'] and coin_list_result['coin']:
+                    gecko_id = coin_list_result['coin']['id']
                 else:
-                    gecko_id = ''  # O podrías manejar esto de otra manera
+                    gecko_id = '' 
             except Exception as e:
                 response["error"] = f"Error fetching gecko_id: {str(e)}"
                 status_code = 500
@@ -252,7 +252,7 @@ def update_coin(coin_id):
                 return jsonify(response), 404
 
             # Update fields if provided
-            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol']:
+            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol', 'gecko_id']:
                 if field in data:
                     setattr(coin, field, data[field])
 

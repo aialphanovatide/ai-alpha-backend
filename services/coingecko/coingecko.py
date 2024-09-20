@@ -134,8 +134,8 @@ def get_coin_data(name: Optional[str] = None, symbol: Optional[str] = None) -> D
     return result
 
 # Example usage:
-result=get_coin_data(symbol='dot', name='Polkadot')
-print("result: ", result) 
+# result=get_coin_data(symbol='dot', name='Polkadot')
+# print("result: ", result) 
 
 
 

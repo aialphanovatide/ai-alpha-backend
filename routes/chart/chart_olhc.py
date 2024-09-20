@@ -1,10 +1,9 @@
-import datetime
-from typing import List, Dict, Union, Tuple, Optional
-from flask import request, jsonify, Blueprint
-from dotenv import load_dotenv
-import requests
 import os
-from datetime import datetime, timedelta
+import time
+import requests
+from typing import Optional
+from dotenv import load_dotenv
+from flask import request, jsonify, Blueprint
 
 chart_graphs_bp = Blueprint('chart_graphs_bp', __name__)
 
@@ -14,22 +13,19 @@ load_dotenv()
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 COINGECKO_API_URL = os.getenv('COINGECKO_API_URL')
 BINANCE_API_URL = os.getenv('BINANCE_API_URL')
-
-# Parse HEADERS from a JSON string to a dictionary
 HEADERS = {'X-Cg-Pro-Api-Key': COINGECKO_API_KEY}
 
-def get_ohlc_binance_data(symbol: str, vs_currency: str, interval: str, precision: Optional[int] = None) -> Tuple[Optional[List[List[Union[int, float]]]], int]:
-    symbol = symbol
-    
-    if not symbol:
-        return None, 404
+def get_ohlc_binance_data(symbol: str, vs_currency: str, interval: str, precision: Optional[int] = None):
+    """
+    Fetch OHLC data from Binance for a specified trading pair and time interval.
+    """
+    pair = f"{symbol.upper().strip()}{vs_currency.upper().strip()}T"
+    endpoint = f"{BINANCE_API_URL}/v3/klines"
 
-    pair = f"{symbol.upper()}{vs_currency.upper()}T"
-    endpoint = f"{BINANCE_API_URL}/klines"
     params = {
         'symbol': pair,
-        'interval': interval,
-        'limit': 30
+        'interval': interval.casefold(),
+        'limit': 180
     }
 
     try:
@@ -49,140 +45,99 @@ def get_ohlc_binance_data(symbol: str, vs_currency: str, interval: str, precisio
                 ] for candle in data
             ]
             return ohlc_data, 200
-        
         return None, 404
     except requests.exceptions.RequestException as e:
         return None, 500
-    
-def consolidate_ohlc_data(data, interval):
-    consolidated = {}
-    for entry in data:
-        timestamp = datetime.fromtimestamp(entry[0] / 1000)
-        if interval == '1d':
-            key = timestamp.date()
-        elif interval == '1w':
-            key = timestamp.date() - timedelta(days=timestamp.weekday())
-        else:
-            # Para otros intervalos, puedes agregar más lógica aquí
-            key = timestamp
 
-        if key not in consolidated:
-            consolidated[key] = {
-                'open': entry[1],
-                'high': entry[2],
-                'low': entry[3],
-                'close': entry[4]
-            }
-        else:
-            consolidated[key]['high'] = max(consolidated[key]['high'], entry[2])
-            consolidated[key]['low'] = min(consolidated[key]['low'], entry[3])
-            consolidated[key]['close'] = entry[4]
-
-    return [
-        [int(key.timestamp() * 1000) if isinstance(key, datetime) else int(datetime.combine(key, datetime.min.time()).timestamp() * 1000),
-         data['open'], data['high'], data['low'], data['close']]
-        for key, data in sorted(consolidated.items())
-    ]
-
-def get_ohlc_coingecko_data(coin: str, gecko_id: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
-    binance_data, binance_status = get_ohlc_binance_data(coin, vs_currency, interval, precision)
-    if binance_data:
-        consolidated_data = consolidate_ohlc_data(binance_data, interval)
-        return consolidated_data, binance_status
-
-    coingecko_id = gecko_id
-    
-    if not coingecko_id:
-        return {"error": "Coin not found"}, 404
-
+def get_ohlc_coingecko_data(gecko_id: str, vs_currency: str, interval: str, precision: Optional[int] = None):
+    """
+    Fetch OHLC data from CoinGecko for a specific coin using its Gecko ID and specified time interval.
+    """
     try:
-        endpoint = f"{COINGECKO_API_URL}/coins/{coingecko_id}/ohlc"
+        endpoint = f"{COINGECKO_API_URL}/coins/{gecko_id}/ohlc"
+        days = 180 if interval == '1w' else 30
         params = {
             'vs_currency': vs_currency,
-            'days': '180' if interval == '1w' else '30'
+            'days': days,
         }
         if precision:
-            params['precision'] = precision
+            params['precision'] = int(precision)
 
         response = requests.get(endpoint, params=params, headers=HEADERS)
         response.raise_for_status()
+        raw_data = response.json()
         
-        raw_data = response.json()
-        consolidated_data = consolidate_ohlc_data(raw_data, interval)
-        return consolidated_data, 200
+        if not raw_data:  # Check if no data is returned
+            return None, 404
+        
+        return raw_data, 200
     except requests.exceptions.HTTPError as http_err:
-        return {"error": str(http_err)}, response.status_code
+        return None, response.status_code  
     except requests.exceptions.RequestException as req_err:
-        return {"error": str(req_err)}, 500
-
-def get_ohlc_data(coin: str,gecko_id: str, vs_currency: str, interval: str, precision: Optional[str] = None) -> Tuple[Union[List[List[Union[int, float]]], Dict[str, str]], int]:
-    # Primero intentamos obtener datos de Binance
-    binance_data, binance_status = get_ohlc_binance_data(coin, vs_currency, interval, precision)
+        return None, 500  
     
-    if binance_data:
-        consolidated_data = consolidate_ohlc_data(binance_data, interval)
-        return consolidated_data, binance_status
-    
-    # Si no hay datos de Binance, consultamos a CoinGecko
-    coingecko_id = gecko_id
-    if not coingecko_id:
-        return {"error": "Coin not found"}, 404
-
-    try:
-        endpoint = f"{COINGECKO_API_URL}/coins/{coingecko_id}/ohlc"
-        params = {
-            'vs_currency': vs_currency,
-            'days': '180' if interval == '1w' else '30'
-        }
-        if precision:
-            params['precision'] = precision
-
-        response = requests.get(endpoint, params=params, headers=HEADERS)
-        response.raise_for_status()
-        raw_data = response.json()
-        consolidated_data = consolidate_ohlc_data(raw_data, interval)
-        return consolidated_data, 200
-    except requests.exceptions.HTTPError as http_err:
-        return {"error": str(http_err)}, response.status_code
-    except requests.exceptions.RequestException as req_err:
-        return {"error": str(req_err)}, 500
-
 
 @chart_graphs_bp.route('/chart/ohlc', methods=['GET'])
-def ohlc() -> Tuple[Union[str, Dict[str, Union[str, List[List[Union[int, float]]]]]], int]:
-    gecko_id = request.args.get('gecko_id', '').lower()
-    vs_currency = request.args.get('vs_currency', 'usd')
-    interval = request.args.get('interval', '1h')
-    precision = request.args.get('precision')
-    symbol = request.args.get('precision')
+def ohlc_chart():
+    response = {
+        'data': None,
+        'error': None,
+    }
     
-    if not gecko_id:
-        return jsonify({"error": "Missing required parameter: 'gecko_id'"}), 400
-    if not symbol:
-        return jsonify({"error": "Missing required parameter: 'symbol'"}), 400
-    if vs_currency not in ['usd', 'btc', 'eth']:
-        return jsonify({"error": "VS currency not supported. Must be 'usd', 'btc', or 'eth'"}), 400
-    if interval not in ['1h', '4h', '1d', '1w']:
-        return jsonify({"error": "Invalid interval. Must be '1h', '4h', '1d', or '1w'"}), 400
-    if precision:
-        try:
-            precision_int = int(precision)
-            if precision_int < 0 or precision_int > 18:
-                return jsonify({"error": "Precision must be a non-negative integer not exceeding 18"}), 400
-        except ValueError:
-            return jsonify({"error": "Precision must be a valid integer"}), 400
+    try:
+        # Retrieve query parameters
+        gecko_id = request.args.get('gecko_id', '').lower()
+        vs_currency = request.args.get('vs_currency', 'usd')
+        interval = request.args.get('interval', '1h')
+        precision = request.args.get('precision')
+        symbol = request.args.get('symbol')
 
-    data, status_code = get_ohlc_data(symbol, gecko_id, vs_currency, interval, precision)
-    return jsonify(data), status_code
+        # Validate required parameters
+        if not gecko_id:
+            response['error'] = "Missing required parameter: 'gecko_id'"
+            return jsonify(response), 400
+        if not symbol:
+            response['error'] = "Missing required parameter: 'symbol'"
+            return jsonify(response), 400
+        if vs_currency not in ['usd', 'btc', 'eth']:
+            response['error'] = "VS currency not supported. Must be 'usd', 'btc', or 'eth'"
+            return jsonify(response), 400
+        if interval not in ['1h', '4h', '1d', '1w']:
+            response['error'] = "Invalid interval. Must be '1h', '4h', '1d', or '1w'"
+            return jsonify(response), 400
+        
+        # Validate precision if provided
+        if precision:
+            try:
+                precision_int = int(precision)
+                if precision_int < 0 or precision_int > 18:
+                    response['error'] = "Precision must be a non-negative integer not exceeding 18"
+                    return jsonify(response), 400
+            except ValueError:
+                response['error'] = "Precision must be a valid integer"
+                return jsonify(response), 400
+
+        # Fetch OHLC data
+        start_time = time.time()
+        data, status = get_ohlc_binance_data(symbol, vs_currency, interval, precision)
+        if data:
+            print("--- Data coming from Binance ---")
+            response['data'] = data
+            end_time = time.time()
+            print(f"Total request time: {end_time - start_time:.2f} seconds")
+            return jsonify(response), status
 
 
+        data, status_code = get_ohlc_coingecko_data(gecko_id, vs_currency, interval, precision)
 
-
-
-
-
-
-
-
+        end_time = time.time()
+        print(f"Total request time: {end_time - start_time:.2f} seconds")
+        
+        response['data'] = data
+        return jsonify(response), status_code
+    
+    except Exception as e:
+        response['error'] = str(e)
+        return jsonify(response), 500
 
 

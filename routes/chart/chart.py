@@ -39,16 +39,16 @@ def save_chart():
     regardless of whether a previous entry exists.
 
     Args (JSON):
-        coin_bot_id (int): The ID of the coin bot.
+        coin_id (int): The ID of the coin.
         pair (str): The trading pair.
         temporality (str): The time frame of the chart.
-        token (str): The token symbol.
+        coin_name (str): The name of the coin.
         support_1, support_2, support_3, support_4 (float): Support levels.
         resistance_1, resistance_2, resistance_3, resistance_4 (float): Resistance levels.
 
     Returns:
         dict: A JSON response indicating success or failure.
-            Format: {"message": str or None, "error": str or None, "status": int}
+            Format: {"message": str or None, "error": str or None, "status": int, "data": dict or None}
 
     Raises:
         SQLAlchemyError: If there's a database-related error.
@@ -56,50 +56,55 @@ def save_chart():
     response = {
         "message": None,
         "error": None,
-        "status": HTTPStatus.OK
+        "status": HTTPStatus.OK,
+        "data": None
     }
 
     session = Session()
 
     try:
         data = request.json
-        required_fields = ['coin_bot_id', 'pair', 'temporality', 'token']
+        required_fields = [
+            'coin_id', 'pair', 'temporality', 'coin_name',
+            'support_1', 'support_2', 'support_3', 'support_4',
+            'resistance_1', 'resistance_2', 'resistance_3', 'resistance_4'
+        ]
         
-        if not all(field in data for field in required_fields):
-            response["error"] = "One or more required fields are missing"
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            response["error"] = f"One or more required fields are missing: {', '.join(missing_fields)}"
             response["status"] = HTTPStatus.BAD_REQUEST
             return jsonify(response), response["status"]
 
-        coin_bot_id = data['coin_bot_id']
+        coin_id = data['coin_id']
         pair = data['pair'].casefold()
         temporality = data['temporality'].casefold()
-        token = data['token'].casefold()
+        coin_name = data['coin_name'].casefold()
 
-        print("data", data)
-
-        if token == 'btc' and pair == 'btc':
+        if coin_name == 'btc' and pair == 'btc':
             response["error"] = "Invalid coin/pair combination"
             response["status"] = HTTPStatus.BAD_REQUEST
             return jsonify(response), response["status"]
         
-       
-
+        if coin_name == 'eth' and pair == 'eth':
+            response["error"] = "Invalid coin/pair combination"
+            response["status"] = HTTPStatus.BAD_REQUEST
+            return jsonify(response), response["status"]
+    
         chart_data = {
-            'support_1': float(data.get('support_1')),
-            'support_2': float(data.get('support_2')),
-            'support_3': float(data.get('support_3')),
-            'support_4': float(data.get('support_4')),
-            'resistance_1': float(data.get('resistance_1')),
-            'resistance_2': float(data.get('resistance_2')),
-            'resistance_3': float(data.get('resistance_3')),
-            'resistance_4': float(data.get('resistance_4')),
-            'token': token,
+            'support_1': float(data['support_1']),
+            'support_2': float(data['support_2']),
+            'support_3': float(data['support_3']),
+            'support_4': float(data['support_4']),
+            'resistance_1': float(data['resistance_1']),
+            'resistance_2': float(data['resistance_2']),
+            'resistance_3': float(data['resistance_3']),
+            'resistance_4': float(data['resistance_4']),
+            'token': coin_name,
             'pair': pair,
             'temporality': temporality,
-            'coin_bot_id': coin_bot_id
+            'coin_bot_id': coin_id
         }
-
-        
 
         new_chart = Chart(**chart_data)
         session.add(new_chart)
@@ -107,6 +112,7 @@ def save_chart():
 
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED
+        response["data"] = new_chart.as_dict()
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -155,14 +161,19 @@ def get_chart_values():
         coin_id = request.args.get('coin_id')
         temporality = request.args.get('temporality')
         pair = request.args.get('pair')
-        
-        if not (coin_name or coin_id) or not temporality or not pair:
-            response["error"] = "Missing required parameters"
+
+        if not (coin_name or coin_id):
+            response["error"] = "Missing required parameter: either coin_name or coin_id must be provided"
+            response["status"] = HTTPStatus.BAD_REQUEST
+            return jsonify(response), response["status"]
+
+        if not temporality or not pair:
+            response["error"] = "Missing required parameters: temporality and pair must be provided"
             response["status"] = HTTPStatus.BAD_REQUEST
             return jsonify(response), response["status"]
 
         if coin_name:
-            coinbot = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+            coinbot = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
             if not coinbot:
                 response["error"] = f"Coin not found with name: {coin_name}"
                 response["status"] = HTTPStatus.NOT_FOUND
@@ -214,13 +225,15 @@ def get_total_3_data_route():
     response = {
         "message": None,
         "error": None,
-        "status": HTTPStatus.OK
+        "status": HTTPStatus.OK,
+        "data": None
     }
 
     try:
         days = int(request.args.get('days', 15))
         total3 = get_total_3_data(days)
-        response["message"] = total3
+        response["data"] = total3
+        response["message"] = "Data retrieved sucessfully"
     except ValueError:
         response["error"] = "Invalid 'days' parameter. It must be an integer."
         response["status"] = HTTPStatus.BAD_REQUEST
@@ -236,6 +249,37 @@ def get_total_3_data_route():
 
 @chart_bp.route('/chart/top-movers', methods=['GET'])
 def get_top_movers():
+    """
+    Retrieve the top movers (gainers and losers) for cryptocurrencies.
+
+    This endpoint fetches cryptocurrency data from the CoinGecko API and returns
+    the top 10 gainers and top 10 losers based on the specified ordering criteria.
+
+    Query Parameters:
+    - vs_currency (str, optional): The target currency for market data (default: 'usd').
+    - order (str, optional): The ordering criteria for the results (default: 'market_cap_desc').
+      Valid options: 'market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc',
+      'price_change_desc', 'price_change_asc'.
+    - precision (int, optional): The number of decimal places for currency values.
+
+    Returns:
+    JSON object with the following structure:
+    {
+        "success": bool,
+        "data": {
+            "top_10_gainers": list,
+            "top_10_losers": list
+        },
+        "order": str
+    }
+
+    On error, returns a JSON object with "success": false and an error message.
+
+    Raises:
+    - 400 Bad Request: If an invalid order parameter is provided.
+    - 500 Internal Server Error: If there's an issue with the CoinGecko API request
+      or any other unexpected error occurs.
+    """
     vs_currency = request.args.get('vs_currency', 'usd')
     order = request.args.get('order', 'market_cap_desc')
     precision = request.args.get('precision', type=int)
@@ -243,56 +287,63 @@ def get_top_movers():
     valid_orders = ['market_cap_desc', 'market_cap_asc', 'volume_desc', 'volume_asc', 'price_change_desc', 'price_change_asc']
     if order not in valid_orders:
         return jsonify({"success": False, "error": {"code": 400, "message": "Invalid order parameter"}}), 400
+    
+    with Session() as session:
+        try:
+            coins_ids = session.query(CoinBot.gecko_id).all()
+            ids = ','.join([coin[0] for coin in coins_ids if coin[0]])
 
-    try:
-        crypto_data = []
-        # Fetch data from CoinGecko API
-        ids = ",".join(crypto["coingecko_id"] for crypto in crypto_data)
-        params = {
-            'vs_currency': vs_currency,
-            'ids': ids,
-            'order': 'market_cap_desc',
-            'per_page': 250,
-            'page': 1,
-            'sparkline': False,
-            'price_change_percentage': '24h'
-        }
-        if precision is not None:
-            params['precision'] = precision
+            if not ids:
+                return jsonify({"success": True, "data": {"top_10_gainers": [], "top_10_losers": []}, "order": order}), 200
 
-        response = requests.get(f'{COINGECKO_API_URL}/coins/markets', params=params, headers=HEADERS)
-        response.raise_for_status()
-        data = response.json()
+            params = {
+                'vs_currency': vs_currency,
+                'ids': ids,
+                'order': 'market_cap_desc',
+                'per_page': 250,
+                'page': 1,
+                'sparkline': False,
+                'price_change_percentage': '24h'
+            }
+            if precision is not None:
+                params['precision'] = precision
 
-        # Sort data based on the order parameter
-        if order.startswith('market_cap'):
-            key = lambda x: x['market_cap'] or 0
-        elif order.startswith('volume'):
-            key = lambda x: x['total_volume'] or 0
-        elif order.startswith('price_change'):
-            key = lambda x: x['price_change_percentage_24h'] or 0
-        else:
-            raise ValueError(f"Unsupported order: {order}")
+            response = requests.get(f'{COINGECKO_API_URL}/coins/markets', params=params, headers=HEADERS)
+            response.raise_for_status()
+            data = response.json()
 
-        sorted_data = sorted(data, key=key, reverse=order.endswith('desc'))
+            # Highlight
+            def filter_properties(coin):
+                return {
+                    "name": coin["name"],
+                    "image": coin["image"],
+                    "symbol": coin["symbol"],
+                    "price_change_percentage_24h": coin["price_change_percentage_24h"],
+                    "id": coin["id"],
+                    "current_price": coin["current_price"],
+                    "last_updated": coin["last_updated"]
+                }
 
-        # Get top 10 and bottom 10
-        top_10 = sorted_data[:10]
-        bottom_10 = sorted_data[-10:][::-1]
+            sort_key = {
+                'market_cap': lambda x: x.get('market_cap') or 0,
+                'volume': lambda x: x.get('total_volume') or 0,
+                'price_change': lambda x: x.get('price_change_percentage_24h') or 0
+            }.get(order.split('_')[0], lambda x: x.get('market_cap') or 0)
 
-        result = {
-            "success": True,
-            "data": {
-                "top_10_gainers": top_10,
-                "top_10_losers": bottom_10
-            },
-            "order": order
-        }
-        return jsonify(result), 200
+            sorted_data = sorted(data, key=sort_key, reverse=order.endswith('desc'))
 
-    except requests.RequestException as e:
-        return jsonify({"success": False, "error": {"code": 500, "message": f"API request failed: {str(e)}"}}), 500
-    except ValueError as e:
-        return jsonify({"success": False, "error": {"code": 400, "message": str(e)}}), 400
-    except Exception as e:
-        return jsonify({"success": False, "error": {"code": 500, "message": f"An unexpected error occurred: {str(e)}"}}), 500
+            # Highlight
+            result = {
+                "success": True,
+                "data": {
+                    "top_10_gainers": [filter_properties(coin) for coin in sorted_data[:10]],
+                    "top_10_losers": [filter_properties(coin) for coin in sorted_data[-10:][::-1]]
+                },
+                "order": order
+            }
+            return jsonify(result), 200
+
+        except requests.RequestException as e:
+            return jsonify({"success": False, "error": {"code": 500, "message": f"API request failed: {str(e)}"}}), 500
+        except Exception as e:
+            return jsonify({"success": False, "error": {"code": 500, "message": f"An unexpected error occurred: {str(e)}"}}), 500

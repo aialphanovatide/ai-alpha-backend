@@ -151,8 +151,7 @@ class Admin(Base):
                 return token_obj.admin
             return None
         finally:
-            session.close() 
-            
+            session.close()       
             
     def generate_reset_token(self, expires_in=3600):
         """
