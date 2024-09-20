@@ -411,7 +411,6 @@ def reset_password(token):
 def get_admin_roles():
     """
     Get all admin roles.
-    
     Returns:
         JSON response with status code:
         - 200: List of admin roles retrieved successfully
