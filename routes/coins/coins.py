@@ -9,6 +9,8 @@ from werkzeug.exceptions import BadRequest
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import joinedload
 from routes.category.category import validate_coin
+from services.coingecko.coingecko import get_coin_data
+from sqlalchemy import func
 
 coin_bp = Blueprint('coin_bp', __name__)
 
@@ -16,8 +18,6 @@ S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 
 # Initialize the ImageProcessor
 image_processor = ImageProcessor()
-
-from sqlalchemy import func
 
 @coin_bp.route('/coin', methods=['POST'])
 def create_coin():
@@ -61,10 +61,9 @@ def create_coin():
             background_color = request.form.get('background_color')
             icon_file = request.files.get('icon')
             symbol = request.form.get('symbol')
-
             
-            if not name or not alias or not category_id:
-                response["error"] = 'Name, alias, and category ID are required'
+            if not name or not alias or not category_id or not symbol:
+                response["error"] = 'Name, alias, symbol and category are required'
                 status_code = 400
                 return jsonify(response), status_code
             
@@ -103,6 +102,17 @@ def create_coin():
                     status_code = 400
                     return jsonify(response), status_code
 
+            try:
+                coin_list_result = get_coin_data(name=name.casefold().strip(), symbol=symbol.casefold().strip())
+                if coin_list_result['success'] and coin_list_result['coin']:
+                    gecko_id = coin_list_result['coin']['id']
+                else:
+                    gecko_id = '' 
+            except Exception as e:
+                response["error"] = f"Error fetching gecko_id: {str(e)}"
+                status_code = 500
+                return jsonify(response), status_code
+
             new_coin = CoinBot(
                 name=name,
                 alias=alias,
@@ -110,7 +120,8 @@ def create_coin():
                 background_color=background_color,
                 icon=icon_url,
                 is_active=False,
-                symbol=symbol,
+                symbol=symbol, 
+                gecko_id=gecko_id,
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
@@ -131,7 +142,6 @@ def create_coin():
             status_code = 500
 
     return jsonify(response), status_code
-
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['GET'])
 def get_single_coin(coin_id):
@@ -242,7 +252,7 @@ def update_coin(coin_id):
                 return jsonify(response), 404
 
             # Update fields if provided
-            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol']:
+            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol', 'gecko_id']:
                 if field in data:
                     setattr(coin, field, data[field])
 
