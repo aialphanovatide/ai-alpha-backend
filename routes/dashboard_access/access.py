@@ -6,8 +6,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from services.email.email import EmailService
 from decorators.token_required import token_required
 from config import Admin, Session, Role, AdminRole, Token
-from flask import Blueprint, current_app, request, jsonify
-from utils.general import generate_unique_short_token
+from flask import Blueprint, current_app, request, jsonify, g
+from decorators.superadmin_required import require_superadmin
 import re
 
 dashboard_access_bp = Blueprint('dashboard_access_bp', __name__)
@@ -15,111 +15,6 @@ dashboard_access_bp = Blueprint('dashboard_access_bp', __name__)
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-# @dashboard_access_bp.route('/admin/register', methods=['POST'])
-# def register_admin():
-#     """
-#     Register a new admin user.
-
-#     This endpoint creates a new admin user with the provided details and assigns the specified role.
-
-#     Request JSON:
-#     {
-#         "email": string,
-#         "username": string,
-#         "password": string,
-#         "role": string (optional, default: "admin")
-#     }
-
-#     Returns:
-#     - 201: Admin registered successfully
-#     - 400: Invalid role or missing required field
-#     - 409: Email or username already exists
-#     - 500: Database error or unexpected error
-#     """
-#     data = request.json
-#     response = {"message": None, "error": None, "admin_id": None, "token": None}
-    
-#     try:
-#         # Validate role
-#         role_name = data.get('role', 'admin').lower()
-#         if not role_name or role_name not in ['superadmin', 'admin']:
-#             return jsonify({"error": "Invalid role"}), 400
-
-#         with Session() as session:
-#             # Check for existing admin
-#             existing_admin = session.query(Admin).filter(
-#                 (Admin.email == data['email']) | (Admin.username == data['username'])
-#             ).first()
-#             if existing_admin:
-#                 return jsonify({"error": "Email or username already exists"}), 409
-
-#             # Create new admin
-#             new_admin = Admin(
-#                 email=data['email'],
-#                 username=data['username'],
-#                 password=data['password']
-#             )
-#             session.add(new_admin)
-#             session.flush()
-
-#             # Assign role
-#             role = session.query(Role).filter_by(name=role_name).first()
-#             if not role:
-#                 role = Role(name=role_name)
-#                 session.add(role)
-#                 session.flush()
-            
-#             admin_role = AdminRole(admin_id=new_admin.admin_id, role_id=role.id)
-#             session.add(admin_role)
-
-#             # Generate token
-#             token = jwt.encode(
-#                 {'admin_id': new_admin.admin_id},
-#                 current_app.config['SECRET_KEY'],
-#                 algorithm='HS256'
-#             )
-#             session.commit()
-        
-#         # Send welcome email
-#         email_service = EmailService()
-#         email_service.send_registration_confirmation(new_admin.email, new_admin.username)
-        
-#         response["message"] = "Admin registered successfully and welcome email sent"
-#         response["admin_id"] = new_admin.admin_id
-#         response["token"] = token
-#         return jsonify(response), 201
-
-#     except KeyError as e:
-#         logger.error(f"Missing required field: {str(e)}")
-#         return jsonify({"error": f"Missing required field: {str(e)}"}), 400
-
-#     except SQLAlchemyError as e:
-#         logger.error(f"Database error: {str(e)}")
-#         return jsonify({"error": "Database error occurred"}), 500
-
-#     except Exception as e:
-#         logger.error(f"An unexpected error occurred: {str(e)}")
-#         return jsonify({"error": "An unexpected error occurred"}), 500
-
-def require_superadmin(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        if not token:
-            return jsonify({"error": "Authorization token is missing"}), 401
-        try:
-            admin = Admin.verify_token(token)
-            if not admin or 'superadmin' not in [role.name for role in admin.roles]:
-                return jsonify({"error": "Superadmin privileges required"}), 403
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Token has expired"}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "Invalid token"}), 401
-        return f(*args, **kwargs)
-    return decorated
-
 
 @dashboard_access_bp.route('/admin/register', methods=['POST'])
 @require_superadmin
@@ -156,6 +51,7 @@ def register_admin():
             # Create new admin
             new_admin = Admin.create_admin(session=session,
                                            username=data['username'],
+                                           email=data['email'],
                                            password=data['password'],
                                            role_names=[data['role']]
                                            )
@@ -215,8 +111,8 @@ def login_admin():
             session.commit()
 
             response["message"] = "Login successful"
-            response["admin_id"] = admin.admin_id
-            response["token"] = token.token
+            response["admin_id"] = admin.to_dict()
+            response["token"] = token.as_dict()
             status_code = 200
         else:
             response["error"] = "Invalid credentials"
@@ -262,9 +158,11 @@ def logout_admin():
     status_code = 500  # Default to server error
     
     try:
-        # Get and invalidate token
-        token = request.headers.get('Authorization')
-        token_obj = session.query(Token).filter_by(token=token).first()
+        # Get the current admin from the g context
+        admin = g.current_admin  # Use the admin set by the token_required decorator
+
+        # Find the token associated with the admin
+        token_obj = session.query(Token).filter_by(admin_id=admin.admin_id).first()  # Fix: Query by admin_id
         if token_obj:
             session.delete(token_obj)
             session.commit()
@@ -288,6 +186,53 @@ def logout_admin():
         session.close()
 
     return jsonify(response), status_code
+
+# @dashboard_access_bp.route('/admin/logout', methods=['POST'])
+# @token_required
+# def logout_admin():
+#     """
+#     Log out an admin by invalidating their current token.
+
+#     Required Header:
+#         Authorization: The current authentication token
+
+#     Returns:
+#         JSON response with status code:
+#         - 200: Logout successful
+#         - 400: Invalid token
+#         - 500: Database error or unexpected error
+#     """
+#     session = Session()
+#     response = {"message": None, "error": None}
+#     status_code = 500  # Default to server error
+    
+#     try:
+#         # Get and invalidate token
+#         token = request.headers.get('Authorization')
+#         token_obj = session.query(Token).filter_by(token=token).first()
+#         if token_obj:
+#             session.delete(token_obj)
+#             session.commit()
+#             response["message"] = "Logged out successfully"
+#             status_code = 200
+#         else:
+#             response["error"] = "Invalid token"
+#             status_code = 400
+
+#     except SQLAlchemyError as e:
+#         session.rollback()
+#         response["error"] = f"Database error: {str(e)}"
+#         status_code = 500
+
+#     except Exception as e:
+#         session.rollback()
+#         response["error"] = f"An unexpected error occurred: {str(e)}"
+#         status_code = 500
+
+#     finally:
+#         session.close()
+
+#     return jsonify(response), status_code
 
 
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['GET'])

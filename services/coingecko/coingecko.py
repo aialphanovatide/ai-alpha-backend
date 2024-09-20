@@ -79,8 +79,63 @@ def get_list_of_coins(coin_names: Optional[List[str]] = None, coin_symbols: Opti
 
     return result
 
-# Example Usage
-# print(get_list_of_coins(coin_symbols=['Render']))
+
+def get_coin_data(name: Optional[str] = None, symbol: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Retrieve data for a specific coin from the CoinGecko API.
+
+    This function makes a GET request to the CoinGecko API to fetch a comprehensive
+    list of all cryptocurrencies and then filters for the specific coin based on
+    the provided name or symbol.
+
+    Args:
+        name (str, optional): The name of the coin to search for.
+        symbol (str, optional): The symbol of the coin to search for.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing:
+            - 'coin' (Dict): A dictionary representing the coin with keys 'id', 'symbol', and 'name',
+              if the coin is found.
+            - 'success' (bool): True if the API call was successful and the coin was found, False otherwise.
+            - 'error' (str): Error message or additional information if the request fails or the coin is not found.
+    """
+    result = {
+        'coin': None,
+        'success': False,
+        'error': None
+    }
+
+    if not name and not symbol:
+        result['error'] = "Either name or symbol must be provided"
+        return result
+
+    try:
+        response = requests.get(f'{BASE_URL}/coins/list', headers=headers, timeout=10)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+
+        all_coins = response.json()
+
+        for coin in all_coins:
+            if (name and coin['name'].lower() == name.lower()) and (symbol and coin['symbol'].lower() == symbol.lower()):
+                result['coin'] = coin
+                result['success'] = True
+                break
+
+        if not result['success']:
+            result['error'] = "No exact match found for both name and symbol"
+
+    except requests.exceptions.RequestException as e:
+        result['error'] = f"Error in CoinGecko API request: {str(e)}"
+    except ValueError as e:
+        result['error'] = f"Error decoding JSON response: {str(e)}"
+    except Exception as e:
+        result['error'] = f"Unexpected error: {str(e)}"
+
+    return result
+
+# Example usage:
+# result=get_coin_data(symbol='dot', name='Polkadot')
+# print("result: ", result) 
 
 
 

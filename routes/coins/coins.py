@@ -9,6 +9,8 @@ from werkzeug.exceptions import BadRequest
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import joinedload
 from routes.category.category import validate_coin
+from services.coingecko.coingecko import get_coin_data
+from sqlalchemy import func
 
 coin_bp = Blueprint('coin_bp', __name__)
 
@@ -16,8 +18,6 @@ S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 
 # Initialize the ImageProcessor
 image_processor = ImageProcessor()
-
-from sqlalchemy import func
 
 @coin_bp.route('/coin', methods=['POST'])
 def create_coin():
@@ -61,10 +61,9 @@ def create_coin():
             background_color = request.form.get('background_color')
             icon_file = request.files.get('icon')
             symbol = request.form.get('symbol')
-
             
-            if not name or not alias or not category_id:
-                response["error"] = 'Name, alias, and category ID are required'
+            if not name or not alias or not category_id or not symbol:
+                response["error"] = 'Name, alias, symbol and category are required'
                 status_code = 400
                 return jsonify(response), status_code
             
@@ -103,6 +102,17 @@ def create_coin():
                     status_code = 400
                     return jsonify(response), status_code
 
+            try:
+                coin_list_result = get_coin_data(name=name.casefold().strip(), symbol=symbol.casefold().strip())
+                if coin_list_result['success'] and coin_list_result['coin']:
+                    gecko_id = coin_list_result['coin']['id']
+                else:
+                    gecko_id = '' 
+            except Exception as e:
+                response["error"] = f"Error fetching gecko_id: {str(e)}"
+                status_code = 500
+                return jsonify(response), status_code
+
             new_coin = CoinBot(
                 name=name,
                 alias=alias,
@@ -110,7 +120,8 @@ def create_coin():
                 background_color=background_color,
                 icon=icon_url,
                 is_active=False,
-                symbol=symbol,
+                symbol=symbol, 
+                gecko_id=gecko_id,
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
@@ -131,7 +142,6 @@ def create_coin():
             status_code = 500
 
     return jsonify(response), status_code
-
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['GET'])
 def get_single_coin(coin_id):
@@ -242,7 +252,7 @@ def update_coin(coin_id):
                 return jsonify(response), 404
 
             # Update fields if provided
-            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol']:
+            for field in ['name', 'alias', 'category_id', 'background_color', 'symbol', 'gecko_id']:
                 if field in data:
                     setattr(coin, field, data[field])
 
@@ -332,10 +342,7 @@ def get_all_coins():
             return jsonify(response), 400
 
         with Session() as session:
-            query = session.query(CoinBot).options(
-                joinedload(CoinBot.keywords),
-                joinedload(CoinBot.blacklist),
-            )
+            query = session.query(CoinBot)
 
             if order == 'desc':
                 query = query.order_by(CoinBot.name.desc())
@@ -501,5 +508,66 @@ def toggle_coin_publication(coin_id):
             session.rollback()
             response["error"] = f"An unexpected error occurred: {str(e)}"
             status_code = 500
+
+    return jsonify(response), status_code
+
+
+@coin_bp.route('/coins-ids/<category_name>', methods=['GET'])
+def get_coins_ids(category_name):
+    """
+    Retrieve coins IDs associated with a given category name.
+
+    This endpoint queries the database for all coins instances associated with the specified category
+    and returns their coin IDs.
+
+    Args:
+        category_name (str): The name of the category to find bots for.
+
+    Returns:
+        Tuple[Dict, int]: A tuple containing:
+            - Dict: JSON response with the following structure:
+                {
+                    "data": {"coin_ids": List[int]} or None,
+                    "error": str or None,
+                    "success": bool
+                }
+            - int: HTTP status code
+                - 200: List of bot IDs retrieved successfully
+                - 404: Category not found
+                - 500: Internal server error
+
+    Raises:
+        SQLAlchemyError: If there's an issue with the database query.
+        Exception: For any other unexpected errors.
+
+    Note:
+        This function uses a SQLAlchemy session to query the database. The session is always
+        closed at the end of the function execution, even if an exception occurs.
+    """
+    response = {"data": None, "error": None, "success": False}
+    status_code = 500  # Default to server error
+
+    session = Session()
+    try:
+        category = session.query(Category).filter_by(name=category_name).first()
+        if not category:
+            response["error"] = 'Category not found'
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Fetch all coins associated with the category
+        coins = session.query(CoinBot).filter_by(category_id=category.category_id).all()
+        coin_ids = [coin.bot_id for coin in coins]
+
+        response["data"] = {'coin_ids': coin_ids}
+        response["success"] = True
+        status_code = 200
+
+    except Exception as e:
+        response["error"] = f'Error retrieving coins for category "{category_name}": {str(e)}'
+        status_code = 500
+
+    finally:
+        session.close()
 
     return jsonify(response), status_code

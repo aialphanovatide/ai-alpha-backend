@@ -8,6 +8,7 @@ export FLASK_ENV=${FLASK_ENV:-development} # if FLASK_ENV not set in .env file, 
 # # Load environment variables from .env file
 # ENV_FILE=.env
 
+
 # if [ -f "$ENV_FILE" ]; then
 #     echo "Loading environment from $ENV_FILE"
 #     set -a
@@ -17,8 +18,6 @@ export FLASK_ENV=${FLASK_ENV:-development} # if FLASK_ENV not set in .env file, 
 #     echo "Error: $ENV_FILE not found."
 #     exit 1
 # fi
-
-
 
 # Function to check, create, and apply Alembic migrations
 check_create_and_apply_migrations() {
