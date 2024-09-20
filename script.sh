@@ -18,8 +18,6 @@ export FLASK_ENV=${FLASK_ENV:-development} # if FLASK_ENV not set in .env file, 
 #     exit 1
 # fi
 
-
-
 # Function to check, create, and apply Alembic migrations
 check_create_and_apply_migrations() {
     echo "Checking for pending database migrations..."
