@@ -342,10 +342,7 @@ def get_all_coins():
             return jsonify(response), 400
 
         with Session() as session:
-            query = session.query(CoinBot).options(
-                joinedload(CoinBot.keywords),
-                joinedload(CoinBot.blacklist),
-            )
+            query = session.query(CoinBot)
 
             if order == 'desc':
                 query = query.order_by(CoinBot.name.desc())
