@@ -10,7 +10,7 @@ load_dotenv()
 
 COINALYZE_API_KEY = os.getenv("COINALYZE_API_KEY")
 
-@coinalyze_bp.route("/get_funding_rates", methods=["GET"])
+@coinalyze_bp.route("/funding-rates", methods=["GET"])
 def get_funding_rates():
     """
     Retrieve funding rates for specified symbols.

@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import joinedload
 from routes.category.category import validate_coin
 from services.coingecko.coingecko import get_coin_data
+from redis_client.redis_client import cache_with_redis
 from sqlalchemy import func
 
 coin_bp = Blueprint('coin_bp', __name__)
@@ -144,6 +145,7 @@ def create_coin():
     return jsonify(response), status_code
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['GET'])
+@cache_with_redis(expiration=21600)
 def get_single_coin(coin_id):
     """
     Retrieve a single coin from the database with its full details, keywords, and blacklist.
@@ -307,6 +309,7 @@ def update_coin(coin_id):
 
 
 @coin_bp.route('/coins', methods=['GET'])
+@cache_with_redis(expiration=21600)
 def get_all_coins():
     """
     Retrieve all coins from the database with optional ordering and full details.
@@ -513,6 +516,7 @@ def toggle_coin_publication(coin_id):
 
 
 @coin_bp.route('/coins-ids/<category_name>', methods=['GET'])
+@cache_with_redis(expiration=21600)
 def get_coins_ids(category_name):
     """
     Retrieve coins IDs associated with a given category name.

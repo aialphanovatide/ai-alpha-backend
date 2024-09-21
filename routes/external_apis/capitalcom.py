@@ -12,7 +12,7 @@ X_CAP_API_KEY = os.getenv("X_CAP_API_KEY")
 REQUIRED_HEADERS = ["X_SECURITY_TOKEN", "CST"]
 email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
-@capitalcom_bp.route("/get_symbol_prices", methods=["GET"])
+@capitalcom_bp.route("/capitalcom/historical/prices", methods=["GET"])
 def get_symbol_prices():
     """
     Retrieve historical prices for a specific symbol.
@@ -97,7 +97,7 @@ def get_symbol_prices():
     return jsonify(response), status_code
 
 
-@capitalcom_bp.route("/post_capitalcom_session", methods=["POST"])
+@capitalcom_bp.route("/capitalcom-session", methods=["POST"])
 def post_capitalcom_session():
     """
     Creates a session with the CapitalCom API.

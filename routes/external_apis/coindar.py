@@ -10,7 +10,7 @@ load_dotenv()
 
 COINDAR_API_KEY = os.getenv("COINDAR_API_KEY")
 
-@coindar_bp.route("/get_crypto_events", methods=["GET"])
+@coindar_bp.route("/crypto-events", methods=["GET"])
 def get_crypto_events():
     """
     Retrieve cryptocurrency events based on specified filters.

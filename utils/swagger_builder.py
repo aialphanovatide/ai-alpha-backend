@@ -128,141 +128,69 @@ swagger = Swagger()
 
 
 # success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/schedule-narrative-trading',
-#     method='post',
-#     tag='Narrative Trading',
-#     description='Schedule a narrative trading post for future publishing.',
+#     endpoint_route='/subscriber-info',
+#     method='get',
+#     tag='RevenueCat',
+#     description='Retrieve user information from RevenueCat.',
 #     params=[
-#         {
-#             'name': 'coin_id',
-#             'in': 'formData',
-#             'type': 'string',
-#             'description': 'ID of the coin bot',
-#             'required': True
-#         },
-#         {
-#             'name': 'category_name',
-#             'in': 'formData',
-#             'type': 'string',
-#             'description': 'Name of the category',
-#             'required': False
-#         },
-#         {
-#             'name': 'content',
-#             'in': 'formData',
-#             'type': 'string',
-#             'description': 'Content of the post',
-#             'required': True
-#         },
-#         {
-#             'name': 'scheduled_date',
-#             'in': 'formData',
-#             'type': 'string',
-#             'description': 'Scheduled date and time for publishing (format: "%a, %b %d, %Y, %I:%M:%S %p")',
-#             'required': True
-#         }
+#         {'name': 'revenuecat_user_id', 'in': 'query', 'type': 'string', 'required': True, 'description': 'The unique identifier of the RevenueCat user'}
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Post scheduled successfully',
+#             'description': 'Successfully retrieved subscriber information',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {'type': 'boolean'},
-#                     'message': {'type': 'string'}
+#                     'data': {
+#                         'type': 'object',
+#                         'description': 'The user information from RevenueCat'
+#                     },
+#                     'error': {'type': 'string', 'nullable': True},
+#                     'success': {'type': 'boolean'}
 #                 }
 #             }
 #         },
 #         '400': {
-#             'description': 'Bad request - Missing required parameters or invalid date format',
-#         },
-#         '500': {
-#             'description': 'Internal server error',
-#         }
-#     }
-# )
-# print(message)
-
-# success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/scheduled-narrative-tradings',
-#     method='get',
-#     tag='Narrative Trading',
-#     description='Retrieve a list of all scheduled narrative trading jobs.',
-#     params=[],
-#     responses={
-#         '200': {
-#             'description': 'Successfully retrieved scheduled jobs',
+#             'description': 'Bad request',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {'type': 'boolean'},
-#                     'data': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'jobs': {
-#                                 'type': 'array',
-#                                 'items': {
-#                                     'type': 'object',
-#                                     'properties': {
-#                                         'id': {'type': 'string'},
-#                                         'name': {'type': 'string'},
-#                                         'trigger': {'type': 'string'},
-#                                         'args': {'type': 'string'},
-#                                         'next_run_time': {'type': 'string'}
-#                                     }
-#                                 }
-#                             }
-#                         }
-#                     }
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean'}
+#                 }
+#             }
+#         },
+#         '401': {
+#             'description': 'Unauthorized',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean'}
 #                 }
 #             }
 #         },
 #         '500': {
 #             'description': 'Internal server error',
-#         }
-#     }
-# )
-# print(message)
-
-
-# success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/scheduled-narrative-tradings/{job_id}',
-#     method='delete',
-#     tag='Narrative Trading',
-#     description='Delete a scheduled narrative trading job by job ID.',
-#     params=[
-#         {
-#             'name': 'job_id',
-#             'in': 'path',
-#             'type': 'string',
-#             'description': 'ID of the job to delete',
-#             'required': True
-#         }
-#     ],
-#     responses={
-#         '200': {
-#             'description': 'Scheduled job deleted successfully',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {'type': 'boolean'},
-#                     'message': {'type': 'string'}
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean'}
 #                 }
 #             }
-#         },
-#         '404': {
-#             'description': 'Scheduled job not found',
-#         },
-#         '500': {
-#             'description': 'Internal server error',
 #         }
 #     }
 # )
 # print(message)
+
 
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/delete_narrative_trading/{narrative_trading_id}')
-# print(message)
+success, message = swagger.delete_endpoint(endpoint_route='/get_revenuecat_user_info')
+print(message)
 
 
