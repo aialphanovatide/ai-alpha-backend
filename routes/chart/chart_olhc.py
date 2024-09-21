@@ -4,6 +4,7 @@ import requests
 from typing import Optional
 from dotenv import load_dotenv
 from flask import request, jsonify, Blueprint
+from redis_client.redis_client import cache_with_redis
 
 chart_graphs_bp = Blueprint('chart_graphs_bp', __name__)
 
@@ -78,6 +79,7 @@ def get_ohlc_coingecko_data(gecko_id: str, vs_currency: str, interval: str, prec
     
 
 @chart_graphs_bp.route('/chart/ohlc', methods=['GET'])
+@cache_with_redis(expiration=2)
 def ohlc_chart():
     response = {
         'data': None,

@@ -1,17 +1,17 @@
-from http import HTTPStatus
-from sqlalchemy import desc
-import requests
 import os
-from dotenv import load_dotenv
+import requests
 from sqlalchemy import desc
+from http import HTTPStatus
+from dotenv import load_dotenv
 from sqlalchemy.exc import SQLAlchemyError
 from config import Chart, CoinBot, Session
 from routes.chart.total3 import get_total_3_data
 from flask import jsonify, request, Blueprint, jsonify  
-from routes.chart.total3 import get_total_3_data
+from redis_client.redis_client import cache_with_redis
+from decorators.measure_time import measure_execution_time
 
 
-load_dotenv()
+load_dotenv() 
 
 TW_USER = os.getenv('TW_USER')
 TW_PASS = os.getenv('TW_PASS')
@@ -209,6 +209,7 @@ def get_chart_values():
 
 
 @chart_bp.route('/chart/total3', methods=['GET'])
+@cache_with_redis(expiration=5)
 def get_total_3_data_route():
     """
     Retrieve and calculate total market cap data for the top 3 cryptocurrencies.
@@ -248,6 +249,7 @@ def get_total_3_data_route():
 
 
 @chart_bp.route('/chart/top-movers', methods=['GET'])
+@cache_with_redis()
 def get_top_movers():
     """
     Retrieve the top movers (gainers and losers) for cryptocurrencies.

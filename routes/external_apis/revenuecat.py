@@ -8,7 +8,7 @@ revenuecat_bp = Blueprint("revenuecat_bp", __name__)
 load_dotenv()
 REVENUECAT_API_KEY = os.getenv("REVENUECAT_API_KEY")
 
-@revenuecat_bp.route("/get_subscribers_info", methods=["GET"])
+@revenuecat_bp.route("/subscriber-info", methods=["GET"])
 def get_subscribers_info():
     """
     Retrieve user information from RevenueCat.

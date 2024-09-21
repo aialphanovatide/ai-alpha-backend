@@ -5,6 +5,7 @@ from services.aws.s3 import ImageProcessor
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from redis_client.redis_client import cache_with_redis
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import func, asc, desc
 
@@ -108,6 +109,7 @@ def create_category():
 
 
 @category_bp.route('/category/<int:category_id>', methods=['GET'])
+@cache_with_redis(expiration=21600)
 def get_single_category(category_id):
     """
     Retrieve a single category with its associated coins.
@@ -179,6 +181,7 @@ def get_single_category(category_id):
 
 
 @category_bp.route('/categories', methods=['GET'])
+@cache_with_redis(expiration=21600)
 def get_all_categories():
     """
     Retrieve all categories with their associated CoinBots, sorted alphabetically by name.

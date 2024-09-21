@@ -23,9 +23,13 @@
       "description": "Operations related to the Analysis"
     },
     {
-      "name": "Coin",
-      "description": "Operations related to coins"
-    },
+      "name": "Admin",
+      "description": "Handles management and administrative operations within the internal dashboard."
+    }, 
+    {
+      "name": "Alerts",
+      "description": "Operations related to the Alerts"
+    },   
     {
       "name": "Category",
       "description": "Operations related to the Category"
@@ -33,6 +37,14 @@
     {
       "name": "Chart",
       "description": "Operations related to the Charts"
+    },
+    {
+      "name": "Coin",
+      "description": "Operations related to coins"
+    },
+    {
+      "name": "Fundamentals",
+      "description": "Operations related to the fundamentals"
     },
     {
       "name": "Narrative trading",
@@ -43,388 +55,11 @@
       "description": "Operations related to the User"
     },
     {
-      "name": "Introduction",
-      "description": "Operations related to the Introduction"
-    },
-    {
-      "name": "Tokenomics",
-      "description": "Operations related to the Tokenomics"
-    },
-    {
-      "name": "Competitors",
-      "description": "Operations related to the Competitors"
-    },
-    {
-      "name": "Revenue Models",
-      "description": "Operations related to the Revenue Models"
-    },
-    {
-      "name": "Hacks",
-      "description": "Operations related to the Hacks"
-    },
-    {
-      "name": "Upgrades",
-      "description": "Operations related to the Upgrades"
-    },
-    {
-      "name": "DApps",
-      "description": "Operations related to the DApps"
-    },
-    {
-      "name": "TradingView",
-      "description": "Operations related to the TradingView"
-    },
-    {
-      "name": "Send Email",
-      "description": "Endpoints related to sending email notifications"
-    },
-    {
-      "name": "WebSocket",
-      "description": "WebSocket operations for real-time cryptocurrency data"
+      "name": "Providers",
+      "description": "Data coming from external providers."
     }
   ],
   "paths": {
-    "api/chart/save_chart": {
-      "post": {
-        "tags": [
-          "Chart"
-        ],
-        "summary": "Adds a new support and resistance lines record for a coin",
-        "description": "This endpoint creates a new chart entry for a specified coin, pair, and temporality, regardless of whether a previous entry exists.",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Chart data to be created",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "coin_bot_id": {
-                  "type": "integer"
-                },
-                "pair": {
-                  "type": "string"
-                },
-                "temporality": {
-                  "type": "string"
-                },
-                "token": {
-                  "type": "string"
-                },
-                "support_1": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "support_2": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "support_3": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "support_4": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "resistance_1": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "resistance_2": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "resistance_3": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "resistance_4": {
-                  "type": "number",
-                  "format": "float"
-                }
-              },
-              "required": [
-                "coin_bot_id",
-                "pair",
-                "temporality",
-                "token"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "New chart record created successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One or more required fields are missing or invalid",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected error occurred",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coin-support-resistance": {
-      "get": {
-        "tags": [
-          "Chart"
-        ],
-        "summary": "Get the most recent support and resistance lines of a requested coin",
-        "description": "This endpoint retrieves the most recent chart values including support and resistance levels for a specified coin (by name or ID), temporality, and trading pair.",
-        "parameters": [
-          {
-            "name": "coin_name",
-            "in": "query",
-            "type": "string",
-            "required": false
-          },
-          {
-            "name": "coin_id",
-            "in": "query",
-            "type": "integer",
-            "required": false
-          },
-          {
-            "name": "temporality",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "pair",
-            "in": "query",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Chart values retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "object",
-                  "properties": {
-                    "support_1": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "support_2": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "support_3": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "support_4": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "resistance_1": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "resistance_2": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "resistance_3": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "resistance_4": {
-                      "type": "number",
-                      "format": "float"
-                    },
-                    "token": {
-                      "type": "string"
-                    },
-                    "pair": {
-                      "type": "string"
-                    },
-                    "temporality": {
-                      "type": "string"
-                    },
-                    "coin_bot_id": {
-                      "type": "integer"
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  }
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Missing required parameters",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "CoinBot not found or no chart found for the given parameters",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected error occurred",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/total_3_data": {
-      "get": {
-        "tags": [
-          "Chart"
-        ],
-        "summary": "Retrieve and calculate total market cap data for the top 3 cryptocurrencies",
-        "description": "This endpoint fetches market cap data for Bitcoin, Ethereum, and the total market, then calculates the market cap for the third largest cryptocurrency by subtracting Bitcoin and Ethereum from the total.",
-        "responses": {
-          "200": {
-            "description": "Market cap data retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "coin": {
-                        "type": "string"
-                      },
-                      "market_cap": {
-                        "type": "number",
-                        "format": "float"
-                      }
-                    }
-                  }
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected error occurred",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/admin/register": {
       "post": {
         "tags": [
@@ -450,15 +85,15 @@
                 "password": {
                   "type": "string"
                 },
-                "role": {
-                  "type": "string"
+                "role_id": {
+                  "type": "integer"
                 }
               },
               "required": [
                 "email",
                 "username",
                 "password",
-                "role"
+                "role_id"
               ]
             }
           }
@@ -1101,7 +736,7 @@
     "/api/tv/alerts": {
       "get": {
         "tags": [
-          "TradingView"
+          "Alerts"
         ],
         "summary": "Get all alerts for a specific category.",
         "parameters": [
@@ -1169,7 +804,7 @@
     "/api/tv/multiple_alert": {
       "post": {
         "tags": [
-          "TradingView"
+          "Alerts"
         ],
         "summary": "Get alerts from multiple categories.",
         "parameters": [
@@ -1243,7 +878,7 @@
     "/api/filter/alerts": {
       "get": {
         "tags": [
-          "TradingView"
+          "Alerts"
         ],
         "summary": "Get filtered alerts by coin and date.",
         "parameters": [
@@ -1330,109 +965,12 @@
         }
       }
     },
-    "/verification": {
-      "get": {
-        "tags": [
-          "Send Email"
-        ],
-        "summary": "Send email verification link.",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "integer",
-                  "description": "Status code"
-                },
-                "content": {
-                  "type": "string",
-                  "description": "Response content"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Client not registered"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Send Email"
-        ],
-        "summary": "Send email verification link.",
-        "parameters": [
-          {
-            "name": "request_body",
-            "in": "body",
-            "description": "Request body containing customer data and line items",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "customer": {
-                  "type": "object",
-                  "properties": {
-                    "email": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "line_items": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "integer",
-                  "description": "Status code"
-                },
-                "content": {
-                  "type": "string",
-                  "description": "Response content"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/get_competitors/{coin_bot_id}": {
       "get": {
         "summary": "Get competitors data",
         "description": "Retrieve a list of competitors for a specific coin bot",
         "tags": [
-          "Competitors"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1489,7 +1027,7 @@
         "summary": "Get DApps data",
         "description": "Retrieve DApps data for a specific coin bot",
         "tags": [
-          "DApps"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1548,7 +1086,7 @@
         "summary": "Get hacks data",
         "description": "Retrieve hacks data for a specific coin bot",
         "tags": [
-          "Hacks"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1604,7 +1142,7 @@
         "summary": "Get introduction data",
         "description": "Retrieve introduction data for a specific coin bot",
         "tags": [
-          "Introduction"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1660,7 +1198,7 @@
         "summary": "Get revenue models",
         "description": "Retrieve revenue model data for a specific coin bot",
         "tags": [
-          "Revenue Models"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1716,7 +1254,7 @@
         "summary": "Get tokenomics data",
         "description": "Retrieve tokenomics data for a specific coin bot",
         "tags": [
-          "Tokenomics"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1798,7 +1336,7 @@
         "summary": "Get individual tokenomic",
         "description": "Retrieve a specific tokenomic by ID",
         "tags": [
-          "Tokenomics"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1844,7 +1382,7 @@
         "summary": "Get token distribution",
         "description": "Retrieve a specific token distribution by ID",
         "tags": [
-          "Tokenomics"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1890,7 +1428,7 @@
         "summary": "Get token utility",
         "description": "Retrieve a specific token utility by ID",
         "tags": [
-          "Tokenomics"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1936,7 +1474,7 @@
         "summary": "Get value accrual mechanism",
         "description": "Retrieve a specific value accrual mechanism by ID",
         "tags": [
-          "Tokenomics"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -1982,7 +1520,7 @@
         "summary": "Get upgrades data",
         "description": "Retrieve upgrades data related to a specific coin",
         "tags": [
-          "Upgrades"
+          "Fundamentals"
         ],
         "parameters": [
           {
@@ -2044,7 +1582,7 @@
     "/api/get_competitors_by_coin_name": {
       "get": {
         "tags": [
-          "Competitors"
+          "Fundamentals"
         ],
         "summary": "Get competitors data for a specific coin by name",
         "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
@@ -2133,240 +1671,10 @@
         }
       }
     },
-    "/api/chart/ohlc": {
+    "/crypto-events": {
       "get": {
         "tags": [
-          "Chart"
-        ],
-        "summary": "Get OHLC data for a specific coin",
-        "description": "Fetch OHLC data for a specific cryptocurrency.",
-        "operationId": "getOhlcData",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "coin",
-            "in": "query",
-            "description": "The cryptocurrency to fetch data for (symbol or name).",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "vs_currency",
-            "in": "query",
-            "description": "The currency to compare against.",
-            "required": false,
-            "type": "string",
-            "default": "usd"
-          },
-          {
-            "name": "interval",
-            "in": "query",
-            "description": "Data interval ('1h', '4h', '1d', '1w').",
-            "required": false,
-            "type": "string",
-            "default": "1h",
-            "enum": [
-              "1h",
-              "4h",
-              "1d",
-              "1w"
-            ]
-          },
-          {
-            "name": "precision",
-            "in": "query",
-            "description": "Decimal place for currency price value (optional).",
-            "required": false,
-            "type": "integer",
-            "default": 2,
-            "minimum": 0,
-            "maximum": 18
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": {
-                  "type": "number"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Coin not found",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/top-movers": {
-      "get": {
-        "tags": [
-          "Chart"
-        ],
-        "summary": "Get top cryptocurrency movers",
-        "description": "Retrieve the top 10 gainers and top 10 losers based on specified criteria.",
-        "operationId": "getCryptoMarkets",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "vs_currency",
-            "in": "query",
-            "description": "The target currency for market data (default: 'usd').",
-            "required": false,
-            "type": "string",
-            "default": "usd",
-            "enum": [
-              "usd",
-              "btc",
-              "eth"
-            ]
-          },
-          {
-            "name": "order",
-            "in": "query",
-            "description": "The ordering criteria for the data.",
-            "required": false,
-            "type": "string",
-            "default": "market_cap_desc",
-            "enum": [
-              "market_cap_desc",
-              "market_cap_asc",
-              "volume_desc",
-              "volume_asc",
-              "price_change_desc",
-              "price_change_asc"
-            ]
-          },
-          {
-            "name": "precision",
-            "in": "query",
-            "description": "The number of decimal places for price values.",
-            "required": false,
-            "type": "integer",
-            "default": null
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "top_10_gainers": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/definitions/CryptoData"
-                      }
-                    },
-                    "top_10_losers": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/definitions/CryptoData"
-                      }
-                    }
-                  }
-                },
-                "order": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid order parameter",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "error": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "error": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/get_crypto_events": {
-      "get": {
-        "tags": [
-          "Crypto Events"
+          "Providers"
         ],
         "summary": "Retrieve cryptocurrency events based on specified filters.",
         "description": "This endpoint queries the Coindar API to retrieve events related to cryptocurrencies, filtered by date range, coin IDs, tags, and sorting options.",
@@ -2450,10 +1758,10 @@
         }
       }
     },
-    "/get_economic_events": {
+    "/economic-events": {
       "get": {
         "tags": [
-          "Economic Events"
+          "Providers"
         ],
         "summary": "Retrieve economic events based on specified filters.",
         "description": "This endpoint queries the Profit API to retrieve economic events related to forex, filtered by date range, country ISO, currency, and impact.",
@@ -2602,74 +1910,12 @@
         }
       }
     },
-    "/get_revenuecat_user_info": {
-      "get": {
-        "tags": [
-          "revenuecat"
-        ],
-        "summary": "Retrieve RevenueCat User Info",
-        "description": "This endpoint queries the RevenueCat API to retrieve subscription and purchase information for a specific user, identified by their RevenueCat user ID.",
-        "operationId": "getRevenueCatUserInfo",
-        "parameters": [
-          {
-            "name": "revenuecat_user_id",
-            "in": "query",
-            "required": true,
-            "description": "The unique identifier of the RevenueCat user.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "description": "The user information from RevenueCat"
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true,
-                      "description": "Error message, if any"
-                    },
-                    "success": {
-                      "type": "boolean",
-                      "description": "Indicates if the operation was successful"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request. Missing or invalid RevenueCat user ID."
-          },
-          "401": {
-            "description": "Unauthorized. Invalid API token."
-          },
-          "500": {
-            "description": "Internal Server Error. An unexpected error occurred."
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/post_capitalcom_session": {
+    "/capitalcom-session": {
       "post": {
         "summary": "Create a session with CapitalCom",
         "description": "Creates a session with the CapitalCom API using the provided email (identifier) and password.",
         "tags": [
-          "CapitalCom Session"
+          "Providers"
         ],
         "requestBody": {
           "required": true,
@@ -2740,12 +1986,12 @@
         }
       }
     },
-    "/get_symbol_prices": {
+    "/capitalcom/historical/prices": {
       "get": {
-        "summary": "Retrieve historical prices for a specific symbol",
+        "summary": "CapitalCom Prices - Retrieve historical prices for a specific symbol",
         "description": "Queries the CapitalCom API to retrieve historical price data for a given financial instrument, based on the provided symbol and resolution.",
         "tags": [
-          "CapitalCom Prices"
+          "Providers"
         ],
         "parameters": [
           {
@@ -2827,12 +2073,12 @@
         ]
       }
     },
-    "/get_funding_rates": {
+    "/funding-rates": {
       "get": {
-        "summary": "Retrieve funding rates for specified symbols",
+        "summary": "Coinalyze - etrieve funding rates for specified symbols",
         "description": "This endpoint retrieves historical funding rates for a list of specified symbols from the Coinalyze API.",
         "tags": [
-          "Coinalyze"
+          "Providers"
         ],
         "parameters": [
           {
@@ -2882,12 +2128,12 @@
         }
       }
     },
-    "/get_symbol_time_series": {
+    "/time-series": {
       "get": {
-        "summary": "Retrieve historical time series data for a specified symbol",
+        "summary": "TwelveData - Retrieve historical time series data for a specified symbol",
         "description": "This endpoint queries the TwelveData API to retrieve historical time series data for a given financial symbol, based on the provided interval and output size.",
         "tags": [
-          "TwelveData"
+          "Providers"
         ],
         "parameters": [
           {
@@ -2952,168 +2198,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/get_symbol_klines": {
-      "get": {
-        "summary": "Retrieve Kline/Candlestick Data for a Specified Symbol",
-        "description": "Fetch Kline/Candlestick data for the given symbol and interval from Binance API.",
-        "tags": [
-          "Binance"
-        ],
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "description": "Trading pair symbol, e.g., 'BTCUSDT'.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "BTCUSDT"
-            }
-          },
-          {
-            "name": "interval",
-            "in": "query",
-            "description": "Time interval for the Klines. Default is '1h'.",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "1m",
-                "3m",
-                "5m",
-                "15m",
-                "30m",
-                "1h",
-                "2h",
-                "4h",
-                "6h",
-                "8h",
-                "12h",
-                "1d",
-                "3d",
-                "1w",
-                "1M"
-              ],
-              "default": "1h"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response with Kline data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "kline_open_time": {
-                            "type": "string",
-                            "example": "2023-08-09 00:00:00"
-                          },
-                          "open_price": {
-                            "type": "string",
-                            "example": "29000.12"
-                          },
-                          "high_price": {
-                            "type": "string",
-                            "example": "29500.45"
-                          },
-                          "low_price": {
-                            "type": "string",
-                            "example": "28900.67"
-                          },
-                          "close_price": {
-                            "type": "string",
-                            "example": "29450.34"
-                          },
-                          "volume": {
-                            "type": "string",
-                            "example": "100.567"
-                          },
-                          "kline_close_time": {
-                            "type": "string",
-                            "example": "2023-08-09 01:00:00"
-                          },
-                          "quote_asset_volume": {
-                            "type": "string",
-                            "example": "2900000.23"
-                          },
-                          "number_of_trades": {
-                            "type": "integer",
-                            "example": 308
-                          },
-                          "taker_buy_base_asset_volume": {
-                            "type": "string",
-                            "example": "50.123"
-                          },
-                          "taker_buy_quote_asset_volume": {
-                            "type": "string",
-                            "example": "1450000.45"
-                          }
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid symbol or missing parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Symbol param is required."
-                    },
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "An unexpected error occurred: ..."
-                    },
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -5327,6 +4411,515 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/chart": {
+      "post": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Adds a new support and resistance lines record for a coin.",
+        "description": "Adds a new support and resistance lines record for a coin.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_id": {
+                  "type": "integer"
+                },
+                "pair": {
+                  "type": "string"
+                },
+                "temporality": {
+                  "type": "string"
+                },
+                "coin_name": {
+                  "type": "string"
+                },
+                "support_1": {
+                  "type": "number"
+                },
+                "support_2": {
+                  "type": "number"
+                },
+                "support_3": {
+                  "type": "number"
+                },
+                "support_4": {
+                  "type": "number"
+                },
+                "resistance_1": {
+                  "type": "number"
+                },
+                "resistance_2": {
+                  "type": "number"
+                },
+                "resistance_3": {
+                  "type": "number"
+                },
+                "resistance_4": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "coin_id",
+                "pair",
+                "temporality",
+                "coin_name",
+                "support_1",
+                "support_2",
+                "support_3",
+                "support_4",
+                "resistance_1",
+                "resistance_2",
+                "resistance_3",
+                "resistance_4"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "New chart record created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Get the most recent support and resistance lines of a requested coin.",
+        "description": "Get the most recent support and resistance lines of a requested coin.",
+        "parameters": [
+          {
+            "name": "coin_name",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "coin_id",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "temporality",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "pair",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved chart values",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chart/total3": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Retrieve and calculate total market cap data for the top 3 cryptocurrencies.",
+        "description": "Retrieve and calculate total market cap data for the top 3 cryptocurrencies.",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chart/top-movers": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Get top movers in the cryptocurrency market.",
+        "description": "Get top movers in the cryptocurrency market.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved top movers",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        }
+      }
+    },
+    "/chart/ohlc": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Retrieve ohlc (open, high, low, close) chart data for a specified cryptocurrency.",
+        "description": "Retrieve ohlc (open, high, low, close) chart data for a specified cryptocurrency.",
+        "parameters": [
+          {
+            "name": "gecko_id",
+            "in": "query",
+            "description": "The CoinGecko ID of the cryptocurrency",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "vs_currency",
+            "in": "query",
+            "description": "The target currency for market data",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "description": "The time interval for OHLC data",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "precision",
+            "in": "query",
+            "description": "The number of decimal places for price data",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "symbol",
+            "in": "query",
+            "description": "The trading symbol of the cryptocurrency",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved OHLC data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 5,
+                    "maxItems": 5
+                  },
+                  "description": "Array of OHLC data points [timestamp, open, high, low, close]"
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriber-info": {
+      "get": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Revenuecat - Retrieve user information from revenuecat.",
+        "description": "Retrieve user information from revenuecat.",
+        "parameters": [
+          {
+            "name": "revenuecat_user_id",
+            "in": "query",
+            "description": "The unique identifier of the RevenueCat user",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved subscriber information",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "description": "The user information from RevenueCat"
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }

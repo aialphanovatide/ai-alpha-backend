@@ -10,7 +10,7 @@ load_dotenv()
 
 TUELVEDATA_API_KEY = os.getenv("TUELVEDATA_API_KEY")
 
-@twelvedata_bp.route("/get_symbol_time_series", methods=["GET"])
+@twelvedata_bp.route("/time-series", methods=["GET"])
 def get_symbol_time_series():
     """
     Retrieve historical time series data for a specified symbol.
