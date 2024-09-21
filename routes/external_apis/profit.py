@@ -11,7 +11,7 @@ load_dotenv()
 
 PROFIT_COM_API_KEY = os.getenv("PROFIT_COM_API_KEY")
 
-@profit_bp.route("/get_economic_events", methods=["GET"])
+@profit_bp.route("/economic-events", methods=["GET"])
 def get_economic_events():
     """
     Retrieve economic events based on specified filters.
