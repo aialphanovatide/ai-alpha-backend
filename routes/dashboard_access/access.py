@@ -1,30 +1,41 @@
-import jwt
-import logging
-from functools import wraps
-from datetime import datetime, timedelta
-from sqlalchemy.exc import SQLAlchemyError
-from services.email.email import EmailService
-from decorators.token_required import token_required
-from config import Admin, Session, Role, AdminRole, Token
-from flask import Blueprint, current_app, request, jsonify, g
-from decorators.superadmin_required import require_superadmin
 import re
+from sqlalchemy.exc import SQLAlchemyError
+from services.email.email_service import EmailService
+from decorators.token_required import token_logout, token_required
+from config import Admin, Session, Role, AdminRole, Token
+from decorators.superadmin_required import require_superadmin
+from flask import Blueprint, current_app, flash, redirect, render_template, request, jsonify, url_for
+
 
 dashboard_access_bp = Blueprint('dashboard_access_bp', __name__)
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+email_service = EmailService(current_app)
 
 @dashboard_access_bp.route('/admin/register', methods=['POST'])
 @require_superadmin
 def register_admin():
+    """
+    Register a new admin user.
+    This endpoint creates a new admin user with the provided details and assigns the specified role.
+    Request JSON:
+    {
+        "email": string,
+        "username": string,
+        "password": string,
+        "role_id": integer
+    }
+    Returns:
+    - 201: Admin registered successfully
+    - 400: Invalid role or missing required field
+    - 409: Email or username already exists
+    - 500: Database error or unexpected error
+    """
     data = request.json
     response = {"message": None, "error": None, "admin_id": None}
     
     try:
         # Validate input fields
-        required_fields = ['email', 'username', 'password', 'role']
+        required_fields = ['email', 'username', 'password', 'role_id']
         for field in required_fields:
             if field not in data:
                 raise Exception(f"Missing required field: {field}")
@@ -42,6 +53,12 @@ def register_admin():
             raise Exception("Invalid role")
 
         with Session() as session:
+            # Validate role
+            role_id = data['role_id']
+            role = session.query(Role).filter_by(id=role_id).first()
+            if not role:
+                return jsonify({"error": "Role not found"}), 400
+
             # Check for existing admin
             existing_admin = session.query(Admin).filter((Admin.email == data['email']) | (Admin.username == data['username'])).first()
             
@@ -49,20 +66,24 @@ def register_admin():
                 return jsonify({"error": "Email or username already exists"}), 409
 
             # Create new admin
-            new_admin = Admin.create_admin(session=session,
-                                           username=data['username'],
-                                           email=data['email'],
-                                           password=data['password'],
-                                           role_names=[data['role']]
-                                           )
-        
-        # Send welcome email
-        email_service = EmailService()
-        email_service.send_registration_confirmation(new_admin.email, new_admin.username)
-        
-        response["message"] = "Admin registered successfully and welcome email sent"
-        response["admin_id"] = new_admin.admin_id
-        return jsonify(response), 201
+            new_admin = Admin(
+                email=data['email'],
+                username=data['username'],
+                password=data['password']
+            )
+            session.add(new_admin)
+            session.flush()
+
+            # Assign role
+            admin_role = AdminRole(admin_id=new_admin.admin_id, role_id=role.id)
+            session.add(admin_role)
+            session.commit()
+
+            email_service.send_registration_confirmation(new_admin.email, new_admin.username, data['password'])
+            response["message"] = "Admin registered successfully and welcome email sent"
+            response["admin_id"] = new_admin.admin_id
+            response["auth_token"] = new_admin.auth_token
+            return jsonify(response), 201
 
     except SQLAlchemyError as e:
         return jsonify({"error": f"Database error occurred: {str(e)}"}), 500
@@ -70,38 +91,30 @@ def register_admin():
         return jsonify({"error": str(e)}), 500
 
 
-def assign_role(session, admin, role_name):
-    role = session.query(Role).filter_by(name=role_name).first()
-    if not role:
-        role = Role(name=role_name)
-        session.add(role)
-        session.flush()
-    
-    admin_role = AdminRole(admin_id=admin.admin_id, role_id=role.id)
-    session.add(admin_role)
-
-
 @dashboard_access_bp.route('/admin/login', methods=['POST'])
 def login_admin():
     """
     Authenticate an admin.
-    
     Args:
-        username (str): Admin's username
-        password (str): Admin's password
-    
+    username (str): Admin's username
+    password (str): Admin's password
     Returns:
-        JSON response with status code:
-        - 200: Login successful
-        - 401: Invalid credentials
-        - 500: Database error or unexpected error
+    JSON response with status code:
+    - 200: Login successful
+    - 401: Invalid credentials
+    - 400: Missing required field
+    - 500: Database error or unexpected error
     """
     data = request.json
     session = Session()
-    response = {"message": None, "error": None, "admin_id": None, "token": None}
+    response = {"message": None, "error": None, "admin_id": None, "token": None, "token_expires_at": None}
     status_code = 500  # Default to server error
 
     try:
+        # Check for required fields
+        if 'username' not in data or 'password' not in data:
+            raise KeyError('username' if 'username' not in data else 'password')
+
         # Authenticate admin
         admin = session.query(Admin).filter_by(username=data['username']).first()
         if admin and admin.verify_password(data['password']):
@@ -109,7 +122,7 @@ def login_admin():
             token = admin.generate_token()
             session.add(token)
             session.commit()
-
+            
             response["message"] = "Login successful"
             response["admin_id"] = admin.to_dict()
             response["token"] = token.as_dict()
@@ -121,17 +134,14 @@ def login_admin():
     except KeyError as e:
         response["error"] = f"Missing required field: {str(e)}"
         status_code = 400
-
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error: {str(e)}"
         status_code = 500
-
     except Exception as e:
         session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
-
     finally:
         session.close()
 
@@ -139,7 +149,7 @@ def login_admin():
 
 
 @dashboard_access_bp.route('/admin/logout', methods=['POST'])
-@token_required
+@token_logout  # Use the token_logout decorator
 def logout_admin():
     """
     Log out an admin by invalidating their current token.
@@ -153,89 +163,11 @@ def logout_admin():
         - 400: Invalid token
         - 500: Database error or unexpected error
     """
-    session = Session()
-    response = {"message": None, "error": None}
-    status_code = 500  # Default to server error
-    
-    try:
-        # Get the current admin from the g context
-        admin = g.current_admin  # Use the admin set by the token_required decorator
-
-        # Find the token associated with the admin
-        token_obj = session.query(Token).filter_by(admin_id=admin.admin_id).first()  # Fix: Query by admin_id
-        if token_obj:
-            session.delete(token_obj)
-            session.commit()
-            response["message"] = "Logged out successfully"
-            status_code = 200
-        else:
-            response["error"] = "Invalid token"
-            status_code = 400
-
-    except SQLAlchemyError as e:
-        session.rollback()
-        response["error"] = f"Database error: {str(e)}"
-        status_code = 500
-
-    except Exception as e:
-        session.rollback()
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        status_code = 500
-
-    finally:
-        session.close()
-
-    return jsonify(response), status_code
-
-# @dashboard_access_bp.route('/admin/logout', methods=['POST'])
-# @token_required
-# def logout_admin():
-#     """
-#     Log out an admin by invalidating their current token.
-
-#     Required Header:
-#         Authorization: The current authentication token
-
-#     Returns:
-#         JSON response with status code:
-#         - 200: Logout successful
-#         - 400: Invalid token
-#         - 500: Database error or unexpected error
-#     """
-#     session = Session()
-#     response = {"message": None, "error": None}
-#     status_code = 500  # Default to server error
-    
-#     try:
-#         # Get and invalidate token
-#         token = request.headers.get('Authorization')
-#         token_obj = session.query(Token).filter_by(token=token).first()
-#         if token_obj:
-#             session.delete(token_obj)
-#             session.commit()
-#             response["message"] = "Logged out successfully"
-#             status_code = 200
-#         else:
-#             response["error"] = "Invalid token"
-#             status_code = 400
-
-#     except SQLAlchemyError as e:
-#         session.rollback()
-#         response["error"] = f"Database error: {str(e)}"
-#         status_code = 500
-
-#     except Exception as e:
-#         session.rollback()
-#         response["error"] = f"An unexpected error occurred: {str(e)}"
-#         status_code = 500
-
-#     finally:
-#         session.close()
-
-#     return jsonify(response), status_code
-
+    # The token_logout decorator handles the token invalidation
+    return jsonify({"message": "Logged out successfully"}), 200 
 
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['GET'])
+@token_required
 def get_admin(admin_id):
     """
     Retrieve admin information.
@@ -275,6 +207,7 @@ def get_admin(admin_id):
 
 
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['PUT'])
+@token_required
 def update_admin(admin_id):
     """
     Update admin information.
@@ -344,26 +277,15 @@ def update_admin(admin_id):
 
 
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['DELETE'])
+@token_required
 def delete_admin(admin_id):
-    """
-    Delete an admin.
-    
-    Args:
-        admin_id (int): The ID of the admin to delete
-    
-    Returns:
-        JSON response with status code:
-        - 200: Admin deleted successfully
-        - 404: Admin not found
-        - 500: Database error or unexpected error
-    """
     response = {"message": None, "error": None}
     status_code = 500  # Default to server error
-    with Session as session:
+    
+    with Session() as session:
         try:
             admin = session.query(Admin).get(admin_id)
             if admin:
-                session.query(AdminRole).filter_by(admin_id=admin_id).delete()
                 session.delete(admin)
                 session.commit()
                 response["message"] = "Admin deleted successfully"
@@ -379,117 +301,117 @@ def delete_admin(admin_id):
             session.rollback()
             response["error"] = f"An unexpected error occurred: {str(e)}"
             status_code = 500
-        finally:
-            session.close()
 
-        return jsonify(response), status_code
+    return jsonify(response), status_code
 
 
 @dashboard_access_bp.route('/admin/request-password-reset', methods=['POST'])
+@token_required
 def request_password_reset():
     """
-    Request a password reset for an admin user.
+    Handle password reset request for admin users.
 
-    This endpoint generates a password reset token and sends it to the admin's email.
-
-    Request JSON:
-    {
-        "email": string
-    }
+    This function processes a POST request to initiate a password reset.
+    It generates a reset token, creates a reset link, and sends an email
+    to the admin with instructions to reset their password.
 
     Returns:
-    - 200: Password reset email sent
-    - 400: Missing required field
-    - 404: Admin not found
-    - 500: Database error or unexpected error
+        JSON response with a success message or error details.
     """
     data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
     
+    session = Session()
     try:
-        with Session() as session:
-            admin = session.query(Admin).filter_by(email=data['email']).first()
-            if not admin:
-                return jsonify({"error": "Admin not found"}), 404
-
-            reset_token = jwt.encode(
-                {'admin_id': admin.admin_id},
-                current_app.config['SECRET_KEY'],
-                algorithm='HS256'
-            )
-            admin.reset_token = reset_token
-            admin.reset_token_expires_at = datetime.utcnow() + timedelta(hours=1)
-            session.commit()
-
-        email_service = EmailService()
-        email_service.send_password_reset(admin.email, reset_token)
-
+        admin = session.query(Admin).filter_by(email=email).first()
+        if not admin:
+            return jsonify({"error": "No account found with that email"}), 404
+        
+        new_token = admin.generate_token(expires_in=5)
+        
+        session.add(new_token)
+        session.commit()
+        
+        reset_link = url_for('dashboard_access_bp.reset_password', token=new_token.token, _external=True)
+        email_service.send_password_reset_email(admin.email, admin.username, reset_link)
+                
         return jsonify({"message": "Password reset email sent"}), 200
-
-    except KeyError as e:
-        logger.error(f"Missing required field: {str(e)}")
-        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
-
-    except SQLAlchemyError as e:
-        logger.error(f"Database error: {str(e)}")
-        return jsonify({"error": "Database error occurred"}), 500
-
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
-
-
-@dashboard_access_bp.route('/admin/reset-password', methods=['POST'])
-def reset_password():
+        session.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        session.close()
+        
+        
+@dashboard_access_bp.route('/admin/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
     """
-    Reset an admin user's password.
+    Handle password reset process for admin users.
 
-    This endpoint resets the password for an admin user using a valid reset token.
+    This function processes both GET and POST requests:
+    - GET: Renders the password reset form.
+    - POST: Processes the submitted form to reset the password.
 
-    Request JSON:
-    {
-        "reset_token": string,
-        "new_password": string
-    }
+    Args:
+        token (str): The password reset token.
 
     Returns:
-    - 200: Password reset successful
-    - 400: Invalid or expired reset token, or missing required field
-    - 500: Database error or unexpected error
+        For GET: Rendered HTML template for password reset.
+        For POST: Redirect to login page on success or error page on failure.
     """
-    data = request.json
-    
-    try:
-        reset_token = data['reset_token']
-        new_password = data['new_password']
-
+    with Session() as session:
         try:
-            payload = jwt.decode(reset_token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
-            admin_id = payload['admin_id']
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Reset token has expired"}), 400
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "Invalid reset token"}), 400
+            admin = Admin.verify_token(token)
+       
+            if not admin:
+                flash('The password reset link is invalid or has expired.', 'error')
+                return redirect(url_for('dashboard_access.login_admin'))
 
-        with Session() as session:
-            admin = session.query(Admin).get(admin_id)
-            if not admin or admin.reset_token != reset_token:
-                return jsonify({"error": "Invalid reset token"}), 400
+            if request.method == 'POST':
+                new_password = request.form.get('new_password')
+                confirm_password = request.form.get('confirm_password')
 
-            admin.password = new_password
-            admin.reset_token = None
-            admin.reset_token_expires_at = None
-            session.commit()
+                # Validate form data
+                if not new_password or not confirm_password:
+                    flash('Both password fields are required.', 'error')
+                elif new_password != confirm_password:
+                    flash('Passwords do not match.', 'error')
+                else:
+                    existing_admin = session.query(Admin).filter_by(email=admin.email).first()
+                    existing_admin.password = new_password  # This will hash the password
+                    session.commit()
+                    flash('Your password has been reset successfully. Please log in.', 'success')
+                    return redirect('https://dashboard-alpha-ai.vercel.app/#/login')
 
-        return jsonify({"message": "Password reset successful"}), 200
+            return render_template('reset_password.html', token=token)  # Pass the token to the template
+        except Exception as e:
+            session.rollback()
+            flash('An error occurred. Please try again.', 'error')
+            return redirect(url_for('dashboard_access.login_admin'))
+        
+        
+@dashboard_access_bp.route('/admin/roles', methods=['GET'])
+def get_admin_roles():
+    """
+    Get all admin roles.
+    Returns:
+        JSON response with status code:
+        - 200: List of admin roles retrieved successfully
+        - 500: Database error or unexpected error
+    """
+    response = {"roles": [], "error": None}
+    status_code = 500  # Default to server error
 
-    except KeyError as e:
-        logger.error(f"Missing required field: {str(e)}")
-        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
+    with Session() as session:
+        try:
+            roles = session.query(Role).all()
+            response["roles"] = [{"id": role.id, "name": role.name, "description": role.description} for role in roles]
+            status_code = 200
+        except SQLAlchemyError as e:
+            response["error"] = f"Database error: {str(e)}"
+        except Exception as e:
+            response["error"] = f"An unexpected error occurred: {str(e)}"
 
-    except SQLAlchemyError as e:
-        logger.error(f"Database error: {str(e)}")
-        return jsonify({"error": "Database error occurred"}), 500
-
-    except Exception as e:
-        logger.error(f"An unexpected error occurred: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+    return jsonify(response), status_code

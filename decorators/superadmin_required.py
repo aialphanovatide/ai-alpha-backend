@@ -39,6 +39,8 @@ def require_superadmin(f):
             return jsonify({"error": "Token has expired"}), 401
         except jwt.InvalidTokenError:
             return jsonify({"error": "Invalid token"}), 401
+        except Exception as e:  # Catch any other exceptions
+            return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
         
         return f(*args, **kwargs)
     return decorated

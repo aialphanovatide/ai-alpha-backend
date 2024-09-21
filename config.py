@@ -1,4 +1,5 @@
 import secrets
+from time import timezone
 from sqlalchemy import (
     Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
@@ -67,7 +68,7 @@ class Admin(Base):
 
     roles = relationship('Role', secondary='admin_roles', back_populates='admins')
     tokens = relationship('Token', back_populates='admin', cascade='all, delete-orphan')
-    api_key = relationship("APIKey", back_populates="admin", uselist=False)
+    api_key = relationship("APIKey", back_populates="admin", uselist=False, cascade='all, delete-orphan')
 
     def to_dict(self):
         """
@@ -197,41 +198,7 @@ class Admin(Base):
         finally:
             session.close()
                     
-    def generate_reset_token(self, expires_in=3600):
-        """
-        Generate a password reset token for the admin.
 
-        Args:
-            expires_in (int): Token expiration time in seconds. Default is 1 hour.
-
-        Returns:
-            tuple: A tuple containing the reset token and its expiration timestamp.
-        """
-        reset_token = secrets.token_urlsafe(32)
-        expires_at = datetime.now() + timedelta(seconds=expires_in)
-        return reset_token, expires_at
-
-    @staticmethod
-    def verify_reset_token(reset_token):
-        """
-        Verify a password reset token and return the associated admin.
-
-        Args:
-            reset_token (str): The reset token to verify.
-
-        Returns:
-            Admin or None: The admin associated with the reset token if valid, None otherwise.
-        """
-        session = Session()
-        try:
-            admin = session.query(Admin).filter(
-                Admin.reset_token == reset_token,
-                Admin.reset_token_expires_at > datetime.now()
-            ).first()
-            return admin
-        finally:
-            session.close()
-    
 class Role(Base):
     """
     Represents a role in the system.
@@ -255,7 +222,6 @@ class Role(Base):
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-
 class AdminRole(Base):
     """
     Represents the many-to-many relationship between admins and roles.
@@ -273,8 +239,7 @@ class AdminRole(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
-       
+  
 class Token(Base):
     """
     Represents a token in the system.
@@ -308,7 +273,6 @@ class Token(Base):
             'token': self.token,
             'expires_at': self.expires_at
         }
-
 
 class APIKey(Base):
     __tablename__ = 'api_keys'
@@ -411,6 +375,7 @@ class APIKey(Base):
             raise
         finally:
             session.close()
+
 
 # __________________________ AI ALPHA APP TABLES __________________________________________
 
@@ -1459,48 +1424,41 @@ ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 # ------------- CREATE DEFAULT ROLES -------------------
 
-def init_roles():
+def initialize_default_roles():
     """
-    Initialize predefined roles in the database.
-
-    This function checks for the existence of predefined roles ('superadmin' and 'admin') 
-    in the database. If a role does not exist, it creates the role and adds it to the database. 
-    The function commits the changes to the database after processing all roles.
-
-    Raises:
-        SQLAlchemyError: If there is a database error during the role initialization process.
-        Exception: For any unexpected errors that occur during execution.
-
-    Returns:
-        None
+    Initialize default roles (superadmin and admin) in the database.
     """
-    session = Session()
-    roles = [
-        {'name': 'superadmin', 'description': 'Super Administrator'},
-        {'name': 'admin', 'description': 'Administrator'}
+    default_roles = [
+        {
+            "name": "superadmin",
+            "description": "Full system access with unrestricted permissions. Can manage all aspects of the application, including user management, system configuration, and critical operations."
+        },
+        {
+            "name": "admin",
+            "description": "Administrative access with elevated permissions. Can manage users, perform most system operations, but may have some restrictions on critical system changes."
+        },
+        {
+            "name": "guest",
+            "description": "Guest access with limited permissions. Can view content and perform basic operations, but cannot manage users or make significant system changes."
+        }
     ]
-    
+
+    session = Session()
     try:
-        for role in roles:
-            existing_role = session.query(Role).filter_by(name=role['name']).first()
+        for role_data in default_roles:
+            existing_role = session.query(Role).filter_by(name=role_data["name"]).first()
             if not existing_role:
-                new_role = Role(name=role['name'], description=role['description'])
+                new_role = Role(name=role_data["name"], description=role_data["description"])
                 session.add(new_role)
-                print(f'---- {role["name"].capitalize()} role created ----')
-
         session.commit()
-        print('---- Role initialization completed ----')
-
     except SQLAlchemyError as e:
         session.rollback()
-        raise SQLAlchemyError(f'Database error while initializing roles: {str(e)}')
-    except Exception as e:
-        session.rollback()
-        raise Exception(f'Unexpected error while initializing roles: {str(e)}')
+        print(f"Error initializing default roles: {str(e)}")
     finally:
         session.close()
 
-init_roles()
+
+initialize_default_roles()
 
 # ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
 
@@ -1560,6 +1518,7 @@ def init_user_data():
         raise Exception(f'Unexpected error while initializing user data: {str(e)}')
     finally:
         session.close()
+
 
 init_user_data()
 
@@ -1658,7 +1617,7 @@ def populate_categories_and_coins():
     finally:
         session.close()
 
-# Populates the DB
+
 populate_categories_and_coins()
 
 # ------------- CREATE DEFAULT SUPERADMIN -----------------------------
@@ -1718,39 +1677,3 @@ init_superadmin()
 
 # ------------- POPULATE THE DB WITH USERS.JSON -------------------
 
-def initialize_default_roles():
-    """
-    Initialize default roles (superadmin and admin) in the database.
-    """
-    default_roles = [
-        {
-            "name": "superadmin",
-            "description": "Full system access with unrestricted permissions. Can manage all aspects of the application, including user management, system configuration, and critical operations."
-        },
-        {
-            "name": "admin",
-            "description": "Administrative access with elevated permissions. Can manage users, perform most system operations, but may have some restrictions on critical system changes."
-        },
-        {
-            "name": "guest",
-            "description": "Guest access with limited permissions. Can view content and perform basic operations, but cannot manage users or make significant system changes."
-        }
-    ]
-
-    session = Session()
-    try:
-        for role_data in default_roles:
-            existing_role = session.query(Role).filter_by(name=role_data["name"]).first()
-            if not existing_role:
-                new_role = Role(name=role_data["name"], description=role_data["description"])
-                session.add(new_role)
-        session.commit()
-        print("Default roles initialized successfully.")
-    except SQLAlchemyError as e:
-        session.rollback()
-        print(f"Error initializing default roles: {str(e)}")
-    finally:
-        session.close()
-
-# Default Roles
-initialize_default_roles()
