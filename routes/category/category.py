@@ -5,7 +5,7 @@ from services.aws.s3 import ImageProcessor
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from redis_client.redis_client import cache_with_redis
+from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import func, asc, desc
 
@@ -18,6 +18,7 @@ S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 image_processor = ImageProcessor()
 
 @category_bp.route('/category', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_categories'])
 def create_category():
     """
     Create a new category in the database.
@@ -250,6 +251,7 @@ def get_all_categories():
     
     
 @category_bp.route('/category/<int:category_id>', methods=['DELETE'])
+@update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
 def delete_category(category_id):
     """
     Delete a category and its associated icon from the database and S3 storage.
@@ -313,6 +315,7 @@ def delete_category(category_id):
 
 
 @category_bp.route('/category/<int:category_id>', methods=['PUT'])
+@update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
 def update_category(category_id):
     """
     Update a category's information in the database.
@@ -413,6 +416,7 @@ def update_category(category_id):
 
 
 @category_bp.route('/categories/<int:category_id>/toggle-coins', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
 def toggle_category_coins(category_id):
     """
     Activate or deactivate all coins within a specific category.
@@ -520,6 +524,7 @@ def toggle_category_coins(category_id):
     
 
 @category_bp.route('/categories/global-toggle', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
 def global_toggle_coins():
     """
     Activate or deactivate all coins across all categories.

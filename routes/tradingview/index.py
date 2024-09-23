@@ -5,6 +5,7 @@ from config import session, Category, Alert, CoinBot
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram
 from services.firebase.firebase import send_notification
+from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 
 tradingview_bp = Blueprint(
     'tradingview_bp', __name__,
@@ -13,6 +14,7 @@ tradingview_bp = Blueprint(
 )
 
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
+@cache_with_redis()
 def get_all_alerts():
     try:
         category = request.args.get('category')
@@ -62,6 +64,7 @@ def get_all_alerts():
 
 # Get alerts from more than one category.
 @tradingview_bp.route('/api/tv/multiple_alert', methods=['POST'])  
+@cache_with_redis()
 def get_alerts_by_categories():
     try:
         data = request.json
@@ -117,6 +120,7 @@ def get_alerts_by_categories():
 
 # Get alerts of a token (coin) 
 @tradingview_bp.route('/api/filter/alerts', methods=['GET', 'POST'])
+@cache_with_redis()
 def get_filtered_alerts(): 
     try:
         coin = request.args.get('coin')
@@ -197,6 +201,7 @@ def get_filtered_alerts():
 # Receives all alert from Tradingview and does three things: Send data to Slack, 
 # Store the data in the DB and send the data to Telegram 
 @tradingview_bp.route('/api/alert/tv', methods=['GET', 'POST'])
+@update_cache_with_redis(related_get_endpoints=['get_filtered_alerts', 'get_alerts_by_categories', 'get_all_alerts'])
 def receive_data_from_tv():
     try:
         if not request.data:

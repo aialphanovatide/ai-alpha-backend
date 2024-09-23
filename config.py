@@ -525,8 +525,13 @@ class CoinBot(Base):
     Attributes:
         bot_id (int): The primary key for the CoinBot.
         name (str): The name of the CoinBot.
+        alias (str): An alternative identifier for the CoinBot.
+        gecko_id (str): The CoinGecko ID for the CoinBot.
         icon (str): URL or path to the CoinBot's image.
         category_id (int): Foreign key referencing the associated Category.
+        background_color (str): The background color for the CoinBot.
+        symbol (str): The symbol of the CoinBot.
+        is_active (bool): Indicates if the CoinBot is currently active.
         created_at (datetime): Timestamp of when the CoinBot was created.
         updated_at (datetime): Timestamp of the last update to the CoinBot record.
         chart (relationship): Relationship to associated Chart objects.
@@ -1458,7 +1463,7 @@ def initialize_default_roles():
         session.close()
 
 
-initialize_default_roles()
+# initialize_default_roles()
 
 # ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
 
@@ -1672,7 +1677,7 @@ def init_superadmin():
 
 
 # Create SuperAdmin
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- POPULATE THE DB WITH USERS.JSON -------------------
