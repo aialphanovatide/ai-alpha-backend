@@ -3,7 +3,7 @@ set -e  # Exit immediately if a command exits with a non-zero status.
 
 # # Set environment variables
 export FLASK_APP=server.py
-export FLASK_ENV=${FLASK_ENV:-development} # if FLASK_ENV not set in .env file, then this variable will be used.
+export FLASK_ENV=${FLASK_ENV:-production} # if FLASK_ENV not set in .env file, then this variable will be used.
 
 # # Load environment variables from .env file
 # ENV_FILE=.env
@@ -56,5 +56,6 @@ else
     echo "Starting Gunicorn production server..."
     PORT=${PORT:-9000}
     # exec gunicorn --workers 3 --threads 2 --timeout 120 server:app
-    exec gunicorn --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120 server:app
+    # exec gunicorn --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120 server:app
+    python server.py --host=0.0.0.0 --port=9000
 fi

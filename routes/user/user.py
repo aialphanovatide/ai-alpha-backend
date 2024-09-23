@@ -7,6 +7,7 @@ from config import PurchasedPlan, Session, User
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
+from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 
 user_bp = Blueprint('user', __name__)
 
@@ -23,6 +24,7 @@ def generate_unique_short_token(length=7, max_attempts=100):
 
 
 @user_bp.route('/user', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans'])
 def set_new_user():
     """
     Register a new user in the system.
@@ -92,6 +94,7 @@ def set_new_user():
     
     
 @user_bp.route('/user/<int:user_id>', methods=['PUT'])
+@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def edit_user_data(user_id):
     """
     Edit user data identified by user ID.
@@ -158,6 +161,7 @@ def edit_user_data(user_id):
     
 
 @user_bp.route('/users', methods=['GET'])
+@cache_with_redis()
 def get_all_users_with_plans():
     """
     Retrieve all users with their purchased plans, with optional pagination.
@@ -243,6 +247,7 @@ def get_all_users_with_plans():
 
 
 @user_bp.route('/user', methods=['GET'])
+@cache_with_redis()
 def get_user_with_plans():
     """
     Retrieve a specific user with their purchased plans.
@@ -320,6 +325,7 @@ def get_user_with_plans():
 
 
 @user_bp.route('/package', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def save_package():
     """
     Save a new purchased plan for a user.
@@ -385,6 +391,7 @@ def save_package():
     
 
 @user_bp.route('/package', methods=['PUT'])
+@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def unsubscribe_package():
     """
     Unsubscribe a user from a purchased plan by setting is_subscribed to False.
@@ -457,6 +464,7 @@ def unsubscribe_package():
     
 
 @user_bp.route('/user', methods=['DELETE'])
+@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def delete_user_account():
     """
     Delete a user account identified by auth0id or email.

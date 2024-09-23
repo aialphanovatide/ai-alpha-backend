@@ -15,6 +15,7 @@ from apscheduler.jobstores.base import JobLookupError
 from config import Analysis, Category, CoinBot, Session
 from services.firebase.firebase import send_notification
 from routes.analysis.analysis_scheduler import sched, chosen_timezone
+from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 
 analysis_bp = Blueprint('analysis_bp', __name__)
 
@@ -22,6 +23,7 @@ image_generator = ImageGenerator()
 image_processor = ImageProcessor()
 
 @analysis_bp.route('/analysis', methods=['GET'])
+@cache_with_redis()
 def get_coin_analysis():
     """
     Retrieve analyses for a specific coin by ID or name, with optional pagination.
@@ -137,6 +139,7 @@ def get_coin_analysis():
 
 
 @analysis_bp.route('/analyses', methods=['GET'])
+@cache_with_redis()
 def get_all_analysis():
     """
     Retrieve all analyses with pagination.
@@ -225,6 +228,7 @@ def get_all_analysis():
 
 
 @analysis_bp.route('/analysis', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
 def post_analysis():
     """
     Create a new analysis and publish it.
@@ -311,6 +315,7 @@ def post_analysis():
 
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['DELETE'])
+@update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
 def delete_analysis(analysis_id):
     """
     Delete an existing analysis and its associated image.
@@ -378,6 +383,7 @@ def delete_analysis(analysis_id):
 
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['PUT'])
+@update_cache_with_redis(related_get_endpoints=['get_all_analysis', 'get_coin_analysis'])
 def edit_analysis(analysis_id):
     """
     Edit the content of an existing analysis.
@@ -446,6 +452,7 @@ def edit_analysis(analysis_id):
 
 
 @analysis_bp.route('/analysis/last', methods=['GET'])
+@cache_with_redis()
 def get_last_analysis():
     """
     Retrieve the name and date of the last analysis created.

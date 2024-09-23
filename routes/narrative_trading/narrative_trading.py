@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from services.openai.dalle import ImageGenerator
 from services.aws.s3 import ImageProcessor
 from routes.narrative_trading.nt_scheduler import sched
+from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 
 narrative_trading_bp = Blueprint('narrative_trading', __name__)
 
@@ -18,6 +19,7 @@ image_generator = ImageGenerator()
 image_processor = ImageProcessor()
 
 @narrative_trading_bp.route('/narrative-trading', methods=['GET'])
+@cache_with_redis()
 def get_narrative_trading():
     """
     Retrieve narrative trading entries for a specific coin, with pagination.
@@ -90,6 +92,7 @@ def get_narrative_trading():
         
         
 @narrative_trading_bp.route('/narrative-tradings', methods=['GET'])
+@cache_with_redis()
 def get_all_narrative_trading():
     """
     Retrieve all narrative trading entries with optional pagination.
@@ -179,6 +182,7 @@ def get_all_narrative_trading():
 
 
 @narrative_trading_bp.route('/narrative-trading', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_narrative_trading'])
 def post_narrative_trading():
     """
     Create a new narrative trading post.
@@ -230,6 +234,7 @@ def post_narrative_trading():
 
     
 @narrative_trading_bp.route('/narrative-trading/<int:narrative_trading_id>', methods=['DELETE'])
+@update_cache_with_redis(related_get_endpoints=['get_all_narrative_trading'])
 def delete_narrative_trading(narrative_trading_id):
     """
     Delete a narrative trading post by narrative_trading_id and its associated S3 image.
@@ -279,6 +284,7 @@ def delete_narrative_trading(narrative_trading_id):
 
 
 @narrative_trading_bp.route('/narrative-trading/<int:narrative_trading_id>', methods=['PUT'])
+@update_cache_with_redis(related_get_endpoints=['get_all_narrative_trading', 'get_narrative_trading'])
 def edit_narrative_trading(narrative_trading_id):
     """
     Edit an existing narrative trading post.

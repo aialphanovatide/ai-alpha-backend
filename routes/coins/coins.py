@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import joinedload
 from routes.category.category import validate_coin
 from services.coingecko.coingecko import get_coin_data
-from redis_client.redis_client import cache_with_redis
+from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 from sqlalchemy import func
 
 coin_bp = Blueprint('coin_bp', __name__)
@@ -21,6 +21,7 @@ S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 image_processor = ImageProcessor()
 
 @coin_bp.route('/coin', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins'])
 def create_coin():
     """
     Create a new coin bot in the database.
@@ -202,6 +203,7 @@ def get_single_coin(coin_id):
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['PUT'])
+@update_cache_with_redis(related_get_endpoints=['get_single_coin', 'get_all_coins'])
 def update_coin(coin_id):
     """
     Update a coin's information in the database.
@@ -367,6 +369,7 @@ def get_all_coins():
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['DELETE'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin'])
 def delete_coin(coin_id):
     """
     Delete a coin from the database.
@@ -433,6 +436,7 @@ def delete_coin(coin_id):
 
 
 @coin_bp.route('/coin/<int:coin_id>/toggle-coin', methods=['POST'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin'])
 def toggle_coin_publication(coin_id):
     """
     Toggle the publication status of a coin.
