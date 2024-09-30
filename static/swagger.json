@@ -5122,5 +5122,45 @@
         }
       }
     }
+  },
+  "/coingecko/usage": {
+  "get": {
+    "tags": [
+      "CoinGecko"
+    ],
+    "summary": "Retrieve CoinGecko API usage information",
+    "description": "Retrieve CoinGecko API usage information using the provided API key",
+    "responses": {
+      "200": {
+        "description": "Successfully retrieved CoinGecko API usage information",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "type": "boolean"
+            },
+            "data": {
+              "type": "object",
+              "description": "CoinGecko API usage details"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal server error",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "type": "boolean"
+            },
+            "error": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
   }
+}
 }
