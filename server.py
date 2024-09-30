@@ -23,6 +23,7 @@ from routes.news_bot.used_keywords import news_bots_features_bp
 from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
+from routes.coingecko.coingecko_usage import coingecko_bp
 from routes.api_keys.api_keys import api_keys_bp
 from routes.category.category import category_bp
 from routes.external_apis.profit import profit_bp
@@ -102,6 +103,7 @@ app.register_blueprint(chart_bp)
 app.register_blueprint(chart_graphs_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
+app.register_blueprint(coingecko_bp)
 app.register_blueprint(send_email_bp)
 app.register_blueprint(competitor_bp)
 app.register_blueprint(tradingview_bp)
