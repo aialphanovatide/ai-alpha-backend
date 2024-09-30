@@ -25,11 +25,11 @@
     {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
-    }, 
+    },
     {
       "name": "Alerts",
       "description": "Operations related to the Alerts"
-    },   
+    },
     {
       "name": "Category",
       "description": "Operations related to the Category"
@@ -41,6 +41,10 @@
     {
       "name": "Coin",
       "description": "Operations related to coins"
+    },
+    {
+      "name": "CoinGecko",
+      "description": "Operations related to CoinGecko"
     },
     {
       "name": "Fundamentals",
@@ -4897,6 +4901,54 @@
                 },
                 "error": {
                   "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coingecko/usage": {
+      "get": {
+        "tags": [
+          "CoinGecko"
+        ],
+        "summary": "Retrieve coingecko api usage information.",
+        "description": "Retrieve coingecko api usage information.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved CoinGecko API usage information",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "description": "The CoinGecko API usage information"
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
                 },
                 "success": {
                   "type": "boolean"
