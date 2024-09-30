@@ -11,7 +11,7 @@ COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 coingecko_bp = Blueprint('coingecko_bp', __name__)
 
 
-@coingecko_bp.route('/api/v1/coingecko/usage', methods=['GET'])
+@coingecko_bp.route('/coingecko/usage', methods=['GET'])
 def coingecko_usage():
     """
     Retrieve CoinGecko API usage information.
