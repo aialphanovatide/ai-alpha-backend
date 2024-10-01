@@ -1,7 +1,7 @@
 import secrets
 from time import timezone
 from sqlalchemy import (
-    Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
+    JSON, Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
 )
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
@@ -1425,6 +1425,73 @@ session = Session()
 
 
 
+# -------------- NOTIFICATION SCHEMAS ------------
+
+class Topic(Base):
+    """
+    Represents a topic in the system.
+
+    This class defines the structure for storing topic information,
+    including the topic name, references to coins, and timeframe.
+
+    Attributes:
+        id (int): The primary key for the topic.
+        name (str): The name of the topic (e.g., analysis_baseblock_4999_m1 or baseblock_4999_m1).
+        reference (JSON): Array of strings (references to coins, can be NULL).
+        timeframe (str): The timeframe of the topic.
+        created_at (datetime): Timestamp of when the topic was created.
+        updated_at (datetime): Timestamp of the last update to the topic record.
+        notifications (relationship): Relationship to associated Notification objects.
+    """
+    __tablename__ = 'topics'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    reference = Column(String, nullable=True) 
+    timeframe = Column(String, nullable=True)
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    notifications = relationship('Notification', back_populates='topic', cascade="all, delete-orphan")
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+class Notification(Base):
+    """
+    Represents a notification in the system.
+
+    This class defines the structure for storing notification information,
+    including the title, body, type, coin reference, and associated topic.
+
+    Attributes:
+        id (int): The primary key for the notification.
+        title (str): The title of the notification.
+        body (str): The message content of the notification.
+        type (str): The type of notification (e.g., "alert", "analysis").
+        coin (str): Coin reference(s).
+        topic_id (int): Foreign key referencing the associated Topic.
+        created_at (datetime): Timestamp of when the notification was created.
+        updated_at (datetime): Timestamp of the last update to the notification record.
+        topic (relationship): Relationship to the associated Topic.
+    """
+    __tablename__ = 'notifications'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    body = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+    coin = Column(String)
+    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    topic = relationship('Topic', back_populates='notifications')
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 # ------------- CREATE DEFAULT ROLES -------------------
@@ -1675,7 +1742,78 @@ def init_superadmin():
     finally:
         session.close()
 
+# Populate Topics
+import json
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 
+def populate_topics():
+    """
+    Populates the database with topics based on provided data from a JSON file and timeframes.
+    This function automatically inserts records into the topics table for the specified timeframes.
+    """
+    try:
+        with open('./services/notification/topics.json', 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError("The file 'topics_data.json' was not found.")
+    except json.JSONDecodeError:
+        raise ValueError("There was an error decoding the JSON file.")
+    
+    with Session() as session:
+        # Check if there are any topics in the table
+        topic_count = session.query(func.count(Topic.id))
+
+        if topic_count == 0:
+            try:
+                # Check if the database is already populated with topics
+                if not session.query(Topic).first():
+                    for name, references in data.items():
+                        # Insert for timeframe 1h
+                        topic_1h = Topic(
+                            name=name,
+                            reference=json.dumps(references),
+                            timeframe='1h'
+                        )
+                        session.add(topic_1h)
+                        
+                        # Insert for timeframe 4h
+                        topic_4h = Topic(
+                            name=name,
+                            reference=json.dumps(references),
+                            timeframe='4h'
+                        )
+                        session.add(topic_4h)
+                        
+                        print(f'----- Topic {name} populated for 1h and 4h timeframes -----')
+
+                    # Insert analysis topics with timeframe null
+                    for name, references in data.items():
+                        analysis_name = f'analysis_{name}'
+                        analysis_topic = Topic(
+                            name=analysis_name,
+                            reference=json.dumps(references),
+                            timeframe=None
+                        )
+                        session.add(analysis_topic)
+
+                    session.commit()
+                    print('----- All topics successfully populated -----')
+                else:
+                    print('----- Topics are already populated. Skipping this process -----')
+
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise SQLAlchemyError(f'Database error while populating topics: {str(e)}')
+            except Exception as e:
+                session.rollback()
+                raise Exception(f'Unexpected error while populating topics: {str(e)}')
+            finally:
+                session.close()
+
+        
+populate_topics()
 # Create SuperAdmin
 # init_superadmin()
 

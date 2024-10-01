@@ -1,0 +1,15 @@
+{
+    "baseblock_4999_m1": ["ada", "sol", "avax"],
+    "corechain_4999_m1": ["near", "ftm", "kas"],
+    "rootlink_4999_m1": ["atom", "dot", "qnt"],
+    "xpayments_4999_m1": ["xlm", "algo", "xrp"],
+    "lsds_4999_m1": ["ldo", "rpl", "fxs"],
+    "boostlayer_4999_m1": ["matic", "arb", "op"],
+    "truthnodes_4999_m1": ["link", "api3", "band"],
+    "cycleswap_4999_m1": ["dydx", "velo", "gmx"],
+    "nextrade_4999_m1": ["uni", "sushi", "cake"],
+    "diversefi_4999_m1": ["aave", "pendle", "1inch"],
+    "intellichain_4999_m1": ["ocean", "fet", "rndr"],
+    "bitcoin_4999_m1": ["BTC"],
+    "ethereum_4999_m1": ["ETH"]
+}
