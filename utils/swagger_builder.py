@@ -127,47 +127,24 @@ swagger = Swagger()
 # ____Add or update an endpoint____
 
 
+# Update Swagger JSON
 # success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/subscriber-info',
+#     endpoint_route='/coingecko/usage',
 #     method='get',
-#     tag='RevenueCat',
-#     description='Retrieve user information from RevenueCat.',
-#     params=[
-#         {'name': 'revenuecat_user_id', 'in': 'query', 'type': 'string', 'required': True, 'description': 'The unique identifier of the RevenueCat user'}
-#     ],
+#     tag='CoinGecko',
+#     description='Retrieve CoinGecko API usage information.',
+#     params=[],  # No query parameters for this endpoint
 #     responses={
 #         '200': {
-#             'description': 'Successfully retrieved subscriber information',
+#             'description': 'Successfully retrieved CoinGecko API usage information',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'data': {
 #                         'type': 'object',
-#                         'description': 'The user information from RevenueCat'
+#                         'description': 'The CoinGecko API usage information'
 #                     },
 #                     'error': {'type': 'string', 'nullable': True},
-#                     'success': {'type': 'boolean'}
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad request',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean'}
-#                 }
-#             }
-#         },
-#         '401': {
-#             'description': 'Unauthorized',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
 #                     'success': {'type': 'boolean'}
 #                 }
 #             }
@@ -185,12 +162,13 @@ swagger = Swagger()
 #         }
 #     }
 # )
+
 # print(message)
 
 
 # ____Delete an endpoint____
 
-success, message = swagger.delete_endpoint(endpoint_route='/get_revenuecat_user_info')
-print(message)
+# success, message = swagger.delete_endpoint(endpoint_route='/get_revenuecat_user_info')
+# print(message)
 
 
