@@ -17,13 +17,13 @@ redis_client = redis.Redis(
     decode_responses=True
 )
 
-try:
-    if redis_client.ping():
-        print('Successfully connected to Redis')
-    else:
-        print('Failed to connect to Redis')
-except Exception as e:
-    raise Exception(f'Error connecting to redis client: {str(e)}')
+# try:
+#     if redis_client.ping():
+#         print('Successfully connected to Redis')
+#     else:
+#         print('Failed to connect to Redis')
+# except Exception as e:
+#     raise Exception(f'Error connecting to redis client: {str(e)}')
 
 
 def cache_with_redis(expiration=300):

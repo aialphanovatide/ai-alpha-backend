@@ -4,7 +4,6 @@ import json
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-
 notification_model = Notification
 
 class Notification:
@@ -55,6 +54,17 @@ class Notification:
                     )
                     self.session.add(new_notification)
                     print(f"Analysis saved for coin {coin} under topic {topic.name}")
+                
+                elif type == "s_and_r":
+                    # Save in the Notification table
+                    new_notification = notification_model( 
+                        topic_id=topic.id,
+                        title=title,
+                        body=body,
+                        coin=coin
+                    )
+                    self.session.add(new_notification)
+                    print(f"S&R saved for coin {coin} under topic {topic.name}")
                 
                 else:
                     raise ValueError(f"Invalid notification type: {type}")

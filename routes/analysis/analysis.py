@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import Tuple, Dict
 from sqlalchemy.exc import SQLAlchemyError
+from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
 from flask import jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
@@ -21,6 +22,8 @@ analysis_bp = Blueprint('analysis_bp', __name__)
 
 image_generator = ImageGenerator()
 image_processor = ImageProcessor()
+notification_service = Notification(session=Session())
+
 
 @analysis_bp.route('/analysis', methods=['GET'])
 @cache_with_redis()
@@ -561,21 +564,24 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         )
         session.add(new_analysis)
         session.commit()
+        
+        # Query the database to get the coin_bot name
+        coin_bot = session.query(CoinBot).filter(CoinBot.id == coin_id).first()
+        if not coin_bot:
+            raise ValueError(f"No CoinBot found with id {coin_id}")
+        session.commit()
+        
+        coin_symbol = coin_bot.name
 
         # Send notification
-        topic = f"{str(category_name).lower()}-analysis"
-        coin = session.query(CoinBot).filter_by(bot_id=coin_id).first()
-        coin_name = coin.bot_name if coin else "Unknown"
-
-        # Send notification
-        # send_notification(
-        #     topic=topic,
-        #     title=title,
-        #     body=content,
-        #     type="analysis",
-        #     coin=coin_name
-        # )
-       
+        notification_service.push_notification(
+        coin=coin_symbol,
+        title=title,  
+        body=f"New analysis for {coin_symbol} in category {category_name}",
+        type="analysis",
+        temporality=""  
+        )
+        
         return create_response(
             data=new_analysis.to_dict(),
             message="Analysis published successfully",

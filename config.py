@@ -1742,12 +1742,6 @@ def init_superadmin():
     finally:
         session.close()
 
-# Populate Topics
-import json
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-
 def populate_topics():
     """
     Populates the database with topics based on provided data from a JSON file and timeframes.
@@ -1791,6 +1785,15 @@ def populate_topics():
                     # Insert analysis topics with timeframe null
                     for name, references in data.items():
                         analysis_name = f'analysis_{name}'
+                        analysis_topic = Topic(
+                            name=analysis_name,
+                            reference=json.dumps(references),
+                            timeframe=None
+                        )
+                        session.add(analysis_topic)
+                        
+                    for name, references in data.items():
+                        analysis_name = f's_and_r_{name}'
                         analysis_topic = Topic(
                             name=analysis_name,
                             reference=json.dumps(references),

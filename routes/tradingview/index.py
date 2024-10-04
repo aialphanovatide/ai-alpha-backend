@@ -6,12 +6,15 @@ from routes.slack.templates.news_message import send_INFO_message_to_slack_chann
 from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram
 from services.firebase.firebase import send_notification
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
-
+from services.notification.index import Notification
+from config import Session
 tradingview_bp = Blueprint(
     'tradingview_bp', __name__,
     template_folder='templates',
     static_folder='static'
 )
+
+notification_service = Notification(session=Session())
 
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
 @cache_with_redis()
@@ -226,7 +229,7 @@ def receive_data_from_tv():
                         key, value = line.split(':', 1)
                         data_dict[key.strip()] = value.strip()
 
-                alert_name = data_dict.get('alert_name', '') 
+                alert_name = data_dict.get('alert_name', '')  
                 symbol = data_dict.get('symbol', '') 
                 message = data_dict.get('message', '')  
                 price = data_dict.get('price', data_dict.get('last_price', ''))
@@ -234,60 +237,29 @@ def receive_data_from_tv():
                 print('alert_name: ', alert_name)
                 print('symbol: ', symbol)
                 print('message: ', message)
-
-
-                token_name = str(symbol).casefold().split('usdt')[0] # btc, eth...
-                categories = {
-                    'baseblock_4999_m1': ['ada', 'sol', 'avax'],
-                    'baseblock_4999_m1_nofreetrial': ['ada', 'sol', 'avax'],
-                    'corechain_4999_m1': ['near', 'ftm', 'kas'],
-                    'rootlink_4999_m1': ['atom', 'dot', 'qnt'],
-                    'xpayments_4999_m1': ['xlm', 'algo', 'xrp'],
-                    'lsds_4999_m1': ['ldo', 'rpl', 'fxs'],
-                    'boostlayer_4999_m1': ['matic', 'arb', 'op'],
-                    'truthnodes_4999_m1': ['link', 'api3', 'band'],
-                    'cycleswap_4999_m1': ['dydx', 'velo', 'gmx'],
-                    'nextrade_4999_m1': ['uni', 'sushi', 'cake'],
-                    'diversefi_4999_m1': ['aave', 'pendle', '1inch'],
-                    'intellichain_4999_m1': ['ocean', 'fet', 'rndr'],
-                    'bitcoin_4999_m1': ['BTC'],
-                    'ethereum_4999_m1': ['ETH'],
-                    'founders_14999_m1': []
-                }
-
-
-
-                # Iterate over the keys and update 'founders_14999_m1' value list
-                for key, value in categories.items():
-                    if key != 'founders_14999_m1':
-                        categories['founders_14999_m1'].extend(value)
                 
-                matching_topics = []
-                for plan, tokens in categories.items():
-                 
-                    for token in tokens:
-                        if token.casefold() == token_name.casefold():
-                            matching_topics.append(plan)
-                            break
+                formatted_symbol = str(symbol).casefold()
+                parts = formatted_symbol.split("usdt")
+                bot_name = parts[0]
+                temp = alert_name
                 
-                for x in matching_topics:
-                    send_notification(topic=x, title=alert_name, body=message)
-                    print('notification send to: ', x)
-               
-                response, status = send_alert_strategy_to_telegram(price=price,
-                                                alert_name=alert_name,
-                                                message=message,
-                                                symbol=symbol)
+                notification_service.push_notification(coin=bot_name, title=alert_name, body=message, type='alert', temporality="")
+ 
                 
-                if status != 200:
-                    send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                                                        title_message='Error seding Tradingview Alert',
-                                                        sub_title='Reason',
-                                                        message=f"{str(response)} - Data: {str(request.data)}")
+                # response, status = send_alert_strategy_to_telegram(price=price,
+                #                                 alert_name=alert_name,
+                #                                 message=message,
+                #                                 symbol=symbol)
+                
+                # if status != 200:
+                #     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+                #                                         title_message='Error seding Tradingview Alert',
+                #                                         sub_title='Reason',
+                #                                         message=f"{str(response)} - Data: {str(request.data)}")
 
 
-                return response, status
-
+                # return response, status
+                return "OK",200
             
             except Exception as e:
                 print(f'Error sending message to Slack channel. Reason: {e}')
