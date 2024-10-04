@@ -9,6 +9,9 @@ from routes.chart.total3 import get_total_3_data
 from flask import jsonify, request, Blueprint, jsonify  
 from redis_client.redis_client import cache_with_redis
 from decorators.measure_time import measure_execution_time
+from services.notification.index import Notification
+
+notification_service = Notification(session=Session())
 
 
 load_dotenv() 
@@ -109,7 +112,25 @@ def save_chart():
         new_chart = Chart(**chart_data)
         session.add(new_chart)
         session.commit()
+        
+        # Query the database to get the coin_bot name
+        coin_bot = session.query(CoinBot).filter(CoinBot.id == coin_id).first()
+        if not coin_bot:
+            raise ValueError(f"No CoinBot found with id {coin_id}")
+        session.commit()
+        
+        coin_symbol = coin_bot.name
 
+        # Send notification
+        notification_service.push_notification(
+        coin=coin_symbol,
+        title=f"New Support/Resistance updated for {coin_symbol}",  
+        body=f"New Support/Resistance updated for {coin_symbol}",
+        type="s_and_r",
+        temporality=""  
+        )
+        
+        
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED
         response["data"] = new_chart.as_dict()
