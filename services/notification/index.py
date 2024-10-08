@@ -1,3 +1,4 @@
+from typing import Type
 from config import Alert, Topic,Notification
 from services.firebase.firebase import send_notification
 import json
@@ -12,28 +13,23 @@ class Notification:
         self.session = session
 
     def push_notification(self, coin: str, title: str, body: str, type: str, temporality: str):
-        """
-        Search the Topic table for topics whose reference array contains the coin provided.
-        Then, save data into either the Alert or Notification table, and trigger FCM notifications.
-        
-        Parameters:
-        - coin: The coin associated with the notification.
-        - title: The title of the notification.
-        - body: The body content of the notification.
-        - type: The notification type ("alert" or "analysis").
-        - temporality: Temporality of the alert (e.g., 1h, 4h).
-        """
-        
         try:
-            # Search for topics that contain the coin in the reference array
-            topics = self.session.query(Topic).filter(Topic.reference.contains(coin)).all()
-            
+            # Define the query based on the notification type
+            if type == "alert":
+                topics = self.session.query(Topic).filter(Topic.reference.ilike(f"%{coin}%")).all()
+            elif type in ["analysis", "s_and_r"]:
+                topics = self.session.query(Topic).filter(
+                    Topic.reference.ilike(f"%{coin}%"),
+                    Topic.name.ilike(f"%{type}%")
+                ).all()
+            else:
+                raise ValueError(f"Invalid notification type: {type}")
+
             if not topics:
-                raise ValueError(f"No topics found for the coin {coin}")
+                raise ValueError(f"No topics found for the coin {coin} and type {type}")
 
             for topic in topics:
                 if type == "alert":
-                    # Save in the Alert table
                     new_alert = Alert(
                         topic_id=topic.id,
                         title=title,
@@ -44,37 +40,22 @@ class Notification:
                     self.session.add(new_alert)
                     print(f"Alert saved for coin {coin} under topic {topic.name}")
                 
-                elif type == "analysis":
-                    # Save in the Notification table
+                elif type in ["analysis", "s_and_r"]:
                     new_notification = notification_model( 
                         topic_id=topic.id,
                         title=title,
                         body=body,
-                        coin=coin
+                        coin=coin,
+                        type=type  # Asegúrate de incluir el tipo aquí
                     )
                     self.session.add(new_notification)
-                    print(f"Analysis saved for coin {coin} under topic {topic.name}")
-                
-                elif type == "s_and_r":
-                    # Save in the Notification table
-                    new_notification = notification_model( 
-                        topic_id=topic.id,
-                        title=title,
-                        body=body,
-                        coin=coin
-                    )
-                    self.session.add(new_notification)
-                    print(f"S&R saved for coin {coin} under topic {topic.name}")
-                
-                else:
-                    raise ValueError(f"Invalid notification type: {type}")
+                    print(f"{type.capitalize()} saved for coin {coin} under topic {topic.name}")
 
-            # Commit the changes to the database
             self.session.commit()
             print(f"Successfully saved {type} notification for coin {coin}.")
 
-            # Trigger FCM notification after saving
-            self._send_fcm_notification(topic.name, title, body, type, coin)
+            for topic in topics:
+                self._send_fcm_notification(topic.name, title, body, type, coin)
         
         except SQLAlchemyError as e:
             self.session.rollback()

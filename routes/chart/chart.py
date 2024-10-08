@@ -48,6 +48,7 @@ def save_chart():
         coin_name (str): The name of the coin.
         support_1, support_2, support_3, support_4 (float): Support levels.
         resistance_1, resistance_2, resistance_3, resistance_4 (float): Resistance levels.
+        is_essential (bool): Flag to determine if notification should be sent.
 
     Returns:
         dict: A JSON response indicating success or failure.
@@ -70,7 +71,7 @@ def save_chart():
         required_fields = [
             'coin_id', 'pair', 'temporality', 'coin_name',
             'support_1', 'support_2', 'support_3', 'support_4',
-            'resistance_1', 'resistance_2', 'resistance_3', 'resistance_4'
+            'resistance_1', 'resistance_2', 'resistance_3', 'resistance_4', 'is_essential'
         ]
         
         missing_fields = [field for field in required_fields if field not in data]
@@ -83,6 +84,7 @@ def save_chart():
         pair = data['pair'].casefold()
         temporality = data['temporality'].casefold()
         coin_name = data['coin_name'].casefold()
+        is_essential = data['is_essential']
 
         if coin_name == 'btc' and pair == 'btc':
             response["error"] = "Invalid coin/pair combination"
@@ -114,22 +116,22 @@ def save_chart():
         session.commit()
         
         # Query the database to get the coin_bot name
-        coin_bot = session.query(CoinBot).filter(CoinBot.id == coin_id).first()
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
         if not coin_bot:
             raise ValueError(f"No CoinBot found with id {coin_id}")
         session.commit()
         
         coin_symbol = coin_bot.name
-
-        # Send notification
-        notification_service.push_notification(
-        coin=coin_symbol,
-        title=f"New Support/Resistance updated for {coin_symbol}",  
-        body=f"New Support/Resistance updated for {coin_symbol}",
-        type="s_and_r",
-        temporality=""  
-        )
         
+        # Send notification only if is_essential is True
+        if is_essential:
+            notification_service.push_notification(
+                coin=coin_symbol,
+                title=f"{coin_symbol} Support/Resistance Update",  
+                body="Check the New Levels!",
+                type="s_and_r",
+                temporality=""  
+            )
         
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED

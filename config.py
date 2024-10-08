@@ -1756,67 +1756,65 @@ def populate_topics():
         raise ValueError("There was an error decoding the JSON file.")
     
     with Session() as session:
-        # Check if there are any topics in the table
-        topic_count = session.query(func.count(Topic.id))
+        try:
+            # Check if the database is already populated with topics
+            if not session.query(Topic).first():
+                for name, references in data.items():
+                    # Convert references list to comma-separated string
+                    references_str = ', '.join(references)
 
-        if topic_count == 0:
-            try:
-                # Check if the database is already populated with topics
-                if not session.query(Topic).first():
-                    for name, references in data.items():
-                        # Insert for timeframe 1h
-                        topic_1h = Topic(
-                            name=name,
-                            reference=json.dumps(references),
-                            timeframe='1h'
-                        )
-                        session.add(topic_1h)
-                        
-                        # Insert for timeframe 4h
-                        topic_4h = Topic(
-                            name=name,
-                            reference=json.dumps(references),
-                            timeframe='4h'
-                        )
-                        session.add(topic_4h)
-                        
-                        print(f'----- Topic {name} populated for 1h and 4h timeframes -----')
+                    # Insert for timeframe 1h
+                    topic_1h = Topic(
+                        name=name,
+                        reference=references_str,
+                        timeframe='1h'
+                    )
+                    session.add(topic_1h)
+                    
+                    # Insert for timeframe 4h
+                    topic_4h = Topic(
+                        name=name,
+                        reference=references_str,
+                        timeframe='4h'
+                    )
+                    session.add(topic_4h)
+                    
+                    print(f'----- Topic {name} populated for 1h and 4h timeframes -----')
 
-                    # Insert analysis topics with timeframe null
-                    for name, references in data.items():
-                        analysis_name = f'analysis_{name}'
-                        analysis_topic = Topic(
-                            name=analysis_name,
-                            reference=json.dumps(references),
-                            timeframe=None
-                        )
-                        session.add(analysis_topic)
-                        
-                    for name, references in data.items():
-                        analysis_name = f's_and_r_{name}'
-                        analysis_topic = Topic(
-                            name=analysis_name,
-                            reference=json.dumps(references),
-                            timeframe=None
-                        )
-                        session.add(analysis_topic)
+                # Insert analysis topics with timeframe null
+                for name, references in data.items():
+                    references_str = ', '.join(references)
+                    analysis_name = f'{name}_analysis'
+                    analysis_topic = Topic(
+                        name=analysis_name,
+                        reference=references_str,
+                        timeframe=None
+                    )
+                    session.add(analysis_topic)
+                    
+                for name, references in data.items():
+                    references_str = ', '.join(references)
+                    analysis_name = f'{name}_s_and_r'
+                    analysis_topic = Topic(
+                        name=analysis_name,
+                        reference=references_str,
+                        timeframe=None
+                    )
+                    session.add(analysis_topic)
 
-                    session.commit()
-                    print('----- All topics successfully populated -----')
-                else:
-                    print('----- Topics are already populated. Skipping this process -----')
+                session.commit()
+                print('----- All topics successfully populated -----')
 
-            except SQLAlchemyError as e:
-                session.rollback()
-                raise SQLAlchemyError(f'Database error while populating topics: {str(e)}')
-            except Exception as e:
-                session.rollback()
-                raise Exception(f'Unexpected error while populating topics: {str(e)}')
-            finally:
-                session.close()
-
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise SQLAlchemyError(f'Database error while populating topics: {str(e)}')
+        except Exception as e:
+            session.rollback()
+            raise Exception(f'Unexpected error while populating topics: {str(e)}')
+        finally:
+            session.close()
         
-populate_topics()
+# populate_topics()
 # Create SuperAdmin
 # init_superadmin()
 

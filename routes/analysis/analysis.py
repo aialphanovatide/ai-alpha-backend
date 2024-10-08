@@ -14,7 +14,6 @@ from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
 from apscheduler.jobstores.base import JobLookupError
 from config import Analysis, Category, CoinBot, Session
-from services.firebase.firebase import send_notification
 from routes.analysis.analysis_scheduler import sched, chosen_timezone
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 
@@ -511,8 +510,8 @@ def get_last_analysis():
     finally:
         session.close()
     
-    
-def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
+   
+def publish_analysis(coin_id: int, content: str, category_name: str) -> dict:
     """
     Function to publish an analysis.
 
@@ -521,8 +520,8 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         content (str): The content of the analysis
         category_name (str): The name of the category
 
-    Raises:
-        SQLAlchemyError: If there's an error with the database operation
+    Returns:
+        dict: A response dictionary containing the result of the operation
     """
     session = Session()
     image_filename = None
@@ -531,7 +530,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         title_end_index = content.find('<br>')
         if title_end_index != -1:
             title = content[:title_end_index].strip()
-            content = content[title_end_index + 1:]
+            content = content[title_end_index + 4:].strip()  # +4 to remove '<br>'
         else:
             raise ValueError("No newline found in the content, please add a space after the title")
 
@@ -544,7 +543,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         try:
             image = image_generator.generate_image(content)
         except Exception as e:
-            raise ValueError(str(e))
+            raise ValueError(f"Image generation failed: {str(e)}")
         
         try:
             resized_image_url = image_processor.process_and_upload_image(
@@ -553,7 +552,14 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
                 image_filename=image_filename
             )
         except Exception as e:
-            raise ValueError(str(e))
+            raise ValueError(f"Image processing failed: {str(e)}")
+
+        # Query the database to get the coin_bot name
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
+        if not coin_bot:
+            raise ValueError(f"No CoinBot found with id {coin_id}")
+        
+        coin_symbol = coin_bot.name
 
         # Create and save the Analysis object
         new_analysis = Analysis(
@@ -565,21 +571,14 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
         session.add(new_analysis)
         session.commit()
         
-        # Query the database to get the coin_bot name
-        coin_bot = session.query(CoinBot).filter(CoinBot.id == coin_id).first()
-        if not coin_bot:
-            raise ValueError(f"No CoinBot found with id {coin_id}")
-        session.commit()
-        
-        coin_symbol = coin_bot.name
 
         # Send notification
         notification_service.push_notification(
-        coin=coin_symbol,
-        title=title,  
-        body=f"New analysis for {coin_symbol} in category {category_name}",
-        type="analysis",
-        temporality=""  
+            coin=coin_symbol,
+            title=f"{coin_symbol} New Analysis Available",  
+            body=f"{title}. Check it out!",
+            type="analysis",
+            temporality=""  
         )
         
         return create_response(
@@ -602,7 +601,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> None:
             data=None,
             message=f"Value error publishing analysis: {str(e)}",
             success=False,
-            status_code=500
+            status_code=400
         )
     except Exception as e:
         return create_response(
