@@ -1,19 +1,21 @@
+import re
 from sqlalchemy import desc  
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
-from config import session, Category, Alert, CoinBot
+from config import session, Category, Alert, CoinBot, Session
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
-from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram
+from routes.tradingview.alert_strategy import send_alert_strategy_to_telegram, send_alert_strategy_to_slack
 from services.firebase.firebase import send_notification
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 from services.notification.index import Notification
-from config import Session
+
 tradingview_bp = Blueprint(
     'tradingview_bp', __name__,
     template_folder='templates',
     static_folder='static'
 )
 
+LOGS_SLACK_CHANNEL_ID = 'C06FTS38JRX'
 notification_service = Notification(session=Session())
 
 @tradingview_bp.route('/api/tv/alerts', methods=['GET'])  
@@ -210,8 +212,7 @@ def receive_data_from_tv():
         if not request.data:
             return 'No data sent in the request', 400
         elif request.is_json:
-            print('Message from Tradingview received as JSON', request.data)
-            send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
+            send_INFO_message_to_slack_channel( channel_id=LOGS_SLACK_CHANNEL_ID    ,
                                                 title_message='Message from Tradingview received as JSON',
                                                 sub_title='Invalid request format',
                                                 message=str(request.data))
@@ -229,48 +230,76 @@ def receive_data_from_tv():
                         key, value = line.split(':', 1)
                         data_dict[key.strip()] = value.strip()
 
+                symbol = data_dict.get('symbol', '').casefold()
+                formatted_symbol = ''.join(char for char in symbol if char.isalpha())
+                if formatted_symbol.endswith('usdt'):
+                    formatted_symbol = formatted_symbol[:-4]
+                
+                timeframe_match = re.search(r'(\d+[HMD])\s*chart', data_text, re.IGNORECASE)
+                normalized_timeframe = None
+                if timeframe_match:
+                    timeframe = timeframe_match.group(1).upper()
+                    timeframe_mapping = {
+                    '1M': '1m', '5M': '5m', '15M': '15m', '30M': '30m',
+                    '1H': '1h', '2H': '2h', '4H': '4h', '1D': '1d'
+                    }
+                    normalized_timeframe = timeframe_mapping.get(timeframe, timeframe.lower())
+
                 alert_name = data_dict.get('alert_name', '')  
-                symbol = data_dict.get('symbol', '') 
                 message = data_dict.get('message', '')  
                 price = data_dict.get('price', data_dict.get('last_price', ''))
 
-                print('alert_name: ', alert_name)
-                print('symbol: ', symbol)
-                print('message: ', message)
-                
-                formatted_symbol = str(symbol).casefold()
-                parts = formatted_symbol.split("usdt")
-                bot_name = parts[0]
-                temp = alert_name
-                
-                notification_service.push_notification(coin=bot_name, title=alert_name, body=message, type='alert', temporality="")
+
+                print('timeframe_match', timeframe_match)
+                print('timeframe', timeframe)
+                print('normalized_timeframe', normalized_timeframe)
+
+                # Get coin_id from coin_name and saves it to the database
+                coin = session.query(CoinBot).filter(CoinBot.name == formatted_symbol).first()
+                coin_id = coin.bot_id
+
+                # Remove any dot or point at the end of the price
+                if price.endswith('.') or price.endswith(','):
+                    price = price[:-1]
+
+                new_alert = Alert(alert_name=alert_name,
+                                alert_message = message.capitalize(),
+                                symbol=formatted_symbol,
+                                price=price,
+                                coin_bot_id=coin_id
+                                )
+
+                session.add(new_alert)
+                session.commit()
+
+                # Send to notification to App
+                notification_service.push_notification(coin=coin.name, 
+                                                    title=alert_name, 
+                                                    body=message.capitalize(), 
+                                                    type='alert', 
+                                                    timeframe=normalized_timeframe)
  
                 
-                # response, status = send_alert_strategy_to_telegram(price=price,
-                #                                 alert_name=alert_name,
-                #                                 message=message,
-                #                                 symbol=symbol)
+                # send_alert_strategy_to_slack(price=price,
+                #                     alert_name=alert_name,
+                #                     message=message.capitalize())
                 
-                # if status != 200:
-                #     send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-                #                                         title_message='Error seding Tradingview Alert',
-                #                                         sub_title='Reason',
-                #                                         message=f"{str(response)} - Data: {str(request.data)}")
 
-
-                # return response, status
-                return "OK",200
+                return "OK", 200
             
             except Exception as e:
-                print(f'Error sending message to Slack channel. Reason: {e}')
-                send_INFO_message_to_slack_channel(channel_id="C06FTS38JRX",
-                                                    title_message='Error receiving Tradingview message',
-                                                    sub_title='Reason',
-                                                    message=f"{str(e)} - Data: {str(request.data)}")
-                return f'Error sending message to Slack channel. Reason: {e}', 500
+                print('Error receiving Tradingview message', e)
+                # send_INFO_message_to_slack_channel(channel_id=LOGS_SLACK_CHANNEL_ID,
+                #                                     title_message='Error receiving Tradingview message',
+                #                                     sub_title='Reason',
+                #                                     message=f"{str(e)} - Data: {str(request.data)}")
+                return f'Error receiving Tradingview message', 500
             
     except Exception as e:
-        print(f'Error receiving Tradingview message: {str(e)}')
-        session.rollback()
+        print('Error receiving Tradingview message', e)
+        # send_INFO_message_to_slack_channel( channel_id=LOGS_SLACK_CHANNEL_ID,
+        #                                     title_message='Error receiving Tradingview message',
+        #                                     sub_title='Reason',
+        #                                     message=str(e))
         return f'Error receiving Tradingview message: {str(e)}', 500    
         

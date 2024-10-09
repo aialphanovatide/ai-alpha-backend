@@ -1,7 +1,5 @@
-from typing import Type
-from config import Alert, Topic,Notification
+from config import Alert, Topic, Notification
 from services.firebase.firebase import send_notification
-import json
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -12,16 +10,39 @@ class Notification:
     def __init__(self, session: Session):
         self.session = session
 
-    def push_notification(self, coin: str, title: str, body: str, type: str, temporality: str):
+    def push_notification(self, coin: str, title: str, body: str, type: str, timeframe: str):
+        """
+        Push a notification for a specific coin and type.
+
+        This method creates and saves a notification or alert in the database,
+        and then sends it via Firebase Cloud Messaging (FCM).
+
+        Parameters:
+        - coin (str): The cryptocurrency coin symbol.
+        - title (str): The title of the notification.
+        - body (str): The body content of the notification.
+        - type (str): The type of notification ('alert', 'analysis', or 's_and_r').
+        - temporality (str): The time frame for the notification (used for alerts).
+
+        Raises:
+        - ValueError: If an invalid notification type is provided or no topics are found.
+        - SQLAlchemyError: If there's an error during database operations.
+        - Exception: For any other unexpected errors during the process.
+        """
         try:
             # Define the query based on the notification type
             if type == "alert":
-                topics = self.session.query(Topic).filter(Topic.reference.ilike(f"%{coin}%")).all()
+                topics = self.session.query(Topic).filter(
+                    Topic.reference.ilike(f"%{coin}%"),
+                    Topic.timeframe == timeframe
+                ).all()
+                
             elif type in ["analysis", "s_and_r"]:
                 topics = self.session.query(Topic).filter(
                     Topic.reference.ilike(f"%{coin}%"),
                     Topic.name.ilike(f"%{type}%")
                 ).all()
+               
             else:
                 raise ValueError(f"Invalid notification type: {type}")
 
@@ -29,24 +50,13 @@ class Notification:
                 raise ValueError(f"No topics found for the coin {coin} and type {type}")
 
             for topic in topics:
-                if type == "alert":
-                    new_alert = Alert(
-                        topic_id=topic.id,
-                        title=title,
-                        body=body,
-                        coin=coin,
-                        temporality=temporality
-                    )
-                    self.session.add(new_alert)
-                    print(f"Alert saved for coin {coin} under topic {topic.name}")
-                
-                elif type in ["analysis", "s_and_r"]:
+                if type in ["analysis", "s_and_r"]:
                     new_notification = notification_model( 
                         topic_id=topic.id,
                         title=title,
                         body=body,
                         coin=coin,
-                        type=type  # Asegúrate de incluir el tipo aquí
+                        type=type 
                     )
                     self.session.add(new_notification)
                     print(f"{type.capitalize()} saved for coin {coin} under topic {topic.name}")

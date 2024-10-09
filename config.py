@@ -1432,13 +1432,14 @@ class Topic(Base):
     Represents a topic in the system.
 
     This class defines the structure for storing topic information,
-    including the topic name, references to coins, and timeframe.
+    including the topic name, references to coins, timeframe, and type.
 
     Attributes:
         id (int): The primary key for the topic.
         name (str): The name of the topic (e.g., analysis_baseblock_4999_m1 or baseblock_4999_m1).
         reference (JSON): Array of strings (references to coins, can be NULL).
         timeframe (str): The timeframe of the topic.
+        type (str): The type of the topic.
         created_at (datetime): Timestamp of when the topic was created.
         updated_at (datetime): Timestamp of the last update to the topic record.
         notifications (relationship): Relationship to associated Notification objects.
@@ -1449,6 +1450,7 @@ class Topic(Base):
     name = Column(String, nullable=False)
     reference = Column(String, nullable=True) 
     timeframe = Column(String, nullable=True)
+    type = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -1592,7 +1594,7 @@ def init_user_data():
         session.close()
 
 
-init_user_data()
+# init_user_data()
 
 # ------------- CREATE DEFAULR CATEGORIES AND COINS -------------------
 
@@ -1690,7 +1692,7 @@ def populate_categories_and_coins():
         session.close()
 
 
-populate_categories_and_coins()
+# populate_categories_and_coins()
 
 # ------------- CREATE DEFAULT SUPERADMIN -----------------------------
 
@@ -1742,6 +1744,12 @@ def init_superadmin():
     finally:
         session.close()
 
+
+# init_superadmin()
+
+
+# ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
+
 def populate_topics():
     """
     Populates the database with topics based on provided data from a JSON file and timeframes.
@@ -1751,7 +1759,7 @@ def populate_topics():
         with open('./services/notification/topics.json', 'r') as file:
             data = json.load(file)
     except FileNotFoundError:
-        raise FileNotFoundError("The file 'topics_data.json' was not found.")
+        raise FileNotFoundError("The file 'topics.json' was not found.")
     except json.JSONDecodeError:
         raise ValueError("There was an error decoding the JSON file.")
     
@@ -1759,51 +1767,58 @@ def populate_topics():
         try:
             # Check if the database is already populated with topics
             if not session.query(Topic).first():
+                topics_added = 0
                 for name, references in data.items():
-                    # Convert references list to comma-separated string
                     references_str = ', '.join(references)
 
                     # Insert for timeframe 1h
                     topic_1h = Topic(
                         name=name,
                         reference=references_str,
-                        timeframe='1h'
+                        timeframe='1h',
+                        type='alert'
                     )
                     session.add(topic_1h)
+                    topics_added += 1
                     
                     # Insert for timeframe 4h
                     topic_4h = Topic(
                         name=name,
                         reference=references_str,
-                        timeframe='4h'
+                        timeframe='4h',
+                        type='alert'
                     )
                     session.add(topic_4h)
+                    topics_added += 1
                     
                     print(f'----- Topic {name} populated for 1h and 4h timeframes -----')
 
-                # Insert analysis topics with timeframe null
-                for name, references in data.items():
-                    references_str = ', '.join(references)
+                    # Insert analysis topic
                     analysis_name = f'{name}_analysis'
                     analysis_topic = Topic(
                         name=analysis_name,
                         reference=references_str,
-                        timeframe=None
+                        timeframe=None,
+                        type='analysis'
                     )
                     session.add(analysis_topic)
+                    topics_added += 1
                     
-                for name, references in data.items():
-                    references_str = ', '.join(references)
-                    analysis_name = f'{name}_s_and_r'
-                    analysis_topic = Topic(
-                        name=analysis_name,
+                    # Insert support and resistance topic
+                    s_and_r_name = f'{name}_s_and_r'
+                    s_and_r_topic = Topic(
+                        name=s_and_r_name,
                         reference=references_str,
-                        timeframe=None
+                        timeframe=None,
+                        type='s_and_r'
                     )
-                    session.add(analysis_topic)
+                    session.add(s_and_r_topic)
+                    topics_added += 1
 
                 session.commit()
-                print('----- All topics successfully populated -----')
+                print(f'----- All topics successfully populated. Total topics added: {topics_added} -----')
+            else:
+                print('----- Topics have already been populated. Skipping population process. -----')
 
         except SQLAlchemyError as e:
             session.rollback()
@@ -1811,13 +1826,7 @@ def populate_topics():
         except Exception as e:
             session.rollback()
             raise Exception(f'Unexpected error while populating topics: {str(e)}')
-        finally:
-            session.close()
+
         
 # populate_topics()
-# Create SuperAdmin
-# init_superadmin()
-
-
-# ------------- POPULATE THE DB WITH USERS.JSON -------------------
 
