@@ -61,7 +61,9 @@ ENV/
 .idea/
 
 
-service_account.json
+service-account.json
+service-account-2.json
+
 __pycache__/
 *.pyc
 
