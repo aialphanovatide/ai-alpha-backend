@@ -575,10 +575,10 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> dict:
         # Send notification
         notification_service.push_notification(
             coin=coin_symbol,
-            title=f"{coin_symbol} New Analysis Available",  
-            body=f"{title}. Check it out!",
+            title=f"{str(coin_symbol).upper()} New Analysis Available",  
+            body=f"{title} - Check it out!",
             type="analysis",
-            temporality=""  
+            timeframe=""  
         )
         
         return create_response(

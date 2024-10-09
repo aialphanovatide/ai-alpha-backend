@@ -3,8 +3,8 @@ from typing import Dict, Tuple
 from firebase_admin import initialize_app, credentials, messaging
 
 # Try the original path
-original_path = os.path.abspath('services/firebase/service-account.json')
-path = original_path if os.path.exists(original_path) else '/etc/secrets/service-account.json'
+original_path = os.path.abspath('services/firebase/service-account-2.json')
+path = original_path if os.path.exists(original_path) else '/etc/secrets/service-account-2.json'
 
 # Creds
 cred = credentials.Certificate(path)
@@ -61,7 +61,8 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
             )
         )
 
-        messaging.send(message)
+        response = messaging.send(message)
+        print(response)
 
     except Exception as e:
         raise Exception(f"Error sending notification: {str(e)}")
