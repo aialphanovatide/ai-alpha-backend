@@ -61,7 +61,8 @@ ENV/
 .idea/
 
 
-service_account.json
+**/firebase/service-account*.json
+
 __pycache__/
 *.pyc
 
