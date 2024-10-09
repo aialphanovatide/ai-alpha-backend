@@ -21,7 +21,7 @@ S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 image_processor = ImageProcessor()
 
 @coin_bp.route('/coin', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_coins'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_all_categories'])
 def create_coin():
     """
     Create a new coin bot in the database.
