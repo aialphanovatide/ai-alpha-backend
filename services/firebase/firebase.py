@@ -10,7 +10,7 @@ path = original_path if os.path.exists(original_path) else '/etc/secrets/service
 cred = credentials.Certificate(path)
 default_app = initialize_app(credential=cred)
 
-def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None) -> None:
+def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None, timeframe: str = None) -> None:
     """
     Send a notification to devices subscribed to a specific topic using Firebase Cloud Messaging.
 
@@ -33,10 +33,12 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
         # Convert type and coin to strings if they are not already
         str_type = str(type)
         str_coin = str(coin) if coin is not None else ''
+        str_timeframe = str(timeframe) if timeframe is not None else ''
 
         data_payload = {
             "type": str_type,  # Ensure type is a string
-            "coin": str_coin  # Ensure coin is a string, handle None case
+            "coin": str_coin,  # Ensure coin is a string, handle None case
+            "timeframe": str_timeframe
         }
 
         message = messaging.Message(

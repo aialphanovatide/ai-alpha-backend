@@ -10,7 +10,7 @@ class Notification:
     def __init__(self, session: Session):
         self.session = session
 
-    def push_notification(self, coin: str, title: str, body: str, type: str, timeframe: str):
+    def push_notification(self, coin: str, title: str, body: str, type: str, timeframe: str = None):
         """
         Push a notification for a specific coin and type.
 
@@ -65,7 +65,7 @@ class Notification:
             print(f"Successfully saved {type} notification for coin {coin}.")
 
             for topic in topics:
-                self._send_fcm_notification(topic.name, title, body, type, coin)
+                self._send_fcm_notification(topic.name, title, body, type, coin, timeframe)
         
         except SQLAlchemyError as e:
             self.session.rollback()
@@ -74,7 +74,7 @@ class Notification:
             self.session.rollback()
             raise Exception(f"Unexpected error while processing notification: {str(e)}")
 
-    def _send_fcm_notification(self, topic: str, title: str, body: str, type: str, coin: str):
+    def _send_fcm_notification(self, topic: str, title: str, body: str, type: str, coin: str, timeframe: str):
         """
         Trigger Firebase Cloud Messaging (FCM) to send a notification.
         
@@ -92,7 +92,8 @@ class Notification:
                 title=title,
                 body=body,
                 type=type,
-                coin=coin
+                coin=coin,
+                timeframe=timeframe
             )
             print(f"FCM notification sent successfully for topic {topic}.")
         except Exception as e:
