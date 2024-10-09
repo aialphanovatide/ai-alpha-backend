@@ -3,8 +3,8 @@ from typing import Dict, Tuple
 from firebase_admin import initialize_app, credentials, messaging
 
 # Try the original path
-original_path = os.path.abspath('services/firebase/service-account-2.json')
-path = original_path if os.path.exists(original_path) else '/etc/secrets/service-account-2.json'
+original_path = os.path.abspath('services/firebase/service-account.json')
+path = original_path if os.path.exists(original_path) else '/etc/secrets/service-account.json'
 
 # Creds
 cred = credentials.Certificate(path)
