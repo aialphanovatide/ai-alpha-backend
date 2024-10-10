@@ -275,6 +275,27 @@ class Token(Base):
         }
 
 class APIKey(Base):
+    """
+    Represents an API key associated with an admin in the system.
+
+    This class defines the structure for storing API key information,
+    including the key itself, the admin it belongs to, timestamps, and relationships.
+
+    Attributes:
+    id (int): The primary key for the API key.
+    key (str): The unique API key.
+    last_used (datetime): The timestamp of the last time the API key was used.
+    admin_id (int): The foreign key referencing the associated admin.
+    created_at (datetime): The timestamp of when the API key was created.
+    updated_at (datetime): The timestamp of when the API key was last updated.
+    admin (Admin): The relationship to the associated admin.
+
+    Methods:
+    as_dict(): Returns a dictionary representation of the API key.
+    generate_api_key(prefix='alpha', length=32): Generates a robust API key.
+    create_new_key(admin_id): Creates a new API key and stores it in the database.
+    validate_api_key(key): Validates an API key.
+    """
     __tablename__ = 'api_keys'
     id = Column(Integer, primary_key=True, autoincrement=True)
     key = Column(String(64), unique=True, nullable=False)
@@ -1830,3 +1851,51 @@ def populate_topics():
         
 # populate_topics()
 
+# --------------CREATE DEFAULT API KEY FOR SUPERADMIN -------------------
+
+
+def create_superadmin_api_key():
+    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL')
+    ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+
+    if not all([ADMIN_EMAIL, ADMIN_USERNAME]):
+        print("---- Error: Admin credentials not fully provided in environment variables ----")
+        return
+
+    session = Session()
+
+    try:
+        # Check if the admin user exists
+        existing_admin = session.query(Admin).filter_by(username=ADMIN_USERNAME).first()
+
+        if existing_admin:
+            # Check if the admin already has an API key
+            existing_api_key = session.query(APIKey).filter_by(admin_id=existing_admin.admin_id).first()
+
+            if existing_api_key:
+                print(f'---- Superadmin API key already exists for {ADMIN_EMAIL} ----')
+                return
+
+            # Generate a new API key using the method from schemas
+            new_api_key = APIKey.generate_api_key()
+
+            # Create a new API key for the admin user
+            api_key = APIKey(admin_id=existing_admin.admin_id, key=new_api_key)
+            session.add(api_key)
+            session.commit()
+
+            print(f'---- Superadmin API key created successfully for {ADMIN_EMAIL} ----')
+            print(f'---- API Key: {new_api_key} ----')
+        else:
+            print(f'---- Error: Admin user {ADMIN_USERNAME} not found ----')
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f'---- Database error while creating superadmin API key: {str(e)} ----')
+    except Exception as e:
+        session.rollback()
+        print(f'---- Unexpected error while creating superadmin API key: {str(e)} ----')
+    finally:
+        session.close()
+
+create_superadmin_api_key()

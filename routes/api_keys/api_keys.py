@@ -24,7 +24,7 @@ def create_or_regenerate_api_key(admin_id):
 
         if existing_api_key:
             # Regenerate the API key
-            new_key = APIKey.generate_api_key()  # Assuming this method exists in your APIKey class
+            new_key = APIKey.generate_api_key()
             existing_api_key.key = new_key
             existing_api_key.last_used = None  # Reset last_used
             session.commit()
