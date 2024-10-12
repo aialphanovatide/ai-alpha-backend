@@ -5,20 +5,6 @@ set -e  # Exit immediately if a command exits with a non-zero status.
 export FLASK_APP=server.py
 export FLASK_ENV=${FLASK_ENV:-development} # if FLASK_ENV not set in .env file, then this variable will be used.
 
-# # Load environment variables from .env file
-# ENV_FILE=.env
-
-
-# if [ -f "$ENV_FILE" ]; then
-#     echo "Loading environment from $ENV_FILE"
-#     set -a
-#     . "$ENV_FILE"
-#     set +a
-# else
-#     echo "Error: $ENV_FILE not found."
-#     exit 1
-# fi
-
 # Function to check, create, and apply Alembic migrations
 check_create_and_apply_migrations() {
     echo "Checking for pending database migrations..."

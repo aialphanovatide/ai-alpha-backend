@@ -147,7 +147,7 @@ def get_filtered_alerts():
                 return jsonify({'error': 'Limit parameter must be an integer'}), 400
 
        
-        coin_bot = session.query(CoinBot).filter(CoinBot.bot_name == coin.casefold().strip()).first()
+        coin_bot = session.query(CoinBot).filter(CoinBot.name == coin.casefold().strip()).first()
 
         if not coin_bot:
             return {'message': f'{coin} not found'}, 404

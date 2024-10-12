@@ -58,7 +58,7 @@ def get_competitor_data_by_coin_name():
         if not coin_name:
             return jsonify({'message': 'Coin name is required', 'status': 400}), 400
 
-        coinbot = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+        coinbot = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
         if not coinbot:
             return jsonify({'message': 'CoinBot not found for the given coin name', 'status': 404}), 404
 

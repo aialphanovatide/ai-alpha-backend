@@ -19,7 +19,7 @@ def get_upgrades():
         coin_data = None
 
         if coin_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+            coin = session.query(CoinBot).filter(CoinBot.name==coin_name).first()
             coin_data = session.query(Upgrades).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
         if coin_bot_id:

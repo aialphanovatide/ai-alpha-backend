@@ -19,7 +19,7 @@ def get_tokenomics():
 
         if coin_name:
             coin = session.query(CoinBot).filter(
-                CoinBot.bot_name == coin_name).first()
+                CoinBot.name == coin_name).first()
             coin_bot_id = coin.bot_id if coin else None
 
         if coin_bot_id is None:

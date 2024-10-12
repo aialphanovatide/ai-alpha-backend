@@ -47,7 +47,7 @@ def get_narrative_trading():
         query = session.query(NarrativeTrading).options(joinedload(NarrativeTrading.coin_bot))
 
         if coin_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+            coin = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
             if not coin:
                 return jsonify(create_response(success=False, error='Coin not found')), 404
             query = query.filter(NarrativeTrading.coin_bot_id == coin.bot_id)
@@ -66,7 +66,7 @@ def get_narrative_trading():
 
         narrative_trading_data = [nt.to_dict() for nt in narrative_trading_objects]
         for nt_dict, nt in zip(narrative_trading_data, narrative_trading_objects):
-            nt_dict['coin_bot_name'] = nt.coin_bot.bot_name if nt.coin_bot else None
+            nt_dict['coin_bot_name'] = nt.coin_bot.name if nt.coin_bot else None
 
         total_pages = (total_count + limit - 1) // limit
 
@@ -156,7 +156,7 @@ def get_all_narrative_trading():
         narrative_trading_data = []
         for nt in narrative_trading_objects:
             nt_dict = nt.to_dict()
-            nt_dict['coin_name'] = nt.coin_bot.bot_name if nt.coin_bot else None
+            nt_dict['coin_name'] = nt.coin_bot.name if nt.coin_bot else None
             narrative_trading_data.append(nt_dict)
 
         response["data"] = narrative_trading_data
@@ -361,7 +361,7 @@ def get_last_narrative_trading():
             return jsonify(response), status_code
 
         narrative_trading_data = last_narrative_trading.to_dict()
-        narrative_trading_data['coin_bot_name'] = last_narrative_trading.coin_bot.bot_name if last_narrative_trading.coin_bot else None
+        narrative_trading_data['coin_bot_name'] = last_narrative_trading.coin_bot.name if last_narrative_trading.coin_bot else None
 
         response["data"] = {'last_narrative_trading': narrative_trading_data}
         response["success"] = True

@@ -17,7 +17,7 @@ def get_hacks():
         coin_data = None
 
         if coin_bot_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_bot_name).first()
+            coin = session.query(CoinBot).filter(CoinBot.name==coin_bot_name).first()
             coin_data = session.query(Hacks).filter_by(coin_bot_id=coin.bot_id).all() if coin else None
 
         if coin_bot_id:

@@ -101,7 +101,7 @@ def send_alert_strategy_to_telegram(price, alert_name, message, symbol):
                 
             if response.status_code == 200:
              
-                coinBot = session.query(CoinBot).filter(CoinBot.bot_name == bot_name).first()
+                coinBot = session.query(CoinBot).filter(CoinBot.name == bot_name).first()
                 coin_bot_id = coinBot.bot_id
                 
                 new_alert = Alert(alert_name=alert_Name,

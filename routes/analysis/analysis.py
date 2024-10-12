@@ -86,7 +86,7 @@ def get_coin_analysis():
         if coin_id:
             query = query.filter(Analysis.coin_bot_id == coin_id)
         elif coin_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name == coin_name).first()
+            coin = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
             if not coin:
                 response["error"] = f"No coin found with name: {coin_name}"
                 status_code = 404

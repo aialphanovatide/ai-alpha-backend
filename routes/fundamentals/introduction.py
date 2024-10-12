@@ -49,7 +49,7 @@ def get_content():
         coin_data = None
 
         if coin_name:
-            coin = session.query(CoinBot).filter(CoinBot.bot_name==coin_name).first()
+            coin = session.query(CoinBot).filter(CoinBot.name==coin_name).first()
             coin_data = session.query(Introduction).filter_by(coin_bot_id=coin.bot_id).first() if coin else None
 
         if coin_id:
