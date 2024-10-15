@@ -1,27 +1,27 @@
-# Use an official Python runtime as the base image
-FROM python:3.9-slim
+FROM python:3.8-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt ./
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt .
 
-# Install the Python dependencies
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Install playwright and its dependencies
+RUN pip install playwright
+# RUN playwright install-deps
+# RUN playwright install
+
+# Copy the current directory contents into the container at /app
 COPY . .
 
-# Set execute permissions for the script
+# Make the script executable
 RUN chmod +x script.sh
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Make port 9002 available to the world outside this container
+EXPOSE 9002
 
-# Set environment variable for Flask
-ENV FLASK_APP=server.py
-ENV FLASK_ENV=production
-
-# Run the application using the script
+# Run the script when the container launches
 CMD ["./script.sh"]

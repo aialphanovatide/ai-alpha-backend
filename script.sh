@@ -37,11 +37,9 @@ check_create_and_apply_migrations
 # Start the application
 if [ "$FLASK_ENV" = "development" ]; then
     echo "Starting Flask development server..."
-    python server.py --host=0.0.0.0 --port=9000
+    python server.py --host=0.0.0.0 --port=9002
 else
     echo "Starting Gunicorn production server..."
-    PORT=${PORT:-9000}
-    # exec gunicorn --workers 3 --threads 2 --timeout 120 server:app
-    # exec gunicorn --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120 server:app
-    python server.py --host=0.0.0.0 --port=9000
+    PORT=${PORT:-9002}
+    exec gunicorn --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120 server:app
 fi

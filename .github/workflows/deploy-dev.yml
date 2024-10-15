@@ -1,0 +1,121 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    env:
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      NEWS_BOT_API_KEY: ${{ secrets.NEWS_BOT_API_KEY }}
+      AWS_ACCESS: ${{ secrets.AWS_ACCESS }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_PRODUCT_ALERTS: ${{ secrets.SLACK_PRODUCT_ALERTS }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      CHANNEL_ID_AI_ALPHA_FOUNDERS: ${{ secrets.CHANNEL_ID_AI_ALPHA_FOUNDERS }}
+      CALL_TO_TRADE_TOPIC_ID: ${{ secrets.CALL_TO_TRADE_TOPIC_ID }}
+      MAIL_DEFAULT_SENDER: ${{ secrets.MAIL_DEFAULT_SENDER }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Deploy to Development
+      run: |
+        echo "Starting deployment to Development environment..."
+        cd $GITHUB_WORKSPACE || exit 1
+        
+        echo "Fetching the latest changes..."
+        git fetch origin
+        
+        echo "Checking out the develop branch..."
+        git checkout develop
+        
+        echo "Pulling the latest changes from the develop branch..."
+        PREVIOUS_COMMIT=$(git rev-parse HEAD)
+        git pull origin develop
+        
+        start_containers() {
+          docker-compose -f docker-compose.dev.yml up -d --build
+          return $?
+        }
+        
+        stop_containers() {
+          docker-compose -f docker-compose.dev.yml down
+        }
+        
+        health_check() {
+          for i in {1..5}; do
+            if curl -f http://localhost:9002/health; then
+              return 0
+            fi
+            echo "Health check attempt $i failed. Retrying in 10 seconds..."
+            sleep 10
+          done
+          return 1
+        }
+        
+        rollback() {
+          echo "Rolling back to previous commit..."
+          git reset --hard $PREVIOUS_COMMIT
+          stop_containers
+          start_containers
+          if health_check; then
+            echo "Rollback successful"
+          else
+            echo "Rollback failed. Manual intervention required."
+            exit 1
+          fi
+        }
+        
+        echo "Stopping containers..."
+        stop_containers
+        echo "Starting containers..."
+        if start_containers; then
+          echo "Waiting for services to start..."
+          sleep 150
+          echo "Performing health check..."
+          if health_check; then
+            echo "Deployment successful. Health check passed."
+          else
+            echo "Health check failed. Rolling back..."
+            rollback
+          fi
+        else
+          echo "Failed to start containers. Rolling back..."
+          rollback
+        fi
+
+    - name: Deployment Status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "Deployment to Development completed successfully!"
+        else
+          echo "Deployment to Development failed. Please check the logs for details."
+        fi
+
+    - name: Debug Information
+      if: failure()
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Contents of directory:"
+        ls -la
+        echo "Git status:"
+        git status
+        echo "Docker version:"
+        docker --version
+        echo "Docker Compose version:"
+        docker-compose --version

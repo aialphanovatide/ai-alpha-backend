@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/playwright:v1.45.1-jammy
+
+# Install additional dependencies and Python
+RUN apt-get update && apt-get install -y \
+    xvfb \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a symlink for python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# Install playwright
+RUN pip3 install playwright
+
+# Create necessary directories with correct permissions
+RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+
+# Check if pwuser exists, create if it doesn't
+RUN id -u pwuser &>/dev/null || useradd -m pwuser
+
+# Switch to the pwuser
+USER pwuser
+
+WORKDIR /home/pwuser/app
+
+# Set up Xvfb for headless browser support
+ENV DISPLAY=:99
+
+# Start Xvfb and run the command
+CMD Xvfb :99 -screen 0 1024x768x16 & python -m playwright install && tail -f /dev/null

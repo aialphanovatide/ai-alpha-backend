@@ -24,9 +24,6 @@ def upgrade() -> None:
     inspector = sa.inspect(conn)
     existing_columns = inspector.get_columns('coin_bot')
     existing_column_names = [col['name'] for col in existing_columns]
-
-    if 'name' not in existing_column_names:
-        op.add_column('coin_bot', sa.Column('name', sa.String(), nullable=True))
     
     if 'alias' not in existing_column_names:
         op.add_column('coin_bot', sa.Column('alias', sa.String(), nullable=True))
@@ -52,8 +49,6 @@ def downgrade() -> None:
     existing_columns = inspector.get_columns('coin_bot')
     existing_column_names = [col['name'] for col in existing_columns]
 
-    if 'name' not in existing_column_names:
-        op.add_column('coin_bot', sa.Column('name', sa.VARCHAR(), autoincrement=False, nullable=True))
     
     if 'image' not in existing_column_names:
         op.add_column('coin_bot', sa.Column('image', sa.VARCHAR(), autoincrement=False, nullable=True))
@@ -68,7 +63,7 @@ def downgrade() -> None:
         op.drop_column('coin_bot', 'alias')
     
     if 'name' in existing_column_names:
-        op.drop_column('coin_bot', 'name')
+        op.alter_column('coin_bot', 'name', new_column_name='bot_name')
     # ### end Alembic commands ###
 
 

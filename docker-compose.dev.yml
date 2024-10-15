@@ -1,16 +1,28 @@
-version: '3.8'
-
-x-common-web-config: &common-web-config
-  build: .
-  depends_on:
-    db_dev:
-      condition: service_healthy
-
 services:
-  web_dev:
-    <<: *common-web-config
+  db_dev:
+    image: postgres:13
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
-      - "5001:5000"
+      - "5432:5432"
+    networks:
+      - myapp_dev_network
+
+  web_dev:
+    build: .
+    ports:
+      - "9002:9002"
     volumes:
       - .:/app
     env_file:
@@ -18,56 +30,76 @@ services:
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-    command: >
-      sh -c "
-        echo 'Current directory:'
-        pwd
-        echo 'Files in current directory:'
-        ls -la
-        echo '.env.dev file path:'
-        find / -name .env.dev 2>/dev/null
-        echo 'Contents of .env.dev file:'
-        cat .env.dev
-        echo 'Web service environment variables:'
-        echo POSTGRES_DB=$${POSTGRES_DB}
-        echo POSTGRES_USER=$${POSTGRES_USER}
-        echo POSTGRES_PASSWORD=$${POSTGRES_PASSWORD}
-        echo FLASK_ENV=$${FLASK_ENV}
-        echo FLASK_DEBUG=$${FLASK_DEBUG}
-        ./script.sh
-      "
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db_dev:5432/${POSTGRES_DB}
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - REDIS_DB=3
+    depends_on:
+      db_dev:
+        condition: service_healthy
+    command: ./script.sh
+    networks:
+      - myapp_dev_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  db_dev:
-    image: postgres:13
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - myapp_dev_network
+    depends_on:
+      - db_dev
+
+  playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    volumes:
+      - .:/app
+    depends_on:
+      - web_dev
+    environment:
+      - DISPLAY=:99
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - myapp_dev_network
+   
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "http"
+      - "--domain=${NGROK_DOMAIN}"
+      - "web_dev:9002"
     env_file:
       - .env
+    depends_on:
+      - web_dev
+    networks:
+      - myapp_dev_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    command: >
-      sh -c "
-        echo 'Current directory:'
-        pwd
-        echo 'Files in current directory:'
-        ls -la
-        echo '.env.dev file path:'
-        find / -name .env.dev 2>/dev/null
-        echo 'Contents of .env.dev file:'
-        cat .env.dev
-        echo 'Database service environment variables:'
-        echo POSTGRES_DB=$${POSTGRES_DB}
-        echo POSTGRES_USER=$${POSTGRES_USER}
-        echo POSTGRES_PASSWORD=$${POSTGRES_PASSWORD}
-        docker-entrypoint.sh postgres
-      "
+      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
-  default:
+  myapp_dev_network:
     name: myapp_dev_network
 
 volumes:
   postgres_data_dev:
+  pgadmin_data:

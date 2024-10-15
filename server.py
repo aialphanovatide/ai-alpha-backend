@@ -13,6 +13,7 @@ from routes.slack.slack_actions import slack_events_bp
 from routes.fundamentals.introduction import introduction
 from routes.fundamentals.competitors import competitor_bp
 from routes.dashboard_access.access import dashboard_access_bp
+from routes.metrics.healthcheck import healthcheck
 from routes.fundamentals.hacks import hacks_bp
 from routes.fundamentals.tokenomics import tokenomics
 from routes.fundamentals.upgrades import upgrades_bp
@@ -100,6 +101,7 @@ CORS(app, origins='*', supports_credentials=True)
 app.register_blueprint(scrapper_bp)
 app.register_blueprint(news_bots_features_bp)
 app.register_blueprint(chart_bp)
+app.register_blueprint(healthcheck)
 app.register_blueprint(chart_graphs_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
@@ -133,7 +135,7 @@ if __name__ == '__main__':
     try:
         with app.app_context():
             print('---AI Alpha API is running---') 
-            app.run(port=9000, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+            app.run(port=9002, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
