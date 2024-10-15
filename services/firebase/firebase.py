@@ -1,6 +1,7 @@
 import os
-from typing import Dict, Tuple
 from firebase_admin import initialize_app, credentials, messaging
+from typing import List, Optional
+from firebase_admin import messaging
 
 # Try the original path
 original_path = os.path.abspath('services/firebase/service-account.json')
@@ -10,66 +11,104 @@ path = original_path if os.path.exists(original_path) else '/etc/secrets/service
 cred = credentials.Certificate(path)
 default_app = initialize_app(credential=cred)
 
-def send_notification(topic: str, title: str, body: str, action: str = 'new_alert', type: str = "alert", coin: str = None, timeframe: str = None) -> None:
+
+
+def send_notification(
+    topic: Optional[str],
+    title: str,
+    body: str,
+    action: str = 'new_alert',
+    type: str = "alert",
+    coin: Optional[str] = None,
+    timeframe: Optional[str] = None,
+    web_tokens: Optional[List[str]] = None
+) -> None:
     """
-    Send a notification to devices subscribed to a specific topic using Firebase Cloud Messaging.
+    Sends notifications to both mobile devices (via FCM topics) and web clients (via FCM web tokens).
+
+    This function can send notifications to mobile devices subscribed to a specific topic
+    and/or to web clients using their FCM tokens. It supports sending different types of
+    notifications with custom data payloads.
 
     Args:
-        topic (str): The topic to which the message will be sent.
+        topic (Optional[str]): The FCM topic to send the notification to for mobile devices.
+            If None, no topic notification will be sent.
         title (str): The title of the notification.
-        body (str): The body content of the notification.
-        action (str, optional): The action category for iOS devices. Defaults to 'new_alert'.
-        type (str, optional): The type of notification. Defaults to "alert".
-        coin (str, optional): The coin associated with the notification. Defaults to None.
+        body (str): The body text of the notification.
+        action (str, optional): The action category for the notification. Defaults to 'new_alert'.
+        type (str, optional): The type of the notification. Defaults to "alert".
+        coin (Optional[str], optional): The cryptocurrency coin related to the notification, if any.
+        timeframe (Optional[str], optional): The timeframe related to the notification, if any.
+        web_tokens (Optional[List[str]], optional): A list of FCM web tokens to send the notification to.
+            If None, no web notifications will be sent.
 
     Raises:
-        Exception: If there's an error sending the notification.
+        Exception: If there's an error sending the notification. The error message will contain details.
 
     Returns:
         None
+
+    Note:
+        - If both 'topic' and 'web_tokens' are provided, notifications will be sent to both channels.
+        - For mobile devices, the notification is sent using FCM topics.
+        - For web clients, the notification is sent using individual FCM tokens.
+        - The function prints success and failure messages to the console.
     """
-
     try:
-        # Convert type and coin to strings if they are not already
-        str_type = str(type)
-        str_coin = str(coin) if coin is not None else ''
-        str_timeframe = str(timeframe) if timeframe is not None else ''
-
         data_payload = {
-            "type": str_type,  # Ensure type is a string
-            "coin": str_coin,  # Ensure coin is a string, handle None case
-            "timeframe": str_timeframe
+            "type": str(type),
+            "coin": str(coin) if coin is not None else '',
+            "timeframe": str(timeframe) if timeframe is not None else ''
         }
 
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=body,
-            ),
-            data=data_payload,
-            topic=topic,
-            android=messaging.AndroidConfig(
-                priority='high',
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        sound='default',
-                        category=action
+        # Preparar la notificación base
+        notification = messaging.Notification(title=title, body=body)
+
+        # Para notificaciones basadas en topic (apps móviles)
+        if topic:
+            message = messaging.Message(
+                notification=notification,
+                data=data_payload,
+                topic=topic,
+                android=messaging.AndroidConfig(priority='high'),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(sound='default', category=action)
                     )
                 )
             )
-        )
+            response = messaging.send(message)
+            print(f"Successfully sent message to topic: {response}")
 
-        response = messaging.send(message)
-        print(response)
+        # Para clientes de aplicaciones web
+        if web_tokens:
+            web_config = messaging.WebpushConfig(
+                headers={'Urgency': 'high'},
+                notification={
+                    'icon': 'icon notification',
+                    'click_action': '#URL ID'
+                }
+            )
+            
+            # Enviar en lotes para mayor eficiencia
+            messages = [
+                messaging.Message(
+                    notification=notification,
+                    data=data_payload,
+                    token=token,
+                    webpush=web_config
+                ) for token in web_tokens
+            ]
+            
+            batch_response = messaging.send_all(messages)
+            print(f"Successfully sent {batch_response.success_count} messages to web clients")
+            if batch_response.failure_count > 0:
+                print(f"Failed to send {batch_response.failure_count} messages")
 
     except Exception as e:
         raise Exception(f"Error sending notification: {str(e)}")
-
-
-
-
+    
+    
 # Example usage
 # result, status_code = send_notification(
 #     topic='bitcoin_4999_m1_analysis',
