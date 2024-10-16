@@ -37,6 +37,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Set up Firebase service account
+      run: |
+        mkdir -p services/firebase
+        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > services/firebase/service-account.json
+
     - name: Deploy to Production
       run: |
         echo "Starting deployment to Production environment..."

@@ -34,12 +34,18 @@ jobs:
       PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
       PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
       DATABASE_URL_DEV: ${{ secrets.DATABASE_URL_DEV }}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    
+    - name: Set up Firebase service account
+      run: |
+        mkdir -p services/firebase
+        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > services/firebase/service-account.json
 
     - name: Deploy to Development
       run: |
