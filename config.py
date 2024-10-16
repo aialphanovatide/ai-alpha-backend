@@ -33,6 +33,7 @@ DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 if env == 'production':
     DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
+print('DATABASE_URL:', DATABASE_URL)
 engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
 Base = declarative_base()
 
