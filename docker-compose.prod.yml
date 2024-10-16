@@ -93,19 +93,19 @@ services:
       - -c
       - |
         echo "Starting ngrok configuration check..."
-        echo "NGROK_AUTHTOKEN value: ${NGROK_AUTHTOKEN:0:5}... (truncated for security)"
-        echo "NGROK_DOMAIN value: $NGROK_DOMAIN"
-        if [ -z "$NGROK_AUTHTOKEN" ]; then
+        echo "NGROK_AUTHTOKEN value: $${NGROK_AUTHTOKEN:0:5}... (truncated for security)"
+        echo "NGROK_DOMAIN value: $$NGROK_DOMAIN"
+        if [ -z "$$NGROK_AUTHTOKEN" ]; then
           echo "Error: NGROK_AUTHTOKEN is not set"
           exit 1
         fi
-        if [ -z "$NGROK_DOMAIN" ]; then
+        if [ -z "$$NGROK_DOMAIN" ]; then
           echo "Error: NGROK_DOMAIN is not set"
           exit 1
         fi
         echo "NGROK_AUTHTOKEN and NGROK_DOMAIN are properly set"
-        echo "Starting ngrok with command: ngrok http --domain=\"$NGROK_DOMAIN\" web:9003"
-        ngrok http --domain="$NGROK_DOMAIN" web:9003
+        echo "Starting ngrok with command: ngrok http --domain=\"$$NGROK_DOMAIN\" web:9003"
+        ngrok http --domain="$$NGROK_DOMAIN" web:9003
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
       - NGROK_DOMAIN=${NGROK_DOMAIN}
