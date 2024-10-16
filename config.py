@@ -1712,7 +1712,7 @@ def populate_categories_and_coins():
         session.close()
 
 
-populate_categories_and_coins()
+# populate_categories_and_coins()
 
 # ------------- CREATE DEFAULT SUPERADMIN -----------------------------
 
