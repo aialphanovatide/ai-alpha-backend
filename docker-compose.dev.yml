@@ -28,8 +28,8 @@ services:
 
   web_dev:
     build: .
-    expose:
-      - "9002"
+    ports:
+      - "9002:9002"
     volumes:
       - .:/app
     environment:
