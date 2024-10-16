@@ -26,7 +26,7 @@ services:
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - DATABASE_URL=postgresql://${POSTGRES_USER_DEV}:${POSTGRES_PASSWORD_DEV}@db_dev:5432/${POSTGRES_DB_DEV}
+      - DATABASE_URL=${DATABASE_URL_DEV}
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=3

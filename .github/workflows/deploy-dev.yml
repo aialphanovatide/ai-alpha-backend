@@ -30,6 +30,7 @@ jobs:
       POSTGRES_PORT_DEV: ${{ secrets.POSTGRES_PORT_DEV }}
       PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
       PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
+      DATABASE_URL_DEV: ${{ secrets.DATABASE_URL_DEV }}
 
     steps:
     - name: Checkout code
