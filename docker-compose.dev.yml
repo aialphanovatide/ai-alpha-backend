@@ -116,7 +116,7 @@ services:
       - "web_dev:9002"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-      - NGROK_DOMAIN=${NGROK_DOMAIN}
+      - NGROK_DOMAIN=${NGROK_DOMAIN_DEV}
     depends_on:
       - web_dev
     ports:
