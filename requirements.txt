@@ -4,9 +4,9 @@ SQLAlchemy==2.0.31
 Flask-SocketIO==5.3.6
 Flask-Cors==4.0.1
 flasgger==0.9.7.1
-pandas==2.2.2
-numpy==2.0.0
-plotly==5.22.0
+pandas
+numpy
+plotly
 openai==1.35.13
 firebase-admin==6.5.0
 google-cloud-firestore==2.16.1
