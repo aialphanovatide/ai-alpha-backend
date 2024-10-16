@@ -109,10 +109,10 @@ services:
     networks:
       - myapp_network
 
-networks:
-  myapp_network:
-    name: myapp_network
-
 volumes:
   postgres_data:
   pgadmin_data:
+
+networks:
+  myapp_network:
+    name: myapp_network
