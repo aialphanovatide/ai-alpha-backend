@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_DEV}
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
-      BACKUP_FILE: /backups/aialpha-database-16-10-2024.sql
+      BACKUP_FILE: /backups/aialpha-database-prod-16-10-24.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_DEV} -d ${POSTGRES_DB_DEV}"]
       interval: 5s
