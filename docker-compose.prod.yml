@@ -11,7 +11,7 @@ services:
       BACKUP_FILE: /backups/aialpha-database-16-10-2024.sql
       POSTGRES_DB: ${POSTGRES_DB_PROD}
       POSTGRES_USER: ${POSTGRES_USER_PROD}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
       interval: 5s

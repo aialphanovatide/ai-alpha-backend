@@ -1,6 +1,7 @@
 services:
   db_dev:
     image: postgres:16
+    restart: unless-stopped
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
       - ./backups:/backups
@@ -27,8 +28,8 @@ services:
 
   web_dev:
     build: .
-    ports:
-      - "9002:9002"
+    expose:
+      - "9002"
     volumes:
       - .:/app
     environment:
@@ -42,7 +43,7 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
-      # - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - AWS_ACCESS=${AWS_ACCESS}

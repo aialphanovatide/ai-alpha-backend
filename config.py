@@ -1441,12 +1441,6 @@ class Upgrades(Base):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
-session = Session()
-
-
-
 # -------------- NOTIFICATION SCHEMAS ------------
 
 class Topic(Base):
@@ -1516,6 +1510,9 @@ class Notification(Base):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+session = Session()
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
 
 # ------------- CREATE DEFAULT ROLES -------------------
