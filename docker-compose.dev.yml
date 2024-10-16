@@ -26,7 +26,7 @@ services:
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - DATABASE_URL=${DATABASE_URL_DEV}
+      - DATABASE_URL_DEV=${DATABASE_URL_DEV}
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=3
