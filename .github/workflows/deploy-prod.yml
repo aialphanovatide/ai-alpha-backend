@@ -70,7 +70,7 @@ jobs:
         
         health_check() {
           for i in {1..5}; do
-            if curl -f http://localhost:9003/health; then
+            if curl -f http://localhost:9002/health; then
               return 0
             fi
             echo "Health check attempt $i failed. Retrying in 30 seconds..."
