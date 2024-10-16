@@ -3,13 +3,17 @@ services:
     image: postgres:16
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_PROD}
+      POSTGRES_USER: ${POSTGRES_USER_PROD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
       interval: 5s
       timeout: 5s
       retries: 5
     expose:
-      - "5432"
+      - "5431:5432"
     networks:
       - myapp_network
 
