@@ -15,6 +15,8 @@ __pycache__/config.cpython-311.pyc
 *account.json
 *.db
 
+*backups/aialpha-database-prod-16-10-24.sql
+
 
 # Temporary files
 *.swp

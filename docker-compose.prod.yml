@@ -5,6 +5,8 @@ services:
     image: postgres:16
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+      - ./restore_db.sh:/docker-entrypoint-initdb.d/restore_db.sh
     env_file:
       - .env
     healthcheck:
@@ -16,6 +18,11 @@ services:
       - "5432"
     networks:
       - myapp_network
+    command: >
+      bash -c "
+        chmod +x /docker-entrypoint-initdb.d/restore_db.sh &&
+        docker-entrypoint.sh postgres
+      "
 
   web:
     build: .
