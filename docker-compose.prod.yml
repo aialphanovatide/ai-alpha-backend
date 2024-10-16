@@ -7,8 +7,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
       - ./restore_db.sh:/docker-entrypoint-initdb.d/restore_db.sh
-    env_file:
-      - .env
+    environment:
+      BACKUP_FILE: /backups/aialpha-database-16-10-2024.sql
+      POSTGRES_DB: ${POSTGRES_DB_PROD}
+      POSTGRES_USER: ${POSTGRES_USER_PROD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
       interval: 5s
@@ -109,10 +112,10 @@ services:
     networks:
       - myapp_network
 
-networks:
-  myapp_network:
-    name: myapp_network
-
 volumes:
   postgres_data:
   pgadmin_data:
+
+networks:
+  myapp_network:
+    name: myapp_network
