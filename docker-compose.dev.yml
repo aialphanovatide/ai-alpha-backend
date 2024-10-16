@@ -33,6 +33,8 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
+      
     depends_on:
       db_dev:
         condition: service_healthy
