@@ -19,8 +19,8 @@ services:
 
   web:
     build: .
-    expose:
-      - "9003"
+    ports:
+      - "9003:9002"
     volumes:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro
