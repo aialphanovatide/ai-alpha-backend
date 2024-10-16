@@ -30,6 +30,9 @@ services:
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=3
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     depends_on:
       db_dev:
         condition: service_healthy
