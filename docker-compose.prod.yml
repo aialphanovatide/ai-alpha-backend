@@ -11,7 +11,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 3
     expose:
       - "5431:5432"
     networks:
@@ -50,10 +50,10 @@ services:
       - myapp_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9003/health"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
   pgadmin:
     image: dpage/pgadmin4
