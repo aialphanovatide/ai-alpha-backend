@@ -10,9 +10,8 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB_PROD: ${{ secrets.POSTGRES_DB_PROD }}
+      POSTGRES_USER_PROD: ${{ secrets.POSTGRES_USER_PROD }}
       FLASK_ENV: production
       FLASK_DEBUG: 0
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
@@ -24,8 +23,6 @@ jobs:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_PRODUCT_ALERTS: ${{ secrets.SLACK_PRODUCT_ALERTS }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-      CHANNEL_ID_AI_ALPHA_FOUNDERS: ${{ secrets.CHANNEL_ID_AI_ALPHA_FOUNDERS }}
-      CALL_TO_TRADE_TOPIC_ID: ${{ secrets.CALL_TO_TRADE_TOPIC_ID }}
       MAIL_DEFAULT_SENDER: ${{ secrets.MAIL_DEFAULT_SENDER }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
       NGROK_DOMAIN: ${{ secrets.NGROK_DOMAIN }}
