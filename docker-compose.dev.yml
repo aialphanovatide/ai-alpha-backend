@@ -3,8 +3,11 @@ services:
     image: postgres:16
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
+<<<<<<< HEAD
       - ./backups:/backups
       - ./restore_db.sh:/docker-entrypoint-initdb.d/restore_db.sh
+=======
+>>>>>>> cb9cdbf88267e676277ca5c677f2a4c8a99ca479
     environment:
       POSTGRES_DB: ${POSTGRES_DB_DEV}
       POSTGRES_USER: ${POSTGRES_USER_DEV}
@@ -30,15 +33,30 @@ services:
       - "9002:9002"
     volumes:
       - .:/app
-    # env_file:
-    #   - .env
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - DATABASE_URL=postgresql://${POSTGRES_USER_DEV}:${POSTGRES_PASSWORD_DEV}@db_dev:5432/${POSTGRES_DB_DEV}
+      - DATABASE_URL_DEV=${DATABASE_URL_DEV}
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=3
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
+      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - AWS_ACCESS=${AWS_ACCESS}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_PRODUCT_ALERTS=${SLACK_PRODUCT_ALERTS}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - CHANNEL_ID_AI_ALPHA_FOUNDERS=${CHANNEL_ID_AI_ALPHA_FOUNDERS}
+      - CALL_TO_TRADE_TOPIC_ID=${CALL_TO_TRADE_TOPIC_ID}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+
     depends_on:
       db_dev:
         condition: service_healthy
@@ -89,17 +107,15 @@ services:
       - "http"
       - "--domain=${NGROK_DOMAIN_DEV}"
       - "web_dev:9002"
-    env_file:
-      - .env
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
       - web_dev
+    ports:
+      - "4043:4040"
     networks:
       - myapp_dev_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  
 
 networks:
   myapp_dev_network:

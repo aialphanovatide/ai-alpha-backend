@@ -31,14 +31,25 @@ services:
     volumes:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro
-    env_file:
-      - .env
     environment:
       - FLASK_ENV=production
-      - DATABASE_URL=postgresql://${POSTGRES_USER_PROD}:${POSTGRES_PASSWORD_PROD}@db:5432/${POSTGRES_DB_PROD}
+      - DATABASE_URL_PROD=${DATABASE_URL_PROD}
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=2
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
+      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - AWS_ACCESS=${AWS_ACCESS}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_PRODUCT_ALERTS=${SLACK_PRODUCT_ALERTS}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - CHANNEL_ID_AI_ALPHA_FOUNDERS=${CHANNEL_ID_AI_ALPHA_FOUNDERS}
     depends_on:
       db:
         condition: service_healthy
@@ -89,10 +100,12 @@ services:
       - "http"
       - "--domain=${NGROK_DOMAIN}"
       - "web:9003"
-    env_file:
-      - .env
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
       - web
+    ports:
+      - "4044:4040"
     networks:
       - myapp_network
 

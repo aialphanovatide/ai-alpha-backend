@@ -20,7 +20,7 @@
   "tags": [
     {
       "name": "Analysis",
-      "description": "Operations related to the Analysis"
+      "description": "Operations related to the Analysis (Daily Deeps)"
     },
     {
       "name": "Admin",
@@ -52,7 +52,7 @@
     },
     {
       "name": "Narrative trading",
-      "description": "Operations related to the Narrative Trading"
+      "description": "Operations related to the Narrative Trading (Market Narrative)"
     },
     {
       "name": "User",

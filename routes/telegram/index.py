@@ -48,7 +48,7 @@ def send_telegram_message(chat_id: int, text: str) -> Dict[str, Any]:
 
 
 
-@telegram_bp.route('/', methods=['POST'])
+@telegram_bp.route('/chat', methods=['POST'])
 async def webhook():
     """
     Handle incoming updates from Telegram.

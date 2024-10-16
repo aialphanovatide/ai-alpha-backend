@@ -10,10 +10,13 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_USER_DEV: ${{ secrets.POSTGRES_USER_DEV }}
+      POSTGRES_PASSWORD_DEV: ${{ secrets.POSTGRES_PASSWORD_DEV }}
+      POSTGRES_DB_DEV: ${{ secrets.POSTGRES_DB_DEV }}
       FLASK_ENV: development
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       FLASK_DEBUG: 1
       NEWS_BOT_API_KEY: ${{ secrets.NEWS_BOT_API_KEY }}
       AWS_ACCESS: ${{ secrets.AWS_ACCESS }}
@@ -25,12 +28,24 @@ jobs:
       CALL_TO_TRADE_TOPIC_ID: ${{ secrets.CALL_TO_TRADE_TOPIC_ID }}
       MAIL_DEFAULT_SENDER: ${{ secrets.MAIL_DEFAULT_SENDER }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+      NGROK_DOMAIN_DEV: ${{ secrets.NGROK_DOMAIN_DEV }}
+      POSTGRES_PORT_DEV: ${{ secrets.POSTGRES_PORT_DEV }}
+      PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
+      PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
+      DATABASE_URL_DEV: ${{ secrets.DATABASE_URL_DEV }}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    
+    - name: Set up Firebase service account
+      run: |
+        mkdir -p services/firebase
+        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > services/firebase/service-account.json
 
     - name: Deploy to Development
       run: |
@@ -48,12 +63,12 @@ jobs:
         git pull origin develop
         
         start_containers() {
-          docker-compose -f docker-compose.dev.yml up -d --build
+          docker-compose -f docker-compose.dev.yml -p ai-alpha-dev up -d --build
           return $?
         }
         
         stop_containers() {
-          docker-compose -f docker-compose.dev.yml down
+          docker-compose -f docker-compose.dev.yml -p ai-alpha-dev down
         }
         
         health_check() {
@@ -85,7 +100,7 @@ jobs:
         echo "Starting containers..."
         if start_containers; then
           echo "Waiting for services to start..."
-          sleep 150
+          sleep 80
           echo "Performing health check..."
           if health_check; then
             echo "Deployment successful. Health check passed."
