@@ -3,8 +3,8 @@ services:
     image: postgres:16
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB_DEV}
       POSTGRES_USER: ${POSTGRES_USER_DEV}
@@ -25,8 +25,8 @@ services:
       - "9002:9002"
     volumes:
       - .:/app
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
