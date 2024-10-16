@@ -15,6 +15,9 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       FLASK_ENV: production
       FLASK_DEBUG: 0
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       NEWS_BOT_API_KEY: ${{ secrets.NEWS_BOT_API_KEY }}
       AWS_ACCESS: ${{ secrets.AWS_ACCESS }}
       AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
@@ -26,6 +29,7 @@ jobs:
       MAIL_DEFAULT_SENDER: ${{ secrets.MAIL_DEFAULT_SENDER }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
       NGROK_DOMAIN: ${{ secrets.NGROK_DOMAIN }}
+      NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
 
     steps:
     - name: Checkout code
@@ -49,17 +53,17 @@ jobs:
         git pull origin main
         
         start_containers() {
-          docker-compose -f docker-compose.prod.yml up -d --build
+          docker-compose -f docker-compose.prod.yml -p ai-alpha-prod up -d --build
           return $?
         }
         
         stop_containers() {
-          docker-compose -f docker-compose.prod.yml down
+          docker-compose -f docker-compose.prod.yml -p ai-alpha-prod down
         }
         
         health_check() {
           for i in {1..5}; do
-            if curl -f http://localhost:5000/api/get/allTopStories; then
+            if curl -f http://localhost:9003/health; then
               return 0
             fi
             echo "Health check attempt $i failed. Retrying in 30 seconds..."
@@ -86,7 +90,7 @@ jobs:
         echo "Starting containers..."
         if start_containers; then
           echo "Waiting for services to start..."
-          sleep 150
+          sleep 120
           echo "Performing health check..."
           if health_check; then
             echo "Deployment successful. Health check passed."

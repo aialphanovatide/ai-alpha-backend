@@ -24,11 +24,9 @@ services:
     volumes:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro
-    env_file:
-      - .env
     environment:
       - FLASK_ENV=production
-      - DATABASE_URL=postgresql://${POSTGRES_USER_PROD}:${POSTGRES_PASSWORD_PROD}@db:5432/${POSTGRES_DB_PROD}
+      - DATABASE_URL_PROD=${DATABASE_URL_PROD}
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=2
@@ -82,8 +80,8 @@ services:
       - "http"
       - "--domain=${NGROK_DOMAIN}"
       - "web:9003"
-    env_file:
-      - .env
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
       - web
     networks:

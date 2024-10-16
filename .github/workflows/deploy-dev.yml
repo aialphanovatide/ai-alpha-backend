@@ -14,6 +14,9 @@ jobs:
       POSTGRES_PASSWORD_DEV: ${{ secrets.POSTGRES_PASSWORD_DEV }}
       POSTGRES_DB_DEV: ${{ secrets.POSTGRES_DB_DEV }}
       FLASK_ENV: development
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       FLASK_DEBUG: 1
       NEWS_BOT_API_KEY: ${{ secrets.NEWS_BOT_API_KEY }}
       AWS_ACCESS: ${{ secrets.AWS_ACCESS }}
