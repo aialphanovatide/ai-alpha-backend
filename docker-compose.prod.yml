@@ -19,8 +19,8 @@ services:
 
   web:
     build: .
-    ports:
-      - "9003:9002"
+    expose:
+      - "9002"
     volumes:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro
@@ -90,7 +90,7 @@ services:
     command:
       - "http"
       - "--domain=${NGROK_DOMAIN}"
-      - "web:9003"
+      - "web:9002"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
