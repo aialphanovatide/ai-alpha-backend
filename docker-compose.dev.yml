@@ -112,20 +112,20 @@ services:
     restart: unless-stopped
     command:
       - "http"
-      - "--domain=${NGROK_DOMAIN}"
-      - "web:9003"
+      - "--domain=${NGROK_DOMAIN_DEV}"
+      - "web_dev:9002"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
       - NGROK_DOMAIN=${NGROK_DOMAIN}
     depends_on:
-      - web
+      - web_dev
     ports:
-      - "4044:4040"
+      - "4043:4040"
     networks:
-      - myapp_network
+      - myapp_dev_network
     entrypoint: >
       /bin/sh -c "
-      echo 'NGROK_DOMAIN: '$$NGROK_DOMAIN;
+      echo 'NGROK_DOMAIN: '$$NGROK_DOMAIN_DEV;
       echo 'NGROK_AUTHTOKEN: '$${NGROK_AUTHTOKEN:0:4}'****'$${NGROK_AUTHTOKEN: -4};
       exec ngrok $${@}"
 
