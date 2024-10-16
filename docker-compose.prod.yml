@@ -88,7 +88,6 @@ services:
   ngrok:
     image: ngrok/ngrok:latest
     command:
-      - "ngrok"
       - "http"
       - "--domain=${NGROK_DOMAIN}"
       - "web:9003"
