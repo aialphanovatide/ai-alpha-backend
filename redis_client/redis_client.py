@@ -9,21 +9,16 @@ REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_DB = int(os.getenv('REDIS_DB', 0))
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 
-redis_client = redis.Redis(
+redis_client=redis.Redis(
     host=REDIS_HOST,
     port=REDIS_PORT,
     db=REDIS_DB,
-    password=REDIS_PASSWORD,
     decode_responses=True
 )
 
-# try:
-#     if redis_client.ping():
-#         print('Successfully connected to Redis')
-#     else:
-#         print('Failed to connect to Redis')
-# except Exception as e:
-#     raise Exception(f'Error connecting to redis client: {str(e)}')
+
+if REDIS_PASSWORD:
+    redis_client['password'] = REDIS_PASSWORD
 
 
 def cache_with_redis(expiration=300):
