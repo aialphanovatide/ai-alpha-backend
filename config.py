@@ -30,6 +30,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 env = os.getenv('FLASK_ENV', 'development')
 DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
+print('DATABASE_URL:', DATABASE_URL)
 if env == 'production':
     DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
