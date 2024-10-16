@@ -3,11 +3,8 @@ services:
     image: postgres:16
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-<<<<<<< HEAD
       - ./backups:/backups
       - ./restore_db.sh:/docker-entrypoint-initdb.d/restore_db.sh
-=======
->>>>>>> cb9cdbf88267e676277ca5c677f2a4c8a99ca479
     environment:
       POSTGRES_DB: ${POSTGRES_DB_DEV}
       POSTGRES_USER: ${POSTGRES_USER_DEV}
@@ -115,12 +112,11 @@ services:
       - "4043:4040"
     networks:
       - myapp_dev_network
-  
-
-networks:
-  myapp_dev_network:
-    name: myapp_dev_network
 
 volumes:
   postgres_data_dev:
   pgadmin_data:
+
+networks:
+  myapp_dev_network:
+    name: myapp_dev_network
