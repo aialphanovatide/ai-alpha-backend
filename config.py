@@ -1441,8 +1441,6 @@ class Upgrades(Base):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
-# -------------- NOTIFICATION SCHEMAS ------------
-
 class Topic(Base):
     """
     Represents a topic in the system.
@@ -1514,6 +1512,9 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session()
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+session = Session()
 
 # ------------- CREATE DEFAULT ROLES -------------------
 
@@ -1551,7 +1552,7 @@ def initialize_default_roles():
         session.close()
 
 
-initialize_default_roles()
+# initialize_default_roles()
 
 # ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
 
@@ -1613,7 +1614,7 @@ def init_user_data():
         session.close()
 
 
-init_user_data()
+# init_user_data()
 
 # ------------- CREATE DEFAULR CATEGORIES AND COINS -------------------
 
@@ -1764,7 +1765,7 @@ def init_superadmin():
         session.close()
 
 
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
@@ -1847,7 +1848,7 @@ def populate_topics():
             raise Exception(f'Unexpected error while populating topics: {str(e)}')
 
         
-populate_topics()
+# populate_topics()
 
 # --------------CREATE DEFAULT API KEY FOR SUPERADMIN -------------------
 
@@ -1896,4 +1897,4 @@ def create_superadmin_api_key():
     finally:
         session.close()
 
-create_superadmin_api_key()
+# create_superadmin_api_key()
