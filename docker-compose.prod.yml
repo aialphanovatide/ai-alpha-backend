@@ -97,6 +97,8 @@ services:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
       - web
+    ports:
+      - "4044:4040"
     networks:
       - myapp_network
 
