@@ -13,6 +13,7 @@ jobs:
       POSTGRES_DB_PROD: ${{ secrets.POSTGRES_DB_PROD }}
       POSTGRES_USER_PROD: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD_PROD: ${{ secrets.POSTGRES_PASSWORD_PROD }}
+      DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
       FLASK_ENV: production
       FLASK_DEBUG: 0
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
