@@ -15,8 +15,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
-    expose:
-      - "5432"
+    ports:
+      - "5435:5432"
     networks:
       - myapp_network
     command: >
@@ -27,8 +27,8 @@ services:
 
   web:
     build: .
-    expose:
-      - "9003"
+    ports:
+      - "9003:9002"
     volumes:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro

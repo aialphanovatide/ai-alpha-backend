@@ -1612,7 +1612,7 @@ def init_user_data():
         session.close()
 
 
-init_user_data()
+# init_user_data()
 
 # ------------- CREATE DEFAULR CATEGORIES AND COINS -------------------
 
@@ -1710,7 +1710,7 @@ def populate_categories_and_coins():
         session.close()
 
 
-populate_categories_and_coins()
+# populate_categories_and_coins()
 
 # ------------- CREATE DEFAULT SUPERADMIN -----------------------------
 
@@ -1763,7 +1763,7 @@ def init_superadmin():
         session.close()
 
 
-init_superadmin()
+# init_superadmin()
 
 
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
@@ -1846,7 +1846,7 @@ def populate_topics():
             raise Exception(f'Unexpected error while populating topics: {str(e)}')
 
         
-populate_topics()
+# populate_topics()
 
 # --------------CREATE DEFAULT API KEY FOR SUPERADMIN -------------------
 
@@ -1895,4 +1895,4 @@ def create_superadmin_api_key():
     finally:
         session.close()
 
-create_superadmin_api_key()
+# create_superadmin_api_key()
