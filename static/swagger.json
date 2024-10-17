@@ -4473,7 +4473,9 @@
                   "type": "number"
                 },
                 "is_essential": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Indicates if the support and resistance lines are essential for the coin",
+                  "default": false
                 }
               },
               "required": [
