@@ -4471,6 +4471,9 @@
                 },
                 "resistance_4": {
                   "type": "number"
+                },
+                "is_essential": {
+                  "type": "boolean"
                 }
               },
               "required": [
