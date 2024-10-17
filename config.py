@@ -1550,7 +1550,7 @@ def initialize_default_roles():
         session.close()
 
 
-initialize_default_roles()
+# initialize_default_roles()
 
 # ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
 
