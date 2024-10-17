@@ -15,7 +15,7 @@ services:
       interval: 20s
       timeout: 10s
       retries: 3
-    expose:
+    ports:
       - "5431:5432"
     networks:
       - myapp_network
