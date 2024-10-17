@@ -130,7 +130,7 @@ def save_chart():
                 title=f"{coin_symbol} Support/Resistance Update",  
                 body="Check the New Levels!",
                 type="s_and_r",
-                temporality=""  
+                timeframe=""  
             )
         
         response["message"] = "New chart record created successfully"
