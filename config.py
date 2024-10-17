@@ -1441,7 +1441,6 @@ class Upgrades(Base):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
-
 class Topic(Base):
     """
     Represents a topic in the system.
@@ -1512,9 +1511,8 @@ class Notification(Base):
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session()
-
-
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
+
 
 # ------------- CREATE DEFAULT ROLES -------------------
 

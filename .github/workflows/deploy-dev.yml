@@ -100,7 +100,7 @@ jobs:
         echo "Starting containers..."
         if start_containers; then
           echo "Waiting for services to start..."
-          sleep 60
+          sleep 50
           echo "Performing health check..."
           if health_check; then
             echo "Deployment successful. Health check passed."

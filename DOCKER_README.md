@@ -89,7 +89,7 @@ docker compose logs -f service_name
 
 ### Start Specific Service Group
 ```bash
-docker-compose -f docker-compose-dev.yml -p ai-alpha-dev up -d
+docker-compose -f docker-compose.dev.yml -p ai-alpha-dev up -d
 ```
 
 ## Volume Management

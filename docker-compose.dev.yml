@@ -1,12 +1,16 @@
 services:
   db_dev:
     image: postgres:16
+    restart: unless-stopped
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
+      - ./backups:/backups
+      - ./restore_db.sh:/docker-entrypoint-initdb.d/restore_db.sh
     environment:
       POSTGRES_DB: ${POSTGRES_DB_DEV}
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
+      BACKUP_FILE: /backups/aialpha-database-prod-16-10-24.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_DEV} -d ${POSTGRES_DB_DEV}"]
       interval: 5s
@@ -16,6 +20,11 @@ services:
       - "5433:5432"
     networks:
       - myapp_dev_network
+    command: >
+      bash -c "
+        chmod +x /docker-entrypoint-initdb.d/restore_db.sh &&
+        docker-entrypoint.sh postgres
+      "
 
   web_dev:
     build: .
@@ -106,11 +115,10 @@ services:
     networks:
       - myapp_dev_network
   
+volumes:
+  postgres_data_dev:
+  pgadmin_data:
 
 networks:
   myapp_dev_network:
     name: myapp_dev_network
-
-volumes:
-  postgres_data_dev:
-  pgadmin_data:
