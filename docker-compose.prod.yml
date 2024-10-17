@@ -15,8 +15,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
-    expose:
-      - "5432"
+    ports:
+      - "5435:5432"
     networks:
       - myapp_network
     command: >
@@ -42,7 +42,7 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
-      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      # - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
       - AWS_ACCESS=${AWS_ACCESS}
