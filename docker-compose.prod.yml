@@ -12,8 +12,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
-      interval: 5s
-      timeout: 5s
+      interval: 20s
+      timeout: 10s
       retries: 3
     ports:
       - "5435:5432"
@@ -42,7 +42,7 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
-      # - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
       - AWS_ACCESS=${AWS_ACCESS}
@@ -50,7 +50,6 @@ services:
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_PRODUCT_ALERTS=${SLACK_PRODUCT_ALERTS}
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - CHANNEL_ID_AI_ALPHA_FOUNDERS=${CHANNEL_ID_AI_ALPHA_FOUNDERS}
     depends_on:
       db:
         condition: service_healthy
@@ -58,11 +57,11 @@ services:
     networks:
       - myapp_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9003/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
   pgadmin:
     image: dpage/pgadmin4
@@ -96,11 +95,10 @@ services:
 
   ngrok:
     image: ngrok/ngrok:latest
-    restart: unless-stopped
     command:
       - "http"
       - "--domain=${NGROK_DOMAIN}"
-      - "web:9003"
+      - "web:9002"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:

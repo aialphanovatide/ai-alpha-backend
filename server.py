@@ -137,7 +137,7 @@ if __name__ == '__main__':
             print('---AI Alpha API is running---') 
             app.run(port=9002, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
-        print(f"Failed to start the AI Alpha server: {e}")
+        print(f"Failed to start the AI Alpha server: {e} ")
     finally:
         # send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
         #                                     title_message="*CRITICAL ERROR*", 
