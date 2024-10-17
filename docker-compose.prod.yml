@@ -27,8 +27,8 @@ services:
 
   web:
     build: .
-    expose:
-      - "9003"
+    ports:
+      - "9003:9002"
     volumes:
       - ./app:/app/app:ro
       - ./migrations:/app/migrations:ro
@@ -58,7 +58,7 @@ services:
     networks:
       - myapp_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9003/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -100,7 +100,7 @@ services:
     command:
       - "http"
       - "--domain=${NGROK_DOMAIN}"
-      - "web:9003"
+      - "web:9002"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
