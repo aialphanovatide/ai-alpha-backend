@@ -50,7 +50,7 @@ services:
         echo 'PostgreSQL Environment:'
         echo 'POSTGRES_DB: '${POSTGRES_DB_PROD}
         echo 'POSTGRES_USER: '${POSTGRES_USER_PROD}
-        echo 'BACKUP_FILE: '${BACKUP_FILE}
+        echo 'POSTGRES_PASSWORD: '${POSTGRES_PASSWORD_PROD}
         echo 'Setting execute permissions for restore_db.sh'
         chmod +x /docker-entrypoint-initdb.d/restore_db.sh
         echo 'Contents of /docker-entrypoint-initdb.d:'

@@ -44,6 +44,13 @@ until pg_isready -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB"; do
     sleep 2
 done
 
+echo "PostgreSQL is ready. Listing existing databases:"
+
+# List all existing databases
+psql -U "$POSTGRES_USER" -c "\l"
+
+echo "Checking if database $POSTGRES_DB exists..."
+
 echo "Database is ready. Checking if it's empty..."
 
 # Check if the database is empty
