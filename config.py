@@ -1512,9 +1512,7 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 session = Session()
 ROOT_DIRECTORY = Path(__file__).parent.resolve()
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
-session = Session()
+
 
 # ------------- CREATE DEFAULT ROLES -------------------
 
