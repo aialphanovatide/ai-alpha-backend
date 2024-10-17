@@ -1763,7 +1763,7 @@ def init_superadmin():
         session.close()
 
 
-# init_superadmin()
+init_superadmin()
 
 
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
