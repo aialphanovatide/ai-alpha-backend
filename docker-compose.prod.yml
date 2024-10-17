@@ -6,16 +6,15 @@ services:
       - ./backups:/backups
       - ./restore_db.sh:/docker-entrypoint-initdb.d/restore_db.sh
     environment:
+      BACKUP_FILE: /backups/aialpha-database-prod-16-10-24.sql
       POSTGRES_DB: ${POSTGRES_DB_PROD}
       POSTGRES_USER: ${POSTGRES_USER_PROD}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
-      BACKUP_FILE: /backups/aialpha-database-prod-16-10-24.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
-      interval: 30s
-      timeout: 20s
+      interval: 20s
+      timeout: 10s
       retries: 3
-      start_period: 40s
     ports:
       - "5435:5432"
     networks:
