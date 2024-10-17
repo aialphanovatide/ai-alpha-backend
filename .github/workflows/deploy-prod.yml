@@ -92,21 +92,21 @@ jobs:
           fi
         }
         
-        echo "Stopping containers..."
+        echo "............Stopping containers............"
         stop_containers
-        echo "Starting containers..."
+        echo "............Starting containers............"
         if start_containers; then
-          echo "Waiting for services to start..."
+          echo "............Waiting for services to start............"
           sleep 60
-          echo "Performing health check..."
+          echo "............Performing health check............"
           if health_check; then
-            echo "Deployment successful. Health check passed."
+            echo "............Deployment successful. Health check passed............"
           else
-            echo "Health check failed. Rolling back..."
+            echo "............Health check failed. Rolling back............"
             rollback
           fi
         else
-          echo "Failed to start containers. Rolling back..."
+          echo "............Failed to start containers. Rolling back............"
           rollback
         fi
 
@@ -114,9 +114,9 @@ jobs:
       if: always()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          echo "Deployment to Production completed successfully!"
+          echo "............Deployment to Production completed successfully!............"
         else
-          echo "Deployment to Production failed. Please check the logs for details."
+          echo "............Deployment to Production failed. Please check the logs for details............"
         fi
 
     - name: Debug Information
