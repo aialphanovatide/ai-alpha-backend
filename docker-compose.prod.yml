@@ -47,12 +47,14 @@ services:
     command: >
       bash -c "
         set -e
+        echo 'PostgreSQL Environment:'
+        echo 'POSTGRES_DB: '${POSTGRES_DB_PROD}
+        echo 'POSTGRES_USER: '${POSTGRES_USER_PROD}
+        echo 'BACKUP_FILE: '${BACKUP_FILE}
         echo 'Setting execute permissions for restore_db.sh'
         chmod +x /docker-entrypoint-initdb.d/restore_db.sh
         echo 'Contents of /docker-entrypoint-initdb.d:'
         ls -la /docker-entrypoint-initdb.d/
-        echo 'Executing restore_db.sh'
-        /docker-entrypoint-initdb.d/restore_db.sh
         echo 'Starting PostgreSQL'
         docker-entrypoint.sh postgres
       "
