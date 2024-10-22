@@ -45,6 +45,11 @@ def create_hack():
         if not coin_bot_id:
             return jsonify({'error': 'Coin ID is required', 'status': 400}), 400
         
+        # Verificar si el coin_bot_id existe
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_bot_id).first()
+        if not coin_bot:
+            return jsonify({'error': f'Coin with ID {coin_bot_id} does not exist', 'status': 400}), 400
+        
         new_hack = Hacks(
             hack_name=data.get('hackName'),
             date=data.get('date'),
@@ -57,7 +62,7 @@ def create_hack():
         session.add(new_hack)
         session.commit()
 
-        return jsonify({'message': f'New hack record added', 'status': 201}), 201
+        return jsonify({'message': 'New hack record added', 'status': 201}), 201
     except Exception as e:
         session.rollback()
         return jsonify({'error': f'Error creating hack: {str(e)}', 'status': 500}), 500
