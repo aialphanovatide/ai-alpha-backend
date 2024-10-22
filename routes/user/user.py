@@ -13,9 +13,11 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
 # from redis_client.redis_client import cache_with_redis, update_cache_with_redis
-from routes.user.utils import is_valid_student_email
+from routes.user.utils import allowed_file, is_valid_student_email
+from services.aws.s3 import ImageProcessor
 from services.email.email_verification import EmailService
 
+uploader = ImageProcessor()
 user_bp = Blueprint('user', __name__)
 secret_key = os.urandom(24).hex()
 load_dotenv()
@@ -645,3 +647,62 @@ def confirm_email():
         flash('An unexpected error occurred', 'error')
         return render_template('error_email.html')
 
+
+@user_bp.route('/upload-student-certification', methods=['POST'])
+def upload_student_certification():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    email = request.form.get('email')
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = file.filename
+    
+        image_url_s3 = f'https://studentfiles.s3.us-east-2.amazonaws.com/{filename}'
+
+        # Subir archivo a S3
+        icon_url = uploader.upload_to_s3(file, 'studentfiles', filename)
+        
+        if not icon_url:
+            return jsonify({'error': 'Failed to upload file to S3'}), 500
+
+        try:
+            with Session() as session:
+                # Buscar usuario por email
+                user = session.query(User).filter_by(email=email).first()
+                
+                if not user:
+                    return jsonify({'error': 'User not found'}), 404
+
+                # Crear nueva instancia de UserVerification
+                new_verification = UserVerification(
+                    user_id=user.user_id,
+                    country=None,
+                    university=None,
+                    email=user.email,
+                    email_verified=True,
+                    certification_url=image_url_s3,
+                    certification_verified=True,
+                    created_at=datetime.datetime.now(),
+                    updated_at=datetime.datetime.now()
+                )
+
+                session.add(new_verification)
+                session.commit()
+
+            return jsonify({
+                'message': 'Certification uploaded successfully',
+                'certification_url': image_url_s3
+            }), 200
+
+        except Exception as e:
+            session.rollback()
+            return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+    return jsonify({'error': 'File type not allowed'}), 400

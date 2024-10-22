@@ -11,6 +11,13 @@ from requests import Session
 from config import User
 
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 def is_valid_student_email(email):
     # Check if email ends with .edu or .uni
     if re.search(r'\.(edu|uni|com)$', email):
