@@ -54,7 +54,7 @@ def before_request():
         return
 
     # List of endpoints to exclude from API key check
-    excluded_endpoints = ['user.verify_email', 'user.confirm_email', 'user.profile-verified']
+    excluded_endpoints = ['user.verify_email', 'user.confirm_email', 'user.upload_student_certification']
 
     if request.endpoint in excluded_endpoints:
         return  # Skip API key check for these specific endpoints
