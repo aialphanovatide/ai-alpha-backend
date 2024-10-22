@@ -33,7 +33,6 @@ DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 if env == 'production':
     DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
-print('DATABASE_URL:', DATABASE_URL)
 engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
 Base = declarative_base()
 
@@ -455,6 +454,48 @@ class User(Base):
         """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
+class UserVerification(Base):
+    """
+    Represents the verification status of a user, including email verification and certification.
+    
+    Attributes:
+        id (int): Primary key, auto-incremented.
+        user_id (int): Foreign key referencing the user in the User table. Cannot be null.
+        country (str): The country of the user (up to 100 characters).
+        university (str): The name of the user's university (up to 255 characters).
+        email (str): The user's email address. Cannot be null.
+        email_verified (bool): Indicates if the user's email is verified. Defaults to False.
+        certification_url (str): The URL to the user's certification document.
+        certification_verified (bool): Indicates if the certification has been verified.
+        created_at (TIMESTAMP): Timestamp when the verification was created.
+        updated_at (TIMESTAMP): Timestamp when the verification was last updated.
+    """
+    
+    __tablename__ = 'user_verifications'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=False)  # Foreign key to User table
+    country = Column(String(100))
+    university = Column(String(255))
+    token = Column(String(255), unique=True) 
+    email = Column(String(255), nullable=False)
+    email_verified = Column(Boolean, default=False)
+    certification_url = Column(String(255))
+    certification_verified = Column(Boolean)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationship with User
+    user = relationship('User', backref='verifications')
+
+    def as_dict(self):
+        """
+        Convert the UserVerification object to a dictionary.
+
+        Returns:
+            dict: A dictionary containing all the columns of the UserVerification object.
+        """
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class PurchasedPlan(Base):
     """
@@ -494,6 +535,8 @@ class PurchasedPlan(Base):
     
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+
     
 
 class Category(Base):

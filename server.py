@@ -48,15 +48,21 @@ template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templa
 mail = Mail(app)
 email_service = EmailService(app)
 
-# Check API key for all requests
 @app.before_request
 def before_request():
     if request.method == 'OPTIONS':
         return
+
+    # List of endpoints to exclude from API key check
+    excluded_endpoints = ['user.verify_email', 'user.confirm_email', 'user.profile-verified']
+
+    if request.endpoint in excluded_endpoints:
+        return  # Skip API key check for these specific endpoints
+
     result = check_api_key()
     if result is not None:
         return result
-
+    
 # Initialize SocketIO
 socketio = init_socketio(app)
 

@@ -1,15 +1,25 @@
+import datetime
 import secrets
 import string
+import jwt
+import os
+from dotenv import load_dotenv
+import requests
 from sqlalchemy import exc
 from sqlalchemy.orm import joinedload
-from flask import jsonify, request, Blueprint
-from config import PurchasedPlan, Session, User
+from flask import jsonify, render_template, request, Blueprint, redirect, url_for, flash
+from config import PurchasedPlan, Session, User, UserVerification
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
-from redis_client.redis_client import cache_with_redis, update_cache_with_redis
+# from redis_client.redis_client import cache_with_redis, update_cache_with_redis
+from routes.user.utils import is_valid_student_email
+from services.email.email_verification import EmailService
 
 user_bp = Blueprint('user', __name__)
+secret_key = os.urandom(24).hex()
+load_dotenv()
+BASE_URL_API = os.getenv('BASE_URL_API')
 
 def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
@@ -24,7 +34,7 @@ def generate_unique_short_token(length=7, max_attempts=100):
 
 
 @user_bp.route('/user', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans'])
 def set_new_user():
     """
     Register a new user in the system.
@@ -94,7 +104,7 @@ def set_new_user():
     
     
 @user_bp.route('/user/<int:user_id>', methods=['PUT'])
-@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def edit_user_data(user_id):
     """
     Edit user data identified by user ID.
@@ -161,7 +171,7 @@ def edit_user_data(user_id):
     
 
 @user_bp.route('/users', methods=['GET'])
-@cache_with_redis()
+# @cache_with_redis()
 def get_all_users_with_plans():
     """
     Retrieve all users with their purchased plans, with optional pagination.
@@ -247,7 +257,7 @@ def get_all_users_with_plans():
 
 
 @user_bp.route('/user', methods=['GET'])
-@cache_with_redis()
+# @cache_with_redis()
 def get_user_with_plans():
     """
     Retrieve a specific user with their purchased plans.
@@ -325,7 +335,7 @@ def get_user_with_plans():
 
 
 @user_bp.route('/package', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def save_package():
     """
     Save a new purchased plan for a user.
@@ -391,7 +401,7 @@ def save_package():
     
 
 @user_bp.route('/package', methods=['PUT'])
-@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def unsubscribe_package():
     """
     Unsubscribe a user from a purchased plan by setting is_subscribed to False.
@@ -464,7 +474,7 @@ def unsubscribe_package():
     
 
 @user_bp.route('/user', methods=['DELETE'])
-@update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
 def delete_user_account():
     """
     Delete a user account identified by auth0id or email.
@@ -526,3 +536,112 @@ def delete_user_account():
             session.rollback()
             response['message'] = f'Unexpected error: {str(e)}'
             return jsonify(response), 500
+
+
+@user_bp.route('/verify-student-email', methods=['POST'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_users_with_plans', 'get_user_with_plans'])
+def verify_email():
+    response = {'success': False, 'message': None}
+    data = request.json
+
+    user_email = data.get('user_email')
+    student_email = data.get('student_email')
+    country = data.get('country')
+    university = data.get('university')
+
+    if not user_email or not student_email:
+        response['message'] = 'Both user email and student email are required'
+        return jsonify(response), 400
+
+    try:
+        with Session() as session:
+            user = session.query(User).filter_by(email=user_email).first()
+
+            if not user:
+                response['message'] = 'User not found'
+                return jsonify(response), 404
+
+            existing_verification = session.query(UserVerification).filter_by(user_id=user.user_id).first()
+            if existing_verification and existing_verification.email_verified:
+                response['message'] = 'Email already verified'
+                return jsonify(response), 400
+
+            if not is_valid_student_email(student_email):
+                response['message'] = 'Invalid student email'
+                return jsonify(response), 400
+
+             # Generate a unique token
+            verification_token = secrets.token_urlsafe(32)
+            
+            # Create a verification link
+            verification_link = f"http://127.0.0.1:9002/confirm-email?token={verification_token}"
+
+            # Send verification email
+            email_service = EmailService()
+            email_result = email_service.send_verification_email(student_email, verification_link)
+
+            if email_result['success']:
+                # If email was sent successfully, proceed with verification
+                new_verification = UserVerification(
+                    user_id=user.user_id,
+                    country=country,
+                    university=university,
+                    email=student_email,
+                    email_verified=False,  # Set to False initially
+                    token=verification_token,  # Store the token
+                    created_at=datetime.datetime.now(),
+                    updated_at=datetime.datetime.now()
+                )
+                
+                session.add(new_verification)
+                session.commit()
+
+                response['success'] = True
+                response['message'] = 'Verification email sent successfully'
+                return jsonify(response), 200
+            else:
+                response['message'] = f'Failed to send verification email: {email_result["message"]}'
+                return jsonify(response), 500
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        response['message'] = f'Database error: {str(e)}'
+        return jsonify(response), 500
+    except Exception as e:
+        session.rollback()
+        response['message'] = f'An unexpected error occurred: {str(e)}'
+        return jsonify(response), 500
+
+
+
+@user_bp.route('/confirm-email', methods=['GET'])
+def confirm_email():
+    try:
+        token = request.args.get('token')
+        if not token:
+            flash('Verification token is required', 'error')
+            return render_template('error_email.html')
+            
+        with Session() as session:
+            verification = session.query(UserVerification).filter_by(token=token).first()
+            
+            if not verification:
+                flash('Invalid verification token', 'error')
+                return render_template('error_email.html')
+                
+            if verification.email_verified:
+                flash('Email already verified', 'info')
+                return render_template('error_email.html')
+                
+            # Actualizar el estado de verificación
+            verification.email_verified = True
+            verification.updated_at = datetime.datetime.now()
+            session.commit()
+            
+            # Renderizar directamente la plantilla de email verificado
+            return render_template('email_verified.html')
+            
+    except Exception as e:
+        flash('An unexpected error occurred', 'error')
+        return render_template('error_email.html')
+
