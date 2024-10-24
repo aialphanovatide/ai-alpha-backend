@@ -29,8 +29,8 @@ async def send_email_to_client(link_to_chat, client_email):
     sender_email = 'info@aialpha.ai'
     sender_password = EMAIL_PASSWORD
     recipient_email = client_email
-    subject = 'AI Alpha Invitation Link'
-    with open(f'{ROOT_DIRECTORY}/email_body.html', 'r') as file:
+    subject = 'AI Alpha Student Validation'
+    with open(f'email_body.html', 'r') as file:
         html_content = file.read()
         html_content = html_content.replace('{{ link }}', link_to_chat)
 
@@ -69,6 +69,7 @@ async def send_email_to_client(link_to_chat, client_email):
 
     finally:
         server.quit()
+        
 
 
 
@@ -120,3 +121,5 @@ async def send_email():
             return jsonify({"status": "Error while creating the link"}), 500
     else:
         return jsonify({"status": "Client not registered yet"}), 404
+
+
