@@ -60,17 +60,24 @@ def get_content():
             return jsonify({'message': 'No record found for the specified ID or name', 'status': 404}), 404
 
         # Intentar obtener datos de CoinGecko
-        coingecko_data = get_competitors_data(db_data.coin_bot.coingecko_id)
+        coingecko_data = get_competitors_data(coin.symbol)
 
         # Preparar la respuesta
         introduction_data = {
-            'content': coingecko_data.get('description', {}).get('en') or db_data.content,
-            'website': (coingecko_data.get('links', {}).get('homepage', [None])[0] or db_data.website) if coingecko_data.get('links') else db_data.website,
-            'whitepaper': coingecko_data.get('links', {}).get('whitepaper') or db_data.whitepaper,
-            'is_coingecko_data': {
-                'content': bool(coingecko_data.get('description', {}).get('en')),
-                'website': bool(coingecko_data.get('links', {}).get('homepage', [None])[0]),
-                'whitepaper': bool(coingecko_data.get('links', {}).get('whitepaper'))
+            'content': {
+                'value': coingecko_data.get('description', {}).get('en') or db_data.content,
+                'is_coingecko_data': bool(coingecko_data.get('description', {}).get('en')),
+                'id': db_data.id if not coingecko_data.get('description', {}).get('en') else None
+            },
+            'website': {
+                'value': (coingecko_data.get('links', {}).get('homepage', [None])[0] or db_data.website),
+                'is_coingecko_data': bool(coingecko_data.get('links', {}).get('homepage', [None])[0]),
+                'id': db_data.id if not coingecko_data.get('links', {}).get('homepage', [None])[0] else None
+            },
+            'whitepaper': {
+                'value': coingecko_data.get('links', {}).get('whitepaper') or db_data.whitepaper,
+                'is_coingecko_data': bool(coingecko_data.get('links', {}).get('whitepaper')),
+                'id': db_data.id if not coingecko_data.get('links', {}).get('whitepaper') else None
             }
         }
 
