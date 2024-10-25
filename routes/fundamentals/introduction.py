@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from config import Introduction, session, CoinBot
 from datetime import datetime
 
+from services.coingecko.coingecko import get_competitors_data
+
 introduction = Blueprint('introduction', __name__)
 
 
@@ -46,20 +48,32 @@ def get_content():
         if not coin_id and not coin_name:
             return jsonify({'message': 'ID or coin name is required', 'status': 400}), 400
         
-        coin_data = None
-
+        # Obtener datos de la base de datos
+        db_data = None
         if coin_name:
-            coin = session.query(CoinBot).filter(CoinBot.name==coin_name).first()
-            coin_data = session.query(Introduction).filter_by(coin_bot_id=coin.bot_id).first() if coin else None
+            coin = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
+            db_data = session.query(Introduction).filter_by(coin_bot_id=coin.bot_id).first() if coin else None
+        elif coin_id:
+            db_data = session.query(Introduction).filter_by(coin_bot_id=coin_id).first()
 
-        if coin_id:
-            coin = session.query(Introduction).filter_by(coin_bot_id=coin_id).first()
-            coin_data = coin if coin else None
+        if db_data is None:
+            return jsonify({'message': 'No record found for the specified ID or name', 'status': 404}), 404
 
-        if coin_data == None:
-            return jsonify({'message': 'No record found for the specified ID', 'status': 404}), 404
-        
-        introduction_data = coin_data.as_dict()
+        # Intentar obtener datos de CoinGecko
+        coingecko_data = get_competitors_data(db_data.coin_bot.coingecko_id)
+
+        # Preparar la respuesta
+        introduction_data = {
+            'content': coingecko_data.get('description', {}).get('en') or db_data.content,
+            'website': (coingecko_data.get('links', {}).get('homepage', [None])[0] or db_data.website) if coingecko_data.get('links') else db_data.website,
+            'whitepaper': coingecko_data.get('links', {}).get('whitepaper') or db_data.whitepaper,
+            'is_coingecko_data': {
+                'content': bool(coingecko_data.get('description', {}).get('en')),
+                'website': bool(coingecko_data.get('links', {}).get('homepage', [None])[0]),
+                'whitepaper': bool(coingecko_data.get('links', {}).get('whitepaper'))
+            }
+        }
+
         return jsonify({'message': introduction_data, 'status': 200}), 200
        
     except Exception as e:

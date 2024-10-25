@@ -204,6 +204,32 @@ def get_tokenomics_data(symbol: str) -> Dict[str, Any]:
     except requests.exceptions.RequestException as e:
         return {"error": f"Error al obtener datos de la criptomoneda: {e}"}
 
+def get_competitors_data(symbol: str) -> Dict[str, Any]:
+    """
+    Retrieve detailed supply data for a given cryptocurrency symbol.
+
+    Args:
+        symbol (str): The symbol of the cryptocurrency (e.g., 'btc' for Bitcoin).
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the following information:
+            All crypto data on Coingeko
+    """
+    crypto_id = get_crypto_id(symbol)
+    if not crypto_id:
+        return f"No cryptocurrency found with the symbol {symbol}"
+
+    url = f'{BASE_URL}/coins/{crypto_id}'
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        return data
+    
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Error: {e}"}
+
 # Ejemplo de uso
 # simbolo = 'dot'  # Puedes cambiar esto por el símbolo que necesites
 # resultado = get_tokenomics_data(simbolo)
