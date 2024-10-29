@@ -511,7 +511,7 @@ def get_last_analysis():
         session.close()
     
    
-def publish_analysis(coin_id: int, content: str, category_name: str) -> dict:
+def publish_analysis(coin_id: int, content: str, category_name: str, section: str) -> dict:
     """
     Function to publish an analysis.
 
