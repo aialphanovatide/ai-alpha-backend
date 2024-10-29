@@ -945,6 +945,49 @@ class Analysis(Base):
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    
+class SAndRAnalysis(Base):
+    """
+    Model for Support and Resistance Analysis
+    """
+    __tablename__ = 's_and_r_analysis'
+
+    analysis_id = Column(Integer, primary_key=True, autoincrement=True)
+    analysis = Column(String)
+    image_url = Column(String, nullable=True)
+    category_name = Column(String)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+    coin_bot_id = Column(
+        Integer,
+        ForeignKey('coin_bot.bot_id'),
+        nullable=False
+    )
+
+    # Relationships
+    images = relationship('AnalysisImage', back_populates='analysis')
+    coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
+
+    def to_dict(self):
+        """
+        Convert model instance to dictionary
+        """
+        return {
+            column.name: getattr(self, column.name)
+            for column in self.__table__.columns
+        }
+
+    def __repr__(self):
+        """
+        String representation of the model
+        """
+        return f"<SAndRAnalysis(analysis_id={self.analysis_id}, coin_bot_id={self.coin_bot_id})>"
 
 class AnalysisImage(Base):
     """
