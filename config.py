@@ -783,12 +783,12 @@ class Alert(Base):
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
+
 class Article(Base):
     """
-    Represents an article associated with a CoinBot.
-
+    Represents an article associated with a CoinBot and a Section.
     This class defines the structure for storing article information, including
-    the date, title, URL, and summary.
+    the date, title, URL, summary, and its associated section.
 
     Attributes:
         article_id (int): The primary key for the article.
@@ -799,7 +799,9 @@ class Article(Base):
         created_at (datetime): Timestamp of when the article was created.
         updated_at (datetime): Timestamp of the last update to the article record.
         coin_bot_id (int): Foreign key referencing the associated CoinBot.
+        section_id (int): Foreign key referencing the associated Section.
         coin_bot (relationship): Relationship to the associated CoinBot.
+        section (relationship): Relationship to the associated Section.
         images (relationship): Relationship to associated ArticleImage objects.
         used_keywords (relationship): Relationship to associated Used_keywords objects.
     """
@@ -813,8 +815,11 @@ class Article(Base):
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
+    section_id = Column(Integer, ForeignKey('sections.id', ondelete='CASCADE'), nullable=False)
 
+    # Relationships
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
+    section = relationship('Sections', back_populates='articles', lazy=True)  # Note: updated back_populates name
     images = relationship('ArticleImage', back_populates='article', lazy=True)
     used_keywords = relationship('Used_keywords', back_populates='article', lazy=True)
 
@@ -1153,7 +1158,36 @@ class Tokenomics(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    
+class Sections(Base):
+    """
+    Represents sections information.
+    This class defines the structure for storing sections data,
+    including name and description.
 
+    Attributes:
+        id (int): The primary key for the sections record.
+        name (str): The name of the section.
+        description (str): The description of the section.
+        target (str): Target for the section.
+        created_at (datetime): Timestamp of when the record was created.
+        updated_at (datetime): Timestamp of the last update to the record.
+    """
+    __tablename__ = 'sections'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    target = Column(String)
+    created_at = Column(TIMESTAMP, default=datetime.now)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationship to Article
+    articles = relationship('Article', back_populates='section', lazy=True)
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Token_distribution(Base):
     """
@@ -1896,3 +1930,73 @@ def create_superadmin_api_key():
         session.close()
 
 # create_superadmin_api_key()
+
+
+
+# --------------AUTOPOPULATE SECTION TABLE -------------------
+
+def populate_sections():
+    """
+    Populates the database with default sections if fewer than 4 exist.
+    Each section represents a different category of content in the application.
+    """
+    # Datos de las secciones a añadir
+    sections_data = [
+        {
+            "name": "What's happening today (Top Stories)",
+            "description": "Articles that belong to top stories",
+            "target": "article"
+        },
+        {
+            "name": "Market Narrative (Narrative Tradings)",
+            "description": "Articles referred to narrative trading posts",
+            "target": "narrative_trading"
+        },
+        {
+            "name": "Daily Deeps (Analysis)",
+            "description": "Coin Analysis posts",
+            "target": "analysis"
+        },
+        {
+            "name": "S&R Lines (S&R Analysis)",
+            "description": "Posts that belong to s&r analysis for a coin",
+            "target": "s_and_r_analysis"
+        }
+    ]
+
+    with Session() as session:
+        try:
+            # Cuenta las secciones existentes en la base de datos
+            existing_sections_count = session.query(Sections).count()
+
+            if existing_sections_count < 4:
+                sections_added = 0
+
+                for section_data in sections_data:
+                    # Verifica si la sección ya existe en la base de datos
+                    existing_section = session.query(Sections).filter_by(name=section_data["name"]).first()
+                    if not existing_section:
+                        section = Sections(
+                            name=section_data["name"],
+                            description=section_data["description"],
+                            target=section_data["target"]
+                        )
+                        session.add(section)
+                        sections_added += 1
+                        print(f"---- Section '{section_data['name']}' added ----")
+
+                # Guarda los cambios en la base de datos
+                session.commit()
+                print(f"---- All missing sections added. Total sections added: {sections_added} ----")
+            else:
+                print("---- Enough sections already exist. Skipping population process. ----")
+
+        except SQLAlchemyError as e:
+            session.rollback()
+            print(f"---- Database error while populating sections: {str(e)} ----")
+        except Exception as e:
+            session.rollback()
+            print(f"---- Unexpected error while populating sections: {str(e)} ----")
+
+
+populate_sections()
