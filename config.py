@@ -946,7 +946,6 @@ class Analysis(Base):
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
-    
 class SAndRAnalysis(Base):
     """
     Model for Support and Resistance Analysis
@@ -970,8 +969,7 @@ class SAndRAnalysis(Base):
         nullable=False
     )
 
-    # Relationships
-    images = relationship('AnalysisImage', back_populates='analysis')
+    # Relationship with CoinBot
     coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
 
     def to_dict(self):
@@ -988,6 +986,7 @@ class SAndRAnalysis(Base):
         String representation of the model
         """
         return f"<SAndRAnalysis(analysis_id={self.analysis_id}, coin_bot_id={self.coin_bot_id})>"
+
 
 class AnalysisImage(Base):
     """
@@ -1012,7 +1011,6 @@ class AnalysisImage(Base):
     analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
 
     analysis = relationship('Analysis', back_populates='images')
-    sr_analysis = relationship('SAndRAnalysis', back_populates='images')
     
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
