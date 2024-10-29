@@ -640,7 +640,9 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
 
         # Get the corresponding model based on target
         target = section.target.lower()
+        print(target)
         model_class = MODEL_MAPPING.get(target)
+        print(model_class)
         if not model_class:
             raise ValueError(f"Invalid target type: {target}")
 
