@@ -611,6 +611,7 @@ class CoinBot(Base):
     dapps = relationship('DApps', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
     upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
     narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
+    s_and_r_analysis = relationship('SAndRAnalysis', back_populates='coin_bot', cascade="all, delete-orphan")
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -970,7 +971,8 @@ class SAndRAnalysis(Base):
     )
 
     # Relationship with CoinBot
-    coin_bot = relationship('CoinBot', back_populates='analysis', lazy=True)
+    coin_bot = relationship('CoinBot', back_populates='s_and_r_analysis', lazy=True)
+    
 
     def to_dict(self):
         """
