@@ -1012,7 +1012,8 @@ class AnalysisImage(Base):
     analysis_id = Column(Integer, ForeignKey('analysis.analysis_id'), nullable=False)
 
     analysis = relationship('Analysis', back_populates='images')
-
+    sr_analysis = relationship('SAndRAnalysis', back_populates='images')
+    
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
@@ -2042,4 +2043,4 @@ def populate_sections():
             print(f"---- Unexpected error while populating sections: {str(e)} ----")
 
 
-populate_sections()
+#populate_sections()
