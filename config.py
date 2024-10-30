@@ -1896,3 +1896,129 @@ def create_superadmin_api_key():
         session.close()
 
 # create_superadmin_api_key()
+
+
+# -------------- ADD COINGECKO IDS AND SYMBOLS ------------------------
+
+def init_coingecko_data():
+    """
+    Populate CoinBot records with CoinGecko IDs and symbols.
+    Updates matching records based on both coin names and symbols for accuracy.
+    """
+    from services.coingecko.coingecko import get_coin_data
+    
+    with Session() as session:
+        try:
+            # Get all CoinBot records that don't have gecko_id
+            coins = session.query(CoinBot).filter(
+                (CoinBot.gecko_id.is_(None)) | 
+                (CoinBot.symbol.is_(None))
+            ).all()
+            
+            if not coins:
+                print("No coins need updating - all records have gecko_id and symbol")
+                return
+                
+            updated_count = 0
+            not_found = []
+            
+            # Known mappings for accurate matching
+            coin_mappings = {
+                # Layer 1s
+                'btc': {'name': 'Bitcoin', 'symbol': 'btc'},
+                'eth': {'name': 'Ethereum', 'symbol': 'eth'},
+                
+                # LSDs
+                'ldo': {'name': 'Lido DAO', 'symbol': 'ldo'},
+                'rpl': {'name': 'Rocket Pool', 'symbol': 'rpl'},
+                'fxs': {'name': 'Frax Share', 'symbol': 'fxs'},
+                
+                # Root/Link
+                'atom': {'name': 'Cosmos Hub', 'symbol': 'atom'},
+                'dot': {'name': 'Polkadot', 'symbol': 'dot'},
+                'qnt': {'name': 'Quant', 'symbol': 'qnt'},
+                
+                # Base Block
+                'ada': {'name': 'Cardano', 'symbol': 'ada'},
+                'sol': {'name': 'Solana', 'symbol': 'sol'},
+                'avax': {'name': 'Avalanche', 'symbol': 'avax'},
+                
+                # Core Chain
+                'near': {'name': 'NEAR Protocol', 'symbol': 'near'},
+                'ftm': {'name': 'Fantom', 'symbol': 'ftm'},
+                'kas': {'name': 'Kaspa', 'symbol': 'kas'},
+                
+                # Layer 2s
+                'matic': {'name': 'Polygon', 'symbol': 'matic'},
+                'arb': {'name': 'Arbitrum', 'symbol': 'arb'},
+                'op': {'name': 'Optimism', 'symbol': 'op'},
+                
+                # Oracles
+                'link': {'name': 'Chainlink', 'symbol': 'link'},
+                'api3': {'name': 'API3', 'symbol': 'api3'},
+                'band': {'name': 'Band Protocol', 'symbol': 'band'},
+                
+                # Payments
+                'xlm': {'name': 'Stellar', 'symbol': 'xlm'},
+                'algo': {'name': 'Algorand', 'symbol': 'algo'},
+                'xrp': {'name': 'XRP', 'symbol': 'xrp'},
+                
+                # DEXs
+                'dydx': {'name': 'dYdX', 'symbol': 'dydx'},
+                'velo': {'name': 'Velodrome', 'symbol': 'velo'},
+                'gmx': {'name': 'GMX', 'symbol': 'gmx'},
+                'uni': {'name': 'Uniswap', 'symbol': 'uni'},
+                'sushi': {'name': 'SushiSwap', 'symbol': 'sushi'},
+                'cake': {'name': 'PancakeSwap', 'symbol': 'cake'},
+                
+                # DeFi
+                'aave': {'name': 'Aave', 'symbol': 'aave'},
+                'pendle': {'name': 'Pendle', 'symbol': 'pendle'},
+                '1inch': {'name': '1inch', 'symbol': '1inch'},
+                
+                # AI/Data
+                'ocean': {'name': 'Ocean Protocol', 'symbol': 'ocean'},
+                'fet': {'name': 'Artificial Superintelligence Alliance', 'symbol': 'fet'},
+                'rndr': {'name': 'Render', 'symbol': 'rndr'},
+            }
+            
+            for coin in coins:
+                print(f"Processing {coin.name}...")
+                
+                # Check if we have a known mapping
+                mapping = coin_mappings.get(coin.name.lower())
+                if mapping:
+                    result = get_coin_data(
+                        name=mapping['name'],
+                        symbol=mapping['symbol']
+                    )
+                    
+                    if result['success'] and result['coin']:
+                        coin.gecko_id = result['coin']['id']
+                        coin.symbol = result['coin']['symbol'].upper()
+                        updated_count += 1
+                        print(f"Updated {coin.name}: ID={coin.gecko_id}, Symbol={coin.symbol}")
+                    else:
+                        not_found.append(coin.name)
+                        print(f"Could not find match for {coin.name} with symbol {mapping['symbol']}")
+                else:
+                    not_found.append(coin.name)
+                    print(f"No mapping found for {coin.name}")
+            
+            if updated_count > 0:
+                session.commit()
+                print(f"\nSuccessfully updated {updated_count} coins")
+            
+            if not_found:
+                print("\nCould not find matches for the following coins:")
+                print(", ".join(not_found))
+                
+        except SQLAlchemyError as e:
+            session.rollback()
+            print(f"Database error: {str(e)}")
+        except Exception as e:
+            session.rollback()
+            print(f"Unexpected error: {str(e)}")
+
+# Usage:
+init_coingecko_data()
