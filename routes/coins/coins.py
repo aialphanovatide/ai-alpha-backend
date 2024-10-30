@@ -495,7 +495,7 @@ def toggle_coin_publication(coin_id):
             else:
                 # Perform validations
                 valid, messages = validate_coin(coin=coin)
-                if  valid:
+                if valid:
                     coin.is_active = True
                     coin.updated_at = datetime.now()
                     session.commit()
