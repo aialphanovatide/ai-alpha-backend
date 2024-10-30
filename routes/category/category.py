@@ -628,21 +628,32 @@ def global_toggle_coins():
             return jsonify(response), 500
 
 
-def validate_coin(coin):
+def validate_coin(coin, session=None):
     """
     Validate if a coin bot meets all requirements for activation.
     
     Args:
         coin_bot (CoinBot): The CoinBot object to validate.
+        session (Session, optional): SQLAlchemy session to use. If None, creates new session.
 
     Returns:
-        bool: True if the coin bot passes all validations, False otherwise.
+        tuple: (bool, list) Validation result and list of messages.
     """
     error_messages = []
-
-    with Session() as session:
+    
+    # Use provided session or create new one
+    should_close_session = False
+    if session is None:
+        session = Session()
+        should_close_session = True
+        
+    try:
+        # Merge the coin object with the current session if it came from another
+        if not session.is_active or coin not in session:
+            coin = session.merge(coin)
+            
         # Check if fundamentals exist and are complete
-        if not coin or not are_coin_fundamentals_complete(coin):
+        if not are_coin_fundamentals_complete(coin):
             error_messages.append('Fundamentals are incomplete')
         
         # Check if chart exists and has support and resistance lines
@@ -650,12 +661,47 @@ def validate_coin(coin):
         if not chart or not has_support_resistance_lines(chart):
             error_messages.append('S&R Lines are incomplete')
 
-    # If there are any error messages, validation failed
-    if error_messages:
-        return False, error_messages
+        # If there are any error messages, validation failed
+        if error_messages:
+            return False, error_messages
 
-    # If no error messages, validation passed
-    return True, ['Valid coin']
+        # If no error messages, validation passed
+        return True, ['Valid coin']
+        
+    finally:
+        if should_close_session:
+            session.close()
+            
+# def validate_coin(coin):
+#     """
+#     Validate if a coin bot meets all requirements for activation.
+    
+#     Args:
+#         coin_bot (CoinBot): The CoinBot object to validate.
+
+#     Returns:
+#         bool: True if the coin bot passes all validations, False otherwise.
+#     """
+#     error_messages = []
+
+#     with Session() as session:
+#         # Refresh the coin object to ensure all relationships are loaded
+#         session.refresh(coin)
+#         # Check if fundamentals exist and are complete
+#         if not coin or not are_coin_fundamentals_complete(coin):
+#             error_messages.append('Fundamentals are incomplete')
+        
+#         # Check if chart exists and has support and resistance lines
+#         chart = session.query(Chart).filter_by(coin_bot_id=coin.bot_id).first()
+#         if not chart or not has_support_resistance_lines(chart):
+#             error_messages.append('S&R Lines are incomplete')
+
+#     # If there are any error messages, validation failed
+#     if error_messages:
+#         return False, error_messages
+
+#     # If no error messages, validation passed
+#     return True, ['Valid coin']
 
 def are_coin_fundamentals_complete(coin):
     """
