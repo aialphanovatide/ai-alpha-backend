@@ -23,6 +23,10 @@
       "description": "Operations related to the Analysis (Daily Deeps)"
     },
     {
+    "name": "Fundamentals",
+    "description": "Operations related to the Fundamentals, AI Searching and DB Saving."
+    },
+    {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
     },
@@ -3182,6 +3186,120 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      },
+      "/api/fundamental_ai_search": {
+        "post": {
+          "tags": ["Fundamentals"],
+          "summary": "Perform a fundamental AI search",
+          "description": "This endpoint performs an AI-powered search for fundamental data of a cryptocurrency.",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "section_name": {
+                    "type": "string",
+                    "description": "The section to search (e.g., 'revenue', 'upgrade', 'hacks', 'dapps')"
+                  },
+                  "coin_name": {
+                    "type": "string",
+                    "description": "The name or symbol of the cryptocurrency"
+                  }
+                },
+                "required": ["section_name", "coin_name"]
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      },
+    
+      "/api/save_fundamental_data": {
+        "post": {
+          "tags": ["Fundamentals"],
+          "summary": "Save fundamental data",
+          "description": "This endpoint saves the fundamental data retrieved from the AI search.",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "section_name": {
+                    "type": "string",
+                    "description": "The section of the data (e.g., 'revenue', 'upgrade', 'hacks', 'dapps')"
+                  },
+                  "coin_bot_id": {
+                    "type": "integer",
+                    "description": "The ID of the associated CoinBot"
+                  },
+                  "content": {
+                    "type": "object",
+                    "description": "The content to be saved"
+                  }
+                },
+                "required": ["section_name", "coin_bot_id", "content"]
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Data saved successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
           }
         }
       },
