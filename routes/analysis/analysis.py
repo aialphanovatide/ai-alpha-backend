@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import Tuple, Dict
 from sqlalchemy.exc import SQLAlchemyError
+from services.fundamentals_populator.populator import process_query
 from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
 from flask import jsonify, Blueprint, request
