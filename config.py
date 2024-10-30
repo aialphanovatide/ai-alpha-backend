@@ -1992,6 +1992,8 @@ def init_coingecko_data():
                         name=mapping['name'],
                         symbol=mapping['symbol']
                     )
+
+                    print(result)
                     
                     if result['success'] and result['coin']:
                         coin.gecko_id = result['coin']['id']
