@@ -1980,6 +1980,8 @@ def init_coingecko_data():
                 'ocean': {'name': 'Ocean Protocol', 'symbol': 'ocean'},
                 'fet': {'name': 'Artificial Superintelligence Alliance', 'symbol': 'fet'},
                 'rndr': {'name': 'Render', 'symbol': 'Render'},
+                
+                # DAOs 
                 'tao': {'name': 'Bittensor', 'symbol': 'tao'},
             }
             
@@ -2024,4 +2026,4 @@ def init_coingecko_data():
             print(f"Unexpected error: {str(e)}")
 
 # Usage:
-init_coingecko_data()
+# init_coingecko_data()

@@ -8,7 +8,7 @@ from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
 from routes.telegram.index import telegram_bp
 from routes.analysis.analysis import analysis_bp 
-from routes.tradingview.index import tradingview_bp
+from routes.alerts.index import tradingview_bp
 from routes.slack.slack_actions import slack_events_bp
 from routes.fundamentals.introduction import introduction
 from routes.fundamentals.competitors import competitor_bp

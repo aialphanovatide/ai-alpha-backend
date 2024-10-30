@@ -56,6 +56,7 @@ services:
       - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - BINANCE_API_URL=${BINANCE_API_URL}
 
     depends_on:
       db_dev:
