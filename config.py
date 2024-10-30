@@ -1965,10 +1965,10 @@ def init_coingecko_data():
                 
                 # DEXs
                 'dydx': {'name': 'dYdX', 'symbol': 'dydx'},
-                'velo': {'name': 'Velodrome', 'symbol': 'velo'},
+                'velo': {'name': 'velo', 'symbol': 'velo'},
                 'gmx': {'name': 'GMX', 'symbol': 'gmx'},
                 'uni': {'name': 'Uniswap', 'symbol': 'uni'},
-                'sushi': {'name': 'SushiSwap', 'symbol': 'sushi'},
+                'sushi': {'name': 'sushi', 'symbol': 'sushi'},
                 'cake': {'name': 'PancakeSwap', 'symbol': 'cake'},
                 
                 # DeFi
@@ -1979,7 +1979,8 @@ def init_coingecko_data():
                 # AI/Data
                 'ocean': {'name': 'Ocean Protocol', 'symbol': 'ocean'},
                 'fet': {'name': 'Artificial Superintelligence Alliance', 'symbol': 'fet'},
-                'rndr': {'name': 'Render', 'symbol': 'rndr'},
+                'rndr': {'name': 'Render', 'symbol': 'Render'},
+                'tao': {'name': 'Bittensor', 'symbol': 'tao'},
             }
             
             for coin in coins:
