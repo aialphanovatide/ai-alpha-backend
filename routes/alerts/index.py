@@ -107,10 +107,28 @@ def get_alerts_by_categories():
 
             logger.debug(f"Found category: {category_obj.name} (ID: {category_obj.category_id})")
 
+            # Build base query with debug logging
+            logger.debug(f"Building query for category_id: {category_obj.category_id}")
+
+            # First, get all coin_bots for this category
+            coins = session.query(CoinBot).filter(CoinBot.category_id == category_obj.category_id).all()
+            logger.debug(f"Found coin_bots for category: {[coin.name for coin in coins]}")
+
             # Build base query
             alerts_query = (session.query(Alert)
                           .join(CoinBot)
                           .filter(CoinBot.category_id == category_obj.category_id))
+            
+            # test
+            for coin in coins:
+                alerts_query_ytest = (session.query(Alert)
+                              .filter(Alert.coin_bot_id == coin.bot_id))
+                logger.debug(f"Alerts query for coin {coin.name}: {str(alerts_query_ytest)}")
+                logger.debug(f"Alerts count for coin {coin.name}: {alerts_query_ytest.count() if alerts_query_ytest else 0}")
+            
+            
+            # Log the raw SQL query
+            logger.debug(f"Base SQL Query: {str(alerts_query)}")
 
             # Apply timeframe filter if provided
             if timeframe:
