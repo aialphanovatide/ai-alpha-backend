@@ -17,6 +17,7 @@ tradingview_bp = Blueprint(
 LOGS_SLACK_CHANNEL_ID = 'C06FTS38JRX'
 notification_service = Notification(session=Session())
 
+
 def extract_timeframe(alert_name):
     """
     Extract standardized timeframe from alert name.
@@ -90,6 +91,7 @@ def get_alerts_by_categories():
         500: Internal Server Error
     """
     try:
+
         data = request.json
         if not data or 'categories' not in data:
             return jsonify({'error': 'Categories are required'}), 400
@@ -118,6 +120,7 @@ def get_alerts_by_categories():
         }
 
         for category_name in categories:
+            print(f"[DEBUG] /alerts/categories - Processing category: {category_name}")
             category_obj = session.query(Category).filter(Category.name == category_name.strip().casefold()).first()
 
             if not category_obj:
@@ -132,6 +135,8 @@ def get_alerts_by_categories():
             alerts_query = (session.query(Alert)
                           .join(CoinBot)
                           .filter(CoinBot.category_id == category_obj.category_id))
+            
+            print(f"[DEBUG] /alerts/categories - Alerts query: {alerts_query}")
 
             # Apply timeframe filter if provided
             if timeframe:
@@ -254,6 +259,7 @@ def get_filtered_alerts():
         }
 
         for coin_name in coins:
+            print(f"[DEBUG] /alerts/coins - Processing coin: {coin_name}")
             coin_bot = session.query(CoinBot).filter(CoinBot.name == coin_name.casefold().strip()).first()
 
             if not coin_bot:
@@ -309,276 +315,11 @@ def get_filtered_alerts():
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
-# @tradingview_bp.route('/alerts/categories', methods=['POST'])  
-# def get_alerts_by_categories():
-#     """
-#     Retrieve alerts for multiple categories with pagination support.
-
-#     This endpoint allows fetching alerts for one or more categories. The alerts are returned
-#     in descending order by creation date (newest first) with optional pagination.
-
-#     Request Body:
-#     {
-#         "categories": ["category1", "category2"],  # Required: List of category names
-#         "page": 1,                                # Optional: Page number (default: 1)
-#         "per_page": 10                           # Optional: Items per page (default: 10)
-#     }
-
-#     Error Responses:
-#         400: Bad Request
-#             - Categories are required
-#             - Categories must be a list of strings
-#             - Categories list cannot be empty
-#             - Page and per_page must be positive integers
-#             - Page and per_page must be valid integers
-#         500: Internal Server Error
-#             - An error occurred: {error_message}
-
-#     Notes:
-#         - Non-existent categories will return empty data with an error message
-#         - Pagination is applied per category
-#         - Results are ordered by created_at in descending order
-#         - All timestamps are in UTC
-#     """
-#     try:
-#         # Validate request data
-#         data = request.json
-#         if not data or 'categories' not in data:
-#             return jsonify({'error': 'Categories are required'}), 400
-
-#         categories = data.get('categories')
-#         # Convert page and per_page to integers safely
-#         try:
-#             page = int(data.get('page', 1))
-#             per_page = int(data.get('per_page', 10))
-#         except ValueError:
-#             return jsonify({'error': 'Page and per_page must be valid integers'}), 400
-        
-#         # Validate input parameters
-#         if not isinstance(categories, list):
-#             return jsonify({'error': 'Categories must be a list of strings'}), 400
-        
-#         if not categories:
-#             return jsonify({'error': 'Categories list cannot be empty'}), 400
-            
-#         # Validate pagination parameters
-#         if page < 1 or per_page < 1:
-#             return jsonify({'error': 'Page and per_page must be positive integers'}), 400
-
-#         response = {
-#             'categories': {},
-#             'total_alerts': 0
-#         }
-
-#         for category_name in categories:
-#             category_obj = session.query(Category).filter(Category.name == category_name.strip().casefold()).first()
-
-#             if not category_obj:
-#                 response['categories'][category_name] = {
-#                     'error': f"Category {category_name} doesn't exist",
-#                     'data': [],
-#                     'total': 0
-#                 }
-#                 continue
-
-#             # Build base query for this category
-#             alerts_query = (session.query(Alert)
-#                           .join(CoinBot)
-#                           .filter(CoinBot.category_id == category_obj.category_id)
-#                           .order_by(desc(Alert.created_at)))
-
-#             # Get total count for this category
-#             total_category_alerts = alerts_query.count()
-#             response['total_alerts'] += total_category_alerts
-
-#             # Calculate pagination values
-#             total_pages = (total_category_alerts + per_page - 1) // per_page
-#             offset = (page - 1) * per_page
-
-#             # Apply pagination
-#             alerts = alerts_query.offset(offset).limit(per_page).all()
-#             alerts_list = [alert.as_dict() for alert in alerts]
-
-#             # Prepare category response
-#             category_response = {
-#                 'data': alerts_list,
-#                 'total': total_category_alerts,
-#                 'pagination': {
-#                     'current_page': page,
-#                     'per_page': per_page,
-#                     'total_pages': total_pages,
-#                     'has_next': page < total_pages,
-#                     'has_prev': page > 1
-#                 }
-#             }
-
-#             response['categories'][category_name] = category_response
-
-#         return jsonify(response), 200
-
-#     except Exception as e:
-#         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
-# @tradingview_bp.route('/alerts/coins', methods=['POST'])
-# def get_filtered_alerts():
-#     """
-#     Retrieve alerts for multiple coins with date filtering and pagination support.
 
-#     This endpoint allows fetching alerts for one or more coins with optional date filtering.
-#     The alerts are returned in descending order by creation date (newest first) with optional pagination.
 
-#     Request Body:
-#     {
-#         "coins": ["btc", "eth"],               # Required: List of coin symbols
-#         "date": "today",                       # Optional: Date filter (today, this week, last week)
-#         "page": 1,                             # Optional: Page number (default: 1)
-#         "per_page": 10                         # Optional: Items per page (default: 10)
-#     }
 
-#     Date Filter Options:
-#         - "today": Alerts from start of current day until now
-#         - "this week": Alerts from start of week until start of today
-#         - "last week": Alerts from start of last week until start of this week
-
-#     Error Responses:
-#         400: Bad Request
-#             - Coins array is required
-#             - Coins must be a non-empty array
-#             - Invalid date parameter
-#             - Page and per_page must be positive integers
-#         500: Internal Server Error
-#             - An error occurred: {error_message}
-
-#     Notes:
-#         - Non-existent coins will return empty data with an error message
-#         - Date ranges are calculated in server's timezone
-#         - Pagination is applied per coin
-#         - Results are ordered by created_at in descending order
-#         - All timestamps are in UTC
-#         - If no date filter is provided, all alerts are returned
-#         - Week starts on Monday (0) and ends on Sunday (6)
-#     """
-
-#     try:
-#         # Validate request data
-#         data = request.json
-#         if not data or 'coins' not in data:
-#             return jsonify({'error': 'Coins array is required'}), 400
-
-#         coins = data.get('coins')
-#         date_filter = data.get('date')
-#         page = data.get('page')
-#         per_page = data.get('per_page')
-
-#         # Validate coins parameter
-#         if not isinstance(coins, list) or not coins:
-#             return jsonify({'error': 'Coins must be a non-empty array'}), 400
-
-#         # Validate date parameter
-#         valid_date_filters = ["today", "this week", "last week"]
-#         if date_filter and date_filter not in valid_date_filters:
-#             return jsonify({'error': f'Invalid date parameter. Must be one of: {", ".join(valid_date_filters)}'}), 400
-
-#         # Validate pagination parameters if provided
-#         if (page is not None and page < 1) or (per_page is not None and per_page < 1):
-#             return jsonify({'error': 'Page and per_page must be positive integers'}), 400
-
-#         # Calculate date ranges
-#         now = datetime.now()
-#         start_date = None
-#         end_date = None
-
-#         if date_filter:
-#             if date_filter == "today":
-#                 # Start of current day to now
-#                 start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-#                 end_date = now
-
-#             elif date_filter == "this week":
-#                 # Start of week to start of today (excluding today)
-#                 week_start = now - timedelta(days=now.weekday())
-#                 start_date = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
-#                 end_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-
-#             elif date_filter == "last week":
-#                 # Start of last week to start of this week
-#                 this_week_start = now - timedelta(days=now.weekday())
-#                 start_date = (this_week_start - timedelta(weeks=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-#                 end_date = this_week_start.replace(hour=0, minute=0, second=0, microsecond=0)
-
-#         response = {
-#             'coins': {},
-#             'total_alerts': 0,
-#             'date_range': {
-#                 'start': start_date.isoformat() if start_date else None,
-#                 'end': end_date.isoformat() if end_date else None,
-#                 'filter': date_filter
-#             }
-#         }
-
-#         for coin_name in coins:
-#             coin_bot = session.query(CoinBot).filter(CoinBot.name == coin_name.casefold().strip()).first()
-
-#             if not coin_bot:
-#                 response['coins'][coin_name] = {
-#                     'error': f'Coin {coin_name} not found',
-#                     'data': [],
-#                     'total': 0
-#                 }
-#                 continue
-
-#             # Build base query for this coin
-#             alerts_query = session.query(Alert).filter(Alert.coin_bot_id == coin_bot.bot_id)
-            
-#             # Apply date filters if provided
-#             if start_date and end_date:
-#                 if date_filter == "today":
-#                     alerts_query = alerts_query.filter(Alert.created_at >= start_date)
-#                 else:
-#                     alerts_query = alerts_query.filter(
-#                         Alert.created_at >= start_date,
-#                         Alert.created_at < end_date
-#                     )
-            
-#             # Order by created_at descending
-#             alerts_query = alerts_query.order_by(desc(Alert.created_at))
-
-#             # Get total count for this coin
-#             total_coin_alerts = alerts_query.count()
-#             response['total_alerts'] += total_coin_alerts
-
-#             # Apply pagination if requested
-#             if page is not None and per_page is not None:
-#                 alerts_query = alerts_query.offset((page - 1) * per_page).limit(per_page)
-
-#             # Get alerts and convert to dict using as_dict method
-#             alerts = alerts_query.all()
-#             alerts_list = [alert.as_dict() for alert in alerts]
-
-#             # Prepare coin response
-#             coin_response = {
-#                 'data': alerts_list,
-#                 'total': total_coin_alerts
-#             }
-
-#             # Add pagination info if pagination was used
-#             if page is not None and per_page is not None:
-#                 total_pages = (total_coin_alerts + per_page - 1) // per_page
-#                 coin_response['pagination'] = {
-#                     'current_page': page,
-#                     'per_page': per_page,
-#                     'total_pages': total_pages,
-#                     'has_next': page < total_pages,
-#                     'has_prev': page > 1
-#                 }
-
-#             response['coins'][coin_name] = coin_response
-
-#         return jsonify(response), 200
-
-#     except Exception as e:
-#         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 # RESERVED ROUTE - DO NOT USE
@@ -675,7 +416,6 @@ def receive_data_from_tv():
                                             message=str(e))
         return f'Error receiving Tradingview message: {str(e)}', 500    
         
-
 
 @tradingview_bp.route('/alert', methods=['POST'])
 def data_tv():

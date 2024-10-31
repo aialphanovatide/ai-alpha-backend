@@ -4714,7 +4714,11 @@
                   "items": {
                     "type": "string"
                   },
-                  "description": "List of category names"
+                  "description": "List of category names",
+                  "example": [
+                    "bitcoin",
+                    "ethereum"
+                  ]
                 },
                 "timeframe": {
                   "type": "string",
