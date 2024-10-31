@@ -1,4 +1,6 @@
 import re
+import sys
+import logging
 from sqlalchemy import desc, func
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
@@ -16,6 +18,16 @@ tradingview_bp = Blueprint(
 
 LOGS_SLACK_CHANNEL_ID = 'C06FTS38JRX'
 notification_service = Notification(session=Session())
+
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
+logger = logging.getLogger(__name__)
 
 
 def extract_timeframe(alert_name):
@@ -41,21 +53,6 @@ def extract_timeframe(alert_name):
     return None
 
 
-import sys
-from functools import partial
-import logging
-
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
-logger = logging.getLogger(__name__)
-
-# Force flush prints
-print = partial(print, flush=True)
-
 @tradingview_bp.route('/alerts/categories', methods=['POST'])  
 def get_alerts_by_categories():
     """Existing docstring..."""
@@ -65,7 +62,6 @@ def get_alerts_by_categories():
 
         data = request.json
         if not data or 'categories' not in data:
-            logger.warning("Missing required field: categories")
             return jsonify({'error': 'Categories are required'}), 400
 
         categories = data.get('categories')
@@ -75,20 +71,16 @@ def get_alerts_by_categories():
         # Validate timeframe if provided
         valid_timeframes = ['1h', '4h', '1d', '1w']
         if timeframe and timeframe.lower() not in valid_timeframes:
-            logger.warning(f"Invalid timeframe provided: {timeframe}")
             return jsonify({'error': f'Invalid timeframe. Must be one of: {", ".join(valid_timeframes)}'}), 400
 
         # Pagination validation
         try:
             page = int(data.get('page', 1))
             per_page = int(data.get('per_page', 10))
-            logger.debug(f"Pagination parameters: page={page}, per_page={per_page}")
         except ValueError:
-            logger.warning("Invalid pagination parameters - not integers")
             return jsonify({'error': 'Invalid pagination parameters'}), 400
 
         if page < 1 or per_page < 1:
-            logger.warning(f"Invalid pagination values: page={page}, per_page={per_page}")
             return jsonify({'error': 'Invalid pagination parameters'}), 400
 
         response = {
@@ -106,7 +98,6 @@ def get_alerts_by_categories():
             ).first()
 
             if not category_obj:
-                logger.warning(f"Category not found: {category_name}")
                 response['categories'][category_name] = {
                     'error': f"Category {category_name} doesn't exist",
                     'data': [],
@@ -120,8 +111,6 @@ def get_alerts_by_categories():
             alerts_query = (session.query(Alert)
                           .join(CoinBot)
                           .filter(CoinBot.category_id == category_obj.category_id))
-            
-            logger.debug(f"Base query built for category {category_name}")
 
             # Apply timeframe filter if provided
             if timeframe:
