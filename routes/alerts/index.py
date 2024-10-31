@@ -101,7 +101,8 @@ def get_alerts_by_categories():
             
             # Query category
             category_obj = session.query(Category).filter(
-                Category.name == category_name.strip().casefold()
+                func.lower(Category.name).in_([category_name.strip().lower()]) |
+                func.lower(Category.alias).in_([category_name.strip().lower()])
             ).first()
 
             if not category_obj:
@@ -174,7 +175,7 @@ def get_alerts_by_categories():
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
     
 
-    
+
 # @tradingview_bp.route('/alerts/categories', methods=['POST'])  
 # def get_alerts_by_categories():
 #     """
