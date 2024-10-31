@@ -126,37 +126,215 @@ swagger = Swagger()
 
 # ____Add or update an endpoint____
 
-
-# Update Swagger JSON
+# # Documentation for /alerts/categories endpoint
 # success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/coingecko/usage',
-#     method='get',
-#     tag='CoinGecko',
-#     description='Retrieve CoinGecko API usage information.',
-#     params=[],  # No query parameters for this endpoint
-#     responses={
-#         '200': {
-#             'description': 'Successfully retrieved CoinGecko API usage information',
+#     endpoint_route='/alerts/categories',
+#     method='post',
+#     tag='Alerts',
+#     description='Retrieve alerts for multiple categories with pagination support',
+#     params=[
+#         {
+#             'name': 'body',
+#             'in': 'body',
+#             'required': True,
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'data': {
-#                         'type': 'object',
-#                         'description': 'The CoinGecko API usage information'
+#                     'categories': {
+#                         'type': 'array',
+#                         'items': {'type': 'string'},
+#                         'description': 'List of category names'
 #                     },
-#                     'error': {'type': 'string', 'nullable': True},
-#                     'success': {'type': 'boolean'}
+#                     'page': {
+#                         'type': 'integer',
+#                         'description': 'Page number (default: 1)',
+#                         'default': 1
+#                     },
+#                     'per_page': {
+#                         'type': 'integer',
+#                         'description': 'Items per page (default: 10)',
+#                         'default': 10
+#                     }
+#                 },
+#                 'required': ['categories']
+#             }
+#         }
+#     ],
+#     responses={
+#         '200': {
+#             'description': 'Successfully retrieved alerts by categories',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'categories': {
+#                         'type': 'object',
+#                         'additionalProperties': {
+#                             'type': 'object',
+#                             'properties': {
+#                                 'data': {
+#                                     'type': 'array',
+#                                     'items': {
+#                                         'type': 'object',
+#                                         'properties': {
+#                                             'alert_id': {'type': 'integer'},
+#                                             'alert_name': {'type': 'string'},
+#                                             'alert_message': {'type': 'string'},
+#                                             'symbol': {'type': 'string'},
+#                                             'price': {'type': 'number'},
+#                                             'coin_bot_id': {'type': 'integer'},
+#                                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                                         }
+#                                     }
+#                                 },
+#                                 'total': {'type': 'integer'},
+#                                 'pagination': {
+#                                     'type': 'object',
+#                                     'properties': {
+#                                         'current_page': {'type': 'integer'},
+#                                         'per_page': {'type': 'integer'},
+#                                         'total_pages': {'type': 'integer'},
+#                                         'has_next': {'type': 'boolean'},
+#                                         'has_prev': {'type': 'boolean'}
+#                                     }
+#                                 }
+#                             }
+#                         }
+#                     },
+#                     'total_alerts': {'type': 'integer'}
+#                 }
+#             }
+#         },
+#         '400': {
+#             'description': 'Bad Request',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'error': {'type': 'string'}
 #                 }
 #             }
 #         },
 #         '500': {
-#             'description': 'Internal server error',
+#             'description': 'Internal Server Error',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean'}
+#                     'error': {'type': 'string'}
+#                 }
+#             }
+#         }
+#     }
+# )
+
+# print(message)
+
+# # Documentation for /alerts/coins endpoint
+# success, message = swagger.add_or_update_endpoint(
+#     endpoint_route='/alerts/coins',
+#     method='post',
+#     tag='Alerts',
+#     description='Retrieve alerts for multiple coins with date filtering and pagination support',
+#     params=[
+#         {
+#             'name': 'body',
+#             'in': 'body',
+#             'required': True,
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'coins': {
+#                         'type': 'array',
+#                         'items': {'type': 'string'},
+#                         'description': 'List of coin symbols'
+#                     },
+#                     'date': {
+#                         'type': 'string',
+#                         'enum': ['today', 'this week', 'last week'],
+#                         'description': 'Optional date filter'
+#                     },
+#                     'page': {
+#                         'type': 'integer',
+#                         'description': 'Page number (default: 1)',
+#                         'default': 1
+#                     },
+#                     'per_page': {
+#                         'type': 'integer',
+#                         'description': 'Items per page (default: 10)',
+#                         'default': 10
+#                     }
+#                 },
+#                 'required': ['coins']
+#             }
+#         }
+#     ],
+#     responses={
+#         '200': {
+#             'description': 'Successfully retrieved filtered alerts',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'coins': {
+#                         'type': 'object',
+#                         'additionalProperties': {
+#                             'type': 'object',
+#                             'properties': {
+#                                 'data': {
+#                                     'type': 'array',
+#                                     'items': {
+#                                         'type': 'object',
+#                                         'properties': {
+#                                             'alert_id': {'type': 'integer'},
+#                                             'alert_name': {'type': 'string'},
+#                                             'alert_message': {'type': 'string'},
+#                                             'symbol': {'type': 'string'},
+#                                             'price': {'type': 'number'},
+#                                             'coin_bot_id': {'type': 'integer'},
+#                                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                                         }
+#                                     }
+#                                 },
+#                                 'total': {'type': 'integer'},
+#                                 'pagination': {
+#                                     'type': 'object',
+#                                     'properties': {
+#                                         'current_page': {'type': 'integer'},
+#                                         'per_page': {'type': 'integer'},
+#                                         'total_pages': {'type': 'integer'},
+#                                         'has_next': {'type': 'boolean'},
+#                                         'has_prev': {'type': 'boolean'}
+#                                     }
+#                                 }
+#                             }
+#                         }
+#                     },
+#                     'total_alerts': {'type': 'integer'},
+#                     'date_range': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'start': {'type': 'string', 'format': 'date-time', 'nullable': True},
+#                             'end': {'type': 'string', 'format': 'date-time', 'nullable': True},
+#                             'filter': {'type': 'string', 'nullable': True}
+#                         }
+#                     }
+#                 }
+#             }
+#         },
+#         '400': {
+#             'description': 'Bad Request',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'error': {'type': 'string'}
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Internal Server Error',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'error': {'type': 'string'}
 #                 }
 #             }
 #         }
@@ -168,7 +346,7 @@ swagger = Swagger()
 
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/get_revenuecat_user_info')
+# success, message = swagger.delete_endpoint(endpoint_route='/api/tv/alerts')
 # print(message)
 
 
