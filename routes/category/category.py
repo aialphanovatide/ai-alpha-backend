@@ -291,9 +291,9 @@ def delete_category(category_id):
                 return jsonify(response), 404
 
             # # Delete associated icon from S3
-            # if category.icon:
-            #     icon_filename = category.icon
-            #     image_processor.delete_from_s3(S3_BUCKET_ICONS, icon_filename)
+            if category.icon:
+                icon_filename = category.icon
+                image_processor.delete_from_s3(S3_BUCKET_ICONS, icon_filename)
 
             # Delete the category from the database
             session.delete(category)
