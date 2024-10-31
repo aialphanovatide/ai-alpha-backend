@@ -40,78 +40,55 @@ def extract_timeframe(alert_name):
         return timeframe_mapping.get(timeframe)
     return None
 
+
+import sys
+from functools import partial
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
+
+# Force flush prints
+print = partial(print, flush=True)
+
 @tradingview_bp.route('/alerts/categories', methods=['POST'])  
 def get_alerts_by_categories():
-    """
-    Retrieve alerts for multiple categories with timeframe filtering and pagination support.
-
-    Request Body:
-    {
-        "categories": ["category1", "category2"],  # Required: List of category names
-        "timeframe": "4h",                        # Optional: Timeframe filter (1h, 4h, 1d, 1w)
-        "page": 1,                                # Optional: Page number (default: 1)
-        "per_page": 10                           # Optional: Items per page (default: 10)
-    }
-
-    Returns:
-    {
-        "categories": {
-            "category1": {
-                "data": [
-                    {
-                        "alert_id": int,
-                        "alert_name": str,
-                        "alert_message": str,
-                        "symbol": str,
-                        "price": float,
-                        "coin_bot_id": int,
-                        "created_at": datetime,
-                        "updated_at": datetime,
-                        "timeframe": str
-                    }
-                ],
-                "total": int,
-                "pagination": {
-                    "current_page": int,
-                    "per_page": int,
-                    "total_pages": int,
-                    "has_next": bool,
-                    "has_prev": bool
-                }
-            }
-        },
-        "total_alerts": int
-    }
-
-    Error Responses:
-        400: Bad Request
-            - Categories are required
-            - Invalid timeframe parameter
-            - Pagination errors
-        500: Internal Server Error
-    """
+    """Existing docstring..."""
     try:
+        logger.debug("[START] Processing /alerts/categories request")
+        logger.debug(f"Request data: {request.json}")
 
         data = request.json
         if not data or 'categories' not in data:
+            logger.warning("Missing required field: categories")
             return jsonify({'error': 'Categories are required'}), 400
 
         categories = data.get('categories')
         timeframe = data.get('timeframe')
+        logger.debug(f"Processing request for categories: {categories}, timeframe: {timeframe}")
         
         # Validate timeframe if provided
         valid_timeframes = ['1h', '4h', '1d', '1w']
         if timeframe and timeframe.lower() not in valid_timeframes:
+            logger.warning(f"Invalid timeframe provided: {timeframe}")
             return jsonify({'error': f'Invalid timeframe. Must be one of: {", ".join(valid_timeframes)}'}), 400
 
         # Pagination validation
         try:
             page = int(data.get('page', 1))
             per_page = int(data.get('per_page', 10))
+            logger.debug(f"Pagination parameters: page={page}, per_page={per_page}")
         except ValueError:
+            logger.warning("Invalid pagination parameters - not integers")
             return jsonify({'error': 'Invalid pagination parameters'}), 400
 
         if page < 1 or per_page < 1:
+            logger.warning(f"Invalid pagination values: page={page}, per_page={per_page}")
             return jsonify({'error': 'Invalid pagination parameters'}), 400
 
         response = {
@@ -120,10 +97,15 @@ def get_alerts_by_categories():
         }
 
         for category_name in categories:
-            print(f"[DEBUG] /alerts/categories - Processing category: {category_name}")
-            category_obj = session.query(Category).filter(Category.name == category_name.strip().casefold()).first()
+            logger.debug(f"Processing category: {category_name}")
+            
+            # Query category
+            category_obj = session.query(Category).filter(
+                Category.name == category_name.strip().casefold()
+            ).first()
 
             if not category_obj:
+                logger.warning(f"Category not found: {category_name}")
                 response['categories'][category_name] = {
                     'error': f"Category {category_name} doesn't exist",
                     'data': [],
@@ -131,15 +113,18 @@ def get_alerts_by_categories():
                 }
                 continue
 
+            logger.debug(f"Found category: {category_obj.name} (ID: {category_obj.category_id})")
+
             # Build base query
             alerts_query = (session.query(Alert)
                           .join(CoinBot)
                           .filter(CoinBot.category_id == category_obj.category_id))
             
-            print(f"[DEBUG] /alerts/categories - Alerts query: {alerts_query}")
+            logger.debug(f"Base query built for category {category_name}")
 
             # Apply timeframe filter if provided
             if timeframe:
+                logger.debug(f"Applying timeframe filter: {timeframe}")
                 alerts_query = alerts_query.filter(
                     func.lower(func.regexp_replace(Alert.alert_name, r'.*(\d+[HhDdWw])\s*[Cc]hart.*', r'\1')) == 
                     timeframe.lower()
@@ -147,18 +132,23 @@ def get_alerts_by_categories():
 
             # Order by created_at descending
             alerts_query = alerts_query.order_by(desc(Alert.created_at))
-
-            # Get total count and apply pagination
+            
+            # Get total count
             total_category_alerts = alerts_query.count()
             response['total_alerts'] += total_category_alerts
+            logger.debug(f"Total alerts for category {category_name}: {total_category_alerts}")
 
+            # Apply pagination
             alerts = alerts_query.offset((page - 1) * per_page).limit(per_page).all()
+            logger.debug(f"Retrieved {len(alerts)} alerts for current page")
             
             # Convert to dict and add timeframe
             alerts_list = []
             for alert in alerts:
                 alert_dict = alert.as_dict()
-                alert_dict['timeframe'] = extract_timeframe(alert_dict['alert_name'])
+                timeframe = extract_timeframe(alert_dict['alert_name'])
+                logger.debug(f"Extracted timeframe '{timeframe}' from alert: {alert_dict['alert_name']}")
+                alert_dict['timeframe'] = timeframe
                 alerts_list.append(alert_dict)
 
             category_response = {
@@ -174,11 +164,156 @@ def get_alerts_by_categories():
             }
 
             response['categories'][category_name] = category_response
+            logger.debug(f"Completed processing category: {category_name}")
 
+        logger.debug(f"Request completed successfully. Total alerts across all categories: {response['total_alerts']}")
         return jsonify(response), 200
 
     except Exception as e:
+        logger.error(f"Error processing request: {str(e)}", exc_info=True)
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+    
+
+    
+# @tradingview_bp.route('/alerts/categories', methods=['POST'])  
+# def get_alerts_by_categories():
+#     """
+#     Retrieve alerts for multiple categories with timeframe filtering and pagination support.
+
+#     Request Body:
+#     {
+#         "categories": ["category1", "category2"],  # Required: List of category names
+#         "timeframe": "4h",                        # Optional: Timeframe filter (1h, 4h, 1d, 1w)
+#         "page": 1,                                # Optional: Page number (default: 1)
+#         "per_page": 10                           # Optional: Items per page (default: 10)
+#     }
+
+#     Returns:
+#     {
+#         "categories": {
+#             "category1": {
+#                 "data": [
+#                     {
+#                         "alert_id": int,
+#                         "alert_name": str,
+#                         "alert_message": str,
+#                         "symbol": str,
+#                         "price": float,
+#                         "coin_bot_id": int,
+#                         "created_at": datetime,
+#                         "updated_at": datetime,
+#                         "timeframe": str
+#                     }
+#                 ],
+#                 "total": int,
+#                 "pagination": {
+#                     "current_page": int,
+#                     "per_page": int,
+#                     "total_pages": int,
+#                     "has_next": bool,
+#                     "has_prev": bool
+#                 }
+#             }
+#         },
+#         "total_alerts": int
+#     }
+
+#     Error Responses:
+#         400: Bad Request
+#             - Categories are required
+#             - Invalid timeframe parameter
+#             - Pagination errors
+#         500: Internal Server Error
+#     """
+#     try:
+
+#         data = request.json
+#         if not data or 'categories' not in data:
+#             return jsonify({'error': 'Categories are required'}), 400
+
+#         categories = data.get('categories')
+#         timeframe = data.get('timeframe')
+        
+#         # Validate timeframe if provided
+#         valid_timeframes = ['1h', '4h', '1d', '1w']
+#         if timeframe and timeframe.lower() not in valid_timeframes:
+#             return jsonify({'error': f'Invalid timeframe. Must be one of: {", ".join(valid_timeframes)}'}), 400
+
+#         # Pagination validation
+#         try:
+#             page = int(data.get('page', 1))
+#             per_page = int(data.get('per_page', 10))
+#         except ValueError:
+#             return jsonify({'error': 'Invalid pagination parameters'}), 400
+
+#         if page < 1 or per_page < 1:
+#             return jsonify({'error': 'Invalid pagination parameters'}), 400
+
+#         response = {
+#             'categories': {},
+#             'total_alerts': 0
+#         }
+
+#         for category_name in categories:
+#             print(f"[DEBUG] /alerts/categories - Processing category: {category_name}")
+#             category_obj = session.query(Category).filter(Category.name == category_name.strip().casefold()).first()
+
+#             if not category_obj:
+#                 response['categories'][category_name] = {
+#                     'error': f"Category {category_name} doesn't exist",
+#                     'data': [],
+#                     'total': 0
+#                 }
+#                 continue
+
+#             # Build base query
+#             alerts_query = (session.query(Alert)
+#                           .join(CoinBot)
+#                           .filter(CoinBot.category_id == category_obj.category_id))
+            
+#             print(f"[DEBUG] /alerts/categories - Alerts query: {alerts_query}")
+
+#             # Apply timeframe filter if provided
+#             if timeframe:
+#                 alerts_query = alerts_query.filter(
+#                     func.lower(func.regexp_replace(Alert.alert_name, r'.*(\d+[HhDdWw])\s*[Cc]hart.*', r'\1')) == 
+#                     timeframe.lower()
+#                 )
+
+#             # Order by created_at descending
+#             alerts_query = alerts_query.order_by(desc(Alert.created_at))
+
+#             # Get total count and apply pagination
+#             total_category_alerts = alerts_query.count()
+#             response['total_alerts'] += total_category_alerts
+
+#             alerts = alerts_query.offset((page - 1) * per_page).limit(per_page).all()
+            
+#             # Convert to dict and add timeframe
+#             alerts_list = []
+#             for alert in alerts:
+#                 alert_dict = alert.as_dict()
+#                 alert_dict['timeframe'] = extract_timeframe(alert_dict['alert_name'])
+#                 alerts_list.append(alert_dict)
+
+#             category_response = {
+#                 'data': alerts_list,
+#                 'total': total_category_alerts,
+#                 'pagination': {
+#                     'current_page': page,
+#                     'per_page': per_page,
+#                     'total_pages': (total_category_alerts + per_page - 1) // per_page,
+#                     'has_next': page < ((total_category_alerts + per_page - 1) // per_page),
+#                     'has_prev': page > 1
+#                 }
+#             }
+
+#             response['categories'][category_name] = category_response
+
+#         return jsonify(response), 200
+
+#     except Exception as e:
+#         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 @tradingview_bp.route('/alerts/coins', methods=['POST'])
 def get_filtered_alerts():
