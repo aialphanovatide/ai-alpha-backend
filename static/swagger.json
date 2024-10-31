@@ -4697,7 +4697,7 @@
         "tags": [
           "Alerts"
         ],
-        "summary": "Retrieve alerts for multiple categories with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "summary": "Retrieve alerts for multiple categories",
         "description": "Retrieve alerts for multiple categories with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
         "parameters": [
           {
@@ -4864,7 +4864,7 @@
         "tags": [
           "Alerts"
         ],
-        "summary": "Retrieve alerts for multiple coins with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "summary": "Retrieve alerts for multiple coins",
         "description": "Retrieve alerts for multiple coins with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
         "parameters": [
           {

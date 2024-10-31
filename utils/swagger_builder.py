@@ -31,7 +31,7 @@ class Swagger:
         except Exception as e:
             raise Exception(f"Unexpected error loading Swagger file: {str(e)}")
 
-    def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, description: str, params: list, responses: dict) -> Tuple[bool, str]:
+    def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, summary: str, description: str, params: list, responses: dict) -> Tuple[bool, str]:
         """
         Add a new endpoint to the Swagger JSON file or update an existing one
         """
@@ -56,7 +56,7 @@ class Swagger:
             # Add or update the endpoint with its details
             swagger_json['paths'][endpoint_route][method] = {
                 'tags': [tag.capitalize()],
-                'summary': description.capitalize(),
+                'summary': summary.capitalize(),
                 'description': description.capitalize(),
                 'parameters': [],
                 'responses': responses
@@ -126,13 +126,13 @@ swagger = Swagger()
 
 # ____Add or update an endpoint____
 
-swagger = Swagger()
 
 # Documentation for /alerts/categories endpoint
 success, message = swagger.add_or_update_endpoint(
     endpoint_route='/alerts/categories',
     method='post',
     tag='Alerts',
+    summary='Retrieve alerts for multiple categories',
     description='''Retrieve alerts for multiple categories with timeframe filtering and pagination support.
     
 The endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.
@@ -254,6 +254,7 @@ success, message = swagger.add_or_update_endpoint(
     endpoint_route='/alerts/coins',
     method='post',
     tag='Alerts',
+    summary='Retrieve alerts for multiple coins',
     description='''Retrieve alerts for multiple coins with timeframe filtering and pagination support.
     
 The endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.
