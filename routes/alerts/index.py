@@ -384,3 +384,150 @@ def receive_data_from_tv():
                                             message=str(e))
         return f'Error receiving Tradingview message: {str(e)}', 500    
         
+
+
+@tradingview_bp.route('/alert', methods=['POST'])
+def data_tv():
+    """
+    Receives alerts from TradingView webhooks in either JSON or plain text format.
+    
+    TradingView sends webhooks with either:
+    - application/json content-type for valid JSON messages
+    - text/plain content-type for plain text messages
+    
+    Expected formats:
+    JSON: {
+        "symbol": "BTCUSDT",
+        "alert_name": "BTCUSDT 4h Chart - Bullish",
+        "message": "Price Touch Resistance 4.",
+        "price": "45762.77"
+    }
+    
+    Plain text: "symbol: BTCUSDT, alert_name: BTCUSDT 4h Chart - Bullish, message: Price Touch Resistance 4., price: 45762.77"
+    """
+    try:
+        if not request.data:
+            return jsonify({'error': 'No data sent in the request'}), 400
+
+        # Initialize data dictionary
+        data_dict = {}
+        
+        # Handle JSON format
+        if request.is_json:
+            try:
+                data_dict = request.get_json()
+                log_message = 'Message from Tradingview received as JSON'
+            except Exception as e:
+                return jsonify({'error': 'Invalid JSON format'}), 400
+        # Handle plain text format
+        else:
+            try:
+                data_text = request.data.decode('utf-8')
+                # Split by comma and then by colon
+                pairs = [pair.strip() for pair in data_text.split(',')]
+                for pair in pairs:
+                    if ':' in pair:
+                        key, value = pair.split(':', 1)
+                        data_dict[key.strip()] = value.strip()
+                log_message = 'Message from Tradingview received as plain text'
+            except Exception as e:
+                return jsonify({'error': 'Invalid text format'}), 400
+
+        # Log received data
+        send_INFO_message_to_slack_channel(
+            channel_id=LOGS_SLACK_CHANNEL_ID,
+            title_message=log_message,
+            sub_title='Data received',
+            message=str(data_dict)
+        )
+
+        # Extract and validate required fields
+        required_fields = ['symbol', 'alert_name', 'message']
+        if not all(field in data_dict for field in required_fields):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Process symbol
+        symbol = data_dict.get('symbol', '').casefold()
+        formatted_symbol = ''.join(char for char in symbol if char.isalpha())
+        if formatted_symbol.endswith('usdt'):
+            formatted_symbol = formatted_symbol[:-4]
+
+        # Extract timeframe from alert name
+        timeframe_match = re.search(r'(\d+[HMD])\s*chart', data_dict.get('alert_name', ''), re.IGNORECASE)
+        normalized_timeframe = None
+        if timeframe_match:
+            timeframe = timeframe_match.group(1).upper()
+            timeframe_mapping = {
+                '1M': '1m', '5M': '5m', '15M': '15m', '30M': '30m',
+                '1H': '1h', '2H': '2h', '4H': '4h', '1D': '1d'
+            }
+            normalized_timeframe = timeframe_mapping.get(timeframe, timeframe.lower())
+
+        # Get other fields
+        alert_name = data_dict.get('alert_name', '').strip()
+        message = data_dict.get('message', '').strip()
+        price = data_dict.get('price', data_dict.get('last_price', '')).strip()
+
+        # Clean price
+        if isinstance(price, str):
+            price = price.rstrip('.,')
+
+        # Validate coin exists
+        coin = session.query(CoinBot).filter(CoinBot.name == formatted_symbol).first()
+        if not coin:
+            return jsonify({'error': f'Coin not found: {formatted_symbol}'}), 404
+
+        # Create new alert
+        try:
+            new_alert = Alert(
+                alert_name=alert_name,
+                alert_message=message.capitalize(),
+                symbol=formatted_symbol,
+                price=float(price),
+                coin_bot_id=coin.bot_id
+            )
+            session.add(new_alert)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise Exception(f"Database error: {str(e)}")
+
+        # Send notifications
+        try:
+            # Send to App
+            notification_service.push_notification(
+                coin=coin.name,
+                title=alert_name,
+                body=message.capitalize(),
+                type='alert',
+                timeframe=normalized_timeframe
+            )
+
+            # Send to Slack
+            send_notification_to_product_alerts_slack_channel(
+                title_message=alert_name,
+                sub_title="Alert",
+                message=f"{message.capitalize()}"
+            )
+        except Exception as e:
+            # Log notification error but don't fail the request
+            send_INFO_message_to_slack_channel(
+                channel_id=LOGS_SLACK_CHANNEL_ID,
+                title_message='Notification error',
+                sub_title='Error',
+                message=str(e)
+            )
+
+        return jsonify({'message': 'Alert processed successfully'}), 200
+
+    except Exception as e:
+        session.rollback()
+        error_message = f'Error processing Tradingview alert: {str(e)}'
+        print(error_message)
+        send_INFO_message_to_slack_channel(
+            channel_id=LOGS_SLACK_CHANNEL_ID,
+            title_message='Error receiving Tradingview message',
+            sub_title='Reason',
+            message=f"{error_message} - Data: {str(request.data)}"
+        )
+        return jsonify({'error': error_message}), 500
