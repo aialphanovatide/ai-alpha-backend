@@ -4697,8 +4697,8 @@
         "tags": [
           "Alerts"
         ],
-        "summary": "Retrieve alerts for multiple categories with pagination support",
-        "description": "Retrieve alerts for multiple categories with pagination support",
+        "summary": "Retrieve alerts for multiple categories with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "description": "Retrieve alerts for multiple categories with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
         "parameters": [
           {
             "name": "body",
@@ -4716,15 +4716,28 @@
                   },
                   "description": "List of category names"
                 },
+                "timeframe": {
+                  "type": "string",
+                  "enum": [
+                    "1h",
+                    "4h",
+                    "1d",
+                    "1w"
+                  ],
+                  "description": "Filter alerts by timeframe",
+                  "example": "4h"
+                },
                 "page": {
                   "type": "integer",
                   "description": "Page number (default: 1)",
-                  "default": 1
+                  "default": 1,
+                  "minimum": 1
                 },
                 "per_page": {
                   "type": "integer",
                   "description": "Items per page (default: 10)",
-                  "default": 10
+                  "default": 10,
+                  "minimum": 1
                 }
               },
               "required": [
@@ -4774,6 +4787,16 @@
                             "updated_at": {
                               "type": "string",
                               "format": "date-time"
+                            },
+                            "timeframe": {
+                              "type": "string",
+                              "enum": [
+                                "1h",
+                                "4h",
+                                "1d",
+                                "1w"
+                              ],
+                              "nullable": true
                             }
                           }
                         }
@@ -4811,12 +4834,13 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request - Invalid input parameters",
             "schema": {
               "type": "object",
               "properties": {
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w"
                 }
               }
             }
@@ -4840,8 +4864,8 @@
         "tags": [
           "Alerts"
         ],
-        "summary": "Retrieve alerts for multiple coins with date filtering and pagination support",
-        "description": "Retrieve alerts for multiple coins with date filtering and pagination support",
+        "summary": "Retrieve alerts for multiple coins with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "description": "Retrieve alerts for multiple coins with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
         "parameters": [
           {
             "name": "body",
@@ -4857,26 +4881,34 @@
                   "items": {
                     "type": "string"
                   },
-                  "description": "List of coin symbols"
+                  "description": "List of coin symbols",
+                  "example": [
+                    "btc",
+                    "eth"
+                  ]
                 },
-                "date": {
+                "timeframe": {
                   "type": "string",
                   "enum": [
-                    "today",
-                    "this week",
-                    "last week"
+                    "1h",
+                    "4h",
+                    "1d",
+                    "1w"
                   ],
-                  "description": "Optional date filter"
+                  "description": "Filter alerts by timeframe",
+                  "example": "4h"
                 },
                 "page": {
                   "type": "integer",
                   "description": "Page number (default: 1)",
-                  "default": 1
+                  "default": 1,
+                  "minimum": 1
                 },
                 "per_page": {
                   "type": "integer",
                   "description": "Items per page (default: 10)",
-                  "default": 10
+                  "default": 10,
+                  "minimum": 1
                 }
               },
               "required": [
@@ -4887,7 +4919,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved filtered alerts",
+            "description": "Successfully retrieved alerts by coins",
             "schema": {
               "type": "object",
               "properties": {
@@ -4926,6 +4958,16 @@
                             "updated_at": {
                               "type": "string",
                               "format": "date-time"
+                            },
+                            "timeframe": {
+                              "type": "string",
+                              "enum": [
+                                "1h",
+                                "4h",
+                                "1d",
+                                "1w"
+                              ],
+                              "nullable": true
                             }
                           }
                         }
@@ -4958,36 +5000,18 @@
                 },
                 "total_alerts": {
                   "type": "integer"
-                },
-                "date_range": {
-                  "type": "object",
-                  "properties": {
-                    "start": {
-                      "type": "string",
-                      "format": "date-time",
-                      "nullable": true
-                    },
-                    "end": {
-                      "type": "string",
-                      "format": "date-time",
-                      "nullable": true
-                    },
-                    "filter": {
-                      "type": "string",
-                      "nullable": true
-                    }
-                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request - Invalid input parameters",
             "schema": {
               "type": "object",
               "properties": {
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w"
                 }
               }
             }
