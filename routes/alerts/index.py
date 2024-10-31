@@ -80,7 +80,7 @@ def get_alerts_by_categories():
         }
 
         for category_name in categories:
-            category_obj = session.query(Category).filter(Category.name == category_name).first()
+            category_obj = session.query(Category).filter(Category.name == category_name.strip().casefold()).first()
 
             if not category_obj:
                 response['categories'][category_name] = {
