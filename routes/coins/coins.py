@@ -436,7 +436,7 @@ def delete_coin(coin_id):
 
 
 @coin_bp.route('/coin/<int:coin_id>/toggle-coin', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin', 'get_all_categories'])
 def toggle_coin_publication(coin_id):
     """
     Toggle the publication status of a coin.
