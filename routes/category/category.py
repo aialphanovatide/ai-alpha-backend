@@ -290,7 +290,7 @@ def delete_category(category_id):
                 response["error"] = f"No category found with ID: {category_id}"
                 return jsonify(response), 404
 
-            # Delete associated icon from S3
+            # # Delete associated icon from S3
             if category.icon:
                 icon_filename = category.icon
                 image_processor.delete_from_s3(S3_BUCKET_ICONS, icon_filename)
@@ -628,66 +628,88 @@ def global_toggle_coins():
             return jsonify(response), 500
 
 
-def validate_coin(coin):
-    """
-    Validate if a coin bot meets all requirements for activation.
-    
-    Args:
-        coin_bot (CoinBot): The CoinBot object to validate.
-
-    Returns:
-        bool: True if the coin bot passes all validations, False otherwise.
-    """
+def validate_coin(coin, session=None):
+    """Validate if a coin bot meets all requirements for activation."""
     error_messages = []
-
-    with Session() as session:
-        # Check if fundamentals exist and are complete
-        if not coin or not are_coin_fundamentals_complete(coin):
-            error_messages.append('Fundamentals are incomplete')
+    should_close_session = False
+    
+    if session is None:
+        session = Session()
+        should_close_session = True
+    
+    try:
+        print(f"[DEBUG] Starting validation for coin: {coin.name} (ID: {coin.bot_id})")
         
-        # Check if chart exists and has support and resistance lines
+        if not session.is_active or coin not in session:
+            print("[DEBUG] Merging coin with session")
+            coin = session.merge(coin)
+        
+        print("[DEBUG] Refreshing coin relationships")
+        session.refresh(coin)
+        
+        print("[DEBUG] Checking fundamentals")
+        fundamentals_complete, missing_fundamentals = are_coin_fundamentals_complete(coin)
+        if not fundamentals_complete:
+            error_messages.append(f"Missing fundamentals: {', '.join(missing_fundamentals)}")
+        
+        print("[DEBUG] Checking chart")
         chart = session.query(Chart).filter_by(coin_bot_id=coin.bot_id).first()
-        if not chart or not has_support_resistance_lines(chart):
-            error_messages.append('S&R Lines are incomplete')
+        print(f"[DEBUG] Chart exists: {bool(chart)}")
+        if not chart:
+            error_messages.append("Chart is missing - Check support and resistance lines")
+        elif not has_support_resistance_lines(chart):
+            error_messages.append("Support and Resistance lines are incomplete")
 
-    # If there are any error messages, validation failed
-    if error_messages:
-        return False, error_messages
-
-    # If no error messages, validation passed
-    return True, ['Valid coin']
+        print(f"[DEBUG] Validation complete. Errors: {error_messages}")
+        return (not bool(error_messages), error_messages or ['Valid coin'])
+        
+    except Exception as e:
+        print(f"[DEBUG] Exception in validate_coin: {str(e)}")
+        raise
+    finally:
+        if should_close_session:
+            session.close()
 
 def are_coin_fundamentals_complete(coin):
-    """
-    Check if all required fundamental sections are complete for a given CoinBot.
+    """Check if all required fundamental sections are complete."""
+    print(f"[DEBUG] Checking fundamentals for coin: {coin.name} (ID: {coin.bot_id})")
+    missing_fundamentals = []
     
-    This function verifies that the CoinBot has the necessary content in each of
-    the fundamental sections considered essential for the coin's information.
+    # Check introduction
+    introduction = coin.introduction[0] if coin.introduction else None
+    if not introduction or not introduction.content:
+        missing_fundamentals.append("Introduction")
+    
+    # Check tokenomics
+    tokenomics = coin.tokenomics[0] if coin.tokenomics else None
+    if not tokenomics or not (tokenomics.token and tokenomics.total_supply):
+        missing_fundamentals.append("Tokenomics")
+    
+    # Check token distribution
+    if not any(td.holder_category and td.percentage_held for td in coin.token_distribution):
+        missing_fundamentals.append("Token Distribution")
+    
+    # Check token utility
+    if not any(tu.token_application and tu.description for tu in coin.token_utility):
+        missing_fundamentals.append("Token Utility")
+    
+    # Check value accrual
+    if not any(vam.mechanism and vam.description for vam in coin.value_accrual_mechanisms):
+        missing_fundamentals.append("Value Accrual Mechanisms")
+    
+    # Check competitors
+    if not any(comp.token and comp.key and comp.value for comp in coin.competitor):
+        missing_fundamentals.append("Competitors")
+    
+    # Check revenue model
+    revenue_model = coin.revenue_model[0] if coin.revenue_model else None
+    if not revenue_model or not revenue_model.analized_revenue:
+        missing_fundamentals.append("Revenue Model")
 
-    Args:
-        coin (CoinBot): The CoinBot object to check.
-
-    Returns:
-        bool: True if all fundamental sections are complete, False otherwise.
-    """
-    # Check if each fundamental section exists and has content
-    has_introduction = coin.introduction and coin.introduction.content
-    has_tokenomics = coin.tokenomics and coin.tokenomics.token and coin.tokenomics.total_supply
-    has_token_distribution = any(td.holder_category and td.percentage_held for td in coin.token_distribution)
-    has_token_utility = any(tu.token_application and tu.description for tu in coin.token_utility)
-    has_value_accrual = any(vam.mechanism and vam.description for vam in coin.value_accrual_mechanisms)
-    has_competitor = any(comp.name for comp in coin.competitor)
-    has_revenue_model = coin.revenue_model and coin.revenue_model.analized_revenue
-
-    return all([
-        has_introduction,
-        has_tokenomics,
-        has_token_distribution,
-        has_token_utility,
-        has_value_accrual,
-        has_competitor,
-        has_revenue_model
-    ])
+    print(f"[DEBUG] Missing fundamentals: {missing_fundamentals}")
+    
+    # Return True only if no fundamentals are missing
+    return len(missing_fundamentals) == 0, missing_fundamentals
 
 def has_support_resistance_lines(chart):
     """
@@ -705,3 +727,5 @@ def has_support_resistance_lines(chart):
     all_lines_present = all(support_lines) and all(resistance_lines)
     
     return all_lines_present
+
+        

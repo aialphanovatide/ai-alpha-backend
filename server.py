@@ -8,7 +8,7 @@ from routes.chart.chart_olhc import chart_graphs_bp
 from routes.news_bot.index import scrapper_bp
 from routes.telegram.index import telegram_bp
 from routes.analysis.analysis import analysis_bp 
-from routes.tradingview.index import tradingview_bp
+from routes.alerts.index import tradingview_bp
 from routes.slack.slack_actions import slack_events_bp
 from routes.fundamentals.introduction import introduction
 from routes.fundamentals.competitors import competitor_bp
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     try:
         with app.app_context():
             print('---AI Alpha API is running---') 
-            app.run(port=9002, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+            app.run(port=9002, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
     finally:
