@@ -141,7 +141,7 @@ async def fundamental_ai_search():
             data = request.json
             section_name = data.get('section_name')
             coin_name = data.get('coin_name')
-
+            print(section_name)
             # Validate input parameters
             if not section_name or not coin_name:
                 return jsonify({
