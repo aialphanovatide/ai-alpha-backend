@@ -35,6 +35,7 @@ def extract_json(html_content):
     return None
 
 def get_query(query_type, coin_name):
+    print("Flag")
     queries = {
         "revenue": f"Please return only the current or past Annualised Revenue (Cumulative last 1yr revenue) for the ${coin_name} cryptocurrency as a single numerical value in JSON format.",
         "upgrade": f"""
@@ -67,5 +68,5 @@ def get_query(query_type, coin_name):
         Ensure that the TVL is represented as an integer in dollars (e.g., 1500000000 for $1.5 billion).
         """
     }
-    
+    print("Flag")
     return queries.get(query_type.lower(), None)

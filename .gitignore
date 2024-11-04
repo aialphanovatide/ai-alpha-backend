@@ -107,3 +107,5 @@ service_account.json
 /myenv
 
 routes/news_bot/userDataDir/
+docker-compose.dev.yml
+dockerfile

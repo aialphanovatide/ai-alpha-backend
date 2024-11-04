@@ -4,6 +4,7 @@ from sqlalchemy import (
     JSON, Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
 )
+from typing import List
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base

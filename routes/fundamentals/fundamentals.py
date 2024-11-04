@@ -1,6 +1,6 @@
 
 
-from requests import Session
+from config import Session
 from flask import Blueprint, jsonify, request
 from config import DApps, Hacks, Revenue_model, Upgrades
 from services.fundamentals_populator.populator import process_query

@@ -13,16 +13,19 @@ async def search_perplexity(query: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch_persistent_context(user_data_dir, headless=False, slow_mo=2000)
         page = await browser.new_page()
-        
+        print("Flag")
+
         # Navigate to Perplexity
         await page.goto("https://www.perplexity.ai")
-        
+        print("Flag")
+
         # Check if Pro Search is enabled, if not, enable it
         pro_search_toggle = await page.query_selector("div[data-state='checked']")
         if not pro_search_toggle:
             await page.click("div.rounded-full.relative.size-4.shadow-sm")
             await page.wait_for_selector("div[data-state='checked']")
-        
+        print("Flag")
+    
         # Wait for the textarea to be available and visible
         textarea = await page.wait_for_selector("textarea[placeholder='Ask anything...']", state="visible")
         

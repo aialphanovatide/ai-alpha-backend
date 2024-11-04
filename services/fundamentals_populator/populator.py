@@ -24,6 +24,7 @@ async def process_query(section_name: str, coin_name: str) -> tuple[Any, Optiona
         This function is asynchronous and should be called with await.
     """
     max_attempts = 3
+    print("Flag")
     
     for attempt in range(max_attempts):
         # Get the appropriate query based on section_name and coin_name

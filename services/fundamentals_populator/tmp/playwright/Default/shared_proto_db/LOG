@@ -1,3 +1,3 @@
-2024/10/30-13:37:35.873 b103 Reusing MANIFEST /Users/agustinbustamante/ai_alpha_server_V2/services/fundamentals_populator/tmp/playwright/Default/shared_proto_db/MANIFEST-000001
-2024/10/30-13:37:35.873 b103 Recovering log #3
-2024/10/30-13:37:35.874 b103 Reusing old log /Users/agustinbustamante/ai_alpha_server_V2/services/fundamentals_populator/tmp/playwright/Default/shared_proto_db/000003.log 
+2024/11/04-20:32:32.261 167 Reusing MANIFEST /app/services/fundamentals_populator/tmp/playwright/Default/shared_proto_db/MANIFEST-000001
+2024/11/04-20:32:32.262 167 Recovering log #3
+2024/11/04-20:32:32.263 167 Reusing old log /app/services/fundamentals_populator/tmp/playwright/Default/shared_proto_db/000003.log 
