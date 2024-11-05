@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from typing import Tuple, Optional
 from requests.exceptions import RequestException
 from botocore.exceptions import ClientError, BotoCoreError
+import werkzeug
 
 load_dotenv()
 
@@ -176,27 +177,35 @@ class ImageProcessor:
             raise Exception(f"Unexpected error uploading to S3: {e}")
     
     def upload_svg_to_s3(self, svg_file, bucket_name: str, svg_filename: str) -> Optional[str]:
+        print(self,bucket_name, svg_file,svg_filename)
         """
         Upload an SVG file to S3.
-
         Args:
-            svg_file: The SVG file to upload (typically from request.files).
+            svg_file (Union[bytes, IO[bytes]]): The SVG file to upload.
             bucket_name (str): Name of the S3 bucket.
             svg_filename (str): Desired filename for the SVG in S3.
-
         Returns:
             Optional[str]: URL of the uploaded SVG in S3, or None if upload failed.
         """
-        if svg_file and svg_file.filename.lower().endswith('.svg'):
+        if svg_file and svg_filename.lower().endswith('.svg'):
             try:
-                filename = svg_filename
-                self.s3_client.upload_fileobj(
-                    svg_file,
-                    bucket_name,
-                    filename,
-                    ExtraArgs={'ContentType': 'image/svg+xml'}
-                )
-                return f"https://{bucket_name}.s3.{self.aws_region}.amazonaws.com/{filename}"
+                if hasattr(svg_file, 'read'):
+                    # svg_file is a file-like object
+                    self.s3_client.upload_fileobj(
+                        svg_file,
+                        bucket_name,
+                        svg_filename,
+                        ExtraArgs={'ContentType': 'image/svg+xml'}
+                    )
+                else:
+                    # svg_file is bytes
+                    self.s3_client.upload_bytes(
+                        svg_file,
+                        bucket_name,
+                        svg_filename,
+                        ExtraArgs={'ContentType': 'image/svg+xml'}
+                    )
+                return f"https://{bucket_name}.s3.{self.aws_region}.amazonaws.com/{svg_filename}"
             except (BotoCoreError, ClientError) as e:
                 return None
         return None
