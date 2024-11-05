@@ -35,6 +35,7 @@ from routes.external_apis.coinalyze import coinalyze_bp
 from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
 from routes.coins.coins import coin_bp
+from routes.ask_ai.ask_ai import ask_ai_bp
 from flasgger import Swagger
 from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
@@ -129,7 +130,7 @@ app.register_blueprint(coinalyze_bp)
 app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
-
+app.register_blueprint(ask_ai_bp)
 
 if __name__ == '__main__':
     try:

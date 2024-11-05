@@ -133,10 +133,82 @@ def get_coin_data(name: Optional[str] = None, symbol: Optional[str] = None) -> D
 
     return result
 
-# Example usage:
-# result=get_coin_data(symbol='dot', name='Polkadot')
-# print("result: ", result) 
+COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
+BASE_URL = 'https://pro-api.coingecko.com/api/v3'
 
+headers = {
+    "Content-Type": "application/json",
+    "x-cg-pro-api-key": COINGECKO_API_KEY,
+}
+
+def get_crypto_id(symbol: str) -> str:
+    """
+    Obtener el ID de una criptomoneda dado su símbolo.
+
+    Args:
+        symbol (str): El símbolo de la criptomoneda.
+
+    Returns:
+        str: El ID de la criptomoneda.
+    """
+    try:
+        url = f'{BASE_URL}/coins/list'
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        coins = response.json()
+
+        for coin in coins:
+            if coin['symbol'].lower() == symbol.lower():
+                return coin['id']
+    except requests.exceptions.RequestException as e:
+        print(f"Error en la solicitud API: {str(e)}")
+    return None
+
+def get_tokenomics_data(symbol: str) -> Dict[str, Any]:
+    """
+    Obtener datos detallados de suministro para un símbolo de criptomoneda dado.
+
+    Args:
+        symbol (str): El símbolo de la criptomoneda.
+
+    Returns:
+        Dict[str, Any]: Un diccionario que contiene información detallada sobre la moneda.
+    """
+    crypto_id = get_crypto_id(symbol)
+    if not crypto_id:
+        return {'error': f"No se encontró ninguna criptomoneda con el símbolo {symbol}"}
+
+    url = f'{BASE_URL}/coins/{crypto_id}'
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        print(data)
+        result = {
+            'website': data['links']['homepage'][0] if data['links']['homepage'] else None,
+            'whitepaper': data['links']['whitepaper'] if 'whitepaper' in data['links'] else None,
+            'categories': data.get('categories', []),
+            'chains': list(data['platforms'].keys()),
+            'current_price': data['market_data']['current_price']['usd'],
+            'market_cap_usd': data['market_data']['market_cap']['usd'],
+            'fully_diluted_valuation': data['market_data'].get('fully_diluted_valuation', {}).get('usd', None),
+            'ath': data['market_data']['ath']['usd'],
+            'ath_change_percentage': data['market_data']['ath_change_percentage']['usd'],
+            'circulating_supply': data['market_data'].get('circulating_supply', None),
+        }
+
+        return result
+
+    except requests.exceptions.RequestException as e:
+        return {'error': f"Error en la solicitud API: {str(e)}"}
+    except ValueError as e:
+        return {'error': f"Error al decodificar JSON: {str(e)}"}
+    except Exception as e:
+        return {'error': f"Error inesperado: {str(e)}"}
+
+# Ejemplo de uso:
+# result = get_tokenomics_data('dot')
+# print("result: ", result)
 
 
 
