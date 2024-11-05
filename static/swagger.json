@@ -23,6 +23,10 @@
       "description": "Operations related to the Analysis (Daily Deeps)"
     },
     {
+      "name": "Ask AI",
+      "description": "Operations related to the Ask AI (Coin info)"
+    },
+    {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
     },
