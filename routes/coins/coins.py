@@ -202,7 +202,7 @@ def get_single_coin(coin_id):
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['PUT'])
-@update_cache_with_redis(related_get_endpoints=['get_single_coin', 'get_all_coins'])
+@update_cache_with_redis(related_get_endpoints=['get_single_coin', 'get_all_coins', 'get_all_categories'])
 def update_coin(coin_id):
     """
     Update a coin's information in the database.
