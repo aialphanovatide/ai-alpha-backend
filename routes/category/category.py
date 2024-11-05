@@ -86,10 +86,6 @@ def create_category():
                 normalized_alias = alias.strip().lower().replace(" ", "")
                 icon_filename = f"{normalized_alias}.svg"
                 icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", icon_filename)
-                if icon_url:
-                    print("Uploaded SVG to S3:", icon_url)
-                else:
-                    print("Failed to upload SVG to S3")
 
             new_category = Category(
                 name=name,
