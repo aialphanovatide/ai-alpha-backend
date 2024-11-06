@@ -18,7 +18,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     conn = op.get_bind()
-    inspector = sa.inspect(conn)
+    inspector = sa.Inspector.from_engine(conn)
     
     # Ensure that 'tokens' table exists
     if 'tokens' in inspector.get_table_names():

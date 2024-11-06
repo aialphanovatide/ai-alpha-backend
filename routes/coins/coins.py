@@ -15,7 +15,6 @@ from sqlalchemy import func
 
 coin_bp = Blueprint('coin_bp', __name__)
 
-S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
 
 # Initialize the ImageProcessor
 image_processor = ImageProcessor()
@@ -98,7 +97,7 @@ def create_coin():
                 # Normalize the alias
                 normalized_alias = alias.strip().lower().replace(" ", "")
                 icon_filename = secure_filename(f"{normalized_alias}.svg")
-                icon_url = image_processor.upload_svg_to_s3(icon_file, S3_BUCKET_ICONS, icon_filename)
+                icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", icon_filename)
                 if not icon_url:
                     response["error"] = 'Failed to upload SVG file'
                     status_code = 400
@@ -203,7 +202,7 @@ def get_single_coin(coin_id):
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['PUT'])
-@update_cache_with_redis(related_get_endpoints=['get_single_coin', 'get_all_coins'])
+@update_cache_with_redis(related_get_endpoints=['get_single_coin', 'get_all_coins', 'get_all_categories'])
 def update_coin(coin_id):
     """
     Update a coin's information in the database.
@@ -271,12 +270,12 @@ def update_coin(coin_id):
                 try:
                     if coin.icon:  # Delete old icon if exists
                         old_icon_filename = coin.icon.split('/')[-1]
-                        image_processor.delete_from_s3(bucket=S3_BUCKET_ICONS, image_url=old_icon_filename)
+                        image_processor.delete_from_s3(bucket="aialphaicons", image_url=old_icon_filename)
 
                     alias = coin.alias
                     normalized_alias = alias.strip().lower().replace(" ", "")
                     new_icon_filename = secure_filename(f"{normalized_alias}.svg")
-                    icon_url = image_processor.upload_svg_to_s3(icon_file, S3_BUCKET_ICONS, new_icon_filename)
+                    icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", new_icon_filename)
                     if not icon_url:
                         raise ValueError('Failed to upload new SVG icon')
                     coin.icon = icon_url
@@ -413,7 +412,7 @@ def delete_coin(coin_id):
             if coin.icon:
                 icon_filename = coin.icon.split('/')[-1]
                 try:
-                    image_processor.delete_from_s3(bucket=S3_BUCKET_ICONS, image_url=icon_filename)
+                    image_processor.delete_from_s3(bucket="aialphaicons", image_url=icon_filename)
                 except Exception as e:
                     return jsonify({"success": False, "error": f"Error deleting icon from S3: {str(e)}"}), 500
 
@@ -436,7 +435,7 @@ def delete_coin(coin_id):
 
 
 @coin_bp.route('/coin/<int:coin_id>/toggle-coin', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin', 'get_all_categories'])
 def toggle_coin_publication(coin_id):
     """
     Toggle the publication status of a coin.
@@ -495,7 +494,7 @@ def toggle_coin_publication(coin_id):
             else:
                 # Perform validations
                 valid, messages = validate_coin(coin=coin)
-                if  valid:
+                if valid:
                     coin.is_active = True
                     coin.updated_at = datetime.now()
                     session.commit()

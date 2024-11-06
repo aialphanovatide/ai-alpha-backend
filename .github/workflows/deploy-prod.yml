@@ -30,6 +30,8 @@ jobs:
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
       NGROK_DOMAIN: ${{ secrets.NGROK_DOMAIN }}
       NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+      BINANCE_API_URL: ${{ secrets.BINANCE_API_URL }}
+      COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
     steps:
     - name: Checkout code
