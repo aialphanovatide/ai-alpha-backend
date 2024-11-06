@@ -105,8 +105,8 @@ def get_coin_data(name: Optional[str] = None, symbol: Optional[str] = None) -> D
         'error': None
     }
 
-    if not name and not symbol:
-        result['error'] = "Either name or symbol must be provided"
+    if not name or not symbol:
+        result['error'] = "Both name and symbol must be provided for accurate matching"
         return result
 
     try:

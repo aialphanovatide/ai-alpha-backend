@@ -369,63 +369,6 @@
         }
       }
     },
-    "/register": {
-      "post": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Create a new user with provided data.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "nickname",
-                "email"
-              ],
-              "properties": {
-                "nickname": {
-                  "type": "string"
-                },
-                "full_name": {
-                  "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                },
-                "email_verified": {
-                  "type": "boolean",
-                  "default": false
-                },
-                "picture": {
-                  "type": "string"
-                },
-                "auth0id": {
-                  "type": "string"
-                },
-                "provider": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User created successfully."
-          },
-          "400": {
-            "description": "Missing required fields (nickname, email)."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
     "/users": {
       "get": {
         "tags": [
@@ -734,238 +677,6 @@
           },
           "404": {
             "description": "User not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/tv/alerts": {
-      "get": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "Get all alerts for a specific category.",
-        "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "description": "Category name",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Limit number of alerts (optional)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "alert_id": {
-                    "type": "integer"
-                  },
-                  "alert_name": {
-                    "type": "string"
-                  },
-                  "alert_message": {
-                    "type": "string"
-                  },
-                  "symbol": {
-                    "type": "string"
-                  },
-                  "price": {
-                    "type": "number"
-                  },
-                  "coin_bot_id": {
-                    "type": "integer"
-                  },
-                  "created_at": {
-                    "type": "string",
-                    "format": "date-time"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Category not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/tv/multiple_alert": {
-      "post": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "Get alerts from multiple categories.",
-        "parameters": [
-          {
-            "name": "categories",
-            "in": "body",
-            "description": "List of category names",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "limit": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "alert_id": {
-                      "type": "integer"
-                    },
-                    "alert_name": {
-                      "type": "string"
-                    },
-                    "alert_message": {
-                      "type": "string"
-                    },
-                    "symbol": {
-                      "type": "string"
-                    },
-                    "price": {
-                      "type": "number"
-                    },
-                    "coin_bot_id": {
-                      "type": "integer"
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/filter/alerts": {
-      "get": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "Get filtered alerts by coin and date.",
-        "parameters": [
-          {
-            "name": "coin",
-            "in": "query",
-            "description": "Name of the coin/token",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "date",
-            "in": "query",
-            "description": "Date filter (optional)",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "today",
-              "this week",
-              "last week",
-              "4h",
-              "1h",
-              "1w",
-              "1d",
-              "24h"
-            ]
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Limit number of alerts (optional)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "alerts": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "alert_id": {
-                        "type": "integer"
-                      },
-                      "alert_name": {
-                        "type": "string"
-                      },
-                      "alert_message": {
-                        "type": "string"
-                      },
-                      "symbol": {
-                        "type": "string"
-                      },
-                      "price": {
-                        "type": "number"
-                      },
-                      "coin_bot_id": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Coin not found"
           },
           "500": {
             "description": "Internal server error"
@@ -5092,6 +4803,348 @@
                 },
                 "success": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/categories": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Retrieve alerts for multiple categories",
+        "description": "Retrieve alerts for multiple categories with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of category names",
+                  "example": [
+                    "bitcoin",
+                    "ethereum"
+                  ]
+                },
+                "timeframe": {
+                  "type": "string",
+                  "enum": [
+                    "1h",
+                    "4h",
+                    "1d",
+                    "1w"
+                  ],
+                  "description": "Filter alerts by timeframe",
+                  "example": "4h"
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Page number (default: 1)",
+                  "default": 1,
+                  "minimum": 1
+                },
+                "per_page": {
+                  "type": "integer",
+                  "description": "Items per page (default: 10)",
+                  "default": 10,
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "categories"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved alerts by categories",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "categories": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "alert_id": {
+                              "type": "integer"
+                            },
+                            "alert_name": {
+                              "type": "string"
+                            },
+                            "alert_message": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "price": {
+                              "type": "number"
+                            },
+                            "coin_bot_id": {
+                              "type": "integer"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "timeframe": {
+                              "type": "string",
+                              "enum": [
+                                "1h",
+                                "4h",
+                                "1d",
+                                "1w"
+                              ],
+                              "nullable": true
+                            }
+                          }
+                        }
+                      },
+                      "total": {
+                        "type": "integer"
+                      },
+                      "pagination": {
+                        "type": "object",
+                        "properties": {
+                          "current_page": {
+                            "type": "integer"
+                          },
+                          "per_page": {
+                            "type": "integer"
+                          },
+                          "total_pages": {
+                            "type": "integer"
+                          },
+                          "has_next": {
+                            "type": "boolean"
+                          },
+                          "has_prev": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "total_alerts": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/coins": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Retrieve alerts for multiple coins",
+        "description": "Retrieve alerts for multiple coins with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of coin symbols",
+                  "example": [
+                    "btc",
+                    "eth"
+                  ]
+                },
+                "timeframe": {
+                  "type": "string",
+                  "enum": [
+                    "1h",
+                    "4h",
+                    "1d",
+                    "1w"
+                  ],
+                  "description": "Filter alerts by timeframe",
+                  "example": "4h"
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Page number (default: 1)",
+                  "default": 1,
+                  "minimum": 1
+                },
+                "per_page": {
+                  "type": "integer",
+                  "description": "Items per page (default: 10)",
+                  "default": 10,
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "coins"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved alerts by coins",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "alert_id": {
+                              "type": "integer"
+                            },
+                            "alert_name": {
+                              "type": "string"
+                            },
+                            "alert_message": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "price": {
+                              "type": "number"
+                            },
+                            "coin_bot_id": {
+                              "type": "integer"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "timeframe": {
+                              "type": "string",
+                              "enum": [
+                                "1h",
+                                "4h",
+                                "1d",
+                                "1w"
+                              ],
+                              "nullable": true
+                            }
+                          }
+                        }
+                      },
+                      "total": {
+                        "type": "integer"
+                      },
+                      "pagination": {
+                        "type": "object",
+                        "properties": {
+                          "current_page": {
+                            "type": "integer"
+                          },
+                          "per_page": {
+                            "type": "integer"
+                          },
+                          "total_pages": {
+                            "type": "integer"
+                          },
+                          "has_next": {
+                            "type": "boolean"
+                          },
+                          "has_prev": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "total_alerts": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
                 }
               }
             }

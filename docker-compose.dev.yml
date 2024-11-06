@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_DEV}
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
-      # BACKUP_FILE: /backups/aialpha-database-prod-16-10-24.sql
+      BACKUP_FILE: /backups/aialpha-database-prod-16-10-24.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_DEV} -d ${POSTGRES_DB_DEV}"]
       interval: 5s
@@ -25,7 +25,6 @@ services:
         chmod +x /docker-entrypoint-initdb.d/restore_db.sh &&
         docker-entrypoint.sh postgres
       "
-
 
   web_dev:
     build: .
@@ -44,7 +43,7 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - NEWS_BOT_API_KEY=${NEWS_BOT_API_KEY}
-      # - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - AWS_ACCESS=${AWS_ACCESS}
@@ -58,11 +57,10 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - COINGECKO_API_KEY=${COINGECKO_API_KEY}
       - BINANCE_API_URL=${BINANCE_API_URL}
+
     depends_on:
       db_dev:
         condition: service_healthy
-    env_file:
-      - .env
     command: sh -c "chmod +x ./script.sh && ./script.sh"
     networks:
       - myapp_dev_network
@@ -103,21 +101,21 @@ services:
     networks:
       - myapp_dev_network
    
-  # ngrok:
-  #   image: ngrok/ngrok:latest
-  #   restart: unless-stopped
-  #   command:
-  #     - "http"
-  #     - "--domain=${NGROK_DOMAIN_DEV}"
-  #     - "web_dev:9002"
-  #   environment:
-  #     - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-  #   depends_on:
-  #     - web_dev
-  #   ports:
-  #     - "4043:4040"
-  #   networks:
-  #     - myapp_dev_network
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "http"
+      - "--domain=${NGROK_DOMAIN_DEV}"
+      - "web_dev:9002"
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    depends_on:
+      - web_dev
+    ports:
+      - "4043:4040"
+    networks:
+      - myapp_dev_network
   
 volumes:
   postgres_data_dev:
@@ -126,6 +124,3 @@ volumes:
 networks:
   myapp_dev_network:
     name: myapp_dev_network
-
-
-
