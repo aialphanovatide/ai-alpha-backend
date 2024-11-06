@@ -686,7 +686,7 @@
         }
       }
     },
-    "/api/sections": {
+    "/sections": {
       "get": {
         "tags": [
           "Sections"
@@ -884,7 +884,7 @@
           }
         }
       }
-    , "/api/sections/{sectionId}": {
+    , "/sections/{sectionId}": {
       "delete": {
         "tags": [
           "Sections"

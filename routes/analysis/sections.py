@@ -1,8 +1,7 @@
 from http import HTTPStatus
 from flask import Blueprint, jsonify, request
-from requests import Session
 from sqlalchemy.exc import SQLAlchemyError
-from config import Sections
+from config import Sections, Session
 
 
 sections_bp = Blueprint('sections_bp', __name__)
@@ -88,7 +87,7 @@ def create_section():
         
         return jsonify(response), response["status"]
 
-@sections_bp.route('sections/<int:section_id>', methods=['DELETE'])
+@sections_bp.route('/sections/<int:section_id>', methods=['DELETE'])
 def delete_section(section_id):
     """
     Delete a section by its ID.
