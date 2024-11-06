@@ -33,7 +33,6 @@ DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 if env == 'production':
     DATABASE_URL = os.getenv('DATABASE_URL_PROD')
 
-print('DATABASE_URL:', DATABASE_URL)
 engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
 Base = declarative_base()
 
@@ -217,6 +216,7 @@ class Role(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False)
     description = Column(String(255))
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     admins = relationship('Admin', secondary='admin_roles', back_populates='roles')
 
@@ -260,6 +260,7 @@ class Token(Base):
     token = Column(String(64), unique=True, nullable=False, index=True)
     admin_id = Column(Integer, ForeignKey('admins.admin_id', ondelete='CASCADE'), nullable=False)
     expires_at = Column(TIMESTAMP(timezone=True), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     admin = relationship('Admin', back_populates='tokens')
 
@@ -1466,7 +1467,7 @@ class Topic(Base):
     timeframe = Column(String, nullable=True)
     type = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     notifications = relationship('Notification', back_populates='topic', cascade="all, delete-orphan")
 
@@ -1500,7 +1501,7 @@ class Notification(Base):
     coin = Column(String)
     topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     topic = relationship('Topic', back_populates='notifications')
 
