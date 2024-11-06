@@ -43,8 +43,4 @@ def downgrade() -> None:
         op.drop_column('topics', 'type')
         print("Column 'type' dropped from 'topics' table.")
     else:
-<<<<<<< HEAD
         print("Column 'type' does not exist in 'topics' table. Skipping drop operation.")
-=======
-        print("Column 'type' does not exist in 'topics' table. Skipping drop operation.")
->>>>>>> 8f80146 (merge)
