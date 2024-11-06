@@ -1,4 +1,4 @@
-# Discord Bot Readme
+# Discord Bot 
 
 This is a Discord bot that allows user verification through a role-based system using email verification. The bot is designed to interact with members of a Discord server, assigning roles based on their email verification status.
 
