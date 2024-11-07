@@ -52,10 +52,6 @@ def create_category():
             alias = request.form.get('alias')
             border_color = request.form.get('border_color')
             icon_file = request.files.get('icon')
-
-            print("Icon file:", icon_file)
-            print("Icon file type:", type(icon_file))
-            print("Icon file size:", icon_file.content_length)
             
             if not name or not alias:
                 response["error"] = 'Name and Alias are required and cannot be null'

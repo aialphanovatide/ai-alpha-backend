@@ -368,7 +368,7 @@ def get_all_coins():
 
 
 @coin_bp.route('/coin/<int:coin_id>', methods=['DELETE'])
-@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin'])
+@update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin', 'get_all_categories'])
 def delete_coin(coin_id):
     """
     Delete a coin from the database.
