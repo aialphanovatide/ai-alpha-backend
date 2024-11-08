@@ -8,12 +8,12 @@ from typing import Tuple, Dict
 from sqlalchemy.exc import SQLAlchemyError
 from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
+from config import Analysis, CoinBot, Session
 from flask import jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
 from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
 from apscheduler.jobstores.base import JobLookupError
-from config import Analysis, Category, CoinBot, Session
 from routes.analysis.analysis_scheduler import sched, chosen_timezone
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 

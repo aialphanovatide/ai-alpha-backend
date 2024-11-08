@@ -20,16 +20,6 @@ LOGS_SLACK_CHANNEL_ID = 'C06FTS38JRX'
 notification_service = Notification(session=Session())
 
 
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
-
-logger = logging.getLogger(__name__)
-
-
 def extract_timeframe(alert_name):
     """
     Extract standardized timeframe from alert name.
@@ -51,12 +41,10 @@ def extract_timeframe(alert_name):
         timeframe = match.group(1).upper()
         return timeframe_mapping.get(timeframe)
     return None
+
 @tradingview_bp.route('/alerts/categories', methods=['POST'])  
 def get_alerts_by_categories():
     try:
-        logger.debug("[START] Processing /alerts/categories request")
-        logger.debug(f"Request data: {request.json}")
-
         data = request.json
         if not data or 'categories' not in data:
             return jsonify({'error': 'Categories are required'}), 400
@@ -85,8 +73,6 @@ def get_alerts_by_categories():
         }
 
         for category_name in categories:
-            logger.debug(f"Processing category: {category_name}")
-            
             # Query category
             category_obj = session.query(Category).filter(
                 func.lower(Category.name).in_([category_name.strip().lower()]) |
@@ -108,7 +94,6 @@ def get_alerts_by_categories():
 
             # Apply timeframe filter if provided
             if timeframe:
-                logger.debug(f"Applying timeframe filter: {timeframe}")
                 alerts_query = alerts_query.filter(
                     Alert.alert_name.ilike(f'%{timeframe}%chart%')
                 )
@@ -119,7 +104,6 @@ def get_alerts_by_categories():
             # Get total count
             total_category_alerts = alerts_query.count()
             response['total_alerts'] += total_category_alerts
-            logger.debug(f"Total alerts for category {category_name}: {total_category_alerts}")
 
             # Apply pagination
             alerts = alerts_query.offset((page - 1) * per_page).limit(per_page).all()
@@ -145,19 +129,14 @@ def get_alerts_by_categories():
 
             response['categories'][category_name] = category_response
 
-        logger.debug(f"Request completed successfully. Total alerts: {response['total_alerts']}")
         return jsonify(response), 200
 
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}", exc_info=True)
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
     
 @tradingview_bp.route('/alerts/coins', methods=['POST'])
 def get_filtered_alerts():
     try:
-        logger.debug("[START] Processing /alerts/coins request")
-        logger.debug(f"Request data: {request.json}")
-
         data = request.json
         if not data or 'coins' not in data:
             return jsonify({'error': 'Coins array is required'}), 400
@@ -168,14 +147,12 @@ def get_filtered_alerts():
         # Validate timeframe if provided
         valid_timeframes = ['1h', '4h', '1d', '1w']
         if timeframe and timeframe.lower() not in valid_timeframes:
-            logger.warning(f"Invalid timeframe provided: {timeframe}")
             return jsonify({'error': f'Invalid timeframe. Must be one of: {", ".join(valid_timeframes)}'}), 400
 
         # Pagination validation
         try:
             page = int(data.get('page', 1))
             per_page = int(data.get('per_page', 10))
-            logger.debug(f"Pagination parameters: page={page}, per_page={per_page}")
         except ValueError:
             return jsonify({'error': 'Invalid pagination parameters'}), 400
 
@@ -188,15 +165,12 @@ def get_filtered_alerts():
         }
 
         for coin_name in coins:
-            logger.debug(f"Processing coin: {coin_name}")
-            
             # Query coin with case-insensitive match
             coin_bot = session.query(CoinBot).filter(
                 func.lower(CoinBot.name) == coin_name.strip().lower()
             ).first()
 
             if not coin_bot:
-                logger.warning(f"Coin not found: {coin_name}")
                 response['coins'][coin_name] = {
                     'error': f'Coin {coin_name} not found',
                     'data': [],
@@ -204,15 +178,11 @@ def get_filtered_alerts():
                 }
                 continue
 
-            logger.debug(f"Found coin: {coin_bot.name} (ID: {coin_bot.bot_id})")
-
             # Build base query
             alerts_query = session.query(Alert).filter(Alert.coin_bot_id == coin_bot.bot_id)
-            logger.debug(f"Base query built for coin {coin_name}")
 
             # Apply timeframe filter if provided
             if timeframe:
-                logger.debug(f"Applying timeframe filter: {timeframe}")
                 alerts_query = alerts_query.filter(
                     Alert.alert_name.ilike(f'%{timeframe}%chart%')
                 )
@@ -223,18 +193,15 @@ def get_filtered_alerts():
             # Get total count
             total_coin_alerts = alerts_query.count()
             response['total_alerts'] += total_coin_alerts
-            logger.debug(f"Total alerts for coin {coin_name}: {total_coin_alerts}")
 
             # Apply pagination
             alerts = alerts_query.offset((page - 1) * per_page).limit(per_page).all()
-            logger.debug(f"Retrieved {len(alerts)} alerts for current page")
             
             # Convert to dict and add timeframe
             alerts_list = []
             for alert in alerts:
                 alert_dict = alert.as_dict()
                 timeframe = extract_timeframe(alert_dict['alert_name'])
-                logger.debug(f"Extracted timeframe '{timeframe}' from alert: {alert_dict['alert_name']}")
                 alert_dict['timeframe'] = timeframe
                 alerts_list.append(alert_dict)
 
@@ -251,13 +218,10 @@ def get_filtered_alerts():
             }
 
             response['coins'][coin_name] = coin_response
-            logger.debug(f"Completed processing coin: {coin_name}")
 
-        logger.debug(f"Request completed successfully. Total alerts: {response['total_alerts']}")
         return jsonify(response), 200
 
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}", exc_info=True)
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
     
 
