@@ -65,6 +65,10 @@
     {
       "name": "Providers",
       "description": "Data coming from external providers."
+    },
+    {
+      "name": "Competitors",
+      "description": "Operations related to competitors"
     }
   ],
   "paths": {
@@ -2899,45 +2903,6 @@
             "description": "Internal server error"
           }
         }
-      },
-      "delete": {
-        "tags": [
-          "Coin"
-        ],
-        "summary": "Delete a coin from the database.",
-        "description": "Delete a coin from the database.",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "path",
-            "description": "The ID of the coin to delete",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Coin deleted successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Coin not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
       }
     },
     "/coins": {
@@ -5226,6 +5191,691 @@
                 },
                 "data": {
                   "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/competitors/edit_competitors/{competitor_id}": {
+      "put": {
+        "tags": [
+          "Competitors"
+        ],
+        "summary": "Edit a competitor's data.",
+        "description": "Updates the data of a competitor identified by the competitor ID.",
+        "parameters": [
+          {
+            "name": "competitor_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID of the competitor to edit"
+          },
+          {
+            "name": "competitor_data",
+            "in": "body",
+            "description": "Competitor data to update",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "required": [
+                "token",
+                "data"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Competitor data edited successfully"
+          },
+          "404": {
+            "description": "Competitor not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/competitors/create_competitor": {
+      "post": {
+        "tags": [
+          "Competitors"
+        ],
+        "summary": "Create a new competitor.",
+        "description": "Adds a new competitor to the database.",
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "body",
+            "description": "ID of the coin bot associated with the competitor",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer"
+                },
+                "competitor_data": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "token",
+                    "data"
+                  ]
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "competitor_data"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Competitor created successfully"
+          },
+          "400": {
+            "description": "Bad request (missing required fields)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dapps/create": {
+      "post": {
+        "tags": [
+          "Fundamentals"
+        ],
+        "summary": "Create a new DApp record for a coin.",
+        "description": "Creates a new DApp record associated with a specific coin bot.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "DApp details to be created",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "dapps": {
+                  "type": "string",
+                  "description": "Name of the DApp"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the DApp"
+                },
+                "tvl": {
+                  "type": "number",
+                  "description": "Total Value Locked in the DApp"
+                },
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the associated coin bot"
+                }
+              },
+              "required": [
+                "coin_bot_id"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "DApp record created successfully"
+          },
+          "400": {
+            "description": "Bad request - Coin ID is missing"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dapps/edit/{dapp_id}": {
+      "put": {
+        "tags": [
+          "Fundamentals"
+        ],
+        "summary": "Edit an existing DApp record.",
+        "description": "Updates the details of an existing DApp record.",
+        "parameters": [
+          {
+            "name": "dapp_id",
+            "in": "path",
+            "description": "ID of the DApp to be edited",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated DApp details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "dapps": {
+                  "type": "string",
+                  "description": "Updated name of the DApp"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Updated description of the DApp"
+                },
+                "tvl": {
+                  "type": "number",
+                  "description": "Updated Total Value Locked in the DApp"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DApp updated successfully"
+          },
+          "404": {
+            "description": "DApp not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/create_revenue_model": {
+      "post": {
+        "tags": [
+          "Revenue Model"
+        ],
+        "summary": "Create a new revenue model.",
+        "description": "Creates a new revenue model associated with a specific coin bot.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Revenue model details to be created.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the revenue model."
+                },
+                "analized_revenue": {
+                  "type": "number",
+                  "description": "Analyzed revenue amount."
+                },
+                "fees_1ys": {
+                  "type": "number",
+                  "description": "Fees for the first year."
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "analized_revenue"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revenue model created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Coin ID missing",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/edit_revenue_model/{model_id}": {
+      "put": {
+        "tags": [
+          "Revenue Model"
+        ],
+        "summary": "Edit an existing revenue model.",
+        "description": "Updates the details of an existing revenue model identified by its ID.",
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "path",
+            "description": "ID of the revenue model to be edited.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated revenue model details.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "analized_revenue": {
+                  "type": "number",
+                  "description": "Updated analyzed revenue amount."
+                },
+                "fees_1ys": {
+                  "type": "number",
+                  "description": "Updated fees for the first year."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revenue model updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Revenue model not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/post_token_utility": {
+      "post": {
+        "tags": [
+          "Tokenomics"
+        ],
+        "summary": "Create a new token utility.",
+        "description": "Adds a new token utility to the database.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Token utility details to be created.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the token utility."
+                },
+                "token_application": {
+                  "type": "string",
+                  "description": "Application of the token."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the token utility."
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "token_application"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token utility added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/post_token_distribution": {
+      "post": {
+        "tags": [
+          "Tokenomics"
+        ],
+        "summary": "Create a new token distribution.",
+        "description": "Adds a new token distribution to the database.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Token distribution details to be created.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the token distribution."
+                },
+                "holder_category": {
+                  "type": "string",
+                  "description": "Category of the token holder."
+                },
+                "percentage_held": {
+                  "type": "number",
+                  "description": "Percentage of tokens held."
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "holder_category",
+                "percentage_held"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token distribution added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/post_value_accrual_mechanisms": {
+      "post": {
+        "tags": [
+          "Tokenomics"
+        ],
+        "summary": "Create a new value accrual mechanism.",
+        "description": "Adds a new value accrual mechanism to the database.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Value accrual mechanism details to be created.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the value accrual mechanism."
+                },
+                "mechanism": {
+                  "type": "string",
+                  "description": "Description of the value accrual mechanism."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Detailed description of the mechanism."
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "mechanism"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Value accrual mechanism added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit_tokenomics/{tokenomics_id}": {
+      "put": {
+        "tags": [
+          "Tokenomics"
+        ],
+        "summary": "Edit an existing tokenomics record.",
+        "description": "Updates the details of an existing tokenomics record identified by its ID.",
+        "parameters": [
+          {
+            "name": "tokenomics_id",
+            "in": "path",
+            "description": "ID of the tokenomics to be edited.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated tokenomics details.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token_distribution": {
+                  "type": "object",
+                  "description": "Token distribution data to update."
+                },
+                "token_utility": {
+                  "type": "object",
+                  "description": "Token utility data to update."
+                },
+                "value_accrual_mechanisms": {
+                  "type": "object",
+                  "description": "Value accrual mechanisms data to update."
+                },
+                "tokenomics": {
+                  "type": "object",
+                  "description": "Tokenomics data to update."
+                }
+              },
+              "required": [
+                "token_distribution",
+                "token_utility",
+                "value_accrual_mechanisms",
+                "tokenomics"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tokenomics data edited successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Tokenomics data required",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
                 }
               }
             }
