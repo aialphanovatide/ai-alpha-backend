@@ -3095,8 +3095,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Create a new category in the database.",
-        "description": "Create a new category in the database.",
+        "summary": "Create a new category.",
+        "description": "Create a new category.",
         "parameters": [
           {
             "name": "name",
@@ -3360,8 +3360,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
-        "description": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
+        "summary": "Retrieve all categories with their associated coins, sorted alphabetically by name.",
+        "description": "Retrieve all categories with their associated coins, sorted alphabetically by name.",
         "parameters": [
           {
             "name": "order",
@@ -3431,8 +3431,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Activate or deactivate all coins within a specific category.",
-        "description": "Activate or deactivate all coins within a specific category.",
+        "summary": "Toggle the publication status of all coins within a specific category.",
+        "description": "Toggle the publication status of all coins within a specific category.",
         "parameters": [
           {
             "name": "category_id",
@@ -3521,8 +3521,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Activate or deactivate all coins across all categories.",
-        "description": "Activate or deactivate all coins across all categories.",
+        "summary": "Global toggle the publication status of all coins across all categories.",
+        "description": "Global toggle the publication status of all coins across all categories.",
         "parameters": [
           {
             "name": "body",
