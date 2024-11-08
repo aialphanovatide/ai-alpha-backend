@@ -1,6 +1,6 @@
 import os
 import json
-import threading  # Importar threading para ejecutar el bot de Discord en un hilo
+import threading
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_mail import Mail
@@ -134,7 +134,7 @@ app.register_blueprint(coinalyze_bp)
 app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
-app.register_blueprint(ask_ai_bp)
+
 
 def run_discord_bot():
     import asyncio

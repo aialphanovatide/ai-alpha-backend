@@ -804,6 +804,318 @@
         }
       }
     },
+    "/api/hacks/create": {
+      "post": {
+        "tags": [
+          "Hacks"
+        ],
+        "summary": "Create a new hack record",
+        "description": "Creates a new hack record associated with a specific coin.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Details of the hack to be created.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the hack."
+                },
+                "hackName": {
+                  "type": "string",
+                  "description": "Name of the hack."
+                },
+                "date": {
+                  "type": "string",
+                  "description": "Date of the hack."
+                },
+                "incidentDescription": {
+                  "type": "string",
+                  "description": "Description of the incident."
+                },
+                "consequences": {
+                  "type": "string",
+                  "description": "Consequences of the hack."
+                },
+                "mitigationMeasure": {
+                  "type": "string",
+                  "description": "Mitigation measures taken."
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "hackName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "New hack record added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Coin ID is required or coin does not exist",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/hacks/edit/{hack_id}": {
+      "put": {
+        "tags": [
+          "Hacks"
+        ],
+        "summary": "Edit an existing hack record",
+        "description": "Updates the details of an existing hack record identified by its ID.",
+        "parameters": [
+          {
+            "name": "hack_id",
+            "in": "path",
+            "description": "ID of the hack to be edited.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated details of the hack.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hackName": {
+                  "type": "string",
+                  "description": "Updated name of the hack."
+                },
+                "date": {
+                  "type": "string",
+                  "description": "Updated date of the hack."
+                },
+                "incidentDescription": {
+                  "type": "string",
+                  "description": "Updated description of the incident."
+                },
+                "consequences": {
+                  "type": "string",
+                  "description": "Updated consequences of the hack."
+                },
+                "mitigationMeasure": {
+                  "type": "string",
+                  "description": "Updated mitigation measures taken."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hack updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Hack not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/hacks/delete/{hack_id}": {
+      "delete": {
+        "tags": [
+          "Hacks"
+        ],
+        "summary": "Delete a hack record",
+        "description": "Deletes a hack record identified by its ID.",
+        "parameters": [
+          {
+            "name": "hack_id",
+            "in": "path",
+            "description": "ID of the hack to be deleted.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hack deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Hack not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, "/api/dapps/delete/{dapp_id}": {
+      "delete": {
+        "tags": [
+          "DApps"
+        ],
+        "summary": "Delete a DApp record.",
+        "description": "Deletes a DApp record identified by its ID.",
+        "parameters": [
+          {
+            "name": "dapp_id",
+            "in": "path",
+            "description": "ID of the DApp to be deleted.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DApp deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "DApp not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/hacks": {
       "get": {
         "summary": "Get hacks data",
@@ -5882,6 +6194,397 @@
           }
         }
       }
+    },
+    "/post_upgrade": {
+      "post": {
+        "tags": [
+          "Upgrades"
+        ],
+        "summary": "Post a new upgrade record",
+        "description": "Allows the user to add a new upgrade record for a specific coin.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Details of the upgrade to be added.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the upgrade."
+                },
+                "upgrade_data": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "type": "string",
+                      "description": "Description of the upgrade event."
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Date of the upgrade."
+                    },
+                    "event_overview": {
+                      "type": "string",
+                      "description": "Overview of the upgrade event."
+                    },
+                    "impact": {
+                      "type": "string",
+                      "description": "Impact of the upgrade."
+                    }
+                  },
+                  "required": [
+                    "event"
+                  ]
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "upgrade_data"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upgrade data added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Coin ID or upgrade data is missing",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit_upgrade/{upgrate_id}": {
+      "put": {
+        "tags": [
+          "Upgrades"
+        ],
+        "summary": "Edit an existing upgrade record",
+        "description": "Allows the user to edit an existing upgrade record identified by its ID.",
+        "parameters": [
+          {
+            "name": "upgrate_id",
+            "in": "path",
+            "description": "ID of the upgrade record to be edited.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated details of the upgrade.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "upgrate_data": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "type": "string",
+                      "description": "Updated description of the upgrade event."
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Updated date of the upgrade."
+                    },
+                    "event_overview": {
+                      "type": "string",
+                      "description": "Updated overview of the upgrade event."
+                    },
+                    "impact": {
+                      "type": "string",
+                      "description": "Updated impact of the upgrade."
+                    }
+                  },
+                  "required": [
+                    "event"
+                  ]
+                }
+              },
+              "required": [
+                "upgrate_data"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upgrade edited successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found - No data found for the requested upgrade",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Upgrade data is required",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/post_introduction": {
+      "post": {
+        "tags": [
+          "Fundamentals"
+        ],
+        "summary": "Create an introduction for a coin.",
+        "description": "Allows the creation of an introduction for a coin. This can only be done once per coin.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Details of the introduction to be created.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_bot_id": {
+                  "type": "integer",
+                  "description": "ID of the coin bot associated with the introduction."
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Content of the introduction."
+                },
+                "website": {
+                  "type": "string",
+                  "description": "Website link related to the coin.",
+                  "nullable": true
+                },
+                "whitepaper": {
+                  "type": "string",
+                  "description": "Link to the whitepaper of the coin.",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "coin_bot_id",
+                "content"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Introduction created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A record already exists for this Coin",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/edit_introduction/{coin_bot_id}": {
+      "put": {
+        "tags": [
+          "Fundamentals"
+        ],
+        "summary": "Edit an introduction for a coin.",
+        "description": "Updates the introduction of a coin by passing the ID of the coin and the values to modify.",
+        "parameters": [
+          {
+            "name": "coin_bot_id",
+            "in": "path",
+            "description": "ID of the coin bot associated with the introduction to be edited.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Details of the introduction to be updated.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "Updated content of the introduction.",
+                  "nullable": true
+                },
+                "website": {
+                  "type": "string",
+                  "description": "Updated website link related to the coin.",
+                  "nullable": true
+                },
+                "whitepaper": {
+                  "type": "string",
+                  "description": "Updated link to the whitepaper of the coin.",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Introduction updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record found for the specified ID",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     }
   },
   "definitions": {
