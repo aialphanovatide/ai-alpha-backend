@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_mail import Mail
 from routes.chart.chart import chart_bp
@@ -130,6 +130,14 @@ app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
 
+@app.route('/tradingview-webhook', methods=['POST'])
+def tradingview_webhook():
+    # Verificar si los datos se reciben correctamente
+    data = request.json
+    print(f"Alerta recibida: {data}")
+    
+    # Puedes procesar los datos aquí, por ejemplo, enviarlos a otro servicio o guardarlos
+    return jsonify({"status": "success", "message": "Alerta recibida correctamente"}), 200
 
 if __name__ == '__main__':
     try:
