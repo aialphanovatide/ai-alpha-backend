@@ -21,7 +21,7 @@ if REDIS_PASSWORD:
 
 redis_client = redis.Redis(**redis_client_args)
 redis_client.ping()
-print("----Redis client connected----")
+print("---- Redis client connected ----")
 
 
 def cache_with_redis(expiration=300):
