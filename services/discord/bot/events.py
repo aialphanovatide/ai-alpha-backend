@@ -1,7 +1,7 @@
 import os
 import discord
 from discord.ext import commands
-from utls import check_email_in_database
+from utils import check_email_in_database
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -16,6 +16,7 @@ class Events(commands.Cog):
     async def on_ready(self):
         print(f'Bot is ready as {self.bot.user}')
         print(f"Parsed GUILD_ID: {self.guild_id}")
+
         guild = discord.utils.get(self.bot.guilds, id=self.guild_id)
         if guild:
             print(f"Guild found: {guild.name} (ID: {guild.id})")
@@ -40,7 +41,7 @@ class Events(commands.Cog):
         if not member:
             return
 
-        # Verifica si la reacción se agregó en el canal de verificación
+        # Verify if the reaction was added in the verification channel
         verification_channel_id = int(os.getenv('VERIFICATION_CHANNEL_ID'))
         if channel.id == verification_channel_id:
             if str(payload.emoji) == '✅':
@@ -66,19 +67,17 @@ class Events(commands.Cog):
         challenger_role = discord.utils.get(guild.roles, name="challenger")
 
         if check_email_in_database(email):
-            # Si el usuario tiene el rol de challenger, lo eliminamos
+            # If the user has the challenger role, remove it
             if challenger_role in member.roles:
                 await member.remove_roles(challenger_role)
                 print(f"{member} removed the challenger role before becoming a founder-member.")
-
             role = founder_role
             print(f"{member} changed their role to founder-member after Email verification.")
         else:
-            # Si el usuario tiene el rol de founder-member, lo eliminamos
+            # If the user has the founder-member role, remove it
             if founder_role in member.roles:
                 await member.remove_roles(founder_role)
                 print(f"{member} removed the founder-member role before becoming a challenger.")
-
             role = challenger_role
             print(f"{member} changed their role to challenger after Email verification.")
 
@@ -94,7 +93,6 @@ class Events(commands.Cog):
                 await ctx.send(f"Error assigning the role: {str(e)}")
         else:
             await ctx.send("Role not found.")
-
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
