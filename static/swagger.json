@@ -23,6 +23,10 @@
       "description": "Operations related to the Analysis (Daily Deeps)"
     },
     {
+      "name": "Ask AI",
+      "description": "Operations related to the Ask AI (Coin info)"
+    },
+    {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
     },
@@ -2670,6 +2674,14 @@
             "schema": {}
           },
           {
+            "name": "symbol",
+            "in": "formData",
+            "description": "The symbol of the coin",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
             "name": "category_id",
             "in": "formData",
             "description": "The ID of the associated category",
@@ -2691,14 +2703,6 @@
             "description": "An SVG file to be used as the coin bot icon",
             "required": false,
             "type": "file",
-            "schema": {}
-          },
-          {
-            "name": "symbol",
-            "in": "formData",
-            "description": "The symbol of the coin",
-            "required": false,
-            "type": "string",
             "schema": {}
           }
         ],
@@ -3091,8 +3095,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Create a new category in the database.",
-        "description": "Create a new category in the database.",
+        "summary": "Create a new category.",
+        "description": "Create a new category.",
         "parameters": [
           {
             "name": "name",
@@ -3356,8 +3360,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
-        "description": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
+        "summary": "Retrieve all categories with their associated coins, sorted alphabetically by name.",
+        "description": "Retrieve all categories with their associated coins, sorted alphabetically by name.",
         "parameters": [
           {
             "name": "order",
@@ -3427,8 +3431,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Activate or deactivate all coins within a specific category.",
-        "description": "Activate or deactivate all coins within a specific category.",
+        "summary": "Toggle the publication status of all coins within a specific category.",
+        "description": "Toggle the publication status of all coins within a specific category.",
         "parameters": [
           {
             "name": "category_id",
@@ -3517,8 +3521,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Activate or deactivate all coins across all categories.",
-        "description": "Activate or deactivate all coins across all categories.",
+        "summary": "Global toggle the publication status of all coins across all categories.",
+        "description": "Global toggle the publication status of all coins across all categories.",
         "parameters": [
           {
             "name": "body",
@@ -5027,6 +5031,201 @@
               "properties": {
                 "error": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask-ai/coins": {
+      "get": {
+        "tags": [
+          "Ask AI"
+        ],
+        "summary": "Get list of available cryptocurrencies",
+        "description": "Retrieve a comprehensive list of all available cryptocurrencies from coingecko.\n    \nthis endpoint is cached for 24 hours (86400 seconds) to optimize performance and reduce api calls.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved list of cryptocurrencies",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "bitcoin"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "example": "btc"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Bitcoin"
+                      }
+                    }
+                  }
+                },
+                "length": {
+                  "type": "integer",
+                  "example": 1000
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "array",
+                  "items": {}
+                },
+                "length": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask-ai": {
+      "get": {
+        "tags": [
+          "Ask AI"
+        ],
+        "summary": "Get detailed tokenomics data for a cryptocurrency",
+        "description": "Retrieve comprehensive tokenomics information about a specific cryptocurrency using its coingecko id.\n    \nthe endpoint fetches data from both coingecko and coinmarketcap (for whitepaper if not available in coingecko).",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "query",
+            "description": "CoinGecko ID of the cryptocurrency (e.g., \"bitcoin\", \"ethereum\")",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved tokenomics data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "website": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "chains": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "current_price": {
+                      "type": "number"
+                    },
+                    "market_cap_usd": {
+                      "type": "number"
+                    },
+                    "fully_diluted_valuation": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "ath": {
+                      "type": "number"
+                    },
+                    "ath_change_percentage": {
+                      "type": "number"
+                    },
+                    "circulating_supply": {
+                      "type": "number",
+                      "nullable": true
+                    }
+                  }
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing required parameter",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "The parameter coin_id is required"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "data": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cryptocurrency not found or API error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "data": {
+                  "type": "null"
                 }
               }
             }
