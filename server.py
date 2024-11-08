@@ -37,6 +37,7 @@ from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
 from routes.coins.coins import coin_bp
 from routes.ask_ai.ask_ai import ask_ai_bp
+from routes.tradingview.tradingview import webhook_bp
 from flasgger import Swagger
 from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
@@ -106,6 +107,7 @@ app.register_blueprint(news_bots_features_bp)
 app.register_blueprint(chart_bp)
 app.register_blueprint(healthcheck)
 app.register_blueprint(chart_graphs_bp)
+app.register_blueprint(webhook_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(coingecko_bp)
@@ -138,6 +140,7 @@ def run_discord_bot():
     import asyncio
     asyncio.run(start_bot())
     
+
 
 if __name__ == '__main__':
     try:
