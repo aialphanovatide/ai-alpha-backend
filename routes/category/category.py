@@ -74,19 +74,14 @@ def create_category():
 
             icon_url = None
             if icon_file:
-                print("Icon file:", icon_file)
-                print("Icon file size:", icon_file.content_length)
-                print("Icon file filename:", icon_file.filename)
 
                 if icon_file.content_type != 'image/svg+xml':
                     raise ValueError('Invalid file type. Only SVG files are allowed.')
 
                 normalized_alias = alias.strip().lower().replace(" ", "")
-                print("Normalized alias:", normalized_alias)
                 icon_filename = f"{normalized_alias}.svg"
-                print("Icon filename:", icon_filename)
                 icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", icon_filename)
-                print("Icon URL:", icon_url)
+               
 
             new_category = Category(
                 name=name,
