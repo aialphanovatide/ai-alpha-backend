@@ -12,8 +12,6 @@ from sqlalchemy import func, asc, desc
 
 category_bp = Blueprint('category_bp', __name__)
 
-S3_BUCKET_ICONS = os.getenv('S3_BUCKET_ICONS')
-
 # Initialize the ImageProcessor
 image_processor = ImageProcessor()
 
@@ -55,6 +53,10 @@ def create_category():
             border_color = request.form.get('border_color')
             icon_file = request.files.get('icon')
 
+            print("Icon file:", icon_file)
+            print("Icon file type:", type(icon_file))
+            print("Icon file size:", icon_file.content_length)
+            
             if not name or not alias:
                 response["error"] = 'Name and Alias are required and cannot be null'
                 status_code = 400
@@ -74,15 +76,16 @@ def create_category():
                 status_code = 400
                 return jsonify(response), status_code
 
-            icon_url = None
             if icon_file:
+                print("Icon file:", icon_file)
+                print("Icon file type:", type(icon_file))
+                print("Icon file size:", icon_file.content_length)
+                print("Icon file filename:", icon_file.filename)
+
+                icon_content = icon_file.read()
                 normalized_alias = alias.strip().lower().replace(" ", "")
-                icon_filename = secure_filename(f"{normalized_alias}.svg")
-                icon_url = image_processor.upload_svg_to_s3(icon_file, S3_BUCKET_ICONS, icon_filename)
-                if not icon_url:
-                    response["error"] = 'Failed to upload SVG file'
-                    status_code = 400
-                    return jsonify(response), status_code
+                icon_filename = f"{normalized_alias}.svg"
+                icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", icon_filename)
 
             new_category = Category(
                 name=name,
@@ -293,7 +296,7 @@ def delete_category(category_id):
             # # Delete associated icon from S3
             if category.icon:
                 icon_filename = category.icon
-                image_processor.delete_from_s3(S3_BUCKET_ICONS, icon_filename)
+                image_processor.delete_from_s3("aialphaicons", icon_filename)
 
             # Delete the category from the database
             session.delete(category)
@@ -376,12 +379,12 @@ def update_category(category_id):
                 try:
                     if category.icon:  # Delete old icon if exists
                         old_icon_filename = category.icon.split('/')[-1]
-                        image_processor.delete_from_s3(bucket=S3_BUCKET_ICONS, image_url=old_icon_filename)
+                        image_processor.delete_from_s3(bucket="aialphaicons", image_url=old_icon_filename)
 
                     alias = category.alias or category.name
                     normalized_alias = alias.strip().lower().replace(" ", "")
                     new_icon_filename = secure_filename(f"{normalized_alias}.svg")
-                    icon_url = image_processor.upload_svg_to_s3(icon_file, S3_BUCKET_ICONS, new_icon_filename)
+                    icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", new_icon_filename)
                     if not icon_url:
                         raise ValueError('Failed to upload new SVG icon')
                     category.icon = icon_url
