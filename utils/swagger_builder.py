@@ -127,251 +127,126 @@ swagger = Swagger()
 # ____Add or update an endpoint____
 
 
-# # Documentation for /alerts/categories endpoint
-# success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/alerts/categories',
-#     method='post',
-#     tag='Alerts',
-#     summary='Retrieve alerts for multiple categories',
-#     description='''Retrieve alerts for multiple categories with timeframe filtering and pagination support.
+# Documentation for /ask-ai/coins endpoint
+success, message = swagger.add_or_update_endpoint(
+    endpoint_route='/ask-ai/coins',
+    method='get',
+    tag='Ask AI',
+    summary='Get list of available cryptocurrencies',
+    description='''Retrieve a comprehensive list of all available cryptocurrencies from CoinGecko.
     
-# The endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.
-# Results are ordered by creation date (newest first) with optional pagination.''',
-#     params=[
-#         {
-#             'name': 'body',
-#             'in': 'body',
-#             'required': True,
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'categories': {
-#                         'type': 'array',
-#                         'items': {'type': 'string'},
-#                         'description': 'List of category names',
-#                         'example': ['bitcoin', 'ethereum']
-#                     },
-#                     'timeframe': {
-#                         'type': 'string',
-#                         'enum': ['1h', '4h', '1d', '1w'],
-#                         'description': 'Filter alerts by timeframe',
-#                         'example': '4h'
-#                     },
-#                     'page': {
-#                         'type': 'integer',
-#                         'description': 'Page number (default: 1)',
-#                         'default': 1,
-#                         'minimum': 1
-#                     },
-#                     'per_page': {
-#                         'type': 'integer',
-#                         'description': 'Items per page (default: 10)',
-#                         'default': 10,
-#                         'minimum': 1
-#                     }
-#                 },
-#                 'required': ['categories']
-#             }
-#         }
-#     ],
-#     responses={
-#         '200': {
-#             'description': 'Successfully retrieved alerts by categories',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'categories': {
-#                         'type': 'object',
-#                         'additionalProperties': {
-#                             'type': 'object',
-#                             'properties': {
-#                                 'data': {
-#                                     'type': 'array',
-#                                     'items': {
-#                                         'type': 'object',
-#                                         'properties': {
-#                                             'alert_id': {'type': 'integer'},
-#                                             'alert_name': {'type': 'string'},
-#                                             'alert_message': {'type': 'string'},
-#                                             'symbol': {'type': 'string'},
-#                                             'price': {'type': 'number'},
-#                                             'coin_bot_id': {'type': 'integer'},
-#                                             'created_at': {'type': 'string', 'format': 'date-time'},
-#                                             'updated_at': {'type': 'string', 'format': 'date-time'},
-#                                             'timeframe': {
-#                                                 'type': 'string',
-#                                                 'enum': ['1h', '4h', '1d', '1w'],
-#                                                 'nullable': True
-#                                             }
-#                                         }
-#                                     }
-#                                 },
-#                                 'total': {'type': 'integer'},
-#                                 'pagination': {
-#                                     'type': 'object',
-#                                     'properties': {
-#                                         'current_page': {'type': 'integer'},
-#                                         'per_page': {'type': 'integer'},
-#                                         'total_pages': {'type': 'integer'},
-#                                         'has_next': {'type': 'boolean'},
-#                                         'has_prev': {'type': 'boolean'}
-#                                     }
-#                                 }
-#                             }
-#                         }
-#                     },
-#                     'total_alerts': {'type': 'integer'}
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad Request - Invalid input parameters',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w'
-#                     }
-#                 }
-#             }
-#         },
-#         '500': {
-#             'description': 'Internal Server Error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'error': {'type': 'string'}
-#                 }
-#             }
-#         }
-#     }
-# )
+This endpoint is cached for 24 hours (86400 seconds) to optimize performance and reduce API calls.''',
+    params=[],  # No parameters needed as it returns all coins
+    responses={
+        '200': {
+            'description': 'Successfully retrieved list of cryptocurrencies',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'coins': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'id': {'type': 'string', 'example': 'bitcoin'},
+                                'symbol': {'type': 'string', 'example': 'btc'},
+                                'name': {'type': 'string', 'example': 'Bitcoin'}
+                            }
+                        }
+                    },
+                    'length': {'type': 'integer', 'example': 1000},
+                    'success': {'type': 'boolean', 'example': True},
+                    'error': {'type': 'string', 'nullable': True, 'example': None}
+                }
+            }
+        },
+        '500': {
+            'description': 'Internal Server Error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'coins': {'type': 'array', 'items': {}},
+                    'length': {'type': 'integer', 'example': 0},
+                    'error': {'type': 'string'},
+                    'success': {'type': 'boolean', 'example': False}
+                }
+            }
+        }
+    }
+)
 
-# print(message)
+print(message)
 
-# # Documentation for /alerts/coins endpoint
-# success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/alerts/coins',
-#     method='post',
-#     tag='Alerts',
-#     summary='Retrieve alerts for multiple coins',
-#     description='''Retrieve alerts for multiple coins with timeframe filtering and pagination support.
+# Documentation for /ask-ai endpoint
+success, message = swagger.add_or_update_endpoint(
+    endpoint_route='/ask-ai',
+    method='get',
+    tag='Ask AI',
+    summary='Get detailed tokenomics data for a cryptocurrency',
+    description='''Retrieve comprehensive tokenomics information about a specific cryptocurrency using its CoinGecko ID.
     
-# The endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.
-# Results are ordered by creation date (newest first) with optional pagination.''',
-#     params=[
-#         {
-#             'name': 'body',
-#             'in': 'body',
-#             'required': True,
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'coins': {
-#                         'type': 'array',
-#                         'items': {'type': 'string'},
-#                         'description': 'List of coin symbols',
-#                         'example': ['btc', 'eth']
-#                     },
-#                     'timeframe': {
-#                         'type': 'string',
-#                         'enum': ['1h', '4h', '1d', '1w'],
-#                         'description': 'Filter alerts by timeframe',
-#                         'example': '4h'
-#                     },
-#                     'page': {
-#                         'type': 'integer',
-#                         'description': 'Page number (default: 1)',
-#                         'default': 1,
-#                         'minimum': 1
-#                     },
-#                     'per_page': {
-#                         'type': 'integer',
-#                         'description': 'Items per page (default: 10)',
-#                         'default': 10,
-#                         'minimum': 1
-#                     }
-#                 },
-#                 'required': ['coins']
-#             }
-#         }
-#     ],
-#     responses={
-#         '200': {
-#             'description': 'Successfully retrieved alerts by coins',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'coins': {
-#                         'type': 'object',
-#                         'additionalProperties': {
-#                             'type': 'object',
-#                             'properties': {
-#                                 'data': {
-#                                     'type': 'array',
-#                                     'items': {
-#                                         'type': 'object',
-#                                         'properties': {
-#                                             'alert_id': {'type': 'integer'},
-#                                             'alert_name': {'type': 'string'},
-#                                             'alert_message': {'type': 'string'},
-#                                             'symbol': {'type': 'string'},
-#                                             'price': {'type': 'number'},
-#                                             'coin_bot_id': {'type': 'integer'},
-#                                             'created_at': {'type': 'string', 'format': 'date-time'},
-#                                             'updated_at': {'type': 'string', 'format': 'date-time'},
-#                                             'timeframe': {
-#                                                 'type': 'string',
-#                                                 'enum': ['1h', '4h', '1d', '1w'],
-#                                                 'nullable': True
-#                                             }
-#                                         }
-#                                     }
-#                                 },
-#                                 'total': {'type': 'integer'},
-#                                 'pagination': {
-#                                     'type': 'object',
-#                                     'properties': {
-#                                         'current_page': {'type': 'integer'},
-#                                         'per_page': {'type': 'integer'},
-#                                         'total_pages': {'type': 'integer'},
-#                                         'has_next': {'type': 'boolean'},
-#                                         'has_prev': {'type': 'boolean'}
-#                                     }
-#                                 }
-#                             }
-#                         }
-#                     },
-#                     'total_alerts': {'type': 'integer'}
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad Request - Invalid input parameters',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w'
-#                     }
-#                 }
-#             }
-#         },
-#         '500': {
-#             'description': 'Internal Server Error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'error': {'type': 'string'}
-#                 }
-#             }
-#         }
-#     }
-# )
+The endpoint fetches data from both CoinGecko and CoinMarketCap (for whitepaper if not available in CoinGecko).''',
+    params=[
+        {
+            'name': 'coin_id',
+            'in': 'query',
+            'description': 'CoinGecko ID of the cryptocurrency (e.g., "bitcoin", "ethereum")',
+            'required': True,
+            'type': 'string'
+        }
+    ],
+    responses={
+        '200': {
+            'description': 'Successfully retrieved tokenomics data',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'data': {
+                        'type': 'object',
+                        'properties': {
+                            'website': {'type': 'string', 'nullable': True},
+                            'whitepaper': {'type': 'string', 'nullable': True},
+                            'categories': {'type': 'array', 'items': {'type': 'string'}},
+                            'chains': {'type': 'array', 'items': {'type': 'string'}},
+                            'current_price': {'type': 'number'},
+                            'market_cap_usd': {'type': 'number'},
+                            'fully_diluted_valuation': {'type': 'number', 'nullable': True},
+                            'ath': {'type': 'number'},
+                            'ath_change_percentage': {'type': 'number'},
+                            'circulating_supply': {'type': 'number', 'nullable': True}
+                        }
+                    },
+                    'success': {'type': 'boolean', 'example': True},
+                    'error': {'type': 'string', 'nullable': True}
+                }
+            }
+        },
+        '400': {
+            'description': 'Bad Request - Missing required parameter',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string', 'example': 'The parameter coin_id is required'},
+                    'success': {'type': 'boolean', 'example': False},
+                    'data': {'type': 'null'}
+                }
+            }
+        },
+        '404': {
+            'description': 'Cryptocurrency not found or API error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'},
+                    'success': {'type': 'boolean', 'example': False},
+                    'data': {'type': 'null'}
+                }
+            }
+        }
+    }
+)
 
-# print(message)
+print(message)
 
 
 # ____Delete an endpoint____

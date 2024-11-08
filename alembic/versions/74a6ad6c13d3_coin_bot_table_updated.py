@@ -1,7 +1,7 @@
 """Coin bot table updated - curated
 
 Revision ID: 74a6ad6c13d3
-Revises: 1ef11a055306
+Revises: 7f9a2b3c4d5e
 Create Date: 2024-09-10 09:09:56.361632
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '74a6ad6c13d3'
-down_revision: Union[str, None] = '1ef11a055306'
+down_revision: Union[str, None] = '7f9a2b3c4d5e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

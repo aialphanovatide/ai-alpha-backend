@@ -36,6 +36,7 @@ from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
 from routes.analysis.sections import sections_bp
 from routes.coins.coins import coin_bp
+from routes.ask_ai.ask_ai import ask_ai_bp
 from flasgger import Swagger
 from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
@@ -131,12 +132,12 @@ app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
 app.register_blueprint(sections_bp)
-
+app.register_blueprint(ask_ai_bp)
 
 if __name__ == '__main__':
     try:
         with app.app_context():
-            print('---AI Alpha API is running---') 
+            print('---- AI Alpha API is running ----') 
             app.run(port=9002, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e}")
@@ -145,7 +146,7 @@ if __name__ == '__main__':
         #                                     title_message="*CRITICAL ERROR*", 
         #                                     sub_title="AI Alpha server has stopped running",
         #                                     message="@David P. - Check this error on the Mac mini immediately")
-        print('---AI Alpha server was stopped---')
+        print('--- AI Alpha server was stopped ---')
 
 
 

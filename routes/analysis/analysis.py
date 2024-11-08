@@ -8,6 +8,7 @@ from typing import Tuple, Dict, Type
 from sqlalchemy.exc import SQLAlchemyError
 from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
+from config import Analysis, CoinBot, Session
 from flask import jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
 from apscheduler.triggers.date import DateTrigger
@@ -140,6 +141,7 @@ def get_coin_analysis():
         session.close()
 
     return jsonify(response), status_code
+
 
 @analysis_bp.route('/analyses', methods=['GET'])
 @cache_with_redis()
