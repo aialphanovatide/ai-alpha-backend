@@ -1114,6 +1114,7 @@ class Chart(Base):
     token = Column(String)
     pair = Column(String)
     temporality = Column(String)
+    is_essential = Column(Boolean, default=False)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
