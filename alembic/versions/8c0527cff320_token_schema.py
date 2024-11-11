@@ -1,7 +1,7 @@
 """Token Schema
 
 Revision ID: 8c0527cff320
-Revises: fedadcb66914
+Revises: abc123def456
 Create Date: 2024-09-16 15:03:48.299321
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.engine.reflection import Inspector
 
 # revision identifiers, used by Alembic.
 revision: str = '8c0527cff320'
-down_revision: Union[str, None] = 'fedadcb66914'
+down_revision: Union[str, None] = 'abc123def456'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
