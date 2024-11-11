@@ -19,8 +19,8 @@
   ],
   "tags": [
     {
-      "name": "Analysis",
-      "description": "Operations related to the Analysis (Daily Deeps)"
+      "name": "Content Creation",
+      "description": "Operations related to the Content Creation"
     },
     {
       "name": "Ask AI",
@@ -65,6 +65,10 @@
     {
       "name": "Providers",
       "description": "Data coming from external providers."
+    },
+    {
+      "name": "Sections",
+      "description": "Operations related to the Sections"
     }
   ],
   "paths": {
@@ -274,7 +278,7 @@
     "/schedule_post": {
       "post": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
         "summary": "Schedule a post for future publication.",
         "description": "Schedule a post for future publication.",
@@ -325,15 +329,15 @@
     "/post_analysis": {
       "post": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Create a new analysis and generate an associated image.",
-        "description": "Create a new analysis based on the provided data, generate an image for the analysis, and upload it to S3.",
+        "summary": "Create a new content creation and generate an associated image.",
+        "description": "Create a new content creation based on the provided data, generate an image for the content creation, and upload it to S3.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "description": "Analysis details",
+            "description": "Content creation details",
             "required": true,
             "schema": {
               "type": "object",
@@ -680,6 +684,408 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/sections": {
+      "get": {
+        "tags": [
+          "Sections"
+        ],
+        "summary": "Retrieve all sections",
+        "description": "Retrieves the list of all sections.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sections"
+        ],
+        "summary": "Create a new section",
+        "description": "Create a new section in the system.\n    \nsections are used to organize different types of content like articles, narrative trading posts, analysis, and s&r analysis.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Section data to be created",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "description",
+                "target"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "What's happening today (Top Stories)"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Articles that belong to top stories"
+                },
+                "target": {
+                  "type": "string",
+                  "example": "article",
+                  "enum": [
+                    "article",
+                    "narrative_trading",
+                    "analysis",
+                    "s_and_r_analysis"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Section created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "null"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 201
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing required fields",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Missing required fields: name, description, target"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 400
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Database error: ..."
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 500
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "post": {
+      "tags": [
+        "Sections"
+      ],
+      "summary": "Create a new section",
+      "description": "Creates a new section.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "description",
+                "target"
+              ]
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Section created successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "error": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request (missing required fields)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "error": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal server error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "error": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sections/{sectionId}": {
+      "delete": {
+        "tags": [
+          "Sections"
+        ],
+        "summary": "Delete a section",
+        "description": "Deletes a section by its ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sectionId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Section deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1924,158 +2330,58 @@
     "/analysis": {
       "get": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Retrieve analyses for a specific coin by id or name, with optional pagination.",
-        "description": "Retrieve analyses for a specific coin by id or name, with optional pagination.",
+        "summary": "Get coin analysis",
+        "description": "Retrieve analyses for a specific coin by id, with optional pagination",
         "parameters": [
           {
             "name": "coin_id",
             "in": "query",
-            "description": "The ID of the coin bot",
-            "required": false,
-            "type": "integer"
+            "description": "ID of the coin bot",
+            "required": true,
+            "type": "integer",
+            "schema": {}
           },
           {
-            "name": "coin_name",
+            "name": "section_id",
             "in": "query",
-            "description": "The name of the coin bot",
-            "required": false,
-            "type": "string"
+            "description": "ID of the section",
+            "required": true,
+            "type": "integer",
+            "schema": {}
           },
           {
             "name": "page",
             "in": "query",
-            "description": "The page number (default: 1)",
+            "description": "Page number",
             "required": false,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
           },
           {
             "name": "limit",
             "in": "query",
-            "description": "The number of items per page (default: 10, max: 100)",
+            "description": "Items per page (max 100)",
             "required": false,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of analyses"
-          },
-          "400": {
-            "description": "Bad Request - Missing coin identification or invalid pagination parameters"
-          },
-          "404": {
-            "description": "Not Found - No analyses found for the specified coin"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Create a new analysis and publish it.",
-        "description": "Create a new analysis and publish it.",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "formData",
-            "description": "The ID of the coin",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "content",
-            "in": "formData",
-            "description": "The content of the analysis",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "category_name",
-            "in": "formData",
-            "description": "The name of the category",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "description": "Details of the created analysis"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Missing or invalid data"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/analyses": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Retrieve all analyses with pagination, ordered by creation date descending.",
-        "description": "Retrieve all analyses with pagination, ordered by creation date descending.",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "The page number (default: 1)",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of items per page (default: 10, max: 100)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful retrieval of analyses",
+            "description": "Successfully retrieved analyses",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
+                    "type": "object"
                   }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
                   "type": "boolean"
@@ -2096,10 +2402,212 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid pagination parameters"
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Create new analysis",
+        "description": "Create and publish a new analysis",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "formData",
+            "description": "ID of the coin",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Content of the analysis",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "Name of the category",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "formData",
+            "description": "ID of the section",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Analysis created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses": {
+      "get": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Get all analyses",
+        "description": "Retrieve all analyses with pagination based on section",
+        "parameters": [
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (max 100)",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all analyses",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                },
+                "section_name": {
+                  "type": "string"
+                },
+                "section_target": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       }
@@ -2107,17 +2615,26 @@
     "/analysis/{analysis_id}": {
       "delete": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Delete an existing analysis and its associated image.",
-        "description": "Delete an existing analysis and its associated image.",
+        "summary": "Delete analysis",
+        "description": "Delete an existing analysis and its associated image",
         "parameters": [
           {
             "name": "analysis_id",
             "in": "path",
-            "description": "The ID of the analysis to delete",
+            "description": "ID of the analysis to delete",
             "required": true,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section",
+            "required": true,
+            "type": "integer",
+            "schema": {}
           }
         ],
         "responses": {
@@ -2127,43 +2644,63 @@
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "string",
-                  "description": "Confirmation message of deletion"
-                },
-                "error": {
                   "type": "string"
                 },
+                "error": {
+                  "type": "null"
+                },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "404": {
-            "description": "Analysis not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
+            "description": "Analysis not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       },
       "put": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Edit the content of an existing analysis.",
-        "description": "Edit the content of an existing analysis.",
+        "summary": "Edit analysis",
+        "description": "Edit the content of an existing analysis",
         "parameters": [
           {
             "name": "analysis_id",
             "in": "path",
-            "description": "The ID of the analysis to edit",
+            "description": "ID of the analysis to edit",
             "required": true,
             "type": "integer",
             "schema": {}
           },
           {
-            "name": "body",
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "content",
             "in": "body",
             "description": "New content for the analysis",
             "required": true,
@@ -2172,43 +2709,48 @@
               "type": "object",
               "properties": {
                 "content": {
-                  "type": "string",
-                  "description": "The new content of the analysis"
+                  "type": "string"
                 }
-              },
-              "required": [
-                "content"
-              ]
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Analysis edited successfully",
+            "description": "Analysis updated successfully",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "object",
-                  "description": "Details of the edited analysis"
+                  "type": "object"
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
                 },
                 "error": {
                   "type": "string"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": false
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad Request - New content is not provided"
-          },
-          "404": {
-            "description": "Analysis not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -2216,23 +2758,31 @@
     "/scheduled-analyses": {
       "post": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Schedule a post for future publication.",
-        "description": "Schedule a post for future publication.",
+        "summary": "Schedule new analysis",
+        "description": "Schedule a post for future publication",
         "parameters": [
           {
             "name": "coin_id",
             "in": "formData",
-            "description": "The ID of the coin bot",
+            "description": "ID of the coin bot",
             "required": true,
-            "type": "integer",
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "formData",
+            "description": "ID of the section",
+            "required": true,
+            "type": "string",
             "schema": {}
           },
           {
             "name": "category_name",
             "in": "formData",
-            "description": "The name of the category",
+            "description": "Name of the category",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2240,7 +2790,7 @@
           {
             "name": "content",
             "in": "formData",
-            "description": "The content of the post",
+            "description": "Content of the post",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2248,7 +2798,7 @@
           {
             "name": "scheduled_date",
             "in": "formData",
-            "description": "The scheduled date and time in ISO 8601 format (e.g., \"2023-01-01T12:00:00.000Z\")",
+            "description": "Scheduled date and time in ISO 8601 format (e.g., 2023-01-01T12:00:00.000Z)",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2264,10 +2814,11 @@
                   "type": "string"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "job_id": {
                   "type": "string"
@@ -2276,23 +2827,38 @@
             }
           },
           "400": {
-            "description": "Bad request (missing or invalid data)"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "job_id": {
+                  "type": "null"
+                }
+              }
+            }
           }
         }
       },
       "get": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Retrieve information about all scheduled jobs.",
-        "description": "Retrieve information about all scheduled jobs.",
+        "summary": "Get all scheduled analyses",
+        "description": "Retrieve information about all scheduled jobs",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Jobs information retrieved successfully",
+            "description": "Successfully retrieved scheduled jobs",
             "schema": {
               "type": "object",
               "properties": {
@@ -2325,16 +2891,32 @@
                   }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server error"
+            "description": "Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       }
@@ -2342,15 +2924,15 @@
     "/scheduled-analyses/{job_id}": {
       "delete": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Delete a scheduled job by its id.",
-        "description": "Delete a scheduled job by its id.",
+        "summary": "Delete scheduled analysis",
+        "description": "Delete a scheduled job by its id",
         "parameters": [
           {
             "name": "job_id",
             "in": "path",
-            "description": "The ID of the scheduled job to delete",
+            "description": "ID of the scheduled job to delete",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2366,33 +2948,46 @@
                   "type": "string"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       },
       "get": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Get information about a scheduled job by its id.",
-        "description": "Get information about a scheduled job by its id.",
+        "summary": "Get scheduled analysis by id",
+        "description": "Get information about a specific scheduled job",
         "parameters": [
           {
             "name": "job_id",
             "in": "path",
-            "description": "The ID of the scheduled job to retrieve",
+            "description": "ID of the scheduled job",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2400,7 +2995,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Job information retrieved successfully",
+            "description": "Successfully retrieved job information",
             "schema": {
               "type": "object",
               "properties": {
@@ -2428,19 +3023,32 @@
                   }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       }
@@ -5226,6 +5834,54 @@
                 },
                 "data": {
                   "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/last": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Get last analysis",
+        "description": "Retrieve the name and date of the last analysis created",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved last analysis",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No analysis found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
                 }
               }
             }
