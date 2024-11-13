@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_mail import Mail
 from routes.chart.chart import chart_bp
@@ -131,6 +131,8 @@ app.register_blueprint(coinalyze_bp)
 app.register_blueprint(twelvedata_bp)
 app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
+
+
 
 
 if __name__ == '__main__':

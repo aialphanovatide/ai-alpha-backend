@@ -149,6 +149,123 @@ def save_chart():
 
     return jsonify(response), response["status"]
 
+@chart_bp.route('/chart-data', methods=['POST'])
+def receive_and_save_chart_data():
+    """
+    Receives support and resistance data from TradingView, parses it,
+    saves it to the database, and sends notifications if required.
+
+    Args:
+        The request body should contain a symbol (e.g., BTCUSDT), support and resistance levels,
+        timeframe, and a flag indicating if a notification should be sent.
+
+    Returns:
+        dict: A JSON response indicating success or failure.
+            Format: {"message": str or None, "error": str or None, "status": int, "data": dict or None}
+    """
+    response = {
+        "message": None,
+        "error": None,
+        "status": HTTPStatus.OK,
+        "data": None
+    }
+
+    session = Session()
+
+    try:
+        # Parse incoming data from TradingView webhook
+        data = request.data.decode('utf-8').split('\n')
+        
+        if len(data) != 11:
+            return jsonify({"error": "Incorrect data format"}), HTTPStatus.BAD_REQUEST
+        
+        # Extract symbol (e.g., BTCUSDT) and clean it
+        symbol = data[0].split(': ')[1]
+        
+        # List of known pairs (you can add more as needed)
+        known_pairs = ['USDT', 'USD', 'ETH', 'BTC']
+        
+        # Determine pair by checking if the symbol ends with any known pair
+        pair = next((p for p in known_pairs if symbol.endswith(p)), None)
+        if not pair:
+            return jsonify({"error": "Invalid trading pair"}), HTTPStatus.BAD_REQUEST
+        
+        # Extract token by removing the pair from the end of the symbol
+        token = symbol[:-len(pair)].lower()  # Everything before the pair is the token
+        # Extract timeframe (e.g., '1D', '4H')
+        timeframe = data[1].split(': ')[1]  # Extracting 'Timeframe' from second line
+        values = {}
+        for line in data[2:-1]:  # Skip last line since it's 'Is Essential'
+            key, value = line.split(': ')
+            values[key] = float(value)
+
+        supports = [values['S1'], values['S2'], values['S3'], values['S4']]
+        resistances = [values['R1'], values['R2'], values['R3'], values['R4']]
+        # Extract 'Is Essential' flag from last line
+        is_essential_str = data[-1].split(': ')[1]
+        # Convert 'Is Essential' string to boolean value ('true' -> True, 'false' -> False)
+        is_essential = True if is_essential_str.lower() == 'true' else False
+        # Query CoinBot to find coin_id using either name or alias
+        coin_bot = session.query(CoinBot).filter(
+            (CoinBot.name == token) | (CoinBot.alias == token)
+        ).first()
+        if not coin_bot:
+            return jsonify({"error": f"No CoinBot found with name or alias '{token}'"}), HTTPStatus.NOT_FOUND
+        coin_id = coin_bot.bot_id
+        
+        # Delete any existing chart records with this coin_bot_id and matching temporality
+        session.query(Chart).filter(Chart.coin_bot_id == coin_id, Chart.temporality == timeframe).delete()
+        
+        # Prepare chart data for saving to database...
+
+        new_chart_data = {
+            'support_1': supports[0],
+            'support_2': supports[1],
+            'support_3': supports[2],
+            'support_4': supports[3],
+            'resistance_1': resistances[0],
+            'resistance_2': resistances[1],
+            'resistance_3': resistances[2],
+            'resistance_4': resistances[3],
+            'token': token,
+            'pair': pair,
+            'temporality': timeframe,
+            'coin_bot_id': coin_id,
+            'is_essential': is_essential   # Store is_essential flag in DB if needed.
+        }
+        
+        new_chart = Chart(**new_chart_data)
+        session.add(new_chart)
+        
+        # Commit changes to the database.
+        session.commit()
+            
+        # Send notification only if is_essential is True.
+        if is_essential:
+            notification_service.push_notification(
+                coin=symbol,
+                title=f"{symbol} Support/Resistance Update",
+                body="Check the New Levels!",
+                type="s_and_r",
+                timeframe=timeframe  
+            )
+        
+        response["message"] = "New chart record created successfully"
+        response["status"] = HTTPStatus.CREATED
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        response["error"] = f"Database error: {str(e)}"
+        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
+
+    except Exception as e:
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
+
+    finally:
+        session.close()
+
+    return jsonify(response), response["status"]
 
 @chart_bp.route('/chart', methods=['GET'])
 def get_chart_values():
