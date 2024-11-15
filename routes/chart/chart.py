@@ -242,15 +242,15 @@ def receive_and_save_chart_data():
         session.commit()
             
         # # Send notification only if is_essential is True.
-        # if is_essential:
-        #     notification_service.push_notification(
-        #         coin=symbol,
-        #         title=f"{symbol} Support/Resistance Update",
-        #         body="Check the New Levels!",
-        #         type="s_and_r",
-        #         timeframe=timeframe  
-        #     )
-        #     print("message sent")
+        if is_essential:
+            notification_service.push_notification(
+                coin=symbol,
+                title=f"{symbol} Support/Resistance Update",
+                body="Check the New Levels!",
+                type="s_and_r",
+                timeframe=timeframe  
+            )
+            print("message sent")
         
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED
