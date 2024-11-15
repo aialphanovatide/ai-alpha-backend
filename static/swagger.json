@@ -70,6 +70,7 @@
       "name": "Competitors",
       "description": "Operations related to competitors"
     },
+    {
       "name": "Sections",
       "description": "Operations related to the Sections"
     }
