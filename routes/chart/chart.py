@@ -215,7 +215,6 @@ def receive_and_save_chart_data():
         
         # Delete any existing chart records with this coin_bot_id and matching temporality
         session.query(Chart).filter(Chart.coin_bot_id == coin_id, Chart.temporality == timeframe).delete()
-        
         # Prepare chart data for saving to database...
 
         new_chart_data = {
@@ -233,22 +232,25 @@ def receive_and_save_chart_data():
             'coin_bot_id': coin_id,
             'is_essential': is_essential   # Store is_essential flag in DB if needed.
         }
+        print(new_chart_data)
         
         new_chart = Chart(**new_chart_data)
         session.add(new_chart)
-        
+        if new_chart:
+            print("Chart saved")
         # Commit changes to the database.
         session.commit()
             
-        # Send notification only if is_essential is True.
-        if is_essential:
-            notification_service.push_notification(
-                coin=symbol,
-                title=f"{symbol} Support/Resistance Update",
-                body="Check the New Levels!",
-                type="s_and_r",
-                timeframe=timeframe  
-            )
+        # # Send notification only if is_essential is True.
+        # if is_essential:
+        #     notification_service.push_notification(
+        #         coin=symbol,
+        #         title=f"{symbol} Support/Resistance Update",
+        #         body="Check the New Levels!",
+        #         type="s_and_r",
+        #         timeframe=timeframe  
+        #     )
+        #     print("message sent")
         
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED
