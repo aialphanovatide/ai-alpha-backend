@@ -822,7 +822,6 @@ class Article(Base):
 
     # Relationships
     coin_bot = relationship('CoinBot', back_populates='article', lazy=True)
-    section = relationship('Sections', back_populates='articles', lazy=True)  # Note: updated back_populates name
     images = relationship('ArticleImage', back_populates='article', lazy=True)
     used_keywords = relationship('Used_keywords', back_populates='article', lazy=True)
 
@@ -1229,9 +1228,6 @@ class Sections(Base):
     target = Column(String)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-
-    # Relationship to Article
-    articles = relationship('Article', back_populates='section', lazy=True)
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
