@@ -43,12 +43,15 @@ from services.email.email_service import EmailService
 from ws.socket import init_socketio
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-app.name = 'AI Alpha API'
-swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
-template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
-mail = Mail(app)
-email_service = EmailService(app)
+app.name = 'AI Alpha API'
+
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
+
+app.static_folder = 'static'
+app.secret_key = os.urandom(24)
+
+template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 # Check API key for all requests
 @app.before_request
@@ -62,8 +65,9 @@ def before_request():
 # Initialize SocketIO
 socketio = init_socketio(app)
 
-app.static_folder = 'static'
-app.secret_key = os.urandom(24)
+# Initialize Mail and EmailService
+mail = Mail(app)
+email_service = EmailService(app)
 
 # Swagger configuration
 with open(swagger_template_path, 'r') as f:
@@ -136,17 +140,12 @@ app.register_blueprint(ask_ai_bp)
 
 if __name__ == '__main__':
     try:
-        with app.app_context():
-            print('---- AI Alpha API is running ----') 
-            app.run(port=9002, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
+        print('---- AI Alpha Server is starting ----') 
+        app.run(port=9002, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
-        print(f"Failed to start the AI Alpha server: {e}")
+        print(f"Failed to start the AI Alpha Server: {e}")
     finally:
-        # send_INFO_message_to_slack_channel( channel_id="C06FTS38JRX",
-        #                                     title_message="*CRITICAL ERROR*", 
-        #                                     sub_title="AI Alpha server has stopped running",
-        #                                     message="@David P. - Check this error on the Mac mini immediately")
-        print('--- AI Alpha server was stopped ---')
+        print('--- AI Alpha Server was stopped ---')
 
 
 
