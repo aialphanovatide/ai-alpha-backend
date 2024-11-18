@@ -32,7 +32,9 @@ jobs:
       FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
       PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
       PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
-
+      BINANCE_API_URL: ${{ secrets.BINANCE_API_URL }}
+      COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+      COINMARKET_API_KEY: ${{ secrets.COINMARKET_API_KEY }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

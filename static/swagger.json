@@ -19,8 +19,12 @@
   ],
   "tags": [
     {
-      "name": "Analysis",
-      "description": "Operations related to the Analysis (Daily Deeps)"
+      "name": "Content Creation",
+      "description": "Operations related to the Content Creation"
+    },
+    {
+      "name": "Ask AI",
+      "description": "Operations related to the Ask AI (Coin info)"
     },
     {
       "name": "Admin",
@@ -61,6 +65,10 @@
     {
       "name": "Providers",
       "description": "Data coming from external providers."
+    },
+    {
+      "name": "Sections",
+      "description": "Operations related to the Sections"
     }
   ],
   "paths": {
@@ -270,7 +278,7 @@
     "/schedule_post": {
       "post": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
         "summary": "Schedule a post for future publication.",
         "description": "Schedule a post for future publication.",
@@ -321,15 +329,15 @@
     "/post_analysis": {
       "post": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Create a new analysis and generate an associated image.",
-        "description": "Create a new analysis based on the provided data, generate an image for the analysis, and upload it to S3.",
+        "summary": "Create a new content creation and generate an associated image.",
+        "description": "Create a new content creation based on the provided data, generate an image for the content creation, and upload it to S3.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "description": "Analysis details",
+            "description": "Content creation details",
             "required": true,
             "schema": {
               "type": "object",
@@ -361,63 +369,6 @@
           },
           "500": {
             "description": "Server error"
-          }
-        }
-      }
-    },
-    "/register": {
-      "post": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Create a new user with provided data.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "nickname",
-                "email"
-              ],
-              "properties": {
-                "nickname": {
-                  "type": "string"
-                },
-                "full_name": {
-                  "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                },
-                "email_verified": {
-                  "type": "boolean",
-                  "default": false
-                },
-                "picture": {
-                  "type": "string"
-                },
-                "auth0id": {
-                  "type": "string"
-                },
-                "provider": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User created successfully."
-          },
-          "400": {
-            "description": "Missing required fields (nickname, email)."
-          },
-          "500": {
-            "description": "Internal server error."
           }
         }
       }
@@ -737,234 +688,404 @@
         }
       }
     },
-    "/api/tv/alerts": {
+    "/sections": {
       "get": {
         "tags": [
-          "Alerts"
+          "Sections"
         ],
-        "summary": "Get all alerts for a specific category.",
-        "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "description": "Category name",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Limit number of alerts (optional)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
+        "summary": "Retrieve all sections",
+        "description": "Retrieves the list of all sections.",
         "responses": {
           "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "alert_id": {
-                    "type": "integer"
-                  },
-                  "alert_name": {
-                    "type": "string"
-                  },
-                  "alert_message": {
-                    "type": "string"
-                  },
-                  "symbol": {
-                    "type": "string"
-                  },
-                  "price": {
-                    "type": "number"
-                  },
-                  "coin_bot_id": {
-                    "type": "integer"
-                  },
-                  "created_at": {
-                    "type": "string",
-                    "format": "date-time"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Category not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/tv/multiple_alert": {
-      "post": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "Get alerts from multiple categories.",
-        "parameters": [
-          {
-            "name": "categories",
-            "in": "body",
-            "description": "List of category names",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "limit": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "array",
-                "items": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "object",
                   "properties": {
-                    "alert_id": {
-                      "type": "integer"
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
                     },
-                    "alert_name": {
-                      "type": "string"
-                    },
-                    "alert_message": {
-                      "type": "string"
-                    },
-                    "symbol": {
-                      "type": "string"
-                    },
-                    "price": {
-                      "type": "number"
-                    },
-                    "coin_bot_id": {
-                      "type": "integer"
-                    },
-                    "created_at": {
+                    "error": {
                       "type": "string",
-                      "format": "date-time"
+                      "nullable": true
+                    },
+                    "status": {
+                      "type": "integer"
                     }
                   }
                 }
               }
             }
           },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sections"
+        ],
+        "summary": "Create a new section",
+        "description": "Create a new section in the system.\n    \nsections are used to organize different types of content like articles, narrative trading posts, analysis, and s&r analysis.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Section data to be created",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "description",
+                "target"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "What's happening today (Top Stories)"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Articles that belong to top stories"
+                },
+                "target": {
+                  "type": "string",
+                  "example": "article",
+                  "enum": [
+                    "article",
+                    "narrative_trading",
+                    "analysis",
+                    "s_and_r_analysis"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Section created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "null"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 201
+                }
+              }
+            }
+          },
           "400": {
-            "description": "Bad request"
+            "description": "Bad Request - Missing required fields",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Missing required fields: name, description, target"
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 400
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Database error: ..."
+                },
+                "status": {
+                  "type": "integer",
+                  "example": 500
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/filter/alerts": {
-      "get": {
+    "post": {
+      "tags": [
+        "Sections"
+      ],
+      "summary": "Create a new section",
+      "description": "Creates a new section.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "description",
+                "target"
+              ]
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Section created successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "error": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request (missing required fields)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "error": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal server error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "error": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sections/{sectionId}": {
+      "delete": {
         "tags": [
-          "Alerts"
+          "Sections"
         ],
-        "summary": "Get filtered alerts by coin and date.",
+        "summary": "Delete a section",
+        "description": "Deletes a section by its ID.",
         "parameters": [
           {
-            "name": "coin",
-            "in": "query",
-            "description": "Name of the coin/token",
+            "in": "path",
+            "name": "sectionId",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "date",
-            "in": "query",
-            "description": "Date filter (optional)",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "today",
-              "this week",
-              "last week",
-              "4h",
-              "1h",
-              "1w",
-              "1d",
-              "24h"
-            ]
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Limit number of alerts (optional)",
-            "required": false,
-            "type": "integer"
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "alerts": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "alert_id": {
-                        "type": "integer"
-                      },
-                      "alert_name": {
-                        "type": "string"
-                      },
-                      "alert_message": {
-                        "type": "string"
-                      },
-                      "symbol": {
-                        "type": "string"
-                      },
-                      "price": {
-                        "type": "number"
-                      },
-                      "coin_bot_id": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
+            "description": "Section deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "status": {
+                      "type": "integer"
                     }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad request"
-          },
           "404": {
-            "description": "Coin not found"
+            "description": "Section not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2209,158 +2330,58 @@
     "/analysis": {
       "get": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Retrieve analyses for a specific coin by id or name, with optional pagination.",
-        "description": "Retrieve analyses for a specific coin by id or name, with optional pagination.",
+        "summary": "Get coin analysis",
+        "description": "Retrieve analyses for a specific coin by id, with optional pagination",
         "parameters": [
           {
             "name": "coin_id",
             "in": "query",
-            "description": "The ID of the coin bot",
-            "required": false,
-            "type": "integer"
+            "description": "ID of the coin bot",
+            "required": true,
+            "type": "integer",
+            "schema": {}
           },
           {
-            "name": "coin_name",
+            "name": "section_id",
             "in": "query",
-            "description": "The name of the coin bot",
-            "required": false,
-            "type": "string"
+            "description": "ID of the section",
+            "required": true,
+            "type": "integer",
+            "schema": {}
           },
           {
             "name": "page",
             "in": "query",
-            "description": "The page number (default: 1)",
+            "description": "Page number",
             "required": false,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
           },
           {
             "name": "limit",
             "in": "query",
-            "description": "The number of items per page (default: 10, max: 100)",
+            "description": "Items per page (max 100)",
             "required": false,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of analyses"
-          },
-          "400": {
-            "description": "Bad Request - Missing coin identification or invalid pagination parameters"
-          },
-          "404": {
-            "description": "Not Found - No analyses found for the specified coin"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Create a new analysis and publish it.",
-        "description": "Create a new analysis and publish it.",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "formData",
-            "description": "The ID of the coin",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "content",
-            "in": "formData",
-            "description": "The content of the analysis",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "category_name",
-            "in": "formData",
-            "description": "The name of the category",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "description": "Details of the created analysis"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Missing or invalid data"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/analyses": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Retrieve all analyses with pagination, ordered by creation date descending.",
-        "description": "Retrieve all analyses with pagination, ordered by creation date descending.",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "The page number (default: 1)",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of items per page (default: 10, max: 100)",
-            "required": false,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful retrieval of analyses",
+            "description": "Successfully retrieved analyses",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
+                    "type": "object"
                   }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
                   "type": "boolean"
@@ -2381,10 +2402,212 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid pagination parameters"
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Create new analysis",
+        "description": "Create and publish a new analysis",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "formData",
+            "description": "ID of the coin",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Content of the analysis",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "Name of the category",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "formData",
+            "description": "ID of the section",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Analysis created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses": {
+      "get": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Get all analyses",
+        "description": "Retrieve all analyses with pagination based on section",
+        "parameters": [
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (max 100)",
+            "required": false,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all analyses",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "total_pages": {
+                  "type": "integer"
+                },
+                "section_name": {
+                  "type": "string"
+                },
+                "section_target": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       }
@@ -2392,17 +2615,26 @@
     "/analysis/{analysis_id}": {
       "delete": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Delete an existing analysis and its associated image.",
-        "description": "Delete an existing analysis and its associated image.",
+        "summary": "Delete analysis",
+        "description": "Delete an existing analysis and its associated image",
         "parameters": [
           {
             "name": "analysis_id",
             "in": "path",
-            "description": "The ID of the analysis to delete",
+            "description": "ID of the analysis to delete",
             "required": true,
-            "type": "integer"
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section",
+            "required": true,
+            "type": "integer",
+            "schema": {}
           }
         ],
         "responses": {
@@ -2412,43 +2644,63 @@
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "string",
-                  "description": "Confirmation message of deletion"
-                },
-                "error": {
                   "type": "string"
                 },
+                "error": {
+                  "type": "null"
+                },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "404": {
-            "description": "Analysis not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
+            "description": "Analysis not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       },
       "put": {
         "tags": [
-          "Analysis"
+          "Content Creation"
         ],
-        "summary": "Edit the content of an existing analysis.",
-        "description": "Edit the content of an existing analysis.",
+        "summary": "Edit analysis",
+        "description": "Edit the content of an existing analysis",
         "parameters": [
           {
             "name": "analysis_id",
             "in": "path",
-            "description": "The ID of the analysis to edit",
+            "description": "ID of the analysis to edit",
             "required": true,
             "type": "integer",
             "schema": {}
           },
           {
-            "name": "body",
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "content",
             "in": "body",
             "description": "New content for the analysis",
             "required": true,
@@ -2457,43 +2709,48 @@
               "type": "object",
               "properties": {
                 "content": {
-                  "type": "string",
-                  "description": "The new content of the analysis"
+                  "type": "string"
                 }
-              },
-              "required": [
-                "content"
-              ]
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Analysis edited successfully",
+            "description": "Analysis updated successfully",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "object",
-                  "description": "Details of the edited analysis"
+                  "type": "object"
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
                 },
                 "error": {
                   "type": "string"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": false
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad Request - New content is not provided"
-          },
-          "404": {
-            "description": "Analysis not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -2501,23 +2758,31 @@
     "/scheduled-analyses": {
       "post": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Schedule a post for future publication.",
-        "description": "Schedule a post for future publication.",
+        "summary": "Schedule new analysis",
+        "description": "Schedule a post for future publication",
         "parameters": [
           {
             "name": "coin_id",
             "in": "formData",
-            "description": "The ID of the coin bot",
+            "description": "ID of the coin bot",
             "required": true,
-            "type": "integer",
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "formData",
+            "description": "ID of the section",
+            "required": true,
+            "type": "string",
             "schema": {}
           },
           {
             "name": "category_name",
             "in": "formData",
-            "description": "The name of the category",
+            "description": "Name of the category",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2525,7 +2790,7 @@
           {
             "name": "content",
             "in": "formData",
-            "description": "The content of the post",
+            "description": "Content of the post",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2533,7 +2798,7 @@
           {
             "name": "scheduled_date",
             "in": "formData",
-            "description": "The scheduled date and time in ISO 8601 format (e.g., \"2023-01-01T12:00:00.000Z\")",
+            "description": "Scheduled date and time in ISO 8601 format (e.g., 2023-01-01T12:00:00.000Z)",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2549,10 +2814,11 @@
                   "type": "string"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "job_id": {
                   "type": "string"
@@ -2561,23 +2827,38 @@
             }
           },
           "400": {
-            "description": "Bad request (missing or invalid data)"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "job_id": {
+                  "type": "null"
+                }
+              }
+            }
           }
         }
       },
       "get": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Retrieve information about all scheduled jobs.",
-        "description": "Retrieve information about all scheduled jobs.",
+        "summary": "Get all scheduled analyses",
+        "description": "Retrieve information about all scheduled jobs",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Jobs information retrieved successfully",
+            "description": "Successfully retrieved scheduled jobs",
             "schema": {
               "type": "object",
               "properties": {
@@ -2610,16 +2891,32 @@
                   }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server error"
+            "description": "Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       }
@@ -2627,15 +2924,15 @@
     "/scheduled-analyses/{job_id}": {
       "delete": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Delete a scheduled job by its id.",
-        "description": "Delete a scheduled job by its id.",
+        "summary": "Delete scheduled analysis",
+        "description": "Delete a scheduled job by its id",
         "parameters": [
           {
             "name": "job_id",
             "in": "path",
-            "description": "The ID of the scheduled job to delete",
+            "description": "ID of the scheduled job to delete",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2651,33 +2948,46 @@
                   "type": "string"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       },
       "get": {
         "tags": [
-          "Analysis"
+          "Scheduled Content Creation"
         ],
-        "summary": "Get information about a scheduled job by its id.",
-        "description": "Get information about a scheduled job by its id.",
+        "summary": "Get scheduled analysis by id",
+        "description": "Get information about a specific scheduled job",
         "parameters": [
           {
             "name": "job_id",
             "in": "path",
-            "description": "The ID of the scheduled job to retrieve",
+            "description": "ID of the scheduled job",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2685,7 +2995,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Job information retrieved successfully",
+            "description": "Successfully retrieved job information",
             "schema": {
               "type": "object",
               "properties": {
@@ -2713,19 +3023,32 @@
                   }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 },
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
           }
         }
       }
@@ -2959,6 +3282,14 @@
             "schema": {}
           },
           {
+            "name": "symbol",
+            "in": "formData",
+            "description": "The symbol of the coin",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
             "name": "category_id",
             "in": "formData",
             "description": "The ID of the associated category",
@@ -2980,14 +3311,6 @@
             "description": "An SVG file to be used as the coin bot icon",
             "required": false,
             "type": "file",
-            "schema": {}
-          },
-          {
-            "name": "symbol",
-            "in": "formData",
-            "description": "The symbol of the coin",
-            "required": false,
-            "type": "string",
             "schema": {}
           }
         ],
@@ -3380,8 +3703,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Create a new category in the database.",
-        "description": "Create a new category in the database.",
+        "summary": "Create a new category.",
+        "description": "Create a new category.",
         "parameters": [
           {
             "name": "name",
@@ -3645,8 +3968,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
-        "description": "Retrieve all categories with their associated coinbots, sorted alphabetically by name.",
+        "summary": "Retrieve all categories with their associated coins, sorted alphabetically by name.",
+        "description": "Retrieve all categories with their associated coins, sorted alphabetically by name.",
         "parameters": [
           {
             "name": "order",
@@ -3716,8 +4039,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Activate or deactivate all coins within a specific category.",
-        "description": "Activate or deactivate all coins within a specific category.",
+        "summary": "Toggle the publication status of all coins within a specific category.",
+        "description": "Toggle the publication status of all coins within a specific category.",
         "parameters": [
           {
             "name": "category_id",
@@ -3806,8 +4129,8 @@
         "tags": [
           "Category"
         ],
-        "summary": "Activate or deactivate all coins across all categories.",
-        "description": "Activate or deactivate all coins across all categories.",
+        "summary": "Global toggle the publication status of all coins across all categories.",
+        "description": "Global toggle the publication status of all coins across all categories.",
         "parameters": [
           {
             "name": "body",
@@ -4974,6 +5297,591 @@
                 },
                 "success": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/categories": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Retrieve alerts for multiple categories",
+        "description": "Retrieve alerts for multiple categories with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of category names",
+                  "example": [
+                    "bitcoin",
+                    "ethereum"
+                  ]
+                },
+                "timeframe": {
+                  "type": "string",
+                  "enum": [
+                    "1h",
+                    "4h",
+                    "1d",
+                    "1w"
+                  ],
+                  "description": "Filter alerts by timeframe",
+                  "example": "4h"
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Page number (default: 1)",
+                  "default": 1,
+                  "minimum": 1
+                },
+                "per_page": {
+                  "type": "integer",
+                  "description": "Items per page (default: 10)",
+                  "default": 10,
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "categories"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved alerts by categories",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "categories": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "alert_id": {
+                              "type": "integer"
+                            },
+                            "alert_name": {
+                              "type": "string"
+                            },
+                            "alert_message": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "price": {
+                              "type": "number"
+                            },
+                            "coin_bot_id": {
+                              "type": "integer"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "timeframe": {
+                              "type": "string",
+                              "enum": [
+                                "1h",
+                                "4h",
+                                "1d",
+                                "1w"
+                              ],
+                              "nullable": true
+                            }
+                          }
+                        }
+                      },
+                      "total": {
+                        "type": "integer"
+                      },
+                      "pagination": {
+                        "type": "object",
+                        "properties": {
+                          "current_page": {
+                            "type": "integer"
+                          },
+                          "per_page": {
+                            "type": "integer"
+                          },
+                          "total_pages": {
+                            "type": "integer"
+                          },
+                          "has_next": {
+                            "type": "boolean"
+                          },
+                          "has_prev": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "total_alerts": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/coins": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Retrieve alerts for multiple coins",
+        "description": "Retrieve alerts for multiple coins with timeframe filtering and pagination support.\n    \nthe endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.\nresults are ordered by creation date (newest first) with optional pagination.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of coin symbols",
+                  "example": [
+                    "btc",
+                    "eth"
+                  ]
+                },
+                "timeframe": {
+                  "type": "string",
+                  "enum": [
+                    "1h",
+                    "4h",
+                    "1d",
+                    "1w"
+                  ],
+                  "description": "Filter alerts by timeframe",
+                  "example": "4h"
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Page number (default: 1)",
+                  "default": 1,
+                  "minimum": 1
+                },
+                "per_page": {
+                  "type": "integer",
+                  "description": "Items per page (default: 10)",
+                  "default": 10,
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "coins"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved alerts by coins",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "alert_id": {
+                              "type": "integer"
+                            },
+                            "alert_name": {
+                              "type": "string"
+                            },
+                            "alert_message": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "price": {
+                              "type": "number"
+                            },
+                            "coin_bot_id": {
+                              "type": "integer"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "timeframe": {
+                              "type": "string",
+                              "enum": [
+                                "1h",
+                                "4h",
+                                "1d",
+                                "1w"
+                              ],
+                              "nullable": true
+                            }
+                          }
+                        }
+                      },
+                      "total": {
+                        "type": "integer"
+                      },
+                      "pagination": {
+                        "type": "object",
+                        "properties": {
+                          "current_page": {
+                            "type": "integer"
+                          },
+                          "per_page": {
+                            "type": "integer"
+                          },
+                          "total_pages": {
+                            "type": "integer"
+                          },
+                          "has_next": {
+                            "type": "boolean"
+                          },
+                          "has_prev": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "total_alerts": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask-ai/coins": {
+      "get": {
+        "tags": [
+          "Ask AI"
+        ],
+        "summary": "Get list of available cryptocurrencies",
+        "description": "Retrieve a comprehensive list of all available cryptocurrencies from coingecko.\n    \nthis endpoint is cached for 24 hours (86400 seconds) to optimize performance and reduce api calls.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved list of cryptocurrencies",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "bitcoin"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "example": "btc"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Bitcoin"
+                      }
+                    }
+                  }
+                },
+                "length": {
+                  "type": "integer",
+                  "example": 1000
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coins": {
+                  "type": "array",
+                  "items": {}
+                },
+                "length": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask-ai": {
+      "get": {
+        "tags": [
+          "Ask AI"
+        ],
+        "summary": "Get detailed tokenomics data for a cryptocurrency",
+        "description": "Retrieve comprehensive tokenomics information about a specific cryptocurrency using its coingecko id.\n    \nthe endpoint fetches data from both coingecko and coinmarketcap (for whitepaper if not available in coingecko).",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "query",
+            "description": "CoinGecko ID of the cryptocurrency (e.g., \"bitcoin\", \"ethereum\")",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved tokenomics data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "website": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "chains": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "current_price": {
+                      "type": "number"
+                    },
+                    "market_cap_usd": {
+                      "type": "number"
+                    },
+                    "fully_diluted_valuation": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "ath": {
+                      "type": "number"
+                    },
+                    "ath_change_percentage": {
+                      "type": "number"
+                    },
+                    "circulating_supply": {
+                      "type": "number",
+                      "nullable": true
+                    }
+                  }
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing required parameter",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "The parameter coin_id is required"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "data": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cryptocurrency not found or API error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "data": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/last": {
+      "get": {
+        "tags": [
+          "Analysis"
+        ],
+        "summary": "Get last analysis",
+        "description": "Retrieve the name and date of the last analysis created",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved last analysis",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No analysis found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
                 }
               }
             }

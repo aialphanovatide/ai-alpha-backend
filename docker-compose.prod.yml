@@ -50,6 +50,13 @@ services:
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_PRODUCT_ALERTS=${SLACK_PRODUCT_ALERTS}
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+<<<<<<< HEAD
+=======
+      - CHANNEL_ID_AI_ALPHA_FOUNDERS=${CHANNEL_ID_AI_ALPHA_FOUNDERS}
+      - BINANCE_API_URL=${BINANCE_API_URL}
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - COINMARKET_API_KEY=${COINMARKET_API_KEY}
+>>>>>>> develop
     depends_on:
       db:
         condition: service_healthy
