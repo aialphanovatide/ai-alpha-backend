@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        let socket;
+        let reconnectInterval;
+        const RECONNECT_INTERVAL = 5000; // 5 seconds
+
+        function connect() {
+            if (socket) {
+                socket.disconnect();
+            }
+
+            socket = io('http://localhost:9002', { 
+                reconnection: false // We'll handle reconnection manually
+            });
+            
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                console.log('Socket ID:', socket.id);
+                updateStatus('Connected', 'green');
+                updateConnectionInfo('Socket ID: ' + socket.id);
+                clearInterval(reconnectInterval);
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+                updateStatus('Disconnected', 'red');
+                updateConnectionInfo('Disconnected');
+                startReconnection();
+            });
+
+            socket.on('connect_error', (error) => {
+                console.log('Connection error:', error);
+                updateStatus('Connection error', 'orange');
+                updateConnectionInfo('Error: ' + error.message);
+                startReconnection();
+            });
+
+            // Listen for client_connected event
+            socket.on('client_connected', (data) => {
+                console.log('Client connected data:', data);
+                updateConnectionInfo(`
+                    Socket ID: ${socket.id}
+                    Client ID: ${data.client_id}
+                `);
+            });
+        }
+        
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                clearInterval(reconnectInterval);
+                updateStatus('Manually disconnected', 'blue');
+                updateConnectionInfo('Manually disconnected');
+            }
+        }
+
+        function startReconnection() {
+            clearInterval(reconnectInterval);
+            reconnectInterval = setInterval(() => {
+                console.log('Attempting to reconnect...');
+                updateStatus('Reconnecting...', 'orange');
+                connect();
+            }, RECONNECT_INTERVAL);
+        }
+
+        function updateStatus(message, color) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.style.color = color;
+        }
+
+        function updateConnectionInfo(info) {
+            const connectionInfoElement = document.getElementById('connection-info');
+            connectionInfoElement.textContent = info;
+        }
+
+        // Auto-connect on page load
+        window.onload = connect;
+    </script>
+    <style>
+        .info-box {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    <p>Status: <span id="status">Not connected</span></p>
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <div class="info-box">
+        <h3>Connection Information:</h3>
+        <div id="connection-info">Not connected</div>
+    </div>
+</body>
+</html>
