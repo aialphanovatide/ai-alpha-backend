@@ -149,6 +149,7 @@ def save_chart():
 
     return jsonify(response), response["status"]
 
+
 @chart_bp.route('/chart-data', methods=['POST'])
 def receive_and_save_chart_data():
     """
@@ -232,8 +233,6 @@ def receive_and_save_chart_data():
             'coin_bot_id': coin_id,
             'is_essential': is_essential   # Store is_essential flag in DB if needed.
         }
-        print(new_chart_data)
-        
         new_chart = Chart(**new_chart_data)
         session.add(new_chart)
         if new_chart:
@@ -268,6 +267,7 @@ def receive_and_save_chart_data():
         session.close()
 
     return jsonify(response), response["status"]
+
 
 @chart_bp.route('/chart', methods=['GET'])
 def get_chart_values():
