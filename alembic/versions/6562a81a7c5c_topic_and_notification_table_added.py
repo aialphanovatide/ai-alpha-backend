@@ -1,7 +1,7 @@
 """topic and notification table added
 
 Revision ID: 6562a81a7c5c
-Revises: 7f9a2b3c4d5e
+Revises: 1ef11a055306
 Create Date: 2024-10-01 13:13:02.185114
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '6562a81a7c5c'
-down_revision: Union[str, None] = '7f9a2b3c4d5e'
+down_revision: Union[str, None] = '1ef11a055306'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
