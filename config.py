@@ -1110,7 +1110,6 @@ class Chart(Base):
     resistance_4 = Column(Float)
     token = Column(String)
     pair = Column(String)
-    is_essential = Column(Boolean)
     temporality = Column(String)
     is_essential = Column(Boolean, default=False)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
