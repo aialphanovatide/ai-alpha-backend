@@ -4,17 +4,18 @@ import datetime
 from sqlalchemy import desc
 from bs4 import BeautifulSoup
 from datetime import datetime
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Type
 from sqlalchemy.exc import SQLAlchemyError
 from services.fundamentals_populator.populator import process_query
 from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
+from config import Analysis, CoinBot, Session
 from flask import jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
 from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
 from apscheduler.jobstores.base import JobLookupError
-from config import Analysis, Category, CoinBot, Session
+from config import Analysis, Category, CoinBot, NarrativeTrading, SAndRAnalysis, Sections, Session
 from routes.analysis.analysis_scheduler import sched, chosen_timezone
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 
@@ -29,14 +30,14 @@ notification_service = Notification(session=Session())
 @cache_with_redis()
 def get_coin_analysis():
     """
-    Retrieve analyses for a specific coin by ID or name, with optional pagination.
+    Retrieve analyses for a specific coin by ID, with optional pagination.
 
-    This endpoint queries the database for analyses related to a specific coin,
-    identified either by ID or name, ordered by creation date descending.
+    This endpoint queries the appropriate table based on the section target
+    for analyses related to a specific coin, identified by ID.
 
     Args:
-        coin_bot_id (int): The ID of the coin bot (optional)
-        coin_bot_name (str): The name of the coin bot (optional)
+        coin_bot_id (int): The ID of the coin bot (required)
+        section_id (int): The ID of the section (required)
         page (int): The page number (default: 1)
         limit (int): The number of items per page (default: 10, max: 100)
 
@@ -50,11 +51,6 @@ def get_coin_analysis():
             - limit (int): Number of items per page (if pagination is used)
             - total_pages (int): Total number of pages (if pagination is used)
         HTTP Status Code
-
-    Raises:
-        400 Bad Request: If neither coin ID nor name is provided, or if invalid pagination parameters are provided
-        404 Not Found: If no analyses are found for the specified coin
-        500 Internal Server Error: If there's an unexpected error during execution
     """
     response = {
         "data": None,
@@ -69,49 +65,54 @@ def get_coin_analysis():
 
     session = Session()
     try:
-        # Get coin identification parameters
-        coin_id = request.args.get('coin_id', type=int)
-        coin_name = request.args.get('coin_name')
+        # Get required parameters
+        coin_bot_id = request.args.get('coin_bot_id', type=int)
+        section_id = request.args.get('section_id', type=int)
 
-        if not coin_id and not coin_name:
-            response["error"] = "Either coin_id or coin_name is required"
+        if not coin_bot_id or not section_id:
+            response["error"] = "Both coin_bot_id and section_id are required"
+            status_code = 400
+            return jsonify(response), status_code
+
+        # Get section information
+        section = session.query(Sections).filter_by(id=section_id).first()
+        if not section:
+            response["error"] = f"Section with id {section_id} not found"
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Get the corresponding model based on target
+        target = section.target.lower()
+        model_class = MODEL_MAPPING.get(target)
+        if not model_class:
+            response["error"] = f"No model found for target: {section.target}"
             status_code = 400
             return jsonify(response), status_code
 
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
-        limit = request.args.get('limit', 10, type=int)
+        limit = min(request.args.get('limit', 10, type=int), 100)  # Cap at 100
 
-        # Build the query
-        query = session.query(Analysis)
-        if coin_id:
-            query = query.filter(Analysis.coin_bot_id == coin_id)
-        elif coin_name:
-            coin = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
-            if not coin:
-                response["error"] = f"No coin found with name: {coin_name}"
-                status_code = 404
-                return jsonify(response), status_code
-            query = query.filter(Analysis.coin_bot_id == coin.bot_id)
-
-        # Get total count
-        total_analyses = query.count()
-
-        if total_analyses == 0:
-            response["error"] = "No analyses found for the specified coin"
-            status_code = 404
-            return jsonify(response), status_code
-
-        # Apply pagination
         if page < 1 or limit < 1:
             response["error"] = "Invalid pagination parameters"
             status_code = 400
             return jsonify(response), status_code
 
-        limit = min(limit, 100)  # Cap at 100
+        # Build the query
+        query = session.query(model_class).filter(model_class.coin_bot_id == coin_bot_id)
+
+        # Get total count
+        total_analyses = query.count()
+
+        if total_analyses == 0:
+            response["error"] = "No analyses found for the specified coin and section"
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Apply pagination
         total_pages = (total_analyses + limit - 1) // limit
         offset = (page - 1) * limit
-        query = query.order_by(desc(Analysis.created_at)).offset(offset).limit(limit)
+        query = query.order_by(desc(model_class.created_at)).offset(offset).limit(limit)
 
         # Execute the query
         analysis_objects = query.all()
@@ -119,12 +120,14 @@ def get_coin_analysis():
         # Prepare the response data
         analysis_data = [analy.to_dict() for analy in analysis_objects]
 
-        response["data"] = analysis_data
-        response["success"] = True
-        response["total"] = total_analyses
-        response["page"] = page
-        response["limit"] = limit
-        response["total_pages"] = total_pages
+        response.update({
+            "data": analysis_data,
+            "success": True,
+            "total": total_analyses,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages
+        })
         status_code = 200
 
     except SQLAlchemyError as e:
@@ -145,29 +148,27 @@ def get_coin_analysis():
 @cache_with_redis()
 def get_all_analysis():
     """
-    Retrieve all analyses with pagination.
-
-    This endpoint queries the database for analyses, ordered by creation date descending.
-    It supports pagination and a configurable limit.
-
+    Retrieve all analyses with pagination based on section.
+    
     Args:
+        section_id (str): The ID of the section to get analyses from
         page (int): The page number (default: 1)
         limit (int): The number of items per page (default: 10, max: 100)
-
+    
     Returns:
         JSON: A JSON object containing:
-            - data (list): List of analysis objects
-            - error (str or None): Error message, if any
-            - success (bool): Indicates if the operation was successful
-            - total (int): Total number of analyses
-            - page (int): Current page number
-            - limit (int): Number of items per page
-            - total_pages (int): Total number of pages
-        HTTP Status Code
-
+        - data (list): List of analysis objects
+        - error (str or None): Error message, if any
+        - success (bool): Indicates if the operation was successful
+        - total (int): Total number of analyses
+        - page (int): Current page number
+        - limit (int): Number of items per page
+        - total_pages (int): Total number of pages
+        
     Raises:
-        400 Bad Request: If invalid pagination parameters are provided
-        500 Internal Server Error: If there's an unexpected error during execution
+        400 Bad Request: If invalid parameters are provided
+        404 Not Found: If section is not found
+        500 Internal Server Error: If there's an unexpected error
     """
     response = {
         "data": None,
@@ -179,28 +180,50 @@ def get_all_analysis():
         "total_pages": 0
     }
     status_code = 500  # Default to server error
-
     session = Session()
+    
     try:
+        # Get required parameters
+        section_id = request.args.get('section_id')
+        if not section_id:
+            response["error"] = "section_id is required"
+            status_code = 400
+            return jsonify(response), status_code
+
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
         limit = min(request.args.get('limit', 10, type=int), 100)  # Cap at 100
-
+        
         if page < 1 or limit < 1:
             response["error"] = "Invalid pagination parameters"
             status_code = 400
             return jsonify(response), status_code
 
+        # Get section information
+        section = session.query(Sections).filter_by(id=section_id).first()
+        if not section:
+            response["error"] = f"Section with id {section_id} not found"
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Get the corresponding model based on target
+        target = section.target.lower()
+        model_class = MODEL_MAPPING.get(target)
+        if not model_class:
+            response["error"] = f"No model found for target: {section.target}"
+            status_code = 400
+            return jsonify(response), status_code
+
         # Query for total count
-        total_analyses = session.query(Analysis).count()
+        total_analyses = session.query(model_class).count()
 
         # Calculate pagination values
         total_pages = (total_analyses + limit - 1) // limit
         offset = (page - 1) * limit
 
         # Query with pagination
-        analysis_objects = session.query(Analysis)\
-            .order_by(desc(Analysis.created_at))\
+        analysis_objects = session.query(model_class)\
+            .order_by(desc(model_class.created_at))\
             .offset(offset)\
             .limit(limit)\
             .all()
@@ -208,25 +231,32 @@ def get_all_analysis():
         # Prepare the response data
         analysis_data = [analy.to_dict() for analy in analysis_objects]
 
-        response["data"] = analysis_data
-        response["success"] = True
-        response["total"] = total_analyses
-        response["page"] = page
-        response["limit"] = limit
-        response["total_pages"] = total_pages
-        status_code = 200  # Use 200 for successful responses
+        # Update response
+        response.update({
+            "data": analysis_data,
+            "success": True,
+            "total": total_analyses,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages,
+            "section_name": section.name,  # Incluimos el nombre de la sección
+            "section_target": section.target  # Incluimos el target para referencia
+        })
+        status_code = 200
 
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
+        
     except Exception as e:
         session.rollback()
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
+        
     finally:
         session.close()
-
+        
     return jsonify(response), status_code
 
 
@@ -245,6 +275,7 @@ def post_analysis():
         coin_id (str): The ID of the coin
         content (str): The content of the analysis
         category_name (str): The name of the category
+        section_id(int): The id of a section
 
     Returns:
         JSON: A JSON object containing:
@@ -270,6 +301,7 @@ def post_analysis():
     session = Session()
     try:
         # Extract data from the request
+        section_id = request.form.get("section_id")
         coin_id = request.form.get('coin_id')
         content = request.form.get('content')
         category_name = request.form.get('category_name')
@@ -282,7 +314,7 @@ def post_analysis():
             return jsonify(response), 400
 
         try:
-            response = publish_analysis(coin_id=coin_id, 
+            response = publish_analysis(coin_id=coin_id,section_id=section_id,
                              content=content, 
                              category_name=category_name)
 
@@ -323,10 +355,13 @@ def delete_analysis(analysis_id):
     """
     Delete an existing analysis and its associated image.
 
-    This endpoint removes an analysis identified by its ID and any associated image.
+    This endpoint removes an analysis identified by its ID and section, and any associated image.
 
     Args:
         analysis_id (int): The ID of the analysis to delete
+
+    Query Parameters:
+        section_id (int): The ID of the section the analysis belongs to
 
     Returns:
         JSON: A JSON object containing:
@@ -336,7 +371,8 @@ def delete_analysis(analysis_id):
         HTTP Status Code
 
     Raises:
-        404 Not Found: If the specified analysis is not found
+        400 Bad Request: If section_id is not provided
+        404 Not Found: If the specified analysis or section is not found
         500 Internal Server Error: If there's an unexpected error during execution
     """
     response = {
@@ -348,15 +384,37 @@ def delete_analysis(analysis_id):
 
     session = Session()
     try:
-        # Check if the analysis_id exists
-        analysis_to_delete = session.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
+        # Get section_id from query parameters
+        section_id = request.args.get('section_id', type=int)
+        if not section_id:
+            response["error"] = "section_id is required"
+            status_code = 400
+            return jsonify(response), status_code
+
+        # Get section information
+        section = session.query(Sections).filter_by(id=section_id).first()
+        if not section:
+            response["error"] = f"Section with id {section_id} not found"
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Get the corresponding model based on target
+        target = section.target.lower()
+        model_class = MODEL_MAPPING.get(target)
+        if not model_class:
+            response["error"] = f"No model found for target: {section.target}"
+            status_code = 400
+            return jsonify(response), status_code
+
+        # Check if the analysis exists
+        analysis_to_delete = session.query(model_class).filter(model_class.id == analysis_id).first()
         if not analysis_to_delete:
-            response["error"] = "Analysis not found"
+            response["error"] = f"Analysis not found in {section.target} table"
             status_code = 404
             return jsonify(response), status_code
 
         # Delete the associated image from S3 if it exists
-        if analysis_to_delete.image_url:
+        if hasattr(analysis_to_delete, 'image_url') and analysis_to_delete.image_url:
             try:
                 image_processor.delete_from_s3(image_url=analysis_to_delete.image_url)
             except Exception as e:
@@ -367,7 +425,7 @@ def delete_analysis(analysis_id):
         session.delete(analysis_to_delete)
         session.commit()
 
-        response["data"] = f'Analysis deleted successfully with its image'
+        response["data"] = f'Analysis deleted successfully from {section.target} table'
         response["success"] = True
         status_code = 200
 
@@ -391,10 +449,13 @@ def edit_analysis(analysis_id):
     """
     Edit the content of an existing analysis.
 
-    This endpoint updates the content of an analysis identified by its ID.
+    This endpoint updates the content of an analysis identified by its ID and section.
 
     Args:
         analysis_id (int): The ID of the analysis to edit
+
+    Query Parameters:
+        section_id (int): The ID of the section the analysis belongs to
 
     Returns:
         JSON: A JSON object containing:
@@ -404,8 +465,8 @@ def edit_analysis(analysis_id):
         HTTP Status Code
 
     Raises:
-        400 Bad Request: If the new content is not provided
-        404 Not Found: If the specified analysis is not found
+        400 Bad Request: If the new content is not provided or section_id is missing
+        404 Not Found: If the specified analysis or section is not found
         500 Internal Server Error: If there's an unexpected error during execution
     """
     response = {
@@ -422,17 +483,40 @@ def edit_analysis(analysis_id):
         status_code = 400
         return jsonify(response), status_code
 
+    # Get section_id from query parameters
+    section_id = request.args.get('section_id', type=int)
+    if not section_id:
+        response["error"] = "section_id is required"
+        status_code = 400
+        return jsonify(response), status_code
+
     session = Session()
     try:
-        # Check if the analysis_id exists
-        analysis_to_edit = session.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
+        # Get section information
+        section = session.query(Sections).filter_by(id=section_id).first()
+        if not section:
+            response["error"] = f"Section with id {section_id} not found"
+            status_code = 404
+            return jsonify(response), status_code
+
+        # Get the corresponding model based on target
+        target = section.target.lower()
+        model_class = MODEL_MAPPING.get(target)
+        if not model_class:
+            response["error"] = f"No model found for target: {section.target}"
+            status_code = 400
+            return jsonify(response), status_code
+
+        # Check if the analysis exists
+        analysis_to_edit = session.query(model_class).filter(model_class.id == analysis_id).first()
         if analysis_to_edit is None:
-            response["error"] = "Analysis not found"
+            response["error"] = f"Analysis not found in {section.target} table"
             status_code = 404
             return jsonify(response), status_code
 
         # Update analysis content
-        analysis_to_edit.analysis = new_content
+        # Assuming the content field is named 'analysis' in all tables. Adjust if necessary.
+        setattr(analysis_to_edit, 'analysis', new_content)
         session.commit()
 
         # Prepare the response data
@@ -452,6 +536,7 @@ def edit_analysis(analysis_id):
         session.close()
 
     return jsonify(response), status_code
+
 
 
 @analysis_bp.route('/analysis/last', methods=['GET'])
@@ -510,23 +595,60 @@ def get_last_analysis():
         status_code = 500
     finally:
         session.close()
-    
-   
-def publish_analysis(coin_id: int, content: str, category_name: str) -> dict:
+
+
+# Definimos un mapeo entre los targets y los modelos correspondientes
+MODEL_MAPPING = {
+    'analysis': Analysis,
+    'narrative_trading': NarrativeTrading,
+    's_and_r_analysis': SAndRAnalysis
+    }
+
+def get_section_info(session, section_id: int):
+    """
+    Obtiene la información de la sección por su ID
+    """
+    return session.query(Sections).filter(Sections.id == section_id).first()
+
+def create_content_object(model_class: Type, content_data: Dict):
+    """
+    Crea una instancia del modelo correspondiente con los datos proporcionados
+    """
+    return model_class(
+        analysis=content_data.get('analysis'),
+        category_name=content_data.get('category_name'),
+        coin_bot_id=content_data.get('coin_bot_id'),
+        image_url=content_data.get('image_url')
+    )
+
+def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
     """
     Function to publish an analysis.
-
     Args:
         coin_id (int): The ID of the coin bot
         content (str): The content of the analysis
         category_name (str): The name of the category
-
+        section_id (str): The ID of the section
     Returns:
         dict: A response dictionary containing the result of the operation
     """
     session = Session()
     image_filename = None
+    
     try:
+        # Get section information
+        section = get_section_info(session, section_id)
+        if not section:
+            raise ValueError(f"No Section found with id {section_id}")
+
+        # Get the corresponding model based on target
+        target = section.target.lower()
+        print(target)
+        model_class = MODEL_MAPPING.get(target)
+        print(model_class)
+        if not model_class:
+            raise ValueError(f"Invalid target type: {target}")
+
         # Extract title and adjust content
         title_end_index = content.find('<br>')
         if title_end_index != -1:
@@ -545,7 +667,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> dict:
             image = image_generator.generate_image(content)
         except Exception as e:
             raise ValueError(f"Image generation failed: {str(e)}")
-        
+
         try:
             resized_image_url = image_processor.process_and_upload_image(
                 image_url=image,
@@ -562,58 +684,59 @@ def publish_analysis(coin_id: int, content: str, category_name: str) -> dict:
         
         coin_symbol = coin_bot.name
 
-        # Create and save the Analysis object
-        new_analysis = Analysis(
-            analysis=content,
-            category_name=category_name,
-            coin_bot_id=coin_id,
-            image_url=resized_image_url
-        )
-        session.add(new_analysis)
+        # Prepare content data
+        content_data = {
+            'analysis': content,
+            'category_name': category_name,
+            'coin_bot_id': coin_id,
+            'image_url': resized_image_url
+        }
+
+        # Create and save the content object
+        new_content = create_content_object(model_class, content_data)
+        session.add(new_content)
         session.commit()
-        
 
         # Send notification
         notification_service.push_notification(
             coin=coin_symbol,
-            title=f"{str(coin_symbol).upper()} New Analysis Available",  
+            title=f"{str(coin_symbol).upper()} New {section.name} Available",
             body=f"{title} - Check it out!",
-            type="analysis",
-            timeframe=""  
+            type=target,
+            timeframe=""
         )
-        
+
         return create_response(
-            data=new_analysis.to_dict(),
-            message="Analysis published successfully",
+            data=new_content.to_dict(),
+            message=f"{section.name} published successfully",
             success=True,
             status_code=201
         )
-        
+
     except SQLAlchemyError as e:
         session.rollback()
         return create_response(
             data=None,
-            message=f"Database error publishing analysis: {str(e)}",
+            message=f"Database error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
             success=False,
             status_code=500
         )
     except ValueError as e:
         return create_response(
             data=None,
-            message=f"Value error publishing analysis: {str(e)}",
+            message=f"Value error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
             success=False,
             status_code=400
         )
     except Exception as e:
         return create_response(
             data=None,
-            message=f"Unexpected error publishing analysis: {str(e)}",
+            message=f"Unexpected error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
             success=False,
             status_code=500
         )
     finally:
         session.close()
-
 
 # ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
@@ -629,6 +752,7 @@ def schedule_post() -> Tuple[Dict, int]:
         coin_id (int): The ID of the coin bot
         category_name (str): The name of the category
         content (str): The content of the post
+        section_id(int): The ID of section
         scheduled_date (str): The scheduled date and time in ISO 8601 format (e.g., '2023-01-01T12:00:00.000Z')
 
     Returns:
@@ -656,6 +780,7 @@ def schedule_post() -> Tuple[Dict, int]:
 
     try:
         coin_id = request.form.get('coin_id')
+        section_id = request.form.get('section_id')
         category_name = request.form.get('category_name')
         content = request.form.get('content')
         scheduled_date = request.form.get('scheduled_date')
@@ -697,7 +822,7 @@ def schedule_post() -> Tuple[Dict, int]:
 
         job = sched.add_job(
             publish_analysis, 
-            args=[coin_id, content, category_name], 
+            args=[coin_id, content, category_name, section_id], 
             trigger=DateTrigger(run_date=scheduled_datetime)
         )
 

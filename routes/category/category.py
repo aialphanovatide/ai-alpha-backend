@@ -52,10 +52,6 @@ def create_category():
             alias = request.form.get('alias')
             border_color = request.form.get('border_color')
             icon_file = request.files.get('icon')
-
-            print("Icon file:", icon_file)
-            print("Icon file type:", type(icon_file))
-            print("Icon file size:", icon_file.content_length)
             
             if not name or not alias:
                 response["error"] = 'Name and Alias are required and cannot be null'
@@ -76,21 +72,21 @@ def create_category():
                 status_code = 400
                 return jsonify(response), status_code
 
+            icon_url = None
             if icon_file:
-                print("Icon file:", icon_file)
-                print("Icon file type:", type(icon_file))
-                print("Icon file size:", icon_file.content_length)
-                print("Icon file filename:", icon_file.filename)
 
-                icon_content = icon_file.read()
+                if icon_file.content_type != 'image/svg+xml':
+                    raise ValueError('Invalid file type. Only SVG files are allowed.')
+
                 normalized_alias = alias.strip().lower().replace(" ", "")
                 icon_filename = f"{normalized_alias}.svg"
                 icon_url = image_processor.upload_svg_to_s3(icon_file, "aialphaicons", icon_filename)
+               
 
             new_category = Category(
                 name=name,
                 alias=alias,
-                border_color=border_color,
+                border_color=border_color or None,
                 icon=icon_url
             )
 

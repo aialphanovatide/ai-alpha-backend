@@ -127,251 +127,320 @@ swagger = Swagger()
 # ____Add or update an endpoint____
 
 
-# # Documentation for /alerts/categories endpoint
-# success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/alerts/categories',
-#     method='post',
-#     tag='Alerts',
-#     summary='Retrieve alerts for multiple categories',
-#     description='''Retrieve alerts for multiple categories with timeframe filtering and pagination support.
-    
-# The endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.
-# Results are ordered by creation date (newest first) with optional pagination.''',
+# # GET /analyses endpoint
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/analyses',
+#     method='get',
+#     tag='Analysis',
+#     summary='Get all analyses',
+#     description='Retrieve all analyses with pagination based on section',
 #     params=[
 #         {
-#             'name': 'body',
-#             'in': 'body',
+#             'name': 'section_id',
+#             'in': 'query',
+#             'description': 'ID of the section',
 #             'required': True,
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'categories': {
-#                         'type': 'array',
-#                         'items': {'type': 'string'},
-#                         'description': 'List of category names',
-#                         'example': ['bitcoin', 'ethereum']
-#                     },
-#                     'timeframe': {
-#                         'type': 'string',
-#                         'enum': ['1h', '4h', '1d', '1w'],
-#                         'description': 'Filter alerts by timeframe',
-#                         'example': '4h'
-#                     },
-#                     'page': {
-#                         'type': 'integer',
-#                         'description': 'Page number (default: 1)',
-#                         'default': 1,
-#                         'minimum': 1
-#                     },
-#                     'per_page': {
-#                         'type': 'integer',
-#                         'description': 'Items per page (default: 10)',
-#                         'default': 10,
-#                         'minimum': 1
-#                     }
-#                 },
-#                 'required': ['categories']
-#             }
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'page',
+#             'in': 'query',
+#             'description': 'Page number',
+#             'required': False,
+#             'type': 'integer',
+#             'default': 1
+#         },
+#         {
+#             'name': 'limit',
+#             'in': 'query',
+#             'description': 'Items per page (max 100)',
+#             'required': False,
+#             'type': 'integer',
+#             'default': 10
 #         }
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Successfully retrieved alerts by categories',
+#             'description': 'Successfully retrieved all analyses',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'categories': {
-#                         'type': 'object',
-#                         'additionalProperties': {
-#                             'type': 'object',
-#                             'properties': {
-#                                 'data': {
-#                                     'type': 'array',
-#                                     'items': {
-#                                         'type': 'object',
-#                                         'properties': {
-#                                             'alert_id': {'type': 'integer'},
-#                                             'alert_name': {'type': 'string'},
-#                                             'alert_message': {'type': 'string'},
-#                                             'symbol': {'type': 'string'},
-#                                             'price': {'type': 'number'},
-#                                             'coin_bot_id': {'type': 'integer'},
-#                                             'created_at': {'type': 'string', 'format': 'date-time'},
-#                                             'updated_at': {'type': 'string', 'format': 'date-time'},
-#                                             'timeframe': {
-#                                                 'type': 'string',
-#                                                 'enum': ['1h', '4h', '1d', '1w'],
-#                                                 'nullable': True
-#                                             }
-#                                         }
-#                                     }
-#                                 },
-#                                 'total': {'type': 'integer'},
-#                                 'pagination': {
-#                                     'type': 'object',
-#                                     'properties': {
-#                                         'current_page': {'type': 'integer'},
-#                                         'per_page': {'type': 'integer'},
-#                                         'total_pages': {'type': 'integer'},
-#                                         'has_next': {'type': 'boolean'},
-#                                         'has_prev': {'type': 'boolean'}
-#                                     }
-#                                 }
-#                             }
-#                         }
-#                     },
-#                     'total_alerts': {'type': 'integer'}
+#                     'data': {'type': 'array', 'items': {'type': 'object'}},
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean'},
+#                     'total': {'type': 'integer'},
+#                     'page': {'type': 'integer'},
+#                     'limit': {'type': 'integer'},
+#                     'total_pages': {'type': 'integer'},
+#                     'section_name': {'type': 'string'},
+#                     'section_target': {'type': 'string'}
 #                 }
 #             }
 #         },
 #         '400': {
-#             'description': 'Bad Request - Invalid input parameters',
+#             'description': 'Bad Request',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w'
-#                     }
-#                 }
-#             }
-#         },
-#         '500': {
-#             'description': 'Internal Server Error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'error': {'type': 'string'}
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
 #                 }
 #             }
 #         }
 #     }
 # )
 
-# print(message)
-
-# # Documentation for /alerts/coins endpoint
-# success, message = swagger.add_or_update_endpoint(
-#     endpoint_route='/alerts/coins',
-#     method='post',
-#     tag='Alerts',
-#     summary='Retrieve alerts for multiple coins',
-#     description='''Retrieve alerts for multiple coins with timeframe filtering and pagination support.
-    
-# The endpoint allows filtering alerts by timeframe (1h, 4h, 1d, 1w) extracted from the alert name.
-# Results are ordered by creation date (newest first) with optional pagination.''',
-#     params=[
-#         {
-#             'name': 'body',
-#             'in': 'body',
-#             'required': True,
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'coins': {
-#                         'type': 'array',
-#                         'items': {'type': 'string'},
-#                         'description': 'List of coin symbols',
-#                         'example': ['btc', 'eth']
-#                     },
-#                     'timeframe': {
-#                         'type': 'string',
-#                         'enum': ['1h', '4h', '1d', '1w'],
-#                         'description': 'Filter alerts by timeframe',
-#                         'example': '4h'
-#                     },
-#                     'page': {
-#                         'type': 'integer',
-#                         'description': 'Page number (default: 1)',
-#                         'default': 1,
-#                         'minimum': 1
-#                     },
-#                     'per_page': {
-#                         'type': 'integer',
-#                         'description': 'Items per page (default: 10)',
-#                         'default': 10,
-#                         'minimum': 1
-#                     }
-#                 },
-#                 'required': ['coins']
-#             }
-#         }
-#     ],
+# # GET /analysis/last endpoint
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/analysis/last',
+#     method='get',
+#     tag='Analysis',
+#     summary='Get last analysis',
+#     description='Retrieve the name and date of the last analysis created',
+#     params=[],
 #     responses={
 #         '200': {
-#             'description': 'Successfully retrieved alerts by coins',
+#             'description': 'Successfully retrieved last analysis',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'coins': {
-#                         'type': 'object',
-#                         'additionalProperties': {
-#                             'type': 'object',
-#                             'properties': {
-#                                 'data': {
-#                                     'type': 'array',
-#                                     'items': {
-#                                         'type': 'object',
-#                                         'properties': {
-#                                             'alert_id': {'type': 'integer'},
-#                                             'alert_name': {'type': 'string'},
-#                                             'alert_message': {'type': 'string'},
-#                                             'symbol': {'type': 'string'},
-#                                             'price': {'type': 'number'},
-#                                             'coin_bot_id': {'type': 'integer'},
-#                                             'created_at': {'type': 'string', 'format': 'date-time'},
-#                                             'updated_at': {'type': 'string', 'format': 'date-time'},
-#                                             'timeframe': {
-#                                                 'type': 'string',
-#                                                 'enum': ['1h', '4h', '1d', '1w'],
-#                                                 'nullable': True
-#                                             }
-#                                         }
-#                                     }
-#                                 },
-#                                 'total': {'type': 'integer'},
-#                                 'pagination': {
-#                                     'type': 'object',
-#                                     'properties': {
-#                                         'current_page': {'type': 'integer'},
-#                                         'per_page': {'type': 'integer'},
-#                                         'total_pages': {'type': 'integer'},
-#                                         'has_next': {'type': 'boolean'},
-#                                         'has_prev': {'type': 'boolean'}
-#                                     }
-#                                 }
-#                             }
-#                         }
-#                     },
-#                     'total_alerts': {'type': 'integer'}
+#                     'data': {'type': 'object'},
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean', 'example': True}
 #                 }
 #             }
 #         },
-#         '400': {
-#             'description': 'Bad Request - Invalid input parameters',
+#         '404': {
+#             'description': 'No analysis found',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Invalid timeframe. Must be one of: 1h, 4h, 1d, 1w'
-#                     }
-#                 }
-#             }
-#         },
-#         '500': {
-#             'description': 'Internal Server Error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'error': {'type': 'string'}
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
 #                 }
 #             }
 #         }
 #     }
 # )
 
-# print(message)
+# # POST /scheduled-analyses endpoint
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/scheduled-analyses',
+#     method='post',
+#     tag='Scheduled Analysis',
+#     summary='Schedule new analysis',
+#     description='Schedule a post for future publication',
+#     params=[
+#         {
+#             'name': 'coin_id',
+#             'in': 'formData',
+#             'description': 'ID of the coin bot',
+#             'required': True,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'section_id',
+#             'in': 'formData',
+#             'description': 'ID of the section',
+#             'required': True,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'category_name',
+#             'in': 'formData',
+#             'description': 'Name of the category',
+#             'required': True,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'content',
+#             'in': 'formData',
+#             'description': 'Content of the post',
+#             'required': True,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'scheduled_date',
+#             'in': 'formData',
+#             'description': 'Scheduled date and time in ISO 8601 format (e.g., 2023-01-01T12:00:00.000Z)',
+#             'required': True,
+#             'type': 'string'
+#         }
+#     ],
+#     responses={
+#         '201': {
+#             'description': 'Post scheduled successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'message': {'type': 'string'},
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean', 'example': True},
+#                     'job_id': {'type': 'string'}
+#                 }
+#             }
+#         },
+#         '400': {
+#             'description': 'Bad Request',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'message': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'job_id': {'type': 'null'}
+#                 }
+#             }
+#         }
+#     }
+# )
+
+# # GET /scheduled-analyses endpoint
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/scheduled-analyses',
+#     method='get',
+#     tag='Scheduled Analysis',
+#     summary='Get all scheduled analyses',
+#     description='Retrieve information about all scheduled jobs',
+#     params=[],
+#     responses={
+#         '200': {
+#             'description': 'Successfully retrieved scheduled jobs',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'jobs': {
+#                                 'type': 'array',
+#                                 'items': {
+#                                     'type': 'object',
+#                                     'properties': {
+#                                         'id': {'type': 'string'},
+#                                         'name': {'type': 'string'},
+#                                         'trigger': {'type': 'string'},
+#                                         'args': {'type': 'string'},
+#                                         'next_run_time': {'type': 'string'}
+#                                     }
+#                                 }
+#                             }
+#                         }
+#                     },
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean', 'example': True}
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Server Error',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
+#                 }
+#             }
+#         }
+#     }
+# )
+
+# # GET /scheduled-analyses/{job_id} endpoint
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/scheduled-analyses/{job_id}',
+#     method='get',
+#     tag='Scheduled Analysis',
+#     summary='Get scheduled analysis by ID',
+#     description='Get information about a specific scheduled job',
+#     params=[
+#         {
+#             'name': 'job_id',
+#             'in': 'path',
+#             'description': 'ID of the scheduled job',
+#             'required': True,
+#             'type': 'string'
+#         }
+#     ],
+#     responses={
+#         '201': {
+#             'description': 'Successfully retrieved job information',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'id': {'type': 'string'},
+#                             'name': {'type': 'string'},
+#                             'func': {'type': 'string'},
+#                             'trigger': {'type': 'string'},
+#                             'args': {'type': 'string'},
+#                             'next_run_time': {'type': 'string'}
+#                         }
+#                     },
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean', 'example': True}
+#                 }
+#             }
+#         },
+#         '404': {
+#             'description': 'Job not found',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
+#                 }
+#             }
+#         }
+#     }
+# )
+
+# # DELETE /scheduled-analyses/{job_id} endpoint
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/scheduled-analyses/{job_id}',
+#     method='delete',
+#     tag='Scheduled Analysis',
+#     summary='Delete scheduled analysis',
+#     description='Delete a scheduled job by its ID',
+#     params=[
+#         {
+#             'name': 'job_id',
+#             'in': 'path',
+#             'description': 'ID of the scheduled job to delete',
+#             'required': True,
+#             'type': 'string'
+#         }
+#     ],
+#     responses={
+#         '201': {
+#             'description': 'Job deleted successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'message': {'type': 'string'},
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean', 'example': True}
+#                 }
+#             }
+#         },
+#         '404': {
+#             'description': 'Job not found',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'message': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
+#                 }
+#             }
+#         }
+#     }
+# )
 
 
 # ____Delete an endpoint____
