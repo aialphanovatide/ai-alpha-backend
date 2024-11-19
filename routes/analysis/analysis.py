@@ -10,7 +10,7 @@ from services.fundamentals_populator.populator import process_query
 from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
 from config import Analysis, CoinBot, Session
-from flask import jsonify, Blueprint, request
+from flask import current_app, jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
 from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
@@ -259,95 +259,96 @@ def get_all_analysis():
         
     return jsonify(response), status_code
 
-
 @analysis_bp.route('/analysis', methods=['POST'])
 @update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
 def post_analysis():
     """
-    Create a new analysis and publish it.
+    Create and publish a new analysis.
 
-    This endpoint creates a new analysis based on the provided data and publishes it.
-
-    Args:
-        None (data is expected in the request form)
-
-    Expected form data:
-        coin_id (str): The ID of the coin
-        content (str): The content of the analysis
-        category_name (str): The name of the category
-        section_id(int): The id of a section
+    This function handles POST requests to create a new analysis. It processes
+    the form data, validates the input, and calls the publish_analysis function
+    to create and publish the analysis.
 
     Returns:
-        JSON: A JSON object containing:
-            - data (dict or None): Details of the created analysis, if successful
-            - error (str or None): Error message, if any
-            - success (bool): Indicates if the operation was successful
-        HTTP Status Code:
-            - 201: Created successfully
-            - 400: Bad Request (missing or invalid data)
-            - 500: Internal Server Error
+        tuple: A tuple containing a JSON response and an HTTP status code.
+        The JSON response includes:
+        - data: The published analysis data (if successful)
+        - error: Error message (if any)
+        - success: Boolean indicating whether the operation was successful
 
     Raises:
-        400 Bad Request: If required data is missing or null
-        500 Internal Server Error: If there's an unexpected error during execution
+        ValueError: If the input data is invalid or missing
+        Exception: For any unexpected errors during processing
     """
+    print("Entering post_analysis function")
+    print(f"Request form data: {request.form}")
+    
     response = {
         "data": None,
         "error": None,
         "success": False
     }
-    status_code = 500  # Default to server error
-
-    session = Session()
+    status_code = 500
+    
     try:
-        # Extract data from the request
-        section_id = request.form.get("section_id")
-        coin_id = request.form.get('coin_id')
-        content = request.form.get('content')
-        category_name = request.form.get('category_name')
-
-        # Check if any of the required values is missing or null
-        missing_params = [param for param in ['coin_id', 'content', 'category_name'] if not locals()[param] or locals()[param] == 'null']
-        if missing_params:
-            response["error"] = f"The following required values are missing or null: {', '.join(missing_params)}"
-            response["success"] = False
+        # Convert form data with explicit error handling
+        try:
+            section_id = int(request.form.get("section_id"))
+            coin_id = int(request.form.get('coin_id'))
+            content = request.form.get('content')
+            category_name = request.form.get('category_name', '').strip()
+        
+        except (ValueError, TypeError) as e:
+            print(f"Error converting form data: {str(e)}")
+            response["error"] = f"Invalid input: {str(e)}"
             return jsonify(response), 400
 
-        try:
-            response = publish_analysis(coin_id=coin_id,section_id=section_id,
-                             content=content, 
-                             category_name=category_name)
+        # Check for missing parameters
+        params = {'coin_id': coin_id, 'content': content, 'category_name': category_name, 'section_id': section_id}
+        missing_params = [param for param, value in params.items() if value is None or (isinstance(value, str) and value.strip() == '')]
+        if missing_params:
+            error_msg = f"The following required values are missing: {', '.join(missing_params)}"
+            print(error_msg)
+            response["error"] = error_msg
+            return jsonify(response), 400
 
-            if response["success"]:
-                # Update the response data with analysis details
-                response["data"] = response["data"]
-                response["success"] = response["success"]
-                status_code = 201   
+        # Publish analysis
+        try:
+            publish_response = publish_analysis(
+                coin_id=coin_id, 
+                section_id=section_id,
+                content=content,
+                category_name=category_name
+            )
+            
+            print(f"publish_analysis response: {publish_response}")
+
+            if publish_response.get("success"):
+                response["data"] = publish_response.get("data")
+                response["success"] = True
+                status_code = 201
+                print("Analysis published successfully")
             else:
-                response["error"] = response["error"]
+                response["error"] = publish_response.get("message", "Unknown error in publish_analysis")
+                print(f"Publish analysis failed: {response['error']}")
                 status_code = 500
 
-        except ValueError as e:
-            session.rollback()
-            response["error"] = f"Image processing failed: {str(e)}"
-            status_code = 500
-        except SQLAlchemyError as e:
-            session.rollback()
-            response["error"] = f"Database error: {str(e)}"
-            status_code = 500
         except Exception as e:
-            session.rollback()
-            response["error"] = f"Unexpected error: {str(e)}"
+            print(f"Error in publish_analysis: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            response["error"] = f"Error in publish analysis: {str(e)}"
             status_code = 500
 
     except Exception as e:
+        print(f"Unexpected error in post_analysis: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         response["error"] = f"Request failed: {str(e)}"
         status_code = 500
-    finally:
-        session.close()
 
+    print(f"Returning response: {response}")
     return jsonify(response), status_code
-
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['DELETE'])
 @update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
@@ -621,7 +622,7 @@ def create_content_object(model_class: Type, content_data: Dict):
         image_url=content_data.get('image_url')
     )
 
-def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
+def publish_analysis(coin_id: int, content: str, category_name: str, section_id: int) -> dict:
     """
     Function to publish an analysis.
     Args:
@@ -640,7 +641,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
         section = get_section_info(session, section_id)
         if not section:
             raise ValueError(f"No Section found with id {section_id}")
-
+        
         # Get the corresponding model based on target
         target = section.target.lower()
         print(target)
