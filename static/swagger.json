@@ -2451,7 +2451,7 @@
             "in": "formData",
             "description": "ID of the coin",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "schema": {}
           },
           {
