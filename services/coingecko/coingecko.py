@@ -140,6 +140,48 @@ def get_coin_data(name: Optional[str] = None, symbol: Optional[str] = None) -> D
     return result
 
 
+import requests
+def get_crypto_id(symbol: str) -> Optional[str]:
+    """
+    Retrieve the CoinGecko ID for a given cryptocurrency symbol.
+
+    This function queries the CoinGecko API to find the corresponding ID
+    for a given cryptocurrency symbol.
+
+    Args:
+        symbol (str): The symbol of the cryptocurrency (e.g., 'btc' for Bitcoin).
+
+    Returns:
+        Optional[str]: The CoinGecko ID of the cryptocurrency if found, None otherwise.
+    """
+    url = 'https://api.coingecko.com/api/v3/coins/markets'
+    params = {'vs_currency': 'usd', 'order': 'market_cap_desc', 'per_page': 100, 'page': 1, 'sparkline': False}
+    response = requests.get(url, params=params)
+    data = response.json()
+    for crypto in data:
+        if crypto['symbol'].lower() == symbol.lower():
+            return crypto['id']
+    return None
+
+def get_tokenomics_data(symbol: str) -> Dict[str, Any]:
+    """
+    Retrieve detailed supply data for a given cryptocurrency symbol.
+
+    Args:
+        symbol (str): The symbol of the cryptocurrency (e.g., 'btc' for Bitcoin).
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the following information:
+            - 'Total Supply': The total supply of the cryptocurrency.
+            - 'Circulating Supply': The current circulating supply.
+            - '% Circulating Supply': The percentage of total supply in circulation.
+            - 'Max Supply': The maximum supply of the cryptocurrency or '∞' if unlimited.
+    """
+    crypto_id = get_crypto_id(symbol)
+    if not crypto_id:
+        return f"No cryptocurrency found with the symbol {symbol}"
+
+    url = f'{BASE_URL}/coins/{crypto_id}'
 def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
     """
     Get detailed tokenomics data for a cryptocurrency using its CoinGecko ID.
@@ -173,7 +215,50 @@ def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
         response.raise_for_status()
         data = response.json()
 
-        # Get the whitepaper from CoinGecko
+        market_data = data.get('market_data', {})
+        total_supply = market_data.get('total_supply')
+        circulating_supply = market_data.get('circulating_supply')
+        max_supply = market_data.get('max_supply')
+        
+        # Calculate % Circulating Supply
+        percent_circulating_supply = None
+        if total_supply and circulating_supply:
+            percent_circulating_supply = (circulating_supply / total_supply) * 100
+
+        # Replace None, NULL, or empty max_supply with infinity symbol
+        if max_supply is None or max_supply == "NULL" or max_supply == "":
+            max_supply = "∞"
+        
+        return {
+            'Total Supply': total_supply,
+            'Circulating Supply': circulating_supply,
+            '% Circulating Supply': percent_circulating_supply,
+            'Max Supply': max_supply
+        }
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Error al obtener datos de la criptomoneda: {e}"}
+
+
+def get_competitors_data(symbol: str) -> Dict[str, Any]:
+    """
+    Retrieve detailed supply data for a given cryptocurrency symbol.
+
+    Args:
+        symbol (str): The symbol of the cryptocurrency (e.g., 'btc' for Bitcoin).
+
+    Returns:
+        Dict[str, Any]: A dictionary containing all crypto data from CoinGecko
+    """
+    crypto_id = get_crypto_id(symbol)
+    if not crypto_id:
+        return {"error": f"No cryptocurrency found with the symbol {symbol}"}
+
+    url = f'{BASE_URL}/coins/{crypto_id}'
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
         whitepaper = data['links'].get('whitepaper') if 'whitepaper' in data['links'] else None
 
         # If no whitepaper in CoinGecko, try CoinMarketCap
@@ -206,10 +291,6 @@ def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
         return {'error': f"JSON decoding error: {str(e)}"}
     except Exception as e:
         return {'error': f"Unexpected error: {str(e)}"}
-
-
-
-
 
 
 
