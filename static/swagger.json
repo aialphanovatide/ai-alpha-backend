@@ -2475,7 +2475,7 @@
             "in": "formData",
             "description": "ID of the section",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "schema": {}
           }
         ],
@@ -2498,6 +2498,24 @@
               }
             }
           },
+          "500": {
+          "description": "Internal Server Error",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "string"
+              },
+              "success": {
+                "type": "boolean",
+                "example": false
+              }
+            }
+          }
+        },
           "400": {
             "description": "Bad Request",
             "schema": {
