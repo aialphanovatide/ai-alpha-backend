@@ -15,6 +15,7 @@ else:
     path = fallback_path
 
 # Creds
+print('Firebase path:', path)
 cred = credentials.Certificate(path)
 default_app = initialize_app(credential=cred)
 
@@ -79,7 +80,7 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
 
 
 # Example usage
-# result, status_code = send_notification(
+# result = send_notification(
 #     topic='bitcoin_4999_m1_analysis',
 #     title='Cosmos Advances with Valence Integration',
 #     body="""
@@ -89,4 +90,4 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
 # """,
 #     coin='bitcoin'
 # )
-# print(result, status_code)
+# print(result)
