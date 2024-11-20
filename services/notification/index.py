@@ -42,7 +42,7 @@ class Notification:
                     Topic.reference.ilike(f"%{coin}%"),
                     Topic.name.ilike(f"%{type}%")
                 ).all()
-               
+                print(topics)
             else:
                 raise ValueError(f"Invalid notification type: {type}")
 
@@ -58,6 +58,7 @@ class Notification:
                         coin=coin,
                         type=type 
                     )
+                    
                     self.session.add(new_notification)
                     print(f"{type.capitalize()} saved for coin {coin} under topic {topic.name}")
 

@@ -181,7 +181,6 @@ def receive_and_save_chart_data():
         
         # Extract symbol (e.g., BTCUSDT) and clean it
         symbol = data[0].split(': ')[1]
-        
         # List of known pairs (you can add more as needed)
         known_pairs = ['USDT', 'USD', 'ETH', 'BTC']
         
@@ -189,7 +188,6 @@ def receive_and_save_chart_data():
         pair = next((p for p in known_pairs if symbol.endswith(p)), None)
         if not pair:
             return jsonify({"error": "Invalid trading pair"}), HTTPStatus.BAD_REQUEST
-        
         # Extract token by removing the pair from the end of the symbol
         token = symbol[:-len(pair)].lower()  # Everything before the pair is the token
         # Extract timeframe (e.g., '1D', '4H')
@@ -198,7 +196,6 @@ def receive_and_save_chart_data():
         for line in data[2:-1]:  # Skip last line since it's 'Is Essential'
             key, value = line.split(': ')
             values[key] = float(value)
-
         supports = [values['S1'], values['S2'], values['S3'], values['S4']]
         resistances = [values['R1'], values['R2'], values['R3'], values['R4']]
         # Extract 'Is Essential' flag from last line
@@ -216,7 +213,6 @@ def receive_and_save_chart_data():
         # Delete any existing chart records with this coin_bot_id and matching temporality
         session.query(Chart).filter(Chart.coin_bot_id == coin_id, Chart.temporality == timeframe).delete()
         # Prepare chart data for saving to database...
-
         new_chart_data = {
             'support_1': supports[0],
             'support_2': supports[1],
@@ -235,6 +231,7 @@ def receive_and_save_chart_data():
         print(new_chart_data)
         
         new_chart = Chart(**new_chart_data)
+
         session.add(new_chart)
         if new_chart:
             print("Chart saved")
@@ -244,7 +241,7 @@ def receive_and_save_chart_data():
         # # Send notification only if is_essential is True.
         if is_essential:
             notification_service.push_notification(
-                coin=symbol,
+                coin=token,
                 title=f"{symbol} Support/Resistance Update",
                 body="Check the New Levels!",
                 type="s_and_r",
