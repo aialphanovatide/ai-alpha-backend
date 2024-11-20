@@ -31,25 +31,25 @@
     "description": "Operations related to the Introduction section."
     },
     {
-      "name": "Tokenomics",
-      "description": "Operations related to the Tokenomics section"
-      },
-      {
-        "name": "Competitors Tokenomics",
-        "description": "Operations related to the Competitors tokenomics section"
-        },
-        {
-          "name": "Dapps",
-          "description": "Operations related to the Dapps section "
-          },
-          {
-            "name": "Upgrades",
-            "description": "Operations related to the Upgrades section"
-            },
-            {
-              "name": "Hacks",
-              "description": "Operations related to the Hacks section"
-              },
+    "name": "Tokenomics",
+    "description": "Operations related to the Tokenomics section"
+    },
+    {
+    "name": "Competitors Tokenomics",
+    "description": "Operations related to the Competitors tokenomics section"
+    },
+  {
+    "name": "Dapps",
+    "description": "Operations related to the Dapps section "
+    },
+    {
+      "name": "Upgrades",
+      "description": "Operations related to the Upgrades section"
+    },
+    {
+    "name": "Hacks",
+    "description": "Operations related to the Hacks section"
+    },
     {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
@@ -73,10 +73,6 @@
     {
       "name": "CoinGecko",
       "description": "Operations related to CoinGecko"
-    },
-    {
-      "name": "Fundamentals",
-      "description": "Operations related to the fundamentals"
     },
     {
       "name": "Narrative trading",
@@ -1119,7 +1115,7 @@
         "summary": "Get competitors data",
         "description": "Retrieve a list of competitors for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Competitors Tokenomics"
         ],
         "parameters": [
           {
@@ -1176,7 +1172,7 @@
         "summary": "Get DApps data",
         "description": "Retrieve DApps data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Dapps"
         ],
         "parameters": [
           {
@@ -1235,7 +1231,7 @@
         "summary": "Get hacks data",
         "description": "Retrieve hacks data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Hacks"
         ],
         "parameters": [
           {
