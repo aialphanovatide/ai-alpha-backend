@@ -27,9 +27,29 @@
       "description": "Operations related to the Ask AI (Coin info)"
     },
     {
-    "name": "Fundamentals",
-    "description": "Operations related to the Fundamentals, AI Searching and DB Saving."
+    "name": "Introductions",
+    "description": "Operations related to the Introduction section."
     },
+    {
+      "name": "Tokenomics",
+      "description": "Operations related to the Tokenomics section"
+      },
+      {
+        "name": "Competitors Tokenomics",
+        "description": "Operations related to the Competitors tokenomics section"
+        },
+        {
+          "name": "Dapps",
+          "description": "Operations related to the Dapps section "
+          },
+          {
+            "name": "Upgrades",
+            "description": "Operations related to the Upgrades section"
+            },
+            {
+              "name": "Hacks",
+              "description": "Operations related to the Hacks section"
+              },
     {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
@@ -1271,7 +1291,7 @@
         "summary": "Get introduction data",
         "description": "Retrieve introduction data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Introductions"
         ],
         "parameters": [
           {
@@ -1327,7 +1347,7 @@
         "summary": "Get revenue models",
         "description": "Retrieve revenue model data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Revenue Models"
         ],
         "parameters": [
           {
@@ -1383,7 +1403,7 @@
         "summary": "Get tokenomics data",
         "description": "Retrieve tokenomics data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1465,7 +1485,7 @@
         "summary": "Get individual tokenomic",
         "description": "Retrieve a specific tokenomic by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1511,7 +1531,7 @@
         "summary": "Get token distribution",
         "description": "Retrieve a specific token distribution by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1557,7 +1577,7 @@
         "summary": "Get token utility",
         "description": "Retrieve a specific token utility by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1603,7 +1623,7 @@
         "summary": "Get value accrual mechanism",
         "description": "Retrieve a specific value accrual mechanism by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1649,7 +1669,7 @@
         "summary": "Get upgrades data",
         "description": "Retrieve upgrades data related to a specific coin",
         "tags": [
-          "Fundamentals"
+          "Upgrades"
         ],
         "parameters": [
           {
@@ -1711,7 +1731,7 @@
     "/api/get_competitors_by_coin_name": {
       "get": {
         "tags": [
-          "Fundamentals"
+          "Competitors Tokenomics"
         ],
         "summary": "Get competitors data for a specific coin by name",
         "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
