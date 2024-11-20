@@ -25,5 +25,6 @@ if is_db_empty "$POSTGRES_DB"; then
         exit 1
     fi
 else
-    echo "Database is not empty. Skipping backup restore."
+    echo "Database is not empty. Skipping backup restore... Using existing database: $POSTGRES_DB"
 fi
+

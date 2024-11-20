@@ -149,6 +149,7 @@ def save_chart():
 
     return jsonify(response), response["status"]
 
+
 @chart_bp.route('/chart-data', methods=['POST'])
 def receive_and_save_chart_data():
     """
@@ -221,7 +222,6 @@ def receive_and_save_chart_data():
             'coin_bot_id': coin_id,
             'is_essential': parsed_data['is_essential']
         }
-
     response = {
         "message": None,
         "error": None,
@@ -249,6 +249,7 @@ def receive_and_save_chart_data():
         chart_data = prepare_chart_data(parsed_data, coin_id)
         new_chart = Chart(**chart_data)
         
+
         session.add(new_chart)
         session.commit()
         
@@ -281,6 +282,7 @@ def receive_and_save_chart_data():
         session.close()
 
     return jsonify(response), response["status"]
+
 
 @chart_bp.route('/chart', methods=['GET'])
 def get_chart_values():
