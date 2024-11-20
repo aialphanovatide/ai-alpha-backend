@@ -33,9 +33,9 @@ services:
     volumes:
       - .:/app
     environment:
+      - DATABASE_URL_DEV=postgresql://${POSTGRES_USER_DEV}:${POSTGRES_PASSWORD_DEV}@db_dev:5432/${POSTGRES_DB_DEV}
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - DATABASE_URL_DEV=${DATABASE_URL_DEV}
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_DB=3

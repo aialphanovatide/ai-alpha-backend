@@ -306,17 +306,25 @@ def post_analysis():
         category_name = request.form.get('category_name')
 
         # Check if any of the required values is missing or null
-        missing_params = [param for param in ['coin_id', 'content', 'category_name'] if not locals()[param] or locals()[param] == 'null']
+        required_params = {
+                'coin_id': coin_id,
+                'content': content,
+                'category_name': category_name
+            }
+        missing_params = [key for key, value in required_params.items() if not value or value == 'null']
+
         if missing_params:
             response["error"] = f"The following required values are missing or null: {', '.join(missing_params)}"
             response["success"] = False
             return jsonify(response), 400
 
         try:
-            response = publish_analysis(coin_id=coin_id,section_id=section_id,
-                             content=content, 
-                             category_name=category_name)
-
+            response = publish_analysis(
+                                        coin_id=int(coin_id), 
+                                        section_id=int(section_id),
+                                        content=content,
+                                        category_name=category_name
+                                    )
             if response["success"]:
                 # Update the response data with analysis details
                 response["data"] = response["data"]
