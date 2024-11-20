@@ -2,7 +2,7 @@ from config import Alert, Topic, Notification
 from services.firebase.firebase import send_notification
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-
+from flask import current_app
 notification_model = Notification
 
 class Notification:
