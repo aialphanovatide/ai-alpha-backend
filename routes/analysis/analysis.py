@@ -626,7 +626,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
     session = Session()
     image_filename = None
     
-    current_app.logger.info(f"Starting publish_analysis for coin_id={coin_id}, category={category_name}, section_id={section_id}")
+    current_app.logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
     
     try:
         # Get section information
