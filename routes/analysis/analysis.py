@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from services.notification.index import Notification
 from services.aws.s3 import ImageProcessor
 from config import Analysis, CoinBot, Session
-from flask import jsonify, Blueprint, request
+from flask import current_app, jsonify, Blueprint, request
 from services.openai.dalle import ImageGenerator
 from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
@@ -258,93 +258,86 @@ def get_all_analysis():
         
     return jsonify(response), status_code
 
-
 @analysis_bp.route('/analysis', methods=['POST'])
 @update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
 def post_analysis():
     """
     Create a new analysis and publish it.
-
-    This endpoint creates a new analysis based on the provided data and publishes it.
-
-    Args:
-        None (data is expected in the request form)
-
-    Expected form data:
-        coin_id (str): The ID of the coin
-        content (str): The content of the analysis
-        category_name (str): The name of the category
-        section_id(int): The id of a section
-
-    Returns:
-        JSON: A JSON object containing:
-            - data (dict or None): Details of the created analysis, if successful
-            - error (str or None): Error message, if any
-            - success (bool): Indicates if the operation was successful
-        HTTP Status Code:
-            - 201: Created successfully
-            - 400: Bad Request (missing or invalid data)
-            - 500: Internal Server Error
-
-    Raises:
-        400 Bad Request: If required data is missing or null
-        500 Internal Server Error: If there's an unexpected error during execution
+    ...
     """
+    current_app.logger.debug(f"Received POST request to /analysis")
+    
     response = {
         "data": None,
         "error": None,
         "success": False
     }
     status_code = 500  # Default to server error
-
     session = Session()
+    
     try:
         # Extract data from the request
         section_id = request.form.get("section_id")
         coin_id = request.form.get('coin_id')
         content = request.form.get('content')
         category_name = request.form.get('category_name')
-
+        
+        current_app.logger.debug(f"Received parameters: section_id={section_id}, coin_id={coin_id}, category_name={category_name}")
+        
         # Check if any of the required values is missing or null
         missing_params = [param for param in ['coin_id', 'content', 'category_name'] if not locals()[param] or locals()[param] == 'null']
+        
         if missing_params:
+            current_app.logger.debug(f"Missing parameters: {missing_params}")
             response["error"] = f"The following required values are missing or null: {', '.join(missing_params)}"
             response["success"] = False
             return jsonify(response), 400
-
+        
         try:
-            response = publish_analysis(coin_id=coin_id,section_id=section_id,
-                             content=content, 
-                             category_name=category_name)
-
+            response = publish_analysis(
+                coin_id=coin_id,
+                section_id=section_id,
+                content=content,
+                category_name=category_name
+            )
+            
+            current_app.logger.debug(f"Publish analysis response: {response}")
+            
             if response["success"]:
-                # Update the response data with analysis details
                 response["data"] = response["data"]
                 response["success"] = response["success"]
-                status_code = 201   
+                status_code = 201
             else:
+                current_app.logger.error(f"Failed to publish analysis: {response['error']}")
                 response["error"] = response["error"]
                 status_code = 500
-
+        
         except ValueError as e:
             session.rollback()
+            current_app.logger.error(f"Image processing failed: {str(e)}")
             response["error"] = f"Image processing failed: {str(e)}"
             status_code = 500
+        
         except SQLAlchemyError as e:
             session.rollback()
+            current_app.logger.error(f"Database error: {str(e)}")
             response["error"] = f"Database error: {str(e)}"
             status_code = 500
+        
         except Exception as e:
             session.rollback()
+            current_app.logger.error(f"Unexpected error: {str(e)}")
             response["error"] = f"Unexpected error: {str(e)}"
             status_code = 500
-
+    
     except Exception as e:
+        current_app.logger.error(f"Request failed: {str(e)}")
         response["error"] = f"Request failed: {str(e)}"
         status_code = 500
+    
     finally:
         session.close()
-
+    
     return jsonify(response), status_code
 
 
