@@ -612,7 +612,6 @@ def create_content_object(model_class: Type, content_data: Dict):
         coin_bot_id=content_data.get('coin_bot_id'),
         image_url=content_data.get('image_url')
     )
-
 def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
     """
     Function to publish an analysis.
@@ -627,18 +626,22 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
     session = Session()
     image_filename = None
     
+    current_app.logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
+    
     try:
         # Get section information
         section = get_section_info(session, section_id)
         if not section:
+            current_app.logger.error(f"No Section found with id {section_id}")
             raise ValueError(f"No Section found with id {section_id}")
 
         # Get the corresponding model based on target
         target = section.target.lower()
-        print(target)
+        current_app.logger.debug(f"Target: {target}")
         model_class = MODEL_MAPPING.get(target)
-        print(model_class)
+        current_app.logger.debug(f"Model class: {model_class}")
         if not model_class:
+            current_app.logger.error(f"Invalid target type: {target}")
             raise ValueError(f"Invalid target type: {target}")
 
         # Extract title and adjust content
@@ -647,34 +650,43 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             title = content[:title_end_index].strip()
             content = content[title_end_index + 4:].strip()  # +4 to remove '<br>'
         else:
+            current_app.logger.error("No newline found in the content")
             raise ValueError("No newline found in the content, please add a space after the title")
 
         # Extract title and format it
         title = BeautifulSoup(title, 'html.parser').get_text()
         formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
         image_filename = f"{formatted_title}.jpg"
+        current_app.logger.debug(f"Formatted title: {formatted_title}")
 
         # Generate image
         try:
+            current_app.logger.info("Generating image")
             image = image_generator.generate_image(content)
         except Exception as e:
+            current_app.logger.error(f"Image generation failed: {str(e)}")
             raise ValueError(f"Image generation failed: {str(e)}")
 
         try:
+            current_app.logger.info("Processing and uploading image")
             resized_image_url = image_processor.process_and_upload_image(
                 image_url=image,
                 bucket_name='appanalysisimages',
                 image_filename=image_filename
             )
+            current_app.logger.debug(f"Resized image URL: {resized_image_url}")
         except Exception as e:
+            current_app.logger.error(f"Image processing failed: {str(e)}")
             raise ValueError(f"Image processing failed: {str(e)}")
 
         # Query the database to get the coin_bot name
         coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
         if not coin_bot:
+            current_app.logger.error(f"No CoinBot found with id {coin_id}")
             raise ValueError(f"No CoinBot found with id {coin_id}")
         
         coin_symbol = coin_bot.name
+        current_app.logger.debug(f"Coin symbol: {coin_symbol}")
 
         # Prepare content data
         content_data = {
@@ -685,11 +697,14 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
         }
 
         # Create and save the content object
+        current_app.logger.info("Creating and saving content object")
         new_content = create_content_object(model_class, content_data)
         session.add(new_content)
         session.commit()
+        current_app.logger.debug("Content object saved successfully")
 
         # Send notification
+        current_app.logger.info("Sending notification")
         notification_service.push_notification(
             coin=coin_symbol,
             title=f"{str(coin_symbol).upper()} New {section.name} Available",
@@ -698,6 +713,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             timeframe=""
         )
 
+        current_app.logger.info(f"{section.name} published successfully")
         return create_response(
             data=new_content.to_dict(),
             message=f"{section.name} published successfully",
@@ -707,6 +723,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
 
     except SQLAlchemyError as e:
         session.rollback()
+        current_app.logger.error(f"Database error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}")
         return create_response(
             data=None,
             message=f"Database error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
@@ -714,6 +731,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             status_code=500
         )
     except ValueError as e:
+        current_app.logger.error(f"Value error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}")
         return create_response(
             data=None,
             message=f"Value error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
@@ -721,6 +739,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             status_code=400
         )
     except Exception as e:
+        current_app.logger.error(f"Unexpected error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}")
         return create_response(
             data=None,
             message=f"Unexpected error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
@@ -729,7 +748,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
         )
     finally:
         session.close()
-
+        current_app.logger.info("Finished publish_analysis function")
 # ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
 @analysis_bp.route('/scheduled-analyses', methods=['POST'])
