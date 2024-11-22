@@ -27,6 +27,30 @@
       "description": "Operations related to the Ask AI (Coin info)"
     },
     {
+    "name": "Introductions",
+    "description": "Operations related to the Introduction section."
+    },
+    {
+    "name": "Tokenomics",
+    "description": "Operations related to the Tokenomics section"
+    },
+    {
+    "name": "Competitors Tokenomics",
+    "description": "Operations related to the Competitors tokenomics section"
+    },
+  {
+    "name": "Dapps",
+    "description": "Operations related to the Dapps section "
+    },
+    {
+      "name": "Upgrades",
+      "description": "Operations related to the Upgrades section"
+    },
+    {
+    "name": "Hacks",
+    "description": "Operations related to the Hacks section"
+    },
+    {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
     },
@@ -49,10 +73,6 @@
     {
       "name": "CoinGecko",
       "description": "Operations related to CoinGecko"
-    },
-    {
-      "name": "Fundamentals",
-      "description": "Operations related to the fundamentals"
     },
     {
       "name": "Narrative trading",
@@ -1095,7 +1115,7 @@
         "summary": "Get competitors data",
         "description": "Retrieve a list of competitors for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Competitors Tokenomics"
         ],
         "parameters": [
           {
@@ -1152,7 +1172,7 @@
         "summary": "Get DApps data",
         "description": "Retrieve DApps data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Dapps"
         ],
         "parameters": [
           {
@@ -1211,7 +1231,7 @@
         "summary": "Get hacks data",
         "description": "Retrieve hacks data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Hacks"
         ],
         "parameters": [
           {
@@ -1267,7 +1287,7 @@
         "summary": "Get introduction data",
         "description": "Retrieve introduction data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Introductions"
         ],
         "parameters": [
           {
@@ -1323,7 +1343,7 @@
         "summary": "Get revenue models",
         "description": "Retrieve revenue model data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Revenue Models"
         ],
         "parameters": [
           {
@@ -1379,7 +1399,7 @@
         "summary": "Get tokenomics data",
         "description": "Retrieve tokenomics data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1461,7 +1481,7 @@
         "summary": "Get individual tokenomic",
         "description": "Retrieve a specific tokenomic by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1507,7 +1527,7 @@
         "summary": "Get token distribution",
         "description": "Retrieve a specific token distribution by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1553,7 +1573,7 @@
         "summary": "Get token utility",
         "description": "Retrieve a specific token utility by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1599,7 +1619,7 @@
         "summary": "Get value accrual mechanism",
         "description": "Retrieve a specific value accrual mechanism by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1645,7 +1665,7 @@
         "summary": "Get upgrades data",
         "description": "Retrieve upgrades data related to a specific coin",
         "tags": [
-          "Fundamentals"
+          "Upgrades"
         ],
         "parameters": [
           {
@@ -1707,7 +1727,7 @@
     "/api/get_competitors_by_coin_name": {
       "get": {
         "tags": [
-          "Fundamentals"
+          "Competitors Tokenomics"
         ],
         "summary": "Get competitors data for a specific coin by name",
         "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
@@ -3505,6 +3525,120 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      },
+      "/api/fundamental_ai_search": {
+        "post": {
+          "tags": ["Fundamentals"],
+          "summary": "Perform a fundamental AI search",
+          "description": "This endpoint performs an AI-powered search for fundamental data of a cryptocurrency.",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "section_name": {
+                    "type": "string",
+                    "description": "The section to search (e.g., 'revenue', 'upgrade', 'hacks', 'dapps')"
+                  },
+                  "coin_name": {
+                    "type": "string",
+                    "description": "The name or symbol of the cryptocurrency"
+                  }
+                },
+                "required": ["section_name", "coin_name"]
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      },
+    
+      "/api/save_fundamental_data": {
+        "post": {
+          "tags": ["Fundamentals"],
+          "summary": "Save fundamental data",
+          "description": "This endpoint saves the fundamental data retrieved from the AI search.",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "section_name": {
+                    "type": "string",
+                    "description": "The section of the data (e.g., 'revenue', 'upgrade', 'hacks', 'dapps')"
+                  },
+                  "coin_bot_id": {
+                    "type": "integer",
+                    "description": "The ID of the associated CoinBot"
+                  },
+                  "content": {
+                    "type": "object",
+                    "description": "The content to be saved"
+                  }
+                },
+                "required": ["section_name", "coin_bot_id", "content"]
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Data saved successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
           }
         }
       },
