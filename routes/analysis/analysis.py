@@ -293,6 +293,8 @@ def post_analysis():
             response["success"] = False
             return jsonify(response), 400
         
+        current_app.logger.info(f"passing to publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
+
         try:
             response = publish_analysis(
                 coin_id=coin_id,
