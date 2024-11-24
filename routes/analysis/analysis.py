@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import Tuple, Dict, Type
 from sqlalchemy.exc import SQLAlchemyError
-from services.notification.index import Notification
+from services.notification.index import NotificationService
 from services.aws.s3 import ImageProcessor
 from config import Analysis, CoinBot, Session
 from flask import current_app, jsonify, Blueprint, request
@@ -22,11 +22,10 @@ analysis_bp = Blueprint('analysis_bp', __name__)
 
 image_generator = ImageGenerator()
 image_processor = ImageProcessor()
-notification_service = Notification(session=Session())
+notification_service = NotificationService()
 
 
 @analysis_bp.route('/analysis', methods=['GET'])
-@cache_with_redis()
 def get_coin_analysis():
     """
     Retrieve analyses for a specific coin by ID, with optional pagination.
@@ -65,11 +64,11 @@ def get_coin_analysis():
     session = Session()
     try:
         # Get required parameters
-        coin_bot_id = request.args.get('coin_bot_id', type=int)
+        coin_id = request.args.get('coin_id', type=int)
         section_id = request.args.get('section_id', type=int)
 
-        if not coin_bot_id or not section_id:
-            response["error"] = "Both coin_bot_id and section_id are required"
+        if not coin_id or not section_id:
+            response["error"] = "Both coin_id and section_id are required"
             status_code = 400
             return jsonify(response), status_code
 
@@ -98,7 +97,7 @@ def get_coin_analysis():
             return jsonify(response), status_code
 
         # Build the query
-        query = session.query(model_class).filter(model_class.coin_bot_id == coin_bot_id)
+        query = session.query(model_class).filter(model_class.coin_bot_id == coin_id)
 
         # Get total count
         total_analyses = query.count()
@@ -144,7 +143,6 @@ def get_coin_analysis():
 
 
 @analysis_bp.route('/analyses', methods=['GET'])
-@cache_with_redis()
 def get_all_analysis():
     """
     Retrieve all analyses with pagination based on section.
@@ -238,8 +236,7 @@ def get_all_analysis():
             "page": page,
             "limit": limit,
             "total_pages": total_pages,
-            "section_name": section.name,  # Incluimos el nombre de la sección
-            "section_target": section.target  # Incluimos el target para referencia
+            "section_name": section.name
         })
         status_code = 200
 
@@ -258,12 +255,11 @@ def get_all_analysis():
         
     return jsonify(response), status_code
 
+
 @analysis_bp.route('/analysis', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
 def post_analysis():
     """
     Create a new analysis and publish it.
-    ...
     """
     current_app.logger.debug(f"Received POST request to /analysis")
     
@@ -272,79 +268,58 @@ def post_analysis():
         "error": None,
         "success": False
     }
-    status_code = 500  # Default to server error
-    session = Session()
-    
+    status_code = 500
+
     try:
-        # Extract data from the request
-        section_id = request.form.get("section_id")
-        coin_id = request.form.get('coin_id')
-        content = request.form.get('content')
-        category_name = request.form.get('category_name')
-        
-        current_app.logger.debug(f"Received parameters: section_id={section_id}, coin_id={coin_id}, category_name={category_name}")
-        
-        # Check if any of the required values is missing or null
-        missing_params = [param for param in ['coin_id', 'content', 'category_name'] if not locals()[param] or locals()[param] == 'null']
+        # Extract and validate required data from the request
+        data = {
+            'coin_id': request.form.get('coin_id'),
+            'section_id': request.form.get('section_id'),
+            'content': request.form.get('content'),
+            'category_name': request.form.get('category_name')
+        }
+
+        # Log received parameters
+        current_app.logger.debug(f"Received parameters: {', '.join(f'{k}={v}' for k, v in data.items())}")
+
+        # Validate required parameters
+        missing_params = [k for k, v in data.items() if not v or str(v).lower() == 'null']
         
         if missing_params:
-            current_app.logger.debug(f"Missing parameters: {missing_params}")
-            response["error"] = f"The following required values are missing or null: {', '.join(missing_params)}"
-            response["success"] = False
-            return jsonify(response), 400
-        
-        current_app.logger.info(f"passing to publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
+            current_app.logger.warning(f"Missing parameters: {missing_params}")
+            response["error"] = f"Missing required parameters: {', '.join(missing_params)}"
+            return jsonify(response), status_code
 
+        # Convert coin_id and section_id to int
         try:
-            response = publish_analysis(
-                coin_id=coin_id,
-                section_id=section_id,
-                content=content,
-                category_name=category_name
-            )
-            
-            current_app.logger.debug(f"Publish analysis response: {response}")
-            
-            if response["success"]:
-                response["data"] = response["data"]
-                response["success"] = response["success"]
-                status_code = 201
-            else:
-                current_app.logger.error(f"Failed to publish analysis: {response['error']}")
-                response["error"] = response["error"]
-                status_code = 500
-        
-        except ValueError as e:
-            session.rollback()
-            current_app.logger.error(f"Image processing failed: {str(e)}")
-            response["error"] = f"Image processing failed: {str(e)}"
-            status_code = 500
-        
-        except SQLAlchemyError as e:
-            session.rollback()
-            current_app.logger.error(f"Database error: {str(e)}")
-            response["error"] = f"Database error: {str(e)}"
-            status_code = 500
-        
-        except Exception as e:
-            session.rollback()
-            current_app.logger.error(f"Unexpected error: {str(e)}")
-            response["error"] = f"Unexpected error: {str(e)}"
-            status_code = 500
-    
+            data['coin_id'] = int(data['coin_id'])
+            data['section_id'] = int(data['section_id'])
+        except (ValueError, TypeError):
+            current_app.logger.error(f"Invalid coin_id or section_id format")
+            response["error"] = "coin_id and section_id must be valid integers"
+            return jsonify(response), 400
+
+        # Call publish_analysis with validated data
+        result = publish_analysis(
+            coin_id=data['coin_id'],
+            section_id=data['section_id'],
+            content=data['content'],
+            category_name=data['category_name']
+        )
+
+        if result.get("success"):
+            return jsonify(result), 201
+        else:
+            current_app.logger.error(f"Failed to publish analysis: {result.get('error')}")
+            return jsonify(result), 500
+
     except Exception as e:
-        current_app.logger.error(f"Request failed: {str(e)}")
-        response["error"] = f"Request failed: {str(e)}"
-        status_code = 500
-    
-    finally:
-        session.close()
-    
-    return jsonify(response), status_code
+        current_app.logger.error(f"Request failed: {str(e)}", exc_info=True)
+        response["error"] = f"An unexpected error occurred: {str(e)}"
+        return jsonify(response), 500
 
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['DELETE'])
-@update_cache_with_redis(related_get_endpoints=['get_all_analysis'])
 def delete_analysis(analysis_id):
     """
     Delete an existing analysis and its associated image.
@@ -374,71 +349,55 @@ def delete_analysis(analysis_id):
         "error": None,
         "success": False
     }
-    status_code = 500  # Default to server error
 
-    session = Session()
     try:
-        # Get section_id from query parameters
-        section_id = request.args.get('section_id', type=int)
-        if not section_id:
-            response["error"] = "section_id is required"
-            status_code = 400
-            return jsonify(response), status_code
+        with Session() as session:
+            # Get section to determine model class
+            section_id = request.args.get('section_id', type=int)
+            if not section_id:
+                raise ValueError("section_id is required")
 
-        # Get section information
-        section = session.query(Sections).filter_by(id=section_id).first()
-        if not section:
-            response["error"] = f"Section with id {section_id} not found"
-            status_code = 404
-            return jsonify(response), status_code
+            section = session.query(Sections).filter_by(id=section_id).first()
+            if not section:
+                raise ValueError(f"Section with id {section_id} not found")
 
-        # Get the corresponding model based on target
-        target = section.target.lower()
-        model_class = MODEL_MAPPING.get(target)
-        if not model_class:
-            response["error"] = f"No model found for target: {section.target}"
-            status_code = 400
-            return jsonify(response), status_code
+            # Get the corresponding model
+            model_class = MODEL_MAPPING.get(section.target.lower())
+            if not model_class:
+                raise ValueError(f"Invalid section target: {section.target}")
 
-        # Check if the analysis exists
-        analysis_to_delete = session.query(model_class).filter(model_class.id == analysis_id).first()
-        if not analysis_to_delete:
-            response["error"] = f"Analysis not found in {section.target} table"
-            status_code = 404
-            return jsonify(response), status_code
+            # Use get() which automatically uses the primary key
+            analysis = session.query(model_class).get(analysis_id)
+            if not analysis:
+                raise ValueError(f"Analysis with id {analysis_id} not found")
 
-        # Delete the associated image from S3 if it exists
-        if hasattr(analysis_to_delete, 'image_url') and analysis_to_delete.image_url:
-            try:
-                image_processor.delete_from_s3(image_url=analysis_to_delete.image_url)
-            except Exception as e:
-                response["error"] = f"Error deleting image from S3: {str(e)}"
-                return jsonify(response), 500
+            # Delete the associated image from S3 if it exists
+            if hasattr(analysis, 'image_url') and analysis.image_url:
+                try:
+                    image_processor.delete_from_s3(image_url=analysis.image_url,
+                                                    bucket='appanalysisimages'
+                                                    )
+                except Exception as e:
+                    response["error"] = f"Error deleting image from S3: {str(e)}"
+                    return jsonify(response), 500
 
-        # Delete the analysis
-        session.delete(analysis_to_delete)
-        session.commit()
+            session.delete(analysis)
+            session.commit()
 
-        response["data"] = f'Analysis deleted successfully from {section.target} table'
-        response["success"] = True
-        status_code = 200
+            response["message"] = "Analysis deleted successfully"
+            response["success"] = True
+            return jsonify(response), 200
 
-    except SQLAlchemyError as e:
-        session.rollback()
-        response["error"] = f"Database error occurred: {str(e)}"
-        status_code = 500
+    except ValueError as e:
+        response["error"] = str(e)
+        return jsonify(response), 404
     except Exception as e:
-        session.rollback()
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        status_code = 500
-    finally:
-        session.close()
-
-    return jsonify(response), status_code
+        current_app.logger.error(f"Error deleting analysis: {str(e)}")
+        response["error"] = "An error occurred while deleting the analysis"
+        return jsonify(response), 500
 
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['PUT'])
-@update_cache_with_redis(related_get_endpoints=['get_all_analysis', 'get_coin_analysis'])
 def edit_analysis(analysis_id):
     """
     Edit the content of an existing analysis.
@@ -534,7 +493,6 @@ def edit_analysis(analysis_id):
 
 
 @analysis_bp.route('/analysis/last', methods=['GET'])
-@cache_with_redis()
 def get_last_analysis():
     """
     Retrieve the name and date of the last analysis created.
@@ -591,18 +549,12 @@ def get_last_analysis():
         session.close()
 
 
-# Definimos un mapeo entre los targets y los modelos correspondientes
+# Define a mapping between targets and their corresponding models
 MODEL_MAPPING = {
     'analysis': Analysis,
     'narrative_trading': NarrativeTrading,
     's_and_r_analysis': SAndRAnalysis
     }
-
-def get_section_info(session, section_id: int):
-    """
-    Obtiene la información de la sección por su ID
-    """
-    return session.query(Sections).filter(Sections.id == section_id).first()
 
 def create_content_object(model_class: Type, content_data: Dict):
     """
@@ -614,83 +566,65 @@ def create_content_object(model_class: Type, content_data: Dict):
         coin_bot_id=content_data.get('coin_bot_id'),
         image_url=content_data.get('image_url')
     )
+
 def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
-    """
-    Function to publish an analysis.
-    Args:
-        coin_id (int): The ID of the coin bot
-        content (str): The content of the analysis
-        category_name (str): The name of the category
-        section_id (str): The ID of the section
-    Returns:
-        dict: A response dictionary containing the result of the operation
-    """
-    session = Session()
-    image_filename = None
     
+    session = Session()
     current_app.logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
     
     try:
-        # Get section information
-        section = get_section_info(session, section_id)
+        # 1. Initial validations
+        section = session.query(Sections).filter(Sections.id == section_id).first()
         if not section:
-            current_app.logger.error(f"No Section found with id {section_id}")
             raise ValueError(f"No Section found with id {section_id}")
 
-        # Get the corresponding model based on target
         target = section.target.lower()
-        current_app.logger.debug(f"Target: {target}")
         model_class = MODEL_MAPPING.get(target)
-        current_app.logger.debug(f"Model class: {model_class}")
+        current_app.logger.info(f"Model class: {model_class}")
         if not model_class:
-            current_app.logger.error(f"Invalid target type: {target}")
             raise ValueError(f"Invalid target type: {target}")
 
-        # Extract title and adjust content
-        title_end_index = content.find('<br>')
-        if title_end_index != -1:
-            title = content[:title_end_index].strip()
-            content = content[title_end_index + 4:].strip()  # +4 to remove '<br>'
-        else:
-            current_app.logger.error("No newline found in the content")
-            raise ValueError("No newline found in the content, please add a space after the title")
+        # 2. Validate coin and get symbol
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
+        if not coin_bot:
+            raise ValueError(f"No coin found with id {coin_id}")
+        
+        coin_symbol = coin_bot.name
 
-        # Extract title and format it
+        # 3. Validate notification topics exist
+        found_topics = notification_service.validate_topics(coin_symbol, target)
+        if not found_topics:
+            raise ValueError(f"No notification topics found for coin {coin_symbol} and type {target}")
+
+        # 4. Extract and validate title
+        title_end_index = content.find('<br>')
+        if title_end_index == -1:
+            raise ValueError("No newline found in the content, please add a space after the title")
+            
+        title = content[:title_end_index].strip()
+        content_body = content[title_end_index + 4:].strip()
+        
+        # Format title for image filename
         title = BeautifulSoup(title, 'html.parser').get_text()
         formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
         image_filename = f"{formatted_title}.jpg"
-        current_app.logger.debug(f"Formatted title: {formatted_title}")
 
-        # Generate image
+        # 5. Generate and process image only after all validations pass
         try:
             current_app.logger.info("Generating image")
-            image = image_generator.generate_image(content)
-        except Exception as e:
-            current_app.logger.error(f"Image generation failed: {str(e)}")
-            raise ValueError(f"Image generation failed: {str(e)}")
-
-        try:
-            current_app.logger.info("Processing and uploading image")
+            image = image_generator.generate_image(content_body)
+            
+            current_app.logger.info(f"Processing and uploading image with URL: {image}")
             resized_image_url = image_processor.process_and_upload_image(
                 image_url=image,
                 bucket_name='appanalysisimages',
                 image_filename=image_filename
             )
-            current_app.logger.debug(f"Resized image URL: {resized_image_url}")
+            current_app.logger.info(f"Image processed and uploaded to S3: {resized_image_url}")
         except Exception as e:
-            current_app.logger.error(f"Image processing failed: {str(e)}")
             raise ValueError(f"Image processing failed: {str(e)}")
 
-        # Query the database to get the coin_bot name
-        coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
-        if not coin_bot:
-            current_app.logger.error(f"No CoinBot found with id {coin_id}")
-            raise ValueError(f"No CoinBot found with id {coin_id}")
-        
-        coin_symbol = coin_bot.name
-        current_app.logger.debug(f"Coin symbol: {coin_symbol}")
-
-        # Prepare content data
+        # 6. Create and save content
         content_data = {
             'analysis': content,
             'category_name': category_name,
@@ -698,24 +632,19 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             'image_url': resized_image_url
         }
 
-        # Create and save the content object
-        current_app.logger.info("Creating and saving content object")
         new_content = create_content_object(model_class, content_data)
         session.add(new_content)
         session.commit()
-        current_app.logger.debug("Content object saved successfully")
 
-        # Send notification
-        current_app.logger.info("Sending notification")
-        notification_service.push_notification(
-            coin=coin_symbol,
-            title=f"{str(coin_symbol).upper()} New {section.name} Available",
-            body=f"{title} - Check it out!",
-            type=target,
-            timeframe=""
-        )
+        # 7. Send notification
+        # notification_service.push_notification(
+        #     coin=coin_symbol,
+        #     title=f"{str(coin_symbol).upper()} New {section.name} Available",
+        #     body=f"{title} - Check it out!",
+        #     type=target,
+        #     timeframe=""
+        # )
 
-        current_app.logger.info(f"{section.name} published successfully")
         return create_response(
             data=new_content.to_dict(),
             message=f"{section.name} published successfully",
@@ -723,34 +652,27 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             status_code=201
         )
 
-    except SQLAlchemyError as e:
-        session.rollback()
-        current_app.logger.error(f"Database error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}")
-        return create_response(
-            data=None,
-            message=f"Database error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
-            success=False,
-            status_code=500
-        )
     except ValueError as e:
-        current_app.logger.error(f"Value error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}")
+        session.rollback()
+        current_app.logger.error(f"Validation error: {str(e)}")
         return create_response(
             data=None,
-            message=f"Value error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
+            message=str(e),
             success=False,
             status_code=400
         )
     except Exception as e:
-        current_app.logger.error(f"Unexpected error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}")
+        session.rollback()
+        current_app.logger.error(f"Unexpected error: {str(e)}")
         return create_response(
             data=None,
-            message=f"Unexpected error publishing {target if 'target' in locals() else 'analysis'}: {str(e)}",
+            message=f"An unexpected error occurred: {str(e)}",
             success=False,
             status_code=500
         )
     finally:
         session.close()
-        current_app.logger.info("Finished publish_analysis function")
+
 # ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
 @analysis_bp.route('/scheduled-analyses', methods=['POST'])

@@ -947,7 +947,20 @@ class Analysis(Base):
     
 class SAndRAnalysis(Base):
     """
-    Model for Support and Resistance Analysis
+    Represents a Support and Resistance Analysis.
+
+    This class defines the structure for storing information about support and resistance analysis,
+    including the analysis content, category, and associated image URL.
+
+    Attributes:
+        analysis_id (int): The primary key for the analysis.
+        analysis (str): The content of the analysis.
+        image_url (str): The URL of the associated image, if any.
+        category_name (str): The name of the category for this analysis.
+        created_at (datetime): Timestamp of when the analysis was created.
+        updated_at (datetime): Timestamp of the last update to the analysis record.
+        coin_bot_id (int): Foreign key referencing the associated CoinBot.
+        coin_bot (relationship): Relationship to the associated CoinBot.
     """
     __tablename__ = 's_and_r_analysis'
 
@@ -968,7 +981,6 @@ class SAndRAnalysis(Base):
         nullable=False
     )
 
-    # Relationship with CoinBot
     coin_bot = relationship('CoinBot', back_populates='s_and_r_analysis', lazy=True)
     
 
@@ -986,7 +998,6 @@ class SAndRAnalysis(Base):
         String representation of the model
         """
         return f"<SAndRAnalysis(analysis_id={self.analysis_id}, coin_bot_id={self.coin_bot_id})>"
-
 
 class AnalysisImage(Base):
     """

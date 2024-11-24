@@ -9,9 +9,9 @@ from routes.chart.total3 import get_total_3_data
 from flask import jsonify, request, Blueprint, jsonify  
 from redis_client.redis_client import cache_with_redis
 from decorators.measure_time import measure_execution_time
-from services.notification.index import Notification
+from services.notification.index import NotificationService
 
-notification_service = Notification(session=Session())
+notification_service = NotificationService()
 
 
 load_dotenv() 
