@@ -11,8 +11,9 @@ jobs:
     runs-on: self-hosted
     env:
       POSTGRES_DB_PROD: ${{ secrets.POSTGRES_DB_PROD }}
-      POSTGRES_USER_PROD: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_USER_PROD: ${{ secrets.POSTGRES_USER_PROD }}
       POSTGRES_PASSWORD_PROD: ${{ secrets.POSTGRES_PASSWORD_PROD }}
+      DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
       FLASK_ENV: production
       FLASK_DEBUG: 0
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
@@ -24,12 +25,13 @@ jobs:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_PRODUCT_ALERTS: ${{ secrets.SLACK_PRODUCT_ALERTS }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-      CHANNEL_ID_AI_ALPHA_FOUNDERS: ${{ secrets.CHANNEL_ID_AI_ALPHA_FOUNDERS }}
-      CALL_TO_TRADE_TOPIC_ID: ${{ secrets.CALL_TO_TRADE_TOPIC_ID }}
       MAIL_DEFAULT_SENDER: ${{ secrets.MAIL_DEFAULT_SENDER }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
       NGROK_DOMAIN: ${{ secrets.NGROK_DOMAIN }}
       NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+      PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
+      PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
       BINANCE_API_URL: ${{ secrets.BINANCE_API_URL }}
       COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
       COINMARKET_API_KEY: ${{ secrets.COINMARKET_API_KEY }}
@@ -92,21 +94,21 @@ jobs:
           fi
         }
         
-        echo "Stopping containers..."
+        echo "............Stopping containers............"
         stop_containers
-        echo "Starting containers..."
+        echo "............Starting containers............"
         if start_containers; then
-          echo "Waiting for services to start..."
-          sleep 120
-          echo "Performing health check..."
+          echo "............Waiting for services to start............"
+          sleep 60
+          echo "............Performing health check............"
           if health_check; then
-            echo "Deployment successful. Health check passed."
+            echo "............Deployment successful. Health check passed............"
           else
-            echo "Health check failed. Rolling back..."
+            echo "............Health check failed. Rolling back............"
             rollback
           fi
         else
-          echo "Failed to start containers. Rolling back..."
+          echo "............Failed to start containers. Rolling back............"
           rollback
         fi
 
@@ -114,9 +116,9 @@ jobs:
       if: always()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          echo "Deployment to Production completed successfully!"
+          echo "............Deployment to Production completed successfully!............"
         else
-          echo "Deployment to Production failed. Please check the logs for details."
+          echo "............Deployment to Production failed. Please check the logs for details............"
         fi
 
     - name: Debug Information
