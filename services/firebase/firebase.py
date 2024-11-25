@@ -15,7 +15,6 @@ else:
     path = fallback_path
 
 # Creds
-print('Firebase path:', path)
 cred = credentials.Certificate(path)
 default_app = initialize_app(credential=cred)
 
@@ -70,8 +69,8 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
             )
         )
 
-        response = messaging.send(message)
-        print(response)
+        messaging.send(message)
+        print('FCM Notification sent')
 
     except Exception as e:
         raise Exception(f"Error sending notification: {str(e)}")

@@ -4,7 +4,7 @@ import logging
 from sqlalchemy import desc, func
 from datetime import datetime, timedelta
 from flask import jsonify, request, Blueprint
-from services.notification.index import Notification
+from services.notification.index import NotificationService
 from config import session, Category, Alert, CoinBot, Session
 from routes.slack.templates.news_message import send_INFO_message_to_slack_channel
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
@@ -18,7 +18,7 @@ tradingview_bp = Blueprint(
 )
 
 LOGS_SLACK_CHANNEL_ID = 'C06FTS38JRX'
-notification_service = Notification(session=Session())
+notification_service = NotificationService()
 
 
 def extract_timeframe(alert_name):
@@ -347,7 +347,7 @@ def data_tv():
             return jsonify({'error': 'No data sent in the request'}), 400
 
         # Initialize data dictionary
-        data_dict = {}
+        data_dict = {} 
         
         # Handle JSON format
         if request.is_json:
