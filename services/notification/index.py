@@ -35,7 +35,7 @@ class NotificationService:
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
-                elif type in ["analysis", "s_and_r"]:
+                elif type in ["analysis", "narrative_trading", "s_and_r"]:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.name.ilike(f"%{type}%")  # Match topics with the specified type
@@ -46,16 +46,14 @@ class NotificationService:
                 topics = query.all()
                 if not topics:
                     raise ValueError(f"No topics found for coin {coin} and type {type}")
-                
+
                 return topics
 
         except SQLAlchemyError as e:
-            current_app.logger.error(f"Database error while validating topics: {str(e)}")
             raise
         except ValueError as e:
             raise
         except Exception as e:
-            current_app.logger.error(f"Unexpected error while validating topics: {str(e)}")
             raise RuntimeError(f"Failed to validate topics: {str(e)}")
 
     def push_notification(self, coin: str, title: str, body: str, type: str, timeframe: str = None) -> None:
@@ -68,8 +66,6 @@ class NotificationService:
             RuntimeError: For unexpected errors or FCM failures
         """
         try:
-            current_app.logger.debug(f"Starting push notification for coin: {coin}, type: {type}")
-            
             # Get validated topics
             topics = self.validate_topics(coin, type, timeframe)
             date_now = datetime.now()
@@ -77,7 +73,7 @@ class NotificationService:
             with Session() as session:
                 # Save notifications to database
                 for topic in topics:
-                    if type in ["analysis", "s_and_r"]:
+                    if type in ["analysis", "narrative_trading", "s_and_r"]:
                         new_notification = Notification(
                             topic_id=topic.id,
                             title=title,
@@ -88,10 +84,8 @@ class NotificationService:
                             updated_at=date_now
                         )
                         session.add(new_notification)
-                        current_app.logger.info(f"{type.capitalize()} saved for coin {coin} under topic {topic.name}")
 
                 session.commit()
-                current_app.logger.info(f"Successfully saved {type} notification for coin {coin}")
 
                 # Send FCM notifications
                 failed_topics = []
@@ -111,7 +105,6 @@ class NotificationService:
         except (ValueError, SQLAlchemyError):
             raise
         except Exception as e:
-            current_app.logger.error(f"Unexpected error while processing notification: {str(e)}")
             raise RuntimeError(f"Failed to process notification: {str(e)}")
 
     def _send_fcm_notification(self, topic: str, title: str, body: str, type: str, 
@@ -123,7 +116,6 @@ class NotificationService:
             RuntimeError: If FCM notification fails
         """
         try:
-            current_app.logger.debug(f"Sending FCM notification to topic: {topic}")
             send_notification(
                 topic=topic,
                 title=title,
@@ -132,7 +124,5 @@ class NotificationService:
                 coin=coin,
                 timeframe=timeframe
             )
-            current_app.logger.info(f"FCM notification sent successfully for topic {topic}")
         except Exception as e:
-            current_app.logger.error(f"Failed to send FCM notification to topic {topic}: {str(e)}")
             raise RuntimeError(f"Failed to send FCM notification to topic {topic}: {str(e)}")

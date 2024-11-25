@@ -305,7 +305,7 @@ def receive_data_from_tv():
             
             except Exception as e:
                 print('Error receiving Tradingview message', e)
-                send_INFO_message_to_slack_channel(channAlertel_id=LOGS_SLACK_CHANNEL_ID,
+                send_INFO_message_to_slack_channel(channel_id=LOGS_SLACK_CHANNEL_ID,
                                                     title_message='Error receiving Tradingview message',
                                                     sub_title='Reason',
                                                     message=f"{str(e)} - Data: {str(request.data)}")
@@ -344,7 +344,7 @@ def data_tv():
             return jsonify({'error': 'No data sent in the request'}), 400
 
         # Initialize data dictionary
-        data_dict = {}
+        data_dict = {} 
         
         # Handle JSON format
         if request.is_json:
@@ -353,6 +353,7 @@ def data_tv():
                 log_message = 'Message from Tradingview received as JSON'
             except Exception as e:
                 return jsonify({'error': 'Invalid JSON format'}), 400
+        
         # Handle plain text format
         else:
             try:

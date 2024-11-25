@@ -944,7 +944,28 @@ class Analysis(Base):
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-    
+
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        """
+        Create and return a new Analysis instance.
+        
+        Args:
+            content (str): The analysis content
+            image_url (str): URL of the associated image
+            category_name (str): Name of the category
+            coin_bot_id (int): ID of the associated CoinBot
+            
+        Returns:
+            Analysis: A new Analysis instance
+        """
+        return cls(
+            analysis=content,
+            image_url=image_url,
+            category_name=category_name,
+            coin_bot_id=coin_bot_id
+        )
+
 class SAndRAnalysis(Base):
     """
     Represents a Support and Resistance Analysis.
@@ -983,7 +1004,6 @@ class SAndRAnalysis(Base):
 
     coin_bot = relationship('CoinBot', back_populates='s_and_r_analysis', lazy=True)
     
-
     def to_dict(self):
         """
         Convert model instance to dictionary
@@ -993,11 +1013,9 @@ class SAndRAnalysis(Base):
             for column in self.__table__.columns
         }
 
-    def __repr__(self):
-        """
-        String representation of the model
-        """
-        return f"<SAndRAnalysis(analysis_id={self.analysis_id}, coin_bot_id={self.coin_bot_id})>"
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(analysis=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class AnalysisImage(Base):
     """
@@ -1083,6 +1101,10 @@ class NarrativeTrading(Base):
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(narrative_trading=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class Chart(Base):
     """
@@ -1852,11 +1874,10 @@ def init_superadmin():
 
 
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
-
 def populate_topics():
     """
     Populates the database with topics based on provided data from a JSON file and timeframes.
-    This function automatically inserts records into the topics table for the specified timeframes.
+    This function checks for existing topics and only adds missing ones.
     """
     try:
         with open('./services/notification/topics.json', 'r') as file:
@@ -1868,61 +1889,42 @@ def populate_topics():
     
     with Session() as session:
         try:
-            # Check if the database is already populated with topics
-            if not session.query(Topic).first():
-                topics_added = 0
-                for name, references in data.items():
-                    references_str = ', '.join(references)
-
-                    # Insert for timeframe 1h
-                    topic_1h = Topic(
-                        name=name,
-                        reference=references_str,
-                        timeframe='1h',
-                        type='alert'
-                    )
-                    session.add(topic_1h)
-                    topics_added += 1
-                    
-                    # Insert for timeframe 4h
-                    topic_4h = Topic(
-                        name=name,
-                        reference=references_str,
-                        timeframe='4h',
-                        type='alert'
-                    )
-                    session.add(topic_4h)
-                    topics_added += 1
-                    
-                    print(f'----- Topic {name} populated for 1h and 4h timeframes -----')
-
-                    # Insert analysis topic
-                    analysis_name = f'{name}_analysis'
-                    analysis_topic = Topic(
-                        name=analysis_name,
-                        reference=references_str,
-                        timeframe=None,
-                        type='analysis'
-                    )
-                    session.add(analysis_topic)
-                    topics_added += 1
-                    
-                    # Insert support and resistance topic
-                    s_and_r_name = f'{name}_s_and_r'
-                    s_and_r_topic = Topic(
-                        name=s_and_r_name,
-                        reference=references_str,
-                        timeframe=None,
-                        type='s_and_r'
-                    )
-                    session.add(s_and_r_topic)
-                    topics_added += 1
-
+            topics_added = 0
+            for name, references in data.items():
+                references_str = ', '.join(references)
+                # Define all topic variations we need to check/create
+                topic_variations = [
+                    {'name': name, 'timeframe': '1h', 'type': 'alert'},
+                    {'name': name, 'timeframe': '4h', 'type': 'alert'},
+                    {'name': f'{name}_analysis', 'timeframe': None, 'type': 'analysis'},
+                    {'name': f'{name}_s_and_r', 'timeframe': None, 'type': 's_and_r'},
+                    {'name': f'{name}_narrative_trading', 'timeframe': None, 'type': 'narrative_trading'}
+                ]
+                for variation in topic_variations:
+                    # Check if this specific topic variation exists
+                    existing_topic = session.query(Topic).filter_by(
+                        name=variation['name'],
+                        timeframe=variation['timeframe'],
+                        type=variation['type']
+                    ).first()
+                    if not existing_topic:
+                        # Create new topic if it doesn't exist
+                        new_topic = Topic(
+                            name=variation['name'],
+                            reference=references_str,
+                            timeframe=variation['timeframe'],
+                            type=variation['type'],
+                            created_at=datetime.now(),
+                            updated_at=datetime.now()
+                        )
+                        session.add(new_topic)
+                        topics_added += 1
+                        print(f"----- Topic {variation['name']} ({variation['type']}) added -----")
+            if topics_added > 0:
                 session.commit()
-                print(f'----- All topics successfully populated. Total topics added: {topics_added} -----')
+                print(f'----- Successfully added {topics_added} new topics -----')
             else:
-                print('----- Topics have already been populated. Skipping population process. -----')
-
+                print('----- All required topics already exist. No new topics added -----')
         except SQLAlchemyError as e:
             session.rollback()
             raise SQLAlchemyError(f'Database error while populating topics: {str(e)}')
@@ -1930,8 +1932,8 @@ def populate_topics():
             session.rollback()
             raise Exception(f'Unexpected error while populating topics: {str(e)}')
 
-        
-# populate_topics()
+
+populate_topics()
 
 # --------------CREATE DEFAULT API KEY FOR SUPERADMIN -------------------
 

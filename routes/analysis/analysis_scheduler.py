@@ -5,7 +5,7 @@ from pytz import timezone as tz
 from sqlalchemy.engine.url import make_url
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.executors.pool import ThreadPoolExecutor
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from services.slack.slack_services import send_INFO_message_to_slack_channel
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_MISSED
 
@@ -22,11 +22,13 @@ try:
     'default': SQLAlchemyJobStore(url=sqlite_url)
     }
     executors = {
-        'default': ThreadPoolExecutor(20)
+        'default': ThreadPoolExecutor(20),
+        'processpool': ProcessPoolExecutor(20)
     }
     job_defaults = {
         'coalesce': False,
-        'max_instances': 1
+        'max_instances': 1,
+        'misfire_grace_time': 30
     }
 
     chosen_timezone = tz('America/Argentina/Buenos_Aires')
