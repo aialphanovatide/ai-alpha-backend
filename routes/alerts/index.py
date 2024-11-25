@@ -10,6 +10,7 @@ from routes.slack.templates.news_message import send_INFO_message_to_slack_chann
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 
+
 tradingview_bp = Blueprint(
     'tradingview_bp', __name__,
     template_folder='templates',
@@ -225,101 +226,103 @@ def get_filtered_alerts():
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
     
 
-# RESERVED ROUTE - DO NOT USE
-# Receives all alert from Tradingview and does three things: Send data to Slack, 
-# Store the data in the DB and send the data to Telegram 
-@tradingview_bp.route('/api/alert/tv', methods=['GET', 'POST'])
-def receive_data_from_tv():
-    try:
-        if not request.data:
-            return 'No data sent in the request', 400
-        elif request.is_json:
-            send_INFO_message_to_slack_channel( channel_id=LOGS_SLACK_CHANNEL_ID    ,
-                                                title_message='Message from Tradingview received as JSON',
-                                                sub_title='Invalid request format',
-                                                message=str(request.data))
-            return 'Invalid request format', 400
-        else:
-            try:
-                data_text = request.data.decode('utf-8')  # Decode the bytes to a string
-                data_lines = data_text.split(',')  # Split the text into lines
+# RESERVED ROUTE - DO NOT USE - DUPLICATED?
+# Receives alerts from Tradingview and stores it in the DB
+# @tradingview_bp.route('/api/alert/tv', methods=['GET', 'POST'])
+# def receive_data_from_tv():
+#     try:
+#         if not request.data:
+#             return 'No data sent in the request', 400
+#         elif request.is_json:
+#             send_INFO_message_to_slack_channel( channel_id=LOGS_SLACK_CHANNEL_ID    ,
+#                                                 title_message='Message from Tradingview received as JSON',
+#                                                 sub_title='Invalid request format',
+#                                                 message=str(request.data))
+#             return 'Invalid request format', 400
+#         else:
+#             try:
+#                 data_text = request.data.decode('utf-8')  # Decode the bytes to a string
+#                 data_lines = data_text.split(',')  # Split the text into lines
                 
-                data_dict = {} 
+#                 data_dict = {} 
 
-                for line in data_lines:
-                    if ':' in line:
-                        key, value = line.split(':', 1)
-                        data_dict[key.strip()] = value.strip()
+#                 for line in data_lines:
+#                     if ':' in line:
+#                         key, value = line.split(':', 1)
+#                         data_dict[key.strip()] = value.strip()
 
-                symbol = data_dict.get('symbol', '').casefold()
-                formatted_symbol = ''.join(char for char in symbol if char.isalpha())
-                if formatted_symbol.endswith('usdt'):
-                    formatted_symbol = formatted_symbol[:-4]
+#                 symbol = data_dict.get('symbol', '').casefold()
+#                 formatted_symbol = ''.join(char for char in symbol if char.isalpha())
+#                 if formatted_symbol.endswith('usdt'):
+#                     formatted_symbol = formatted_symbol[:-4]
                 
-                timeframe_match = re.search(r'(\d+[HMD])\s*chart', data_text, re.IGNORECASE)
-                normalized_timeframe = None
-                if timeframe_match:
-                    timeframe = timeframe_match.group(1).upper()
-                    timeframe_mapping = {
-                    '1M': '1m', '5M': '5m', '15M': '15m', '30M': '30m',
-                    '1H': '1h', '2H': '2h', '4H': '4h', '1D': '1d'
-                    }
-                    normalized_timeframe = timeframe_mapping.get(timeframe, timeframe.lower())
+#                 timeframe_match = re.search(r'(\d+[HMD])\s*chart', data_text, re.IGNORECASE)
+#                 normalized_timeframe = None
+#                 if timeframe_match:
+#                     timeframe = timeframe_match.group(1).upper()
+#                     timeframe_mapping = {
+#                     '1M': '1m', '5M': '5m', '15M': '15m', '30M': '30m',
+#                     '1H': '1h', '2H': '2h', '4H': '4h', '1D': '1d'
+#                     }
+#                     normalized_timeframe = timeframe_mapping.get(timeframe, timeframe.lower())
 
-                alert_name = data_dict.get('alert_name', '')  
-                message = data_dict.get('message', '')  
-                price = data_dict.get('price', data_dict.get('last_price', ''))
+#                 alert_name = data_dict.get('alert_name', '')  
+#                 message = data_dict.get('message', '')  
+#                 price = data_dict.get('price', data_dict.get('last_price', ''))
 
-                # Get coin_id from coin_name and saves it to the database
-                coin = session.query(CoinBot).filter(CoinBot.name == formatted_symbol).first()
-                coin_id = coin.bot_id
+#                 # Get coin_id from coin_name and saves it to the database
+#                 coin = session.query(CoinBot).filter(CoinBot.name == formatted_symbol).first()
+#                 coin_id = coin.bot_id
 
-                # Remove any dot or point at the end of the price
-                if price.endswith('.') or price.endswith(','):
-                    price = price[:-1]
+#                 # Remove any dot or point at the end of the price
+#                 if price.endswith('.') or price.endswith(','):
+#                     price = price[:-1]
 
-                new_alert = Alert(alert_name=alert_name,
-                                alert_message = message.capitalize(),
-                                symbol=formatted_symbol,
-                                price=price,
-                                coin_bot_id=coin_id
-                                )
+#                 new_alert = Alert(alert_name=alert_name,
+#                                 alert_message = message.capitalize(),
+#                                 symbol=formatted_symbol,
+#                                 price=price,
+#                                 coin_bot_id=coin_id
+#                                 )
 
-                session.add(new_alert)
-                session.commit()
+#                 session.add(new_alert)
+#                 session.commit()
 
-                # Send to notification to App
-                notification_service.push_notification(coin=coin.name, 
-                                                    title=alert_name, 
-                                                    body=message.capitalize(), 
-                                                    type='alert', 
-                                                    timeframe=normalized_timeframe)
+#                 # Send to notification to App
+#                 notification_service.push_notification(coin=coin.name, 
+#                                                     title=alert_name, 
+#                                                     body=message.capitalize(), 
+#                                                     type='alert', 
+#                                                     timeframe=normalized_timeframe)
  
                 
-                send_notification_to_product_alerts_slack_channel(title_message=alert_name,
-                                    sub_title="Alert",
-                                    message=f"{message.capitalize()}")
+#                 send_notification_to_product_alerts_slack_channel(title_message=alert_name,
+#                                     sub_title="Alert",
+#                                     message=f"{message.capitalize()}")
                 
 
-                return "OK", 200
+#                 return "OK", 200
             
-            except Exception as e:
-                print('Error receiving Tradingview message', e)
-                send_INFO_message_to_slack_channel(channAlertel_id=LOGS_SLACK_CHANNEL_ID,
-                                                    title_message='Error receiving Tradingview message',
-                                                    sub_title='Reason',
-                                                    message=f"{str(e)} - Data: {str(request.data)}")
-                return f'Error receiving Tradingview message', 500
+#             except Exception as e:
+#                 print('Error receiving Tradingview message', e)
+#                 send_INFO_message_to_slack_channel(channAlertel_id=LOGS_SLACK_CHANNEL_ID,
+#                                                     title_message='Error receiving Tradingview message',
+#                                                     sub_title='Reason',
+#                                                     message=f"{str(e)} - Data: {str(request.data)}")
+#                 return f'Error receiving Tradingview message', 500
             
-    except Exception as e:
-        print('Error receiving Tradingview message', e)
-        send_INFO_message_to_slack_channel( channel_id=LOGS_SLACK_CHANNEL_ID,
-                                            title_message='Error receiving Tradingview message',
-                                            sub_title='Reason',
-                                            message=str(e))
-        return f'Error receiving Tradingview message: {str(e)}', 500    
+#     except Exception as e:
+#         print('Error receiving Tradingview message', e)
+#         send_INFO_message_to_slack_channel( channel_id=LOGS_SLACK_CHANNEL_ID,
+#                                             title_message='Error receiving Tradingview message',
+#                                             sub_title='Reason',
+#                                             message=str(e))
+#         return f'Error receiving Tradingview message: {str(e)}', 500    
         
 
+
+# RESERVED ROUTE - DO NOT USE
+# Receives support and resistance lines data from Tradingview and stores it in the DB
 @tradingview_bp.route('/alert', methods=['POST'])
 def data_tv():
     """
@@ -353,6 +356,7 @@ def data_tv():
                 log_message = 'Message from Tradingview received as JSON'
             except Exception as e:
                 return jsonify({'error': 'Invalid JSON format'}), 400
+        
         # Handle plain text format
         else:
             try:
