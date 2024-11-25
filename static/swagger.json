@@ -27,28 +27,28 @@
       "description": "Operations related to the Ask AI (Coin info)"
     },
     {
-    "name": "Introductions",
-    "description": "Operations related to the Introduction section."
+      "name": "Introductions",
+      "description": "Operations related to the Introduction section."
     },
     {
-    "name": "Tokenomics",
-    "description": "Operations related to the Tokenomics section"
+      "name": "Tokenomics",
+      "description": "Operations related to the Tokenomics section"
     },
     {
-    "name": "Competitors Tokenomics",
-    "description": "Operations related to the Competitors tokenomics section"
+      "name": "Competitors Tokenomics",
+      "description": "Operations related to the Competitors tokenomics section"
     },
-  {
-    "name": "Dapps",
-    "description": "Operations related to the Dapps section "
+    {
+      "name": "Dapps",
+      "description": "Operations related to the Dapps section "
     },
     {
       "name": "Upgrades",
       "description": "Operations related to the Upgrades section"
     },
     {
-    "name": "Hacks",
-    "description": "Operations related to the Hacks section"
+      "name": "Hacks",
+      "description": "Operations related to the Hacks section"
     },
     {
       "name": "Admin",
@@ -75,7 +75,7 @@
       "description": "Operations related to CoinGecko"
     },
     {
-      "name": "Narrative trading",
+      "name": "Narrative trading (Deprecated)",
       "description": "Operations related to the Narrative Trading (Market Narrative)"
     },
     {
@@ -336,53 +336,6 @@
         "responses": {
           "200": {
             "description": "Post scheduled successfully"
-          },
-          "400": {
-            "description": "Bad request (missing or invalid data)"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/post_analysis": {
-      "post": {
-        "tags": [
-          "Content Creation"
-        ],
-        "summary": "Create a new content creation and generate an associated image.",
-        "description": "Create a new content creation based on the provided data, generate an image for the content creation, and upload it to S3.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Content creation details",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "coinBot": {
-                  "type": "string"
-                },
-                "category_name": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "coinBot",
-                "category_name",
-                "content"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Analysis created successfully"
           },
           "400": {
             "description": "Bad request (missing or invalid data)"
@@ -2700,37 +2653,42 @@
         "tags": [
           "Content Creation"
         ],
-        "summary": "Edit analysis",
-        "description": "Edit the content of an existing analysis",
+        "summary": "Update analysis",
+        "description": "Update the content of an existing analysis",
         "parameters": [
           {
             "name": "analysis_id",
             "in": "path",
-            "description": "ID of the analysis to edit",
+            "description": "ID of the analysis to update",
             "required": true,
             "type": "integer",
             "schema": {}
           },
           {
-            "name": "section_id",
-            "in": "query",
-            "description": "ID of the section",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "content",
+            "name": "body",
             "in": "body",
-            "description": "New content for the analysis",
+            "description": "Analysis update data",
             "required": true,
             "type": "string",
             "schema": {
               "type": "object",
               "properties": {
+                "section_id": {
+                  "type": "integer",
+                  "description": "ID of the section the analysis belongs to"
+                },
                 "content": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "New content for the analysis"
                 }
+              },
+              "required": [
+                "section_id",
+                "content"
+              ],
+              "example": {
+                "section_id": 1,
+                "content": "Updated analysis content here"
               }
             }
           }
@@ -2738,6 +2696,103 @@
         "responses": {
           "200": {
             "description": "Analysis updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "analysis": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing or invalid parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis or section not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Get single analysis",
+        "description": "Retrieve a single analysis by its id and section",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "description": "ID of the analysis to retrieve",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section the analysis belongs to",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved analysis",
             "schema": {
               "type": "object",
               "properties": {
@@ -2754,8 +2809,26 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request - Missing section_id",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Analysis not found",
+            "description": "Analysis or section not found",
             "schema": {
               "type": "object",
               "properties": {
@@ -3530,7 +3603,9 @@
       },
       "/api/fundamental_ai_search": {
         "post": {
-          "tags": ["Fundamentals"],
+          "tags": [
+            "Fundamentals"
+          ],
           "summary": "Perform a fundamental AI search",
           "description": "This endpoint performs an AI-powered search for fundamental data of a cryptocurrency.",
           "parameters": [
@@ -3550,7 +3625,10 @@
                     "description": "The name or symbol of the cryptocurrency"
                   }
                 },
-                "required": ["section_name", "coin_name"]
+                "required": [
+                  "section_name",
+                  "coin_name"
+                ]
               }
             }
           ],
@@ -3584,10 +3662,11 @@
           }
         }
       },
-    
       "/api/save_fundamental_data": {
         "post": {
-          "tags": ["Fundamentals"],
+          "tags": [
+            "Fundamentals"
+          ],
           "summary": "Save fundamental data",
           "description": "This endpoint saves the fundamental data retrieved from the AI search.",
           "parameters": [
@@ -3611,7 +3690,11 @@
                     "description": "The content to be saved"
                   }
                 },
-                "required": ["section_name", "coin_bot_id", "content"]
+                "required": [
+                  "section_name",
+                  "coin_bot_id",
+                  "content"
+                ]
               }
             }
           ],
@@ -5968,54 +6051,6 @@
                 },
                 "data": {
                   "type": "null"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/analysis/last": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Get last analysis",
-        "description": "Retrieve the name and date of the last analysis created",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved last analysis",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object"
-                },
-                "error": {
-                  "type": "null"
-                },
-                "success": {
-                  "type": "boolean",
-                  "example": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No analysis found",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "null"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean",
-                  "example": false
                 }
               }
             }
