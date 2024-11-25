@@ -127,89 +127,89 @@ swagger = Swagger()
 # ____Add or update an endpoint____
 
 # PUT /analysis/{analysis_id}
-swagger.add_or_update_endpoint(
-    endpoint_route='/analysis/{analysis_id}',
-    method='put',
-    tag='Content Creation',
-    summary='Update analysis',
-    description='Update the content of an existing analysis',
-    params=[
-        {
-            'name': 'analysis_id',
-            'in': 'path',
-            'description': 'ID of the analysis to update',
-            'required': True,
-            'type': 'integer'
-        },
-        {
-            'name': 'body',
-            'in': 'body',
-            'description': 'Analysis update data',
-            'required': True,
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'section_id': {
-                        'type': 'integer',
-                        'description': 'ID of the section the analysis belongs to'
-                    },
-                    'content': {
-                        'type': 'string',
-                        'description': 'New content for the analysis'
-                    }
-                },
-                'required': ['section_id', 'content'],
-                'example': {
-                    'section_id': 1,
-                    'content': 'Updated analysis content here'
-                }
-            }
-        }
-    ],
-    responses={
-        '200': {
-            'description': 'Analysis updated successfully',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'data': {
-                        'type': 'object',
-                        'properties': {
-                            'id': {'type': 'integer'},
-                            'analysis': {'type': 'string'},
-                            'created_at': {'type': 'string', 'format': 'date-time'},
-                            'updated_at': {'type': 'string', 'format': 'date-time'}
-                        }
-                    },
-                    'error': {'type': 'null'},
-                    'success': {'type': 'boolean', 'example': True}
-                }
-            }
-        },
-        '400': {
-            'description': 'Bad Request - Missing or invalid parameters',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'data': {'type': 'null'},
-                    'error': {'type': 'string'},
-                    'success': {'type': 'boolean', 'example': False}
-                }
-            }
-        },
-        '404': {
-            'description': 'Analysis or section not found',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'data': {'type': 'null'},
-                    'error': {'type': 'string'},
-                    'success': {'type': 'boolean', 'example': False}
-                }
-            }
-        }
-    }
-)
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/analysis/{analysis_id}',
+#     method='put',
+#     tag='Content Creation',
+#     summary='Update analysis',
+#     description='Update the content of an existing analysis',
+#     params=[
+#         {
+#             'name': 'analysis_id',
+#             'in': 'path',
+#             'description': 'ID of the analysis to update',
+#             'required': True,
+#             'type': 'integer'
+#         },
+#         {
+#             'name': 'body',
+#             'in': 'body',
+#             'description': 'Analysis update data',
+#             'required': True,
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'section_id': {
+#                         'type': 'integer',
+#                         'description': 'ID of the section the analysis belongs to'
+#                     },
+#                     'content': {
+#                         'type': 'string',
+#                         'description': 'New content for the analysis'
+#                     }
+#                 },
+#                 'required': ['section_id', 'content'],
+#                 'example': {
+#                     'section_id': 1,
+#                     'content': 'Updated analysis content here'
+#                 }
+#             }
+#         }
+#     ],
+#     responses={
+#         '200': {
+#             'description': 'Analysis updated successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'id': {'type': 'integer'},
+#                             'analysis': {'type': 'string'},
+#                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                         }
+#                     },
+#                     'error': {'type': 'null'},
+#                     'success': {'type': 'boolean', 'example': True}
+#                 }
+#             }
+#         },
+#         '400': {
+#             'description': 'Bad Request - Missing or invalid parameters',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
+#                 }
+#             }
+#         },
+#         '404': {
+#             'description': 'Analysis or section not found',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'data': {'type': 'null'},
+#                     'error': {'type': 'string'},
+#                     'success': {'type': 'boolean', 'example': False}
+#                 }
+#             }
+#         }
+#     }
+# )
 
 
 # ____Delete an endpoint____
