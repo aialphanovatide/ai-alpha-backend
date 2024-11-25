@@ -1,9 +1,11 @@
-from flask import current_app
 from config import Topic, Notification, Session
 from typing import Tuple, Optional, List
 from sqlalchemy.exc import SQLAlchemyError
 from services.firebase.firebase import send_notification
 from datetime import datetime
+
+notification_model = Notification
+
 
 class NotificationService:
     """Service class for handling notifications and alerts."""
@@ -116,6 +118,64 @@ class NotificationService:
             RuntimeError: If FCM notification fails
         """
         try:
+            # Define the query based on the notification type
+            if type == "alert":
+                topics = self.session.query(Topic).filter(
+                    Topic.reference.ilike(f"%{coin}%"),
+                    Topic.timeframe == timeframe
+                ).all()
+                
+            elif type in ["analysis", "s_and_r"]:
+                topics = self.session.query(Topic).filter(
+                    Topic.reference.ilike(f"%{coin}%"),
+                    Topic.name.ilike(f"%{type}%")
+                ).all()
+                print(topics)
+            else:
+                raise ValueError(f"Invalid notification type: {type}")
+
+            if not topics:
+                raise ValueError(f"No topics found for the coin {coin} and type {type}")
+
+            for topic in topics:
+                if type in ["analysis", "s_and_r"]:
+                    new_notification = notification_model( 
+                        topic_id=topic.id,
+                        title=title,
+                        body=body,
+                        coin=coin,
+                        type=type 
+                    )
+                    
+                    self.session.add(new_notification)
+                    print(f"{type.capitalize()} saved for coin {coin} under topic {topic.name}")
+
+            self.session.commit()
+            print(f"Successfully saved {type} notification for coin {coin}.")
+
+            for topic in topics:
+                self._send_fcm_notification(topic.name, title, body, type, coin, timeframe)
+        
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise SQLAlchemyError(f"Database error while processing notification: {str(e)}")
+        except Exception as e:
+            self.session.rollback()
+            raise Exception(f"Unexpected error while processing notification: {str(e)}")
+
+    def _send_fcm_notification(self, topic: str, title: str, body: str, type: str, coin: str, timeframe: str):
+        """
+        Trigger Firebase Cloud Messaging (FCM) to send a notification.
+        
+        Parameters:
+        - topic: The topic to which the message will be sent.
+        - title: The title of the notification.
+        - body: The body content of the notification.
+        - type: The type of the notification ("alert" or "analysis").
+        - coin: The coin associated with the notification.
+        """
+        try:
+            # Use the send_notification function you provided
             send_notification(
                 topic=topic,
                 title=title,

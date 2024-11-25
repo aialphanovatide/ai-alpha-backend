@@ -144,7 +144,7 @@ if __name__ == '__main__':
         print('---- AI Alpha Server is starting ----') 
         app.run(port=9002, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
-        print(f"Failed to start the AI Alpha Server: {e}")
+        print(f"Failed to start the AI Alpha server: {e} ")
     finally:
         print('--- AI Alpha Server was stopped ---')
 

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import SQLAlchemyError
 from config import Chart, CoinBot, Session
 from routes.chart.total3 import get_total_3_data
-from flask import jsonify, request, Blueprint, jsonify  
+from flask import current_app, jsonify, request, Blueprint, jsonify  
 from redis_client.redis_client import cache_with_redis
 from decorators.measure_time import measure_execution_time
 from services.notification.index import NotificationService
@@ -155,15 +155,73 @@ def receive_and_save_chart_data():
     """
     Receives support and resistance data from TradingView, parses it,
     saves it to the database, and sends notifications if required.
-
-    Args:
-        The request body should contain a symbol (e.g., BTCUSDT), support and resistance levels,
-        timeframe, and a flag indicating if a notification should be sent.
-
-    Returns:
-        dict: A JSON response indicating success or failure.
-            Format: {"message": str or None, "error": str or None, "status": int, "data": dict or None}
     """
+    def validate_incoming_data(data):
+        """Validate and parse incoming webhook data."""
+        if len(data) != 11:
+            raise ValueError("Incorrect data format")
+        
+        # Extract symbol and determine pair
+        symbol = data[0].split(': ')[1]
+        known_pairs = ['USDT', 'USD', 'ETH', 'BTC']
+        pair = next((p for p in known_pairs if symbol.endswith(p)), None)
+        
+        if not pair:
+            raise ValueError("Invalid trading pair")
+        
+        # Extract token and other details
+        token = symbol[:-len(pair)].lower()
+        timeframe = data[1].split(': ')[1]
+        
+        # Parse support and resistance values
+        values = {}
+        for line in data[2:-1]:
+            key, value = line.split(': ')
+            values[key] = float(value)
+        
+        supports = [values[f'S{i}'] for i in range(1, 5)]
+        resistances = [values[f'R{i}'] for i in range(1, 5)]
+        
+        is_essential = data[-1].split(': ')[1].lower() == 'true'
+        
+        return {
+            'symbol': symbol,
+            'token': token,
+            'pair': pair,
+            'timeframe': timeframe,
+            'supports': supports,
+            'resistances': resistances,
+            'is_essential': is_essential
+        }
+    
+    def find_coin_bot(session, token):
+        """Find CoinBot based on token name or alias."""
+        coin_bot = session.query(CoinBot).filter(
+            (CoinBot.name == token) | (CoinBot.alias == token)
+        ).first()
+        
+        if not coin_bot:
+            raise ValueError(f"No CoinBot found with name or alias '{token}'")
+        
+        return coin_bot.bot_id
+    
+    def prepare_chart_data(parsed_data, coin_id):
+        """Prepare chart data for database insertion."""
+        return {
+            'support_1': parsed_data['supports'][0],
+            'support_2': parsed_data['supports'][1],
+            'support_3': parsed_data['supports'][2],
+            'support_4': parsed_data['supports'][3],
+            'resistance_1': parsed_data['resistances'][0],
+            'resistance_2': parsed_data['resistances'][1],
+            'resistance_3': parsed_data['resistances'][2],
+            'resistance_4': parsed_data['resistances'][3],
+            'token': parsed_data['token'],
+            'pair': parsed_data['pair'],
+            'temporality': parsed_data['timeframe'],
+            'coin_bot_id': coin_id,
+            'is_essential': parsed_data['is_essential']
+        }
     response = {
         "message": None,
         "error": None,
@@ -174,90 +232,47 @@ def receive_and_save_chart_data():
     session = Session()
 
     try:
-        # Parse incoming data from TradingView webhook
-        data = request.data.decode('utf-8').split('\n')
+        # Parse incoming data
+        raw_data = request.data.decode('utf-8').split('\n')
+        parsed_data = validate_incoming_data(raw_data)
         
-        if len(data) != 11:
-            return jsonify({"error": "Incorrect data format"}), HTTPStatus.BAD_REQUEST
+        # Find coin_bot_id
+        coin_id = find_coin_bot(session, parsed_data['token'])
         
-        # Extract symbol (e.g., BTCUSDT) and clean it
-        symbol = data[0].split(': ')[1]
+        # Remove existing chart records
+        session.query(Chart).filter(
+            Chart.coin_bot_id == coin_id, 
+            Chart.temporality == parsed_data['timeframe']
+        ).delete()
         
-        # List of known pairs (you can add more as needed)
-        known_pairs = ['USDT', 'USD', 'ETH', 'BTC']
+        # Prepare and save new chart data
+        chart_data = prepare_chart_data(parsed_data, coin_id)
+        new_chart = Chart(**chart_data)
         
-        # Determine pair by checking if the symbol ends with any known pair
-        pair = next((p for p in known_pairs if symbol.endswith(p)), None)
-        if not pair:
-            return jsonify({"error": "Invalid trading pair"}), HTTPStatus.BAD_REQUEST
-        
-        # Extract token by removing the pair from the end of the symbol
-        token = symbol[:-len(pair)].lower()  # Everything before the pair is the token
-        # Extract timeframe (e.g., '1D', '4H')
-        timeframe = data[1].split(': ')[1]  # Extracting 'Timeframe' from second line
-        values = {}
-        for line in data[2:-1]:  # Skip last line since it's 'Is Essential'
-            key, value = line.split(': ')
-            values[key] = float(value)
 
-        supports = [values['S1'], values['S2'], values['S3'], values['S4']]
-        resistances = [values['R1'], values['R2'], values['R3'], values['R4']]
-        # Extract 'Is Essential' flag from last line
-        is_essential_str = data[-1].split(': ')[1]
-        # Convert 'Is Essential' string to boolean value ('true' -> True, 'false' -> False)
-        is_essential = True if is_essential_str.lower() == 'true' else False
-        # Query CoinBot to find coin_id using either name or alias
-        coin_bot = session.query(CoinBot).filter(
-            (CoinBot.name == token) | (CoinBot.alias == token)
-        ).first()
-        if not coin_bot:
-            return jsonify({"error": f"No CoinBot found with name or alias '{token}'"}), HTTPStatus.NOT_FOUND
-        coin_id = coin_bot.bot_id
-        
-        # Delete any existing chart records with this coin_bot_id and matching temporality
-        session.query(Chart).filter(Chart.coin_bot_id == coin_id, Chart.temporality == timeframe).delete()
-        # Prepare chart data for saving to database...
-
-        new_chart_data = {
-            'support_1': supports[0],
-            'support_2': supports[1],
-            'support_3': supports[2],
-            'support_4': supports[3],
-            'resistance_1': resistances[0],
-            'resistance_2': resistances[1],
-            'resistance_3': resistances[2],
-            'resistance_4': resistances[3],
-            'token': token,
-            'pair': pair,
-            'temporality': timeframe,
-            'coin_bot_id': coin_id,
-            'is_essential': is_essential   # Store is_essential flag in DB if needed.
-        }
-        new_chart = Chart(**new_chart_data)
         session.add(new_chart)
-        if new_chart:
-            print("Chart saved")
-        # Commit changes to the database.
         session.commit()
-            
-        # # Send notification only if is_essential is True.
-        if is_essential:
+        
+        # Send notification if essential
+        if parsed_data['is_essential']:
             notification_service.push_notification(
-                coin=symbol,
-                title=f"{symbol} Support/Resistance Update",
+                coin=parsed_data['token'],
+                title=f"{parsed_data['symbol']} Support/Resistance Update",
                 body="Check the New Levels!",
                 type="s_and_r",
-                timeframe=timeframe  
+                timeframe=parsed_data['timeframe']
             )
-            print("message sent")
         
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED
 
-    except SQLAlchemyError as e:
+    except (SQLAlchemyError, ValueError) as e:
         session.rollback()
-        response["error"] = f"Database error: {str(e)}"
-        response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
+        response["error"] = str(e)
+        response["status"] = (
+            HTTPStatus.BAD_REQUEST if isinstance(e, ValueError) 
+            else HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
     except Exception as e:
         response["error"] = f"An unexpected error occurred: {str(e)}"
