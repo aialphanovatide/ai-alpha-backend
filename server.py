@@ -38,7 +38,6 @@ from routes.external_apis.binance import binance_bp
 from routes.analysis.sections import sections_bp
 from routes.coins.coins import coin_bp
 from routes.ask_ai.ask_ai import ask_ai_bp
-from routes.tradingview.tradingview import webhook_bp
 from flasgger import Swagger
 from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
@@ -46,12 +45,15 @@ from ws.socket import init_socketio
 from services.discord.bot.main import start_bot  
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-app.name = 'AI Alpha API'
-swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
-template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
-mail = Mail(app)
-email_service = EmailService(app)
+app.name = 'AI Alpha API'
+
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
+
+app.static_folder = 'static'
+app.secret_key = os.urandom(24)
+
+template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 # Check API key for all requests
 @app.before_request
@@ -65,8 +67,9 @@ def before_request():
 # Initialize SocketIO
 socketio = init_socketio(app)
 
-app.static_folder = 'static'
-app.secret_key = os.urandom(24)
+# Initialize Mail and EmailService
+mail = Mail(app)
+email_service = EmailService(app)
 
 # Swagger configuration
 with open(swagger_template_path, 'r') as f:
@@ -108,7 +111,6 @@ app.register_blueprint(news_bots_features_bp)
 app.register_blueprint(chart_bp)
 app.register_blueprint(healthcheck)
 app.register_blueprint(chart_graphs_bp)
-app.register_blueprint(webhook_bp)
 app.register_blueprint(dashboard_access_bp)
 app.register_blueprint(telegram_bp)
 app.register_blueprint(coingecko_bp)
@@ -153,7 +155,7 @@ if __name__ == '__main__':
             print('---- AI Alpha API is running ----') 
             app.run(port=9002, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
-        print(f"Failed to start the AI Alpha server: {e}")
+        print(f"Failed to start the AI Alpha server: {e} ")
     finally:
         print('---AI Alpha server was stopped---')
 

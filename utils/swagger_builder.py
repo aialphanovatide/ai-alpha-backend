@@ -55,7 +55,7 @@ class Swagger:
             
             # Add or update the endpoint with its details
             swagger_json['paths'][endpoint_route][method] = {
-                'tags': [tag.capitalize()],
+                'tags': [tag],
                 'summary': summary.capitalize(),
                 'description': description.capitalize(),
                 'parameters': [],
@@ -126,207 +126,127 @@ swagger = Swagger()
 
 # ____Add or update an endpoint____
 
-
-# # GET /analyses endpoint
+# Add this to the example usage section at the bottom of the file
+# success, message = swagger.add_or_update_endpoint(
+#    endpoint_route='/coin/{coin_id}/toggle-coin',
+#    method='post',
+#    tag='Coin',
+#    summary='Toggle coin activation status',
+#    description='Toggle a coin\'s active status. Activation requires an active category and valid coin data. Deactivation is always allowed.',
+#    params=[
+#        {
+#            'name': 'coin_id',
+#            'in': 'path',
+#            'description': 'ID of the coin to toggle',
+#            'required': True,
+#            'type': 'integer'
+#        }
+#    ],
+#    responses={
+#        '200': {
+#            'description': 'Successfully toggled coin status',
+#            'schema': {
+#                'type': 'object',
+#                'properties': {
+#                    'success': {'type': 'boolean'},
+#                    'message': {'type': 'string'},
+#                    'is_active': {'type': 'boolean'},
+#                    'error': {'type': 'null'}
+#                }
+#            }
+#        },
+#        '400': {
+#            'description': 'Invalid request (inactive category or failed validation)',
+#            'schema': {
+#                'type': 'object',
+#                'properties': {
+#                    'success': {'type': 'boolean', 'example': False},
+#                    'message': {'type': 'string'},
+#                    'is_active': {'type': 'boolean'},
+#                    'error': {'type': 'string'}
+#                }
+#            }
+#        },
+#        '404': {
+#            'description': 'Coin not found',
+#            'schema': {
+#                'type': 'object',
+#                'properties': {
+#                    'success': {'type': 'boolean', 'example': False},
+#                    'message': {'type': 'string'},
+#                    'is_active': {'type': 'boolean'},
+#                    'error': {'type': 'string'}
+#                }
+#            }
+#        },
+#        '500': {
+#            'description': 'Server error',
+#            'schema': {
+#                'type': 'object',
+#                'properties': {
+#                    'success': {'type': 'boolean', 'example': False},
+#                    'message': {'type': 'string'},
+#                    'is_active': {'type': 'boolean'},
+#                    'error': {'type': 'string'}
+#                }
+#            }
+#        }
+#    }
+# )
+# print(message)
+# PUT /analysis/{analysis_id}
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/analyses',
-#     method='get',
-#     tag='Analysis',
-#     summary='Get all analyses',
-#     description='Retrieve all analyses with pagination based on section',
+#     endpoint_route='/analysis/{analysis_id}',
+#     method='put',
+#     tag='Content Creation',
+#     summary='Update analysis',
+#     description='Update the content of an existing analysis',
 #     params=[
 #         {
-#             'name': 'section_id',
-#             'in': 'query',
-#             'description': 'ID of the section',
+#             'name': 'analysis_id',
+#             'in': 'path',
+#             'description': 'ID of the analysis to update',
 #             'required': True,
-#             'type': 'string'
+#             'type': 'integer'
 #         },
 #         {
-#             'name': 'page',
-#             'in': 'query',
-#             'description': 'Page number',
-#             'required': False,
-#             'type': 'integer',
-#             'default': 1
-#         },
-#         {
-#             'name': 'limit',
-#             'in': 'query',
-#             'description': 'Items per page (max 100)',
-#             'required': False,
-#             'type': 'integer',
-#             'default': 10
+#             'name': 'body',
+#             'in': 'body',
+#             'description': 'Analysis update data',
+#             'required': True,
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'section_id': {
+#                         'type': 'integer',
+#                         'description': 'ID of the section the analysis belongs to'
+#                     },
+#                     'content': {
+#                         'type': 'string',
+#                         'description': 'New content for the analysis'
+#                     }
+#                 },
+#                 'required': ['section_id', 'content'],
+#                 'example': {
+#                     'section_id': 1,
+#                     'content': 'Updated analysis content here'
+#                 }
+#             }
 #         }
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Successfully retrieved all analyses',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'array', 'items': {'type': 'object'}},
-#                     'error': {'type': 'null'},
-#                     'success': {'type': 'boolean'},
-#                     'total': {'type': 'integer'},
-#                     'page': {'type': 'integer'},
-#                     'limit': {'type': 'integer'},
-#                     'total_pages': {'type': 'integer'},
-#                     'section_name': {'type': 'string'},
-#                     'section_target': {'type': 'string'}
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad Request',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean', 'example': False}
-#                 }
-#             }
-#         }
-#     }
-# )
-
-# # GET /analysis/last endpoint
-# swagger.add_or_update_endpoint(
-#     endpoint_route='/analysis/last',
-#     method='get',
-#     tag='Analysis',
-#     summary='Get last analysis',
-#     description='Retrieve the name and date of the last analysis created',
-#     params=[],
-#     responses={
-#         '200': {
-#             'description': 'Successfully retrieved last analysis',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'object'},
-#                     'error': {'type': 'null'},
-#                     'success': {'type': 'boolean', 'example': True}
-#                 }
-#             }
-#         },
-#         '404': {
-#             'description': 'No analysis found',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean', 'example': False}
-#                 }
-#             }
-#         }
-#     }
-# )
-
-# # POST /scheduled-analyses endpoint
-# swagger.add_or_update_endpoint(
-#     endpoint_route='/scheduled-analyses',
-#     method='post',
-#     tag='Scheduled Analysis',
-#     summary='Schedule new analysis',
-#     description='Schedule a post for future publication',
-#     params=[
-#         {
-#             'name': 'coin_id',
-#             'in': 'formData',
-#             'description': 'ID of the coin bot',
-#             'required': True,
-#             'type': 'string'
-#         },
-#         {
-#             'name': 'section_id',
-#             'in': 'formData',
-#             'description': 'ID of the section',
-#             'required': True,
-#             'type': 'string'
-#         },
-#         {
-#             'name': 'category_name',
-#             'in': 'formData',
-#             'description': 'Name of the category',
-#             'required': True,
-#             'type': 'string'
-#         },
-#         {
-#             'name': 'content',
-#             'in': 'formData',
-#             'description': 'Content of the post',
-#             'required': True,
-#             'type': 'string'
-#         },
-#         {
-#             'name': 'scheduled_date',
-#             'in': 'formData',
-#             'description': 'Scheduled date and time in ISO 8601 format (e.g., 2023-01-01T12:00:00.000Z)',
-#             'required': True,
-#             'type': 'string'
-#         }
-#     ],
-#     responses={
-#         '201': {
-#             'description': 'Post scheduled successfully',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'message': {'type': 'string'},
-#                     'error': {'type': 'null'},
-#                     'success': {'type': 'boolean', 'example': True},
-#                     'job_id': {'type': 'string'}
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad Request',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'message': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean', 'example': False},
-#                     'job_id': {'type': 'null'}
-#                 }
-#             }
-#         }
-#     }
-# )
-
-# # GET /scheduled-analyses endpoint
-# swagger.add_or_update_endpoint(
-#     endpoint_route='/scheduled-analyses',
-#     method='get',
-#     tag='Scheduled Analysis',
-#     summary='Get all scheduled analyses',
-#     description='Retrieve information about all scheduled jobs',
-#     params=[],
-#     responses={
-#         '200': {
-#             'description': 'Successfully retrieved scheduled jobs',
+#             'description': 'Analysis updated successfully',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'data': {
 #                         'type': 'object',
 #                         'properties': {
-#                             'jobs': {
-#                                 'type': 'array',
-#                                 'items': {
-#                                     'type': 'object',
-#                                     'properties': {
-#                                         'id': {'type': 'string'},
-#                                         'name': {'type': 'string'},
-#                                         'trigger': {'type': 'string'},
-#                                         'args': {'type': 'string'},
-#                                         'next_run_time': {'type': 'string'}
-#                                     }
-#                                 }
-#                             }
+#                             'id': {'type': 'integer'},
+#                             'analysis': {'type': 'string'},
+#                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                             'updated_at': {'type': 'string', 'format': 'date-time'}
 #                         }
 #                     },
 #                     'error': {'type': 'null'},
@@ -334,8 +254,8 @@ swagger = Swagger()
 #                 }
 #             }
 #         },
-#         '500': {
-#             'description': 'Server Error',
+#         '400': {
+#             'description': 'Bad Request - Missing or invalid parameters',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
@@ -344,96 +264,13 @@ swagger = Swagger()
 #                     'success': {'type': 'boolean', 'example': False}
 #                 }
 #             }
-#         }
-#     }
-# )
-
-# # GET /scheduled-analyses/{job_id} endpoint
-# swagger.add_or_update_endpoint(
-#     endpoint_route='/scheduled-analyses/{job_id}',
-#     method='get',
-#     tag='Scheduled Analysis',
-#     summary='Get scheduled analysis by ID',
-#     description='Get information about a specific scheduled job',
-#     params=[
-#         {
-#             'name': 'job_id',
-#             'in': 'path',
-#             'description': 'ID of the scheduled job',
-#             'required': True,
-#             'type': 'string'
-#         }
-#     ],
-#     responses={
-#         '201': {
-#             'description': 'Successfully retrieved job information',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'id': {'type': 'string'},
-#                             'name': {'type': 'string'},
-#                             'func': {'type': 'string'},
-#                             'trigger': {'type': 'string'},
-#                             'args': {'type': 'string'},
-#                             'next_run_time': {'type': 'string'}
-#                         }
-#                     },
-#                     'error': {'type': 'null'},
-#                     'success': {'type': 'boolean', 'example': True}
-#                 }
-#             }
 #         },
 #         '404': {
-#             'description': 'Job not found',
+#             'description': 'Analysis or section not found',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean', 'example': False}
-#                 }
-#             }
-#         }
-#     }
-# )
-
-# # DELETE /scheduled-analyses/{job_id} endpoint
-# swagger.add_or_update_endpoint(
-#     endpoint_route='/scheduled-analyses/{job_id}',
-#     method='delete',
-#     tag='Scheduled Analysis',
-#     summary='Delete scheduled analysis',
-#     description='Delete a scheduled job by its ID',
-#     params=[
-#         {
-#             'name': 'job_id',
-#             'in': 'path',
-#             'description': 'ID of the scheduled job to delete',
-#             'required': True,
-#             'type': 'string'
-#         }
-#     ],
-#     responses={
-#         '201': {
-#             'description': 'Job deleted successfully',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'message': {'type': 'string'},
-#                     'error': {'type': 'null'},
-#                     'success': {'type': 'boolean', 'example': True}
-#                 }
-#             }
-#         },
-#         '404': {
-#             'description': 'Job not found',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'message': {'type': 'null'},
 #                     'error': {'type': 'string'},
 #                     'success': {'type': 'boolean', 'example': False}
 #                 }
@@ -445,7 +282,7 @@ swagger = Swagger()
 
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/api/tv/alerts')
+# success, message = swagger.delete_endpoint(endpoint_route='/categories/global-toggle')
 # print(message)
 
 

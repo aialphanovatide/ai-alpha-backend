@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .status-container {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .connected { background-color: #4CAF50; }
+        .disconnected { background-color: #f44336; }
+        .connecting { background-color: #FFC107; }
+
+        .log-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 0.8em;
+            margin-right: 10px;
+        }
+
+        .control-panel {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #1976D2;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .error {
+            color: #f44336;
+        }
+
+        .success {
+            color: #4CAF50;
+        }
+
+        .info {
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Socket.IO Client</h1>
+    
+    <div class="status-container">
+        <h3>Connection Status</h3>
+        <div>
+            <span class="status-indicator disconnected" id="statusIndicator"></span>
+            <span id="statusText">Disconnected</span>
+        </div>
+        <div id="clientId"></div>
+        <div id="activeClients"></div>
+    </div>
+
+    <div class="control-panel">
+        <button id="connectBtn" onclick="handleConnect()">Connect</button>
+        <button id="disconnectBtn" onclick="handleDisconnect()" disabled>Disconnect</button>
+        <button id="clearLogsBtn" onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div class="log-container" id="logContainer">
+        <!-- Logs will be inserted here -->
+    </div>
+
+    <script>
+        let socket;
+        let isConnected = false;
+
+        function updateStatus(status, message) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            indicator.className = 'status-indicator ' + status;
+            statusText.textContent = message;
+            
+            document.getElementById('connectBtn').disabled = status === 'connected';
+            document.getElementById('disconnectBtn').disabled = status !== 'connected';
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = message;
+            
+            entry.appendChild(timestamp);
+            entry.appendChild(messageSpan);
+            
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '';
+        }
+
+        function initializeSocket() {
+            socket = io('http://127.0.0.1:9002');
+
+            // Connection event handlers
+            socket.on('connect', () => {
+                isConnected = true;
+                updateStatus('connected', 'Connected');
+                addLogEntry('Connected to server', 'success');
+            });
+
+            socket.on('disconnect', () => {
+                isConnected = false;
+                updateStatus('disconnected', 'Disconnected');
+                addLogEntry('Disconnected from server', 'error');
+                document.getElementById('clientId').textContent = '';
+            });
+
+            socket.on('connect_error', (error) => {
+                updateStatus('disconnected', 'Connection Error');
+                addLogEntry(`Connection error: ${error.message}`, 'error');
+            });
+
+            socket.on('connecting', () => {
+                updateStatus('connecting', 'Connecting...');
+                addLogEntry('Attempting to connect...', 'info');
+            });
+
+            socket.on('reconnecting', (attemptNumber) => {
+                updateStatus('connecting', `Reconnecting (Attempt ${attemptNumber})...`);
+                addLogEntry(`Reconnection attempt ${attemptNumber}...`, 'info');
+            });
+
+            socket.on('error', (error) => {
+                addLogEntry(`Socket error: ${error}`, 'error');
+            });
+
+            // Custom event handlers
+            socket.on('connection_established', (data) => {
+                document.getElementById('clientId').textContent = `Client ID: ${data.client_id}`;
+                addLogEntry(`Connection established - Client ID: ${data.client_id}`, 'success');
+            });
+
+            socket.on('clients_updated', (data) => {
+                document.getElementById('activeClients').textContent = 
+                    `Active clients: ${data.active_clients}`;
+                addLogEntry(`Active clients updated: ${data.active_clients}`, 'info');
+            });
+
+            socket.on('new_analysis', (data) => {
+                addLogEntry(`New analysis received: ${JSON.stringify(data)}`, 'info');
+            });
+        }
+
+        function handleConnect() {
+            if (!socket) {
+                initializeSocket();
+            }
+            socket.connect();
+            addLogEntry('Initiating connection...', 'info');
+        }
+
+        function handleDisconnect() {
+            if (socket) {
+                socket.disconnect();
+                addLogEntry('Disconnecting...', 'info');
+            }
+        }
+
+        // Initialize socket when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeSocket();
+            addLogEntry('Socket.IO client initialized', 'info');
+        });
+    </script>
+</body>
+</html>

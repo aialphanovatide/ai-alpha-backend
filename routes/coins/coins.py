@@ -432,37 +432,30 @@ def delete_coin(coin_id):
             status_code = 500
 
     return jsonify(response), status_code
-
-
 @coin_bp.route('/coin/<int:coin_id>/toggle-coin', methods=['POST'])
 @update_cache_with_redis(related_get_endpoints=['get_all_coins', 'get_single_coin', 'get_all_categories'])
 def toggle_coin_publication(coin_id):
     """
-    Toggle the publication status of a coin.
-
-    This endpoint allows for activating or deactivating a coin based on its current status.
-    When activating, it checks if the coin's fundamentals are complete and if the chart
-    has valid support and resistance lines.
+    Toggle a coin's active status with category validation.
+    This endpoint handles both activation and deactivation of coins. When activating,
+    it ensures the coin's category is active and validates required coin data.
+    Deactivation is allowed regardless of category status.
 
     Args:
         coin_id (int): The ID of the coin to toggle.
 
     Returns:
-        tuple: A tuple containing:
-            - A JSON response with the following keys:
-                - success (bool): Indicates if the operation was successful.
-                - message (str): A descriptive message about the operation result.
-                - is_active (bool): The new active status of the coin.
-                - error (str): Error message if any error occurred, otherwise None.
-            - An HTTP status code.
-
-    Raises:
-        SQLAlchemyError: If a database error occurs.
-        Exception: For any other unexpected errors.
+        tuple: Contains:
+            - JSON response with:
+                - success (bool): Operation success status
+                - message (str): Success message
+                - is_active (bool): New coin status
+                - error (str, optional): Error message if operation failed
+            - HTTP status code
 
     Status Codes:
-        200: Success
-        400: Bad Request (e.g., incomplete fundamentals or invalid chart)
+        200: Successfully toggled coin status
+        400: Invalid request (inactive category or failed validation)
         404: Coin not found
         500: Server error
     """
@@ -482,30 +475,38 @@ def toggle_coin_publication(coin_id):
                 status_code = 404
                 return jsonify(response), status_code
 
-            # If the coin is currently active, deactivate it
+            # Handle deactivation
             if coin.is_active:
                 coin.is_active = False
                 coin.updated_at = datetime.now()
                 session.commit()
+
                 response["success"] = True
                 response["message"] = "Coin deactivated successfully"
                 response["is_active"] = False
                 status_code = 200
-            else:
-                # Perform validations
-                valid, messages = validate_coin(coin=coin)
-                if valid:
-                    coin.is_active = True
-                    coin.updated_at = datetime.now()
-                    session.commit()
-                    response["success"] = True
-                    response["message"] = "Coin activated successfully"
-                    response["is_active"] = True
-                    status_code = 200
-                else:
-                    response["error"] = ', '.join(messages)
-                    status_code = 400
+                return jsonify(response), status_code
 
+            # Handle activation
+            if not coin.category.is_active:
+                response["error"] = "Cannot activate coin: Category is inactive"
+                status_code = 400
+                return jsonify(response), status_code
+
+            # Validate coin data
+            valid, messages = validate_coin(coin=coin)
+            if valid:
+                coin.is_active = True
+                coin.updated_at = datetime.now()
+                session.commit()
+
+                response["success"] = True
+                response["message"] = "Coin activated successfully"
+                response["is_active"] = True
+                status_code = 200
+            else:
+                response["error"] = ', '.join(messages)
+                status_code = 400
         except SQLAlchemyError as e:
             session.rollback()
             response["error"] = f"Database error occurred: {str(e)}"

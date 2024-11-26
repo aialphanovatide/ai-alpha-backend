@@ -27,6 +27,30 @@
       "description": "Operations related to the Ask AI (Coin info)"
     },
     {
+      "name": "Introductions",
+      "description": "Operations related to the Introduction section."
+    },
+    {
+      "name": "Tokenomics",
+      "description": "Operations related to the Tokenomics section"
+    },
+    {
+      "name": "Competitors Tokenomics",
+      "description": "Operations related to the Competitors tokenomics section"
+    },
+    {
+      "name": "Dapps",
+      "description": "Operations related to the Dapps section "
+    },
+    {
+      "name": "Upgrades",
+      "description": "Operations related to the Upgrades section"
+    },
+    {
+      "name": "Hacks",
+      "description": "Operations related to the Hacks section"
+    },
+    {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
     },
@@ -51,11 +75,7 @@
       "description": "Operations related to CoinGecko"
     },
     {
-      "name": "Fundamentals",
-      "description": "Operations related to the fundamentals"
-    },
-    {
-      "name": "Narrative trading",
+      "name": "Narrative trading (Deprecated)",
       "description": "Operations related to the Narrative Trading (Market Narrative)"
     },
     {
@@ -316,53 +336,6 @@
         "responses": {
           "200": {
             "description": "Post scheduled successfully"
-          },
-          "400": {
-            "description": "Bad request (missing or invalid data)"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/post_analysis": {
-      "post": {
-        "tags": [
-          "Content Creation"
-        ],
-        "summary": "Create a new content creation and generate an associated image.",
-        "description": "Create a new content creation based on the provided data, generate an image for the content creation, and upload it to S3.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Content creation details",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "coinBot": {
-                  "type": "string"
-                },
-                "category_name": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "coinBot",
-                "category_name",
-                "content"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Analysis created successfully"
           },
           "400": {
             "description": "Bad request (missing or invalid data)"
@@ -1095,7 +1068,7 @@
         "summary": "Get competitors data",
         "description": "Retrieve a list of competitors for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Competitors Tokenomics"
         ],
         "parameters": [
           {
@@ -1152,7 +1125,7 @@
         "summary": "Get DApps data",
         "description": "Retrieve DApps data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Dapps"
         ],
         "parameters": [
           {
@@ -1211,7 +1184,7 @@
         "summary": "Get hacks data",
         "description": "Retrieve hacks data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Hacks"
         ],
         "parameters": [
           {
@@ -1267,7 +1240,7 @@
         "summary": "Get introduction data",
         "description": "Retrieve introduction data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Introductions"
         ],
         "parameters": [
           {
@@ -1323,7 +1296,7 @@
         "summary": "Get revenue models",
         "description": "Retrieve revenue model data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Revenue Models"
         ],
         "parameters": [
           {
@@ -1379,7 +1352,7 @@
         "summary": "Get tokenomics data",
         "description": "Retrieve tokenomics data for a specific coin bot",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1461,7 +1434,7 @@
         "summary": "Get individual tokenomic",
         "description": "Retrieve a specific tokenomic by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1507,7 +1480,7 @@
         "summary": "Get token distribution",
         "description": "Retrieve a specific token distribution by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1553,7 +1526,7 @@
         "summary": "Get token utility",
         "description": "Retrieve a specific token utility by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1599,7 +1572,7 @@
         "summary": "Get value accrual mechanism",
         "description": "Retrieve a specific value accrual mechanism by ID",
         "tags": [
-          "Fundamentals"
+          "Tokenomics"
         ],
         "parameters": [
           {
@@ -1645,7 +1618,7 @@
         "summary": "Get upgrades data",
         "description": "Retrieve upgrades data related to a specific coin",
         "tags": [
-          "Fundamentals"
+          "Upgrades"
         ],
         "parameters": [
           {
@@ -1707,7 +1680,7 @@
     "/api/get_competitors_by_coin_name": {
       "get": {
         "tags": [
-          "Fundamentals"
+          "Competitors Tokenomics"
         ],
         "summary": "Get competitors data for a specific coin by name",
         "description": "This endpoint retrieves a list of competitors for the analyzed coin based on the provided coin name.",
@@ -2680,37 +2653,42 @@
         "tags": [
           "Content Creation"
         ],
-        "summary": "Edit analysis",
-        "description": "Edit the content of an existing analysis",
+        "summary": "Update analysis",
+        "description": "Update the content of an existing analysis",
         "parameters": [
           {
             "name": "analysis_id",
             "in": "path",
-            "description": "ID of the analysis to edit",
+            "description": "ID of the analysis to update",
             "required": true,
             "type": "integer",
             "schema": {}
           },
           {
-            "name": "section_id",
-            "in": "query",
-            "description": "ID of the section",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "content",
+            "name": "body",
             "in": "body",
-            "description": "New content for the analysis",
+            "description": "Analysis update data",
             "required": true,
             "type": "string",
             "schema": {
               "type": "object",
               "properties": {
+                "section_id": {
+                  "type": "integer",
+                  "description": "ID of the section the analysis belongs to"
+                },
                 "content": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "New content for the analysis"
                 }
+              },
+              "required": [
+                "section_id",
+                "content"
+              ],
+              "example": {
+                "section_id": 1,
+                "content": "Updated analysis content here"
               }
             }
           }
@@ -2718,6 +2696,103 @@
         "responses": {
           "200": {
             "description": "Analysis updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "analysis": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "null"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing or invalid parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis or section not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Get single analysis",
+        "description": "Retrieve a single analysis by its id and section",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "description": "ID of the analysis to retrieve",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "ID of the section the analysis belongs to",
+            "required": true,
+            "type": "integer",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved analysis",
             "schema": {
               "type": "object",
               "properties": {
@@ -2734,8 +2809,26 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request - Missing section_id",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Analysis not found",
+            "description": "Analysis or section not found",
             "schema": {
               "type": "object",
               "properties": {
@@ -3508,6 +3601,130 @@
           }
         }
       },
+      "/api/fundamental_ai_search": {
+        "post": {
+          "tags": [
+            "Fundamentals"
+          ],
+          "summary": "Perform a fundamental AI search",
+          "description": "This endpoint performs an AI-powered search for fundamental data of a cryptocurrency.",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "section_name": {
+                    "type": "string",
+                    "description": "The section to search (e.g., 'revenue', 'upgrade', 'hacks', 'dapps')"
+                  },
+                  "coin_name": {
+                    "type": "string",
+                    "description": "The name or symbol of the cryptocurrency"
+                  }
+                },
+                "required": [
+                  "section_name",
+                  "coin_name"
+                ]
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      },
+      "/api/save_fundamental_data": {
+        "post": {
+          "tags": [
+            "Fundamentals"
+          ],
+          "summary": "Save fundamental data",
+          "description": "This endpoint saves the fundamental data retrieved from the AI search.",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "section_name": {
+                    "type": "string",
+                    "description": "The section of the data (e.g., 'revenue', 'upgrade', 'hacks', 'dapps')"
+                  },
+                  "coin_bot_id": {
+                    "type": "integer",
+                    "description": "The ID of the associated CoinBot"
+                  },
+                  "content": {
+                    "type": "object",
+                    "description": "The content to be saved"
+                  }
+                },
+                "required": [
+                  "section_name",
+                  "coin_bot_id",
+                  "content"
+                ]
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Data saved successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "Coin"
@@ -3601,13 +3818,13 @@
         "tags": [
           "Coin"
         ],
-        "summary": "Toggle the publication status of a coin.",
-        "description": "Toggle the publication status of a coin.",
+        "summary": "Toggle coin activation status",
+        "description": "Toggle a coin's active status. activation requires an active category and valid coin data. deactivation is always allowed.",
         "parameters": [
           {
             "name": "coin_id",
             "in": "path",
-            "description": "The ID of the coin to toggle",
+            "description": "ID of the coin to toggle",
             "required": true,
             "type": "integer",
             "schema": {}
@@ -3615,7 +3832,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Coin status toggled successfully",
+            "description": "Successfully toggled coin status",
             "schema": {
               "type": "object",
               "properties": {
@@ -3629,19 +3846,73 @@
                   "type": "boolean"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "null"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request (e.g., incomplete fundamentals or invalid chart)"
+            "description": "Invalid request (inactive category or failed validation)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Coin not found"
+            "description": "Coin not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Server error"
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -4039,44 +4310,21 @@
         "tags": [
           "Category"
         ],
-        "summary": "Toggle the publication status of all coins within a specific category.",
-        "description": "Toggle the publication status of all coins within a specific category.",
+        "summary": "Toggle category and coin activation status",
+        "description": "Toggle a category's active status and optionally validate and activate/deactivate its associated coins",
         "parameters": [
           {
             "name": "category_id",
             "in": "path",
-            "description": "The ID of the category to process",
+            "description": "ID of the category to toggle",
             "required": true,
             "type": "integer",
             "schema": {}
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "",
-            "required": true,
-            "type": "string",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "action": {
-                  "type": "string",
-                  "enum": [
-                    "activate",
-                    "deactivate"
-                  ],
-                  "description": "The action to perform on the coins"
-                }
-              },
-              "required": [
-                "action"
-              ]
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully processed the request",
+            "description": "Successfully toggled category status",
             "schema": {
               "type": "object",
               "properties": {
@@ -4095,13 +4343,45 @@
                         "type": "string"
                       },
                       "status": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                          "activated",
+                          "deactivated",
+                          "invalid",
+                          "unchanged"
+                        ]
                       },
                       "message": {
                         "type": "string"
                       }
                     }
                   }
+                },
+                "category_status": {
+                  "type": "string",
+                  "enum": [
+                    "activated",
+                    "deactivated"
+                  ]
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "processed_coins": {
+                  "type": "array",
+                  "items": {}
                 },
                 "category_status": {
                   "type": "string"
@@ -4112,113 +4392,27 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid action provided"
-          },
-          "404": {
-            "description": "Category not found or no coins found for the category"
-          },
           "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/categories/global-toggle": {
-      "post": {
-        "tags": [
-          "Category"
-        ],
-        "summary": "Global toggle the publication status of all coins across all categories.",
-        "description": "Global toggle the publication status of all coins across all categories.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "",
-            "required": true,
-            "type": "string",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "action": {
-                  "type": "string",
-                  "enum": [
-                    "activate",
-                    "deactivate"
-                  ],
-                  "description": "The action to perform on all coins"
-                }
-              },
-              "required": [
-                "action"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully processed the request",
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": false
                 },
-                "processed_categories": {
+                "processed_coins": {
                   "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "category_id": {
-                        "type": "integer"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "message": {
-                        "type": "string"
-                      },
-                      "processed_coin_bots": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "bot_id": {
-                              "type": "integer"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "status": {
-                              "type": "string"
-                            },
-                            "message": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "items": {}
+                },
+                "category_status": {
+                  "type": "string"
                 },
                 "error": {
                   "type": "string"
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid action provided"
-          },
-          "404": {
-            "description": "No categories found"
-          },
-          "500": {
-            "description": "Internal server error"
           }
         }
       }
@@ -5834,54 +6028,6 @@
                 },
                 "data": {
                   "type": "null"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/analysis/last": {
-      "get": {
-        "tags": [
-          "Analysis"
-        ],
-        "summary": "Get last analysis",
-        "description": "Retrieve the name and date of the last analysis created",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved last analysis",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object"
-                },
-                "error": {
-                  "type": "null"
-                },
-                "success": {
-                  "type": "boolean",
-                  "example": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No analysis found",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "null"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean",
-                  "example": false
                 }
               }
             }

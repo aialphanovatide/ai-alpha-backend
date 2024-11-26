@@ -31,7 +31,7 @@ check_create_and_apply_migrations() {
     fi
 }
 
-# Check, create, and apply migrations
+# Check, create, and apply migration
 check_create_and_apply_migrations
 
 # Start the application
