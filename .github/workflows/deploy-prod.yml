@@ -12,8 +12,11 @@ jobs:
     env:
       POSTGRES_DB_PROD: ${{ secrets.POSTGRES_DB_PROD }}
       POSTGRES_USER_PROD: ${{ secrets.POSTGRES_USER_PROD }}
+<<<<<<< HEAD
       POSTGRES_PASSWORD_PROD: ${{ secrets.POSTGRES_PASSWORD_PROD }}
       DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
+=======
+>>>>>>> abd00f3 (fix: adjusted deploy script to match env variables in docker compose)
       FLASK_ENV: production
       FLASK_DEBUG: 0
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
