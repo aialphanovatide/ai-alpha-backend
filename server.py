@@ -1,6 +1,7 @@
 import os
 import json
-from flask import Flask, request
+import threading  # Importar threading para ejecutar el bot de Discord en un hilo
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_mail import Mail
 from routes.chart.chart import chart_bp
@@ -37,11 +38,11 @@ from routes.external_apis.binance import binance_bp
 from routes.analysis.sections import sections_bp
 from routes.coins.coins import coin_bp
 from routes.ask_ai.ask_ai import ask_ai_bp
-from ws.socket import emit_notification
 from flasgger import Swagger
 from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
 from ws.socket import init_socketio
+from services.discord.bot.main import start_bot  
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 
@@ -139,14 +140,23 @@ app.register_blueprint(coin_bp)
 app.register_blueprint(sections_bp)
 app.register_blueprint(ask_ai_bp)
 
+def run_discord_bot():
+    import asyncio
+    asyncio.run(start_bot())
+    
+
+
 if __name__ == '__main__':
     try:
-        print('---- AI Alpha Server is starting ----') 
-        app.run(port=9002, debug=False, use_reloader=False, threaded=True, host='0.0.0.0') 
+        discord_thread = threading.Thread(target=run_discord_bot)
+        discord_thread.start()
+
+        with app.app_context():
+            print('---- AI Alpha API is running ----') 
+            app.run(port=9002, debug=True, use_reloader=False, threaded=True, host='0.0.0.0') 
     except Exception as e:
         print(f"Failed to start the AI Alpha server: {e} ")
     finally:
-        print('--- AI Alpha Server was stopped ---')
-
+        print('---AI Alpha server was stopped---')
 
 
