@@ -1,5 +1,128 @@
 import json
+import re
 from bs4 import BeautifulSoup
+
+
+def extract_raw_json(json_string):
+    print(f"[DEBUG] JSON content received: {json_string}")  # Log for debugging
+    if not json_string.strip():
+        print("[ERROR] The JSON string is empty")
+        return None
+
+    try:
+        data = json.loads(json_string)
+        if isinstance(data, list):
+            return data
+        elif isinstance(data, dict):
+            return [data]
+        else:
+            print("[ERROR] The content is not a valid JSON object")
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Error decoding JSON: {str(e)}")
+    
+    return None
+
+
+def extract_upgrades(json_string):
+    # Clean the JSON content
+    json_string = json_string.strip()
+    
+    # Search for the JSON block using a regular expression
+    match = re.search(r'```json\n(.*?)```', json_string, re.DOTALL)
+    if match:
+        json_content = match.group(1).strip()  # Extract the JSON content
+    else:
+        print("[ERROR] No JSON content found in the string.")
+        return None
+
+    if not json_content:
+        print("[ERROR] The JSON string is empty")
+        return None
+
+    try:
+        data = json.loads(json_content)
+        return data  # Return the list of dictionaries with upgrade data
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Error decoding JSON: {str(e)}")
+    
+    return None
+
+import json
+import re
+
+def extract_revenue(json_string):
+    # Clean the JSON content
+    json_string = json_string.strip()
+    
+    # Search for the JSON block using a regular expression
+    match = re.search(r'```json\n(.*?)```', json_string, re.DOTALL)
+    if match:
+        json_content = match.group(1).strip()  # Extract the JSON content
+    else:
+        print("[ERROR] No JSON content found in the string.")
+        return None
+
+    if not json_content:
+        print("[ERROR] The JSON string is empty")
+        return None
+
+    try:
+        data = json.loads(json_content)
+        return data  # Return the dictionary with revenue data
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Error decoding JSON: {str(e)}")
+    
+    return None
+
+def extract_dapps(json_string):
+    # Clean the JSON content
+    json_string = json_string.strip()
+    if json_string.startswith("```json"):
+        json_string = json_string[7:].strip()
+    if json_string.endswith("```"):
+        json_string = json_string[:-3].strip()
+
+    if not json_string:
+        print("[ERROR] The JSON string is empty")
+        return None
+
+    try:
+        data = json.loads(json_string)
+        if isinstance(data, list):
+            return data  # Return the list of dictionaries
+        elif isinstance(data, dict):
+            return [data]  # Return a single dictionary as a list
+        else:
+            print("[ERROR] The content is not a valid JSON object")
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Error decoding JSON: {str(e)}")
+    
+    return None
+
+def extract_hacks(json_string):
+    # Clean the JSON content
+    json_string = json_string.strip()
+    if json_string.startswith("```json"):
+        json_string = json_string[7:].strip()
+    if json_string.endswith("```"):
+        json_string = json_string[:-3].strip()
+
+    if not json_string:
+        print("[ERROR] The JSON string is empty")
+        return None
+
+    try:
+        data = json.loads(json_string)
+        if isinstance(data, list):
+            return data  # Return the list of dictionaries
+        elif isinstance(data, dict):
+            return [data]  # Return a single dictionary as a list
+        else:
+            print("[ERROR] The content is not a valid JSON object")
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Error decoding JSON: {str(e)}")
+    
+    return None
 
 def extract_revenue(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -68,3 +191,27 @@ def get_query(query_type, coin_name):
         """
     }
     return queries.get(query_type.lower(), None)
+
+
+def extract_data_by_section(section_name, json_string):
+    """
+    Main function to extract data based on the section name.
+    
+    Args:
+        section_name (str): The name of the section to extract data from.
+        json_string (str): The JSON string containing the data.
+    
+    Returns:
+        list or dict: Extracted data based on the section name.
+    """
+    if section_name == "hacks":
+        return extract_hacks(json_string)
+    elif section_name == "dapps":
+        return extract_dapps(json_string)
+    elif section_name == "revenue":
+        return extract_revenue(json_string)
+    elif section_name == "upgrade":
+        return extract_upgrades(json_string)
+    else:
+        print(f"[ERROR] Unknown section name: {section_name}")
+        return None
