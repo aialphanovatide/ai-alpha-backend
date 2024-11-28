@@ -1874,6 +1874,7 @@ init_superadmin()
 
 
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
+
 def populate_topics():
     """
     Populates the database with topics based on provided data from a JSON file and timeframes.
@@ -1983,7 +1984,7 @@ def create_superadmin_api_key():
         session.close()
 
 
-# create_superadmin_api_key()
+create_superadmin_api_key()
 
 
 # --------------AUTOPOPULATE SECTION TABLE -------------------
@@ -2052,7 +2053,7 @@ def populate_sections():
             print(f"---- Unexpected error while populating sections: {str(e)} ----")
 
 
-# populate_sections()
+populate_sections()
 
 # -------------- ADD COINGECKO IDS AND SYMBOLS ------------------------
 
@@ -2182,4 +2183,4 @@ def init_coingecko_data():
             print(f"Unexpected error: {str(e)}")
 
 
-# init_coingecko_data()
+init_coingecko_data()
