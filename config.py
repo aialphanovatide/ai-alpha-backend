@@ -1657,8 +1657,6 @@ def initialize_default_roles():
         session.close()
 
 
-initialize_default_roles()
-
 # ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
 
 def init_user_data():
@@ -1718,8 +1716,6 @@ def init_user_data():
     finally:
         session.close()
 
-
-init_user_data()
 
 # ------------- CREATE DEFAULR CATEGORIES AND COINS -------------------
 
@@ -1817,8 +1813,6 @@ def populate_categories_and_coins():
         session.close()
 
 
-populate_categories_and_coins()
-
 # ------------- CREATE DEFAULT SUPERADMIN -----------------------------
 
 def init_superadmin():
@@ -1868,9 +1862,6 @@ def init_superadmin():
         session.rollback()
     finally:
         session.close()
-
-
-init_superadmin()
 
 
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
@@ -1933,8 +1924,6 @@ def populate_topics():
             session.rollback()
             raise Exception(f'Unexpected error while populating topics: {str(e)}')
 
-        
-populate_topics()
 
 # --------------CREATE DEFAULT API KEY FOR SUPERADMIN -------------------
 
@@ -1982,9 +1971,6 @@ def create_superadmin_api_key():
         print(f'---- Unexpected error while creating superadmin API key: {str(e)} ----')
     finally:
         session.close()
-
-
-create_superadmin_api_key()
 
 
 # --------------AUTOPOPULATE SECTION TABLE -------------------
@@ -2052,8 +2038,6 @@ def populate_sections():
             session.rollback()
             print(f"---- Unexpected error while populating sections: {str(e)} ----")
 
-
-populate_sections()
 
 # -------------- ADD COINGECKO IDS AND SYMBOLS ------------------------
 
@@ -2183,4 +2167,14 @@ def init_coingecko_data():
             print(f"Unexpected error: {str(e)}")
 
 
-init_coingecko_data()
+
+def init_all_data():
+    init_coingecko_data()
+    init_superadmin()
+    initialize_default_roles()
+    populate_topics()
+    populate_sections()
+    create_superadmin_api_key()
+    populate_categories_and_coins()
+    init_user_data()
+
