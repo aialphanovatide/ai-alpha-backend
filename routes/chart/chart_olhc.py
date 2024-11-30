@@ -2,6 +2,7 @@ import os
 import time
 import requests
 from typing import Optional
+from bokeh.resources import CDN
 from dotenv import load_dotenv
 from flask import render_template
 from services.chart.candlestick import ChartWidget, ChartSettings
@@ -230,14 +231,42 @@ def chart_widget():
         symbol = request.args.get('symbol', 'BTCUSDT')
         interval = request.args.get('interval', '1h')
         n_bars = request.args.get('n_bars', 50, type=int)
+        theme = request.args.get('theme', 'light')
 
-        # Create a ChartWidget instance with the new parameters
-        chart_widget = ChartWidget(config=ChartSettings(interval=interval, symbol=symbol, num_candles=n_bars))
+        # Validations
+        if not symbol or not isinstance(symbol, str):
+            return "Invalid symbol parameter", 400
+
+        valid_intervals = ['15m', '30m', '1h', '4h', '1d', '1w']
+        if interval not in valid_intervals:
+            return f"Invalid interval. Must be one of: {', '.join(valid_intervals)}", 400
+
+        if not isinstance(n_bars, int) or n_bars < 1 or n_bars > 1000:
+            return "n_bars must be an integer between 1 and 1000", 400
+        
+        if theme not in ['light', 'dark']:
+            return "Invalid theme. Must be 'light' or 'dark'", 400
+
+        # Create a ChartWidget instance with the specific parameters
+        chart_widget = ChartWidget(
+            config=ChartSettings(
+                symbol=symbol,
+                interval=interval,
+                num_candles=n_bars,
+                theme=theme
+            )
+        )
         
         # Get the script and div components
         script, div = chart_widget.get_chart_components()
         
-        # Render the template with the chart components
-        return render_template('chart.html', script=script, div=div)
+        # Render the embedded template
+        return render_template(
+            'chart_embed.html',  # New template specifically for embedded view
+            script=script, 
+            div=div, 
+            resources=CDN.render(),
+            title=f"Chart - {symbol}"
+        )
     except Exception as e:
         return str(e), 500

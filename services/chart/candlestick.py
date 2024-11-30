@@ -167,8 +167,8 @@ class ChartSettings:
                  resistance_label_color: str = '#2DDA99',
                  axis_line_color: str = '#565656',
                  title_font_size: str = '16px',
-                 axis_font_size: str = '12px',
-                 label_font_size: str = '10px'):
+                 axis_font_size: str = '10px',
+                 label_font_size: str = '8px'):
 
         self.symbol = symbol
         self.interval = interval
@@ -248,7 +248,7 @@ class RSISettings:
                  period: int = 14,
                  overbought: float = 70,
                  oversold: float = 30,
-                 level_color: str = '#202020',
+                 level_color: str = '#282828', # Default color for overbought/oversold levels
                  line_color: str = '#6A0DAD',
                  line_width: float = 1,
                  height: int = 150):
@@ -388,28 +388,31 @@ class ChartWidget:
             'interval': interval,
             'limit': limit
         }
-        
-        response = requests.get(f'{self.BASE_URL}/klines', params=params)
-        
-        if response.status_code != 200:
-            raise Exception(f"API Error: {response.status_code}, {response.text}")
-        
-        data = response.json()
-        
-        # Extract only the needed columns
-        extracted_data = [{'Open Time': item[0], 'Open': item[1], 'High': item[2], 'Low': item[3], 'Close': item[4], 'Volume': item[5], 'Close Time': item[6]} for item in data]
 
-        # Convert to DataFrame
-        df = pd.DataFrame(extracted_data)
-        
-        # Convert numeric columns
-        numeric_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
-        df[numeric_cols] = df[numeric_cols].astype(float)
-        
-        # Convert timestamps
-        df['Open Time'] = pd.to_datetime(df['Open Time'], unit='ms')
-        
-        return df
+        try:
+            response = requests.get(f'{self.BASE_URL}/klines', params=params)
+            
+            if response.status_code != 200:
+                raise Exception(f"API Error: {response.status_code}, {response.text}")
+            
+            data = response.json()
+            
+            # Extract only the needed columns
+            extracted_data = [{'Open Time': item[0], 'Open': item[1], 'High': item[2], 'Low': item[3], 'Close': item[4], 'Volume': item[5], 'Close Time': item[6]} for item in data]
+
+            # Convert to DataFrame
+            df = pd.DataFrame(extracted_data)
+            
+            # Convert numeric columns
+            numeric_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+            df[numeric_cols] = df[numeric_cols].astype(float)
+            
+            # Convert timestamps
+            df['Open Time'] = pd.to_datetime(df['Open Time'], unit='ms')
+            
+            return df
+        except Exception as e:
+            print(f"Error getting klines: {e}")
 
     def calculate_technical_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -501,9 +504,54 @@ class ChartWidget:
             active_drag="xpan"
         )
 
+        # Load base64 image data from file
+        try:
+            with open('static/logo.txt', 'r') as f:
+                base64_image = f.read().strip()  # Remove any whitespace
+                image_url = base64_image
+        except FileNotFoundError:
+            print("Warning: Logo file not found, using default image")
+            image_url = ''
+        
+        # Calculate positions in data space
+        x_pos = self.df['Open Time'].max() - (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.007
+        y_pos = self.df['High'].max() * 0.63  # Position at 90% of max height
+        width = (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.01  # 20% of time range
+        height = (self.df['High'].max() - self.df['Low'].min()) * 0.05  # 20% of price range
+
+        print(f"Image positioning - X: {x_pos}, Y: {y_pos}")
+        print(f"Image size - Width: {width}, Height: {height}")
+
+
+        image_source = ColumnDataSource({
+            'url': [image_url],
+            'x': [x_pos],
+            'y': [y_pos],
+            'w': [width],
+            'h': [height]
+        })
+
+        # Add the image
+        image = ImageURL(
+            url="url",
+            x="x",
+            y="y",
+            w="w",  # Fixed width in pixels
+            h="h",  # Fixed height in pixels
+            anchor="center",  # Position in bottom left corner
+            global_alpha=1.0,  # Slight transparency
+        )
+
+        # Add the image to the plot
+        self.p.add_glyph(image_source, image)
+        
+        # Print the figure's range for debugging
+        print(f"Figure X range: {self.p.x_range.start} to {self.p.x_range.end}")
+        print(f"Figure Y range: {self.p.y_range.start} to {self.p.y_range.end}")
+
         # Trigger initial y-axis range calculation
         self.p.js_on_event('document_ready', callback)
-        
+
         # Attach the callback to x_range changes
         x_range.js_on_change('start', callback)
         x_range.js_on_change('end', callback)
@@ -511,7 +559,6 @@ class ChartWidget:
         # Style the figure
         self.style_figure(self.p)
 
-        # Add candlesticks
         self.add_candlesticks(self.p)
 
         # Add current price line and label
@@ -520,17 +567,13 @@ class ChartWidget:
         # Support and Resistance levels
         self.add_support_resistance_levels(self.p)
 
-        # Add technical indicators
-        chart = self.add_technical_indicators(self.p)
+        # Add technical indicators and capture the return value
+        result = self.add_technical_indicators(self.p)
 
-        html = file_html(chart, CDN, "Candlestick Chart")
+        # Store the result for other methods to use
+        self.chart_layout = result
 
-        # Save the chart to an HTML file
-        chart_path = "templates/chart.html"
-        with open(chart_path, "w") as f:
-            f.write(html)
-
-        return self.p
+        return result  # Return either the figure or the layout with RSI
 
     def _calculate_y_range(self, time_min, time_max):
 
@@ -588,21 +631,33 @@ class ChartWidget:
 
     def style_figure(self, p):
         p.outline_line_color = None
+        
+        # X-axis styling
         p.xaxis.major_label_text_color = self.config.text_color
+        p.xaxis.major_label_text_font_size = self.config.axis_font_size
         p.xaxis.axis_line_color = self.config.axis_line_color
         p.xaxis.major_tick_line_color = self.config.axis_line_color
         p.xaxis.minor_tick_line_color = None
+        
+        # Y-axis styling
         p.yaxis.major_label_text_color = self.config.text_color
+        p.yaxis.major_label_text_font_size = self.config.axis_font_size
         p.yaxis.axis_line_color = self.config.axis_line_color
         p.yaxis.major_tick_line_color = self.config.axis_line_color
         p.yaxis.minor_tick_line_color = None
+        
+        # Grid styling
         p.xgrid.grid_line_color = None
         p.ygrid.grid_line_color = None
+        
+        # Formatters
         p.yaxis.formatter = NumeralTickFormatter(format="$0,0.00")
-        p.xaxis.formatter = DatetimeTickFormatter(
-            milliseconds="%Y-%m-%d", seconds="%Y-%m-%d", minutes="%Y-%m-%d",
-            hours="%Y-%m-%d", days="%Y-%m-%d", months="%Y-%m-%d", years="%Y-%m-%d"
+        p.xaxis.formatter = DatetimeTickFormatter( 
+            days="%Y-%m-%d", 
+            months="%Y-%m-%d", 
+            years="%Y-%m-%d"
         )
+        
         # Disable zoom
         p.toolbar.active_scroll = None  # Disable wheel zoom
 
@@ -717,6 +772,7 @@ class ChartWidget:
             self.p.legend.background_fill_color = self.config.background_color
             self.p.legend.label_text_color = self.config.text_color
             self.p.legend.click_policy = "hide"
+            self.p.legend.label_text_font_size = self.config.axis_font_size
 
 
         if self.rsi.enabled:
@@ -760,7 +816,7 @@ class ChartWidget:
             rsi_figure.line(
                 x=[self.df['Open Time'].min(), self.df['Open Time'].max()], 
                 y=[self.rsi.overbought, self.rsi.overbought], 
-                line_color=self.rsi.level_color, 
+                line_color=self.rsi.level_color if self.config.theme == 'light' else '#ffffff', 
                 line_dash='dashed', 
                 line_width=self.rsi.line_width,
                 line_alpha=0.5
@@ -768,7 +824,7 @@ class ChartWidget:
             rsi_figure.line(
                 x=[self.df['Open Time'].min(), self.df['Open Time'].max()], 
                 y=[self.rsi.oversold, self.rsi.oversold], 
-                line_color=self.rsi.level_color, 
+                line_color=self.rsi.level_color if self.config.theme == 'light' else '#ffffff', 
                 line_dash='dashed', 
                 line_width=self.rsi.line_width,
                 line_alpha=0.5
@@ -804,19 +860,19 @@ class ChartWidget:
 
         # Create ColumnDataSource for current price line
         current_price_line_source = ColumnDataSource({
-            'x': [[self.df['Open Time'].min(), self.df['Open Time'].max()]],
-            'y': [[current_price, current_price]]
+            'x': [self.df['Open Time'].min(), self.df['Open Time'].max()],  # Changed from nested list
+            'y': [current_price, current_price]  # Changed from nested list
         })
 
         # Add current price line
-        p.multi_line(xs='x',
-                     ys='y',
-                     source=current_price_line_source,
-                     line_color=self.config.text_color,
-                     line_dash='dotted',
-                     line_width=1,
-                     line_alpha=0.5,
-                     level='overlay')
+        p.line(x='x',
+               y='y',
+               source=current_price_line_source,
+               line_color=self.config.text_color,
+               line_dash='dotted',
+               line_width=1,
+               line_alpha=0.5,
+               level='overlay')
 
         # Add current price label
         p.text(x='x',
@@ -825,9 +881,9 @@ class ChartWidget:
                source=current_price_label_source,
                text_color=self.config.text_color,
                text_font_size=self.config.label_font_size,
-               text_align='right',  # Align text to the right
+               text_align='right',
                text_baseline='middle',
-               x_offset=-10,  # Negative offset to move label left of the point
+               x_offset=-10,
                background_fill_color=self.config.background_color,
                background_fill_alpha=0.8,
                border_line_color=self.config.text_color,
@@ -836,7 +892,7 @@ class ChartWidget:
                level='overlay',
                border_radius=5)
 
-        # Update the callback to keep label on right side
+        # Update callback
         price_callback = CustomJS(
             args=dict(
                 label_source=current_price_label_source,
@@ -857,16 +913,16 @@ class ChartWidget:
                 
                 // Update line position
                 const line_data = line_source.data;
-                line_data.x[0] = [x_start, x_end];
+                line_data.x = [x_start, x_end];  // Changed from nested array
                 
                 // If current price is not in visible range, position both at top
                 if (current_price < y_start || current_price > y_end) {
-                    const top_position = y_end - ((y_end - y_start) * 0.05);
+                    const top_position = y_end - ((y_end - y_start) * 0.02);
                     label_data.y[0] = top_position;
-                    line_data.y[0] = [top_position, top_position];
+                    line_data.y = [top_position, top_position];  // Changed from nested array
                 } else {
                     label_data.y[0] = current_price;
-                    line_data.y[0] = [current_price, current_price];
+                    line_data.y = [current_price, current_price];  // Changed from nested array
                 }
                 
                 label_source.change.emit();
@@ -916,77 +972,89 @@ class ChartWidget:
         self.websocket.update_callback = update_chart
 
     def add_support_resistance_levels(self, p):
-        # ColumnDataSource for support and resistance labels
-        support_label_source = ColumnDataSource({
-            'x': [],
-            'y': [],
-            'text': []
-        })
+        def format_crypto_price(price):
+            """Format crypto price with appropriate decimal places"""
+            if price >= 1:
+                # For prices >= 1, show 2 decimal places
+                return f'${price:,.2f}'
+            else:
+                # For prices < 1, show up to 8 decimal places, removing trailing zeros
+                return f'${price:.8f}'.rstrip('0').rstrip('.')
 
-        resistance_label_source = ColumnDataSource({
-            'x': [],
-            'y': [],
-            'text': []
-        })
+        # Create initial data for labels
+        support_data = {
+            'x': [self.df['Open Time'].iloc[0]] * len(self.config.support_levels),
+            'y': self.config.support_levels,
+            'text': [format_crypto_price(price) for price in self.config.support_levels]
+        }
+        
+        resistance_data = {
+            'x': [self.df['Open Time'].iloc[0]] * len(self.config.resistance_levels),
+            'y': self.config.resistance_levels,
+            'text': [format_crypto_price(price) for price in self.config.resistance_levels]
+        }
 
-        # Handle support levels
+        # Create data sources
+        support_label_source = ColumnDataSource(support_data)
+        resistance_label_source = ColumnDataSource(resistance_data)
+
+        # Add support levels
         if self.config.support_levels:
+            # Add support lines
             for level in self.config.support_levels:
-                p.line(x=[self.df['Open Time'].min(), self.df['Open Time'].max()], 
-                       y=[level, level],
-                       line_color=self.config.support_label_color, 
-                       line_dash='dashed', 
-                       line_width=2, 
-                       hover_line_alpha=0
+                p.line(
+                    x=[self.df['Open Time'].min(), self.df['Open Time'].max()],
+                    y=[level, level],
+                    line_color=self.config.support_label_color,
+                    line_dash='dashed',
+                    line_width=1
                 )
-                
-                label = f'${level}'
-                support_label_source.data['x'].append(self.df['Open Time'].min())
-                support_label_source.data['y'].append(level)
-                support_label_source.data['text'].append(label)
 
-            # Create support labels
-            p.text(x='x', 
-                y='y', 
-                text='text',
-                source=support_label_source,
-                text_color=self.config.text_color,
-                text_font_size=self.config.label_font_size,
-                text_align='left',
-                text_baseline='middle',
-                x_offset=10,
-                background_fill_color=self.config.support_label_color,
-                background_fill_alpha=0.8,
-                padding=5)
+                # Add support labels
+                p.text(
+                    x='x',
+                    y='y',
+                    text='text',
+                    source=support_label_source,
+                    text_color=self.config.text_color,
+                    text_font_size=self.config.label_font_size,
+                    text_align='left',
+                    text_baseline='middle',
+                    x_offset=10,
+                    background_fill_color=self.config.support_label_color,
+                    border_radius=5,
+                    background_fill_alpha=0.8,
+                    padding=5
+                )
 
-        # Handle resistance levels
+        # Add resistance levels with the same formatting
         if self.config.resistance_levels:
+            # Add resistance lines
             for level in self.config.resistance_levels:
-                p.line(x=[self.df['Open Time'].min(), self.df['Open Time'].max()], 
-                       y=[level, level],
-                       line_color=self.config.resistance_label_color, 
-                       line_dash='dashed', 
-                       line_width=1, 
-                       hover_line_alpha=0)
-                
-                label = f'${level}'
-                resistance_label_source.data['x'].append(self.df['Open Time'].min())
-                resistance_label_source.data['y'].append(level)
-                resistance_label_source.data['text'].append(label)
+                p.line(
+                    x=[self.df['Open Time'].min(), self.df['Open Time'].max()],
+                    y=[level, level],
+                    line_color=self.config.resistance_label_color,
+                    line_dash='dashed',
+                    line_width=1
+                )
 
-            # Create resistance labels
-            p.text(x='x', 
-                y='y', 
-                text='text',
-                source=resistance_label_source,
-                text_color=self.config.text_color,
-                text_font_size=self.config.label_font_size,
-                text_align='left',
-                text_baseline='middle',
-                x_offset=10,
-                background_fill_color=self.config.resistance_label_color,
-                background_fill_alpha=1,
-                padding=5)
+                # Add resistance labels
+                p.text(
+                    x='x',
+                    y='y',
+                    text='text',
+                    source=resistance_label_source,
+                    text_color=self.config.text_color,
+                    text_font_size=self.config.label_font_size,
+                    text_align='left',
+                    text_baseline='middle',
+                    x_offset=10,
+                    background_fill_color=self.config.resistance_label_color,
+                    border_radius=5,
+                    background_fill_alpha=0.8,
+                    padding=5
+                )
 
         # Update callback to handle both sources
         callback = CustomJS(
@@ -1016,24 +1084,32 @@ class ChartWidget:
 
         # Attach callback to x_range updates
         p.x_range.js_on_change('start', callback)
-        p.x_range.js_on_change('end', callback)     
+        p.x_range.js_on_change('end', callback) 
 
     def get_chart_components(self):
         """Return the script and div components for embedding the chart."""
         self.create_candlestick_chart()
-        script, div = components(self.p)
+        script, div = components(self.chart_layout)  # Use chart_layout instead of self.p
         return script, div
-    
+        
+    def save_as_html(self, filepath: str = "templates/chart_test.html"):
+        """Saves the chart as a standalone HTML file."""
+        if not hasattr(self, 'p'):
+            self.p = self.create_candlestick_chart()
+        html = file_html(self.p, CDN, "Candlestick Chart")
+        with open(filepath, "w") as f:
+            f.write(html)
+        
 
 
 if __name__ == '__main__':
     # Create a ChartWidget instance with default settings
-    chart = ChartWidget(config=ChartSettings(interval='1h'))
+    chart = ChartWidget()
     
     # Create the candlestick chart
-    chart.create_candlestick_chart()
+    chart.save_as_html()
 
-    # # Start live updates
+    # Start live updates
     # try:
     #     print("Press Ctrl+C to stop live updates")
     #     while True:
@@ -1042,3 +1118,12 @@ if __name__ == '__main__':
     #     print("Stopping live updates...")
     # finally:
     #     chart.stop_live_updates()
+
+
+
+
+
+
+
+
+
