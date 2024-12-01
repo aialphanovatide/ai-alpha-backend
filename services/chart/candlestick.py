@@ -31,39 +31,60 @@ class BinanceWebSocket:
         print(f"Initialized BinanceWebSocket for {self.symbol.upper()} {self.interval}")
     
     def _on_message(self, ws, message):
+        """
+        Handles incoming messages from the Binance WebSocket.
+
+        This method parses the incoming JSON message, extracts candlestick data,
+        updates the current price, and calls the update callback function if available.
+        It handles both closed and open candles, providing different messages for each case.
+
+        Args:
+            ws (websocket.WebSocketApp): The WebSocket client instance.
+            message (str): The incoming JSON message from the Binance WebSocket.
+        """
         try:
             data = json.loads(message)
-            if 'k' in data: #check if 'k' exists in the message
+            if 'k' in data:
                 kline = data['k']
-
+                
                 # Extract relevant information
                 open_time = pd.to_datetime(kline['t'], unit='ms')
-                open_price = float(kline['o'])
-                high_price = float(kline['h'])
-                low_price = float(kline['l'])
-                close_price = float(kline['c'])
-                volume = float(kline['v'])
                 close_time = pd.to_datetime(kline['T'], unit='ms')
-
-                # Create DataFrame
-                df = pd.DataFrame([{
+                is_closed = kline['x']  # Whether this kline is closed
+                
+                # Create DataFrame with the new data
+                new_data = pd.DataFrame([{
                     'Open Time': open_time,
-                    'Open': open_price,
-                    'High': high_price,
-                    'Low': low_price,
-                    'Close': close_price,
-                    'Volume': volume,
                     'Close Time': close_time,
+                    'Open': float(kline['o']),
+                    'High': float(kline['h']),
+                    'Low': float(kline['l']),
+                    'Close': float(kline['c']),
+                    'Volume': float(kline['v'])
                 }])
 
-                print(f"\nNew kline data for {self.symbol.upper()} ({self.interval}):")
-                print(f"Open Time: {df['Open Time'][0].strftime('%Y-%m-%d %H:%M:%S')}, Open: {df['Open'][0]:.2f}, High: {df['High'][0]:.2f}, Low: {df['Low'][0]:.2f}, Close: {df['Close'][0]:.2f}, Volume: {df['Volume'][0]:.2f}")
-
                 # Update current price
-                self.current_price = close_price
+                self.current_price = float(kline['c'])
 
-                if self.update_callback and callable(self.update_callback):
-                    self.update_callback(df)
+                if is_closed:
+                    # This is a new candle, append it to the data
+                    print(f"\nNew closed kline for {self.symbol.upper()} ({self.interval})")
+                    if self.update_callback and callable(self.update_callback):
+                        self.update_callback(new_data, is_new_candle=True)
+                else:
+                    # This is an update to the current candle
+                    print(f"\nUpdating current kline for {self.symbol.upper()} ({self.interval})")
+                    if self.update_callback and callable(self.update_callback):
+                        self.update_callback(new_data, is_new_candle=False)
+
+                print(f"Time: {open_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"Open: {new_data['Open'][0]:.2f}")
+                print(f"High: {new_data['High'][0]:.2f}")
+                print(f"Low: {new_data['Low'][0]:.2f}")
+                print(f"Close: {new_data['Close'][0]:.2f}")
+                print(f"Volume: {new_data['Volume'][0]:.2f}")
+                print(f"Is Closed: {is_closed}")
+
             else:
                 print("Waiting for kline data...")
 
@@ -131,6 +152,7 @@ import requests
 import numpy as np
 import pandas as pd
 import bokeh.plotting as bk
+from ws.socket import socketio
 from typing import List, Literal
 from bokeh.resources import CDN
 from bokeh.embed import file_html, components
@@ -298,45 +320,191 @@ class ChartWidget:
         self._running = False
         self._thread = None
 
-    def update_chart_data(self, df):
-        """Handle incoming WebSocket data updates"""
+    def update_chart_data(self, df: pd.DataFrame, is_new_candle: bool):
+        """
+        Update the chart with new candlestick data
+        
+        Args:
+            df (pd.DataFrame): DataFrame containing the new candlestick data
+            is_new_candle (bool): Whether this is a new candle or an update to the current one
+        """
         if not self.source:
+            print("Warning: ColumnDataSource not initialized")
             return
-        
-        # Extract the latest row of data from the DataFrame
-        latest_data = df.iloc[0]
-        
-        # Convert timestamp to datetime
-        timestamp = latest_data['Open Time']
-        
-        # Update existing candle or add new one
-        if latest_data['Close Time'] <= pd.Timestamp.now():
-            # Add new candle
-            new_data = {
-                'Open Time': [timestamp],
-                'Open': [latest_data['Open']],
-                'High': [latest_data['High']],
-                'Low': [latest_data['Low']],
-                'Close': [latest_data['Close']],
-                'Volume': [latest_data['Volume']]
-            }
+
+        try:
+            latest_data = df.iloc[0]
             
-            # Convert the new data to a dictionary with lists for each column
-            new_data_dict = new_data.to_dict(orient='list')
-            
-            # Stream the new data to the source
-            self.source.stream(new_data_dict, rollover=len(self.source.data['Open Time']))
+            if is_new_candle:
+                # Add new candle to the data
+                new_data = {
+                    'Open Time': [latest_data['Open Time']],
+                    'Close Time': [latest_data['Close Time']],
+                    'Open': [latest_data['Open']],
+                    'High': [latest_data['High']],
+                    'Low': [latest_data['Low']],
+                    'Close': [latest_data['Close']],
+                    'Volume': [latest_data['Volume']],
+                    'index': [len(self.source.data['Open Time'])]
+                }
                 
-        else:
-            # Update current candle
-            last_idx = -1
-            self.source.data['High'][last_idx] = max(self.source.data['High'][last_idx], latest_data['High'])
-            self.source.data['Low'][last_idx] = min(self.source.data['Low'][last_idx], latest_data['Low'])
-            self.source.data['Close'][last_idx] = latest_data['Close']
-            self.source.data['Volume'][last_idx] = latest_data['Volume']
+                # Update the DataFrame and stream new data
+                self.df = pd.concat([self.df, df], ignore_index=True)
+                self.source.stream(new_data, rollover=len(self.source.data['Open Time']))
+                
+            else:
+                # Update the current candle
+                current_index = len(self.source.data['Open Time']) - 1
+                
+                # Update the source data for the current candle
+                self.source.patch({
+                    'High': [(current_index, latest_data['High'])],
+                    'Low': [(current_index, latest_data['Low'])],
+                    'Close': [(current_index, latest_data['Close'])],
+                    'Volume': [(current_index, latest_data['Volume'])]
+                })
+                
+                # Update the DataFrame
+                self.df.iloc[-1, self.df.columns.get_indexer(['High', 'Low', 'Close', 'Volume'])] = [
+                    latest_data['High'],
+                    latest_data['Low'],
+                    latest_data['Close'],
+                    latest_data['Volume']
+                ]
+
+            # Calculate technical indicators if enabled
+            if self.sma.enabled or self.rsi.enabled:
+                self.calculate_technical_indicators()
+
+            # Update current price elements
+            current_price = latest_data['Close']
+            if hasattr(self, 'current_price_label_source'):
+                self.current_price_label_source.data.update({
+                    'y': [current_price],
+                    'text': [f'${current_price:,.2f}']
+                })
+                
+            if hasattr(self, 'current_price_line_source'):
+                self.current_price_line_source.data.update({
+                    'y': [current_price, current_price]
+                })
+
+            print(f"Chart updated {'with new candle' if is_new_candle else 'current candle'} at {latest_data['Open Time']}")
+
+             # Get the last index from the current source
+            current_length = len(self.source.data['index'])
+
+            # Create new data with index
+            new_data = {
+                'index': [current_length + i for i in range(len(df))],  # Add sequential index
+                'Open Time': df['Open Time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist(),
+                'Close Time': df['Close Time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist(),
+                'Open': df['Open'].tolist(),
+                'High': df['High'].tolist(),
+                'Low': df['Low'].tolist(),
+                'Close': df['Close'].tolist(),
+                'Volume': df['Volume'].tolist()
+            }
+                
+            socketio.emit('update', new_data, namespace='/chart')
+
+        except Exception as e:
+            print(f"Error updating chart: {e}")
+            import traceback
+            traceback.print_exc()
+
+    # def update_chart_data(self, df: pd.DataFrame):
+    #     """
+    #     Update the chart with new candlestick data
         
-        # Trigger source update
-        self.source.change.emit()
+    #     Args:
+    #         df (pd.DataFrame): DataFrame containing the new candlestick data
+    #     """
+    #     if not self.source:
+    #         print("Warning: ColumnDataSource not initialized")
+    #         return
+
+    #     try:
+    #         print("\ndf", df)
+    #         print("\ndf", type(df))
+    #         # Get the latest data
+    #         latest_data = df.iloc[0]  
+            
+    #         # Prepare the new data with ALL required columns
+    #         new_data = {
+    #             'Open Time': [latest_data['Open Time']],
+    #             'Close Time': [latest_data['Close Time']],
+    #             'Open': [latest_data['Open']],
+    #             'High': [latest_data['High']],
+    #             'Low': [latest_data['Low']],
+    #             'Close': [latest_data['Close']],
+    #             'Volume': [latest_data['Volume']],
+    #             'index': [len(self.source.data['Open Time'])]
+    #         }
+
+    #         # Calculate technical indicators if enabled
+    #         if self.sma.enabled:
+    #             # Update existing DataFrame with new data
+    #             updated_df = pd.concat([self.df, pd.DataFrame([latest_data])], ignore_index=True)
+    #             for period in self.sma.periods:
+    #                 sma_value = updated_df['Close'].rolling(window=period).mean().iloc[-1]
+    #                 new_data[f'SMA_{period}'] = [sma_value]
+
+    #         if self.rsi.enabled:
+    #             # Update RSI calculation
+    #             updated_df = pd.concat([self.df, pd.DataFrame([latest_data])], ignore_index=True)
+    #             delta = updated_df['Close'].diff()
+    #             gain = (delta.where(delta > 0, 0)).rolling(window=self.rsi.period).mean()
+    #             loss = (-delta.where(delta < 0, 0)).rolling(window=self.rsi.period).mean()
+    #             rs = gain / loss
+    #             rsi = 100 - (100 / (1 + rs))
+    #             new_data['RSI'] = [rsi.iloc[-1]]
+
+    #         # Update the DataFrame with the new data
+    #         self.df = pd.concat([self.df, df], ignore_index=True)
+
+    #         # Stream the new data to the source
+    #         self.source.stream(new_data, rollover=len(self.source.data['Open Time']))
+
+    #         # Update current price elements if they exist
+    #         current_price = latest_data['Close']
+    #         print('\nNew Price: ', current_price)
+    #         if hasattr(self, 'current_price_label_source'):
+    #             self.current_price_label_source.data.update({
+    #                 'y': [current_price],
+    #                 'text': [f'${current_price:,.2f}']
+    #             })
+    #             print('chart current_price_label_source pass')
+                
+    #         if hasattr(self, 'current_price_line_source'):
+    #             self.current_price_line_source.data.update({
+    #                 'y': [current_price, current_price]
+    #             })
+    #             print('chart current_price_line_source pass')
+
+    #         print(f"Chart updated with new data at {latest_data['Open Time']}")
+
+    #         # Get the last index from the current source
+    #         current_length = len(self.source.data['index'])
+            
+    #         # Create new data with index
+    #         new_data = {
+    #             'index': [current_length + i for i in range(len(df))],  # Add sequential index
+    #             'Open Time': df['Open Time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist(),
+    #             'Close Time': df['Close Time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist(),
+    #             'Open': df['Open'].tolist(),
+    #             'High': df['High'].tolist(),
+    #             'Low': df['Low'].tolist(),
+    #             'Close': df['Close'].tolist(),
+    #             'Volume': df['Volume'].tolist()
+    #         }
+                
+    #         socketio.emit('update', new_data, namespace='/chart')
+            
+    #     except Exception as e:
+    #         print(f"Error updating chart: {e}")
+    #         import traceback
+    #         traceback.print_exc()
 
     def start_live_updates(self):
         """Start receiving live updates"""
@@ -344,7 +512,7 @@ class ChartWidget:
             self.websocket = BinanceWebSocket(
                 symbol=self.symbol,
                 interval=self.interval,
-                # update_callback=self.update_chart_data
+                update_callback=self.update_chart_data
             )
             self.websocket.start()
             
@@ -414,7 +582,7 @@ class ChartWidget:
         except Exception as e:
             print(f"Error getting klines: {e}")
 
-    def calculate_technical_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_technical_indicators(self) -> pd.DataFrame:
         """
         Calculate and add basic technical indicators to the input DataFrame.
 
@@ -444,10 +612,13 @@ class ChartWidget:
         self.df = self.get_historical_data(self.symbol, self.interval)
         
         # Calculate technical indicators
-        self.df = self.calculate_technical_indicators(self.df)
+        self.calculate_technical_indicators()
 
         # Create ColumnDataSource
-        self.source = ColumnDataSource(self.df)
+        self.source = ColumnDataSource(self.df, name='chart_source')
+
+        # Open WS for live candles data
+        self.start_live_updates()
 
         # Calculate initial ranges based on the number of candles
         time_min = self.df['Open Time'].iloc[-self.config.num_candles]
@@ -511,7 +682,7 @@ class ChartWidget:
                 image_url = base64_image
         except FileNotFoundError:
             print("Warning: Logo file not found, using default image")
-            image_url = ''
+            image_url = 'https://www.shutterstock.com/image-vector/bnb-binance-icon-sign-payment-600nw-2080319677.jpg'
         
         # Calculate positions in data space
         x_pos = self.df['Open Time'].max() - (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.007
@@ -562,7 +733,7 @@ class ChartWidget:
         self.add_candlesticks(self.p)
 
         # Add current price line and label
-        self.add_current_price_elements(self.p)
+        self.add_current_price_element(self.p)
 
         # Support and Resistance levels
         self.add_support_resistance_levels(self.p)
@@ -847,38 +1018,44 @@ class ChartWidget:
         else:
             return p
 
-    def add_current_price_elements(self, p):
+    def add_current_price_element(self, p):
         # Use the current price from the WebSocket
-        current_price = self.websocket.get_current_price() if self.websocket and self.websocket.is_connected else self.df['Close'].iloc[-1]
+        current_price = self.websocket.get_current_price() if self.websocket and self.websocket.is_connected else None
+        print('current_price live: ', current_price)
+
+        if not current_price:
+            current_price = self.df['Close'].iloc[-1]
+            print('current_price from historical: ', current_price)
         
         # Create ColumnDataSource for current price label
-        current_price_label_source = ColumnDataSource({
+        self.current_price_label_source = ColumnDataSource({
             'x': [self.df['Open Time'].max()],  # Start at the right edge
             'y': [current_price],
             'text': [f'${current_price:,.2f}']
-        })
+        }, name='current_price_label_source')
 
         # Create ColumnDataSource for current price line
-        current_price_line_source = ColumnDataSource({
+        self.current_price_line_source = ColumnDataSource({
             'x': [self.df['Open Time'].min(), self.df['Open Time'].max()],  # Changed from nested list
             'y': [current_price, current_price]  # Changed from nested list
-        })
+        }, name='current_price_line_source')
 
         # Add current price line
         p.line(x='x',
                y='y',
-               source=current_price_line_source,
+               source=self.current_price_line_source,
                line_color=self.config.text_color,
                line_dash='dotted',
                line_width=1,
                line_alpha=0.5,
+               name='current_price_line',
                level='overlay')
 
         # Add current price label
         p.text(x='x',
                y='y',
                text='text',
-               source=current_price_label_source,
+               source=self.current_price_label_source,
                text_color=self.config.text_color,
                text_font_size=self.config.label_font_size,
                text_align='right',
@@ -890,13 +1067,14 @@ class ChartWidget:
                border_line_width=0.5,
                padding=5,
                level='overlay',
+               name='current_price_label',
                border_radius=5)
 
         # Update callback
         price_callback = CustomJS(
             args=dict(
-                label_source=current_price_label_source,
-                line_source=current_price_line_source,
+                label_source=self.current_price_label_source,
+                line_source=self.current_price_line_source,
                 x_range=p.x_range,
                 y_range=p.y_range,
                 current_price=current_price
@@ -1110,14 +1288,14 @@ if __name__ == '__main__':
     chart.save_as_html()
 
     # Start live updates
-    # try:
-    #     print("Press Ctrl+C to stop live updates")
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     print("Stopping live updates...")
-    # finally:
-    #     chart.stop_live_updates()
+    try:
+        print("Press Ctrl+C to stop live updates")
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Stopping live updates...")
+    finally:
+        chart.stop_live_updates()
 
 
 

@@ -1,5 +1,6 @@
 import os
 import time
+import uuid
 import requests
 from typing import Optional
 from bokeh.resources import CDN
@@ -246,6 +247,8 @@ def chart_widget():
         
         if theme not in ['light', 'dark']:
             return "Invalid theme. Must be 'light' or 'dark'", 400
+        
+        chart_id = f"chart_{uuid.uuid4().hex}"
 
         # Create a ChartWidget instance with the specific parameters
         chart_widget = ChartWidget(
@@ -262,11 +265,13 @@ def chart_widget():
         
         # Render the embedded template
         return render_template(
-            'chart_embed.html',  # New template specifically for embedded view
+            'chart_embed.html',
             script=script, 
             div=div, 
             resources=CDN.render(),
-            title=f"Chart - {symbol}"
+            chart_id=chart_id,
+            symbol=symbol,
+            interval=interval
         )
     except Exception as e:
         return str(e), 500
