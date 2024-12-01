@@ -70,6 +70,17 @@
 
                     // Update the data source
                     source.stream(formattedData);
+
+                    // Get the image source specifically
+                    const imageSource = doc.get_model_by_name('image_source');
+                    if (imageSource) {
+                        // Update the image source data with the correct URL format
+                        imageSource.data = {
+                            ...imageSource.data,  // Keep existing positioning data
+                            url: [imageSource.data.url[0]]  // Ensure URL is properly set
+                        };
+                        imageSource.change.emit();
+                    }
                     
                     // Update price indicators
                     const currentPrice = data['Close'][data['Close'].length - 1];

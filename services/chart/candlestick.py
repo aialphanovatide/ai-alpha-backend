@@ -74,16 +74,17 @@ class BinanceWebSocket:
                 else:
                     # This is an update to the current candle
                     print(f"\nUpdating current kline for {self.symbol.upper()} ({self.interval})")
+                    
                     if self.update_callback and callable(self.update_callback):
                         self.update_callback(new_data, is_new_candle=False)
 
-                print(f"Time: {open_time.strftime('%Y-%m-%d %H:%M:%S')}")
-                print(f"Open: {new_data['Open'][0]:.2f}")
-                print(f"High: {new_data['High'][0]:.2f}")
-                print(f"Low: {new_data['Low'][0]:.2f}")
-                print(f"Close: {new_data['Close'][0]:.2f}")
-                print(f"Volume: {new_data['Volume'][0]:.2f}")
-                print(f"Is Closed: {is_closed}")
+                # print(f"Time: {open_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                # print(f"Open: {new_data['Open'][0]:.2f}")
+                # print(f"High: {new_data['High'][0]:.2f}")
+                # print(f"Low: {new_data['Low'][0]:.2f}")
+                # print(f"Close: {new_data['Close'][0]:.2f}")
+                # print(f"Volume: {new_data['Volume'][0]:.2f}")
+                # print(f"Is Closed: {is_closed}")
 
             else:
                 print("Waiting for kline data...")
@@ -189,6 +190,7 @@ class ChartSettings:
                  resistance_label_color: str = '#2DDA99',
                  axis_line_color: str = '#565656',
                  title_font_size: str = '16px',
+                 text_price_font_size = '9px',
                  axis_font_size: str = '10px',
                  label_font_size: str = '8px'):
 
@@ -196,6 +198,7 @@ class ChartSettings:
         self.interval = interval
         self.resistance_levels = resistance_levels
         self.support_levels = support_levels
+        self.text_price_font_size = text_price_font_size
         self.theme = theme
         self.background_color_dark = background_color_dark
         self.background_color_light = background_color_light
@@ -413,99 +416,6 @@ class ChartWidget:
             import traceback
             traceback.print_exc()
 
-    # def update_chart_data(self, df: pd.DataFrame):
-    #     """
-    #     Update the chart with new candlestick data
-        
-    #     Args:
-    #         df (pd.DataFrame): DataFrame containing the new candlestick data
-    #     """
-    #     if not self.source:
-    #         print("Warning: ColumnDataSource not initialized")
-    #         return
-
-    #     try:
-    #         print("\ndf", df)
-    #         print("\ndf", type(df))
-    #         # Get the latest data
-    #         latest_data = df.iloc[0]  
-            
-    #         # Prepare the new data with ALL required columns
-    #         new_data = {
-    #             'Open Time': [latest_data['Open Time']],
-    #             'Close Time': [latest_data['Close Time']],
-    #             'Open': [latest_data['Open']],
-    #             'High': [latest_data['High']],
-    #             'Low': [latest_data['Low']],
-    #             'Close': [latest_data['Close']],
-    #             'Volume': [latest_data['Volume']],
-    #             'index': [len(self.source.data['Open Time'])]
-    #         }
-
-    #         # Calculate technical indicators if enabled
-    #         if self.sma.enabled:
-    #             # Update existing DataFrame with new data
-    #             updated_df = pd.concat([self.df, pd.DataFrame([latest_data])], ignore_index=True)
-    #             for period in self.sma.periods:
-    #                 sma_value = updated_df['Close'].rolling(window=period).mean().iloc[-1]
-    #                 new_data[f'SMA_{period}'] = [sma_value]
-
-    #         if self.rsi.enabled:
-    #             # Update RSI calculation
-    #             updated_df = pd.concat([self.df, pd.DataFrame([latest_data])], ignore_index=True)
-    #             delta = updated_df['Close'].diff()
-    #             gain = (delta.where(delta > 0, 0)).rolling(window=self.rsi.period).mean()
-    #             loss = (-delta.where(delta < 0, 0)).rolling(window=self.rsi.period).mean()
-    #             rs = gain / loss
-    #             rsi = 100 - (100 / (1 + rs))
-    #             new_data['RSI'] = [rsi.iloc[-1]]
-
-    #         # Update the DataFrame with the new data
-    #         self.df = pd.concat([self.df, df], ignore_index=True)
-
-    #         # Stream the new data to the source
-    #         self.source.stream(new_data, rollover=len(self.source.data['Open Time']))
-
-    #         # Update current price elements if they exist
-    #         current_price = latest_data['Close']
-    #         print('\nNew Price: ', current_price)
-    #         if hasattr(self, 'current_price_label_source'):
-    #             self.current_price_label_source.data.update({
-    #                 'y': [current_price],
-    #                 'text': [f'${current_price:,.2f}']
-    #             })
-    #             print('chart current_price_label_source pass')
-                
-    #         if hasattr(self, 'current_price_line_source'):
-    #             self.current_price_line_source.data.update({
-    #                 'y': [current_price, current_price]
-    #             })
-    #             print('chart current_price_line_source pass')
-
-    #         print(f"Chart updated with new data at {latest_data['Open Time']}")
-
-    #         # Get the last index from the current source
-    #         current_length = len(self.source.data['index'])
-            
-    #         # Create new data with index
-    #         new_data = {
-    #             'index': [current_length + i for i in range(len(df))],  # Add sequential index
-    #             'Open Time': df['Open Time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist(),
-    #             'Close Time': df['Close Time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist(),
-    #             'Open': df['Open'].tolist(),
-    #             'High': df['High'].tolist(),
-    #             'Low': df['Low'].tolist(),
-    #             'Close': df['Close'].tolist(),
-    #             'Volume': df['Volume'].tolist()
-    #         }
-                
-    #         socketio.emit('update', new_data, namespace='/chart')
-            
-    #     except Exception as e:
-    #         print(f"Error updating chart: {e}")
-    #         import traceback
-    #         traceback.print_exc()
-
     def start_live_updates(self):
         """Start receiving live updates"""
         if self.websocket is None:
@@ -683,7 +593,8 @@ class ChartWidget:
         except FileNotFoundError:
             print("Warning: Logo file not found, using default image")
             image_url = 'https://www.shutterstock.com/image-vector/bnb-binance-icon-sign-payment-600nw-2080319677.jpg'
-        
+
+            
         # Calculate positions in data space
         x_pos = self.df['Open Time'].max() - (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.007
         y_pos = self.df['High'].max() * 0.63  # Position at 90% of max height
@@ -700,7 +611,7 @@ class ChartWidget:
             'y': [y_pos],
             'w': [width],
             'h': [height]
-        })
+        }, name='image_source')
 
         # Add the image
         image = ImageURL(
@@ -1029,9 +940,10 @@ class ChartWidget:
         
         # Create ColumnDataSource for current price label
         self.current_price_label_source = ColumnDataSource({
-            'x': [self.df['Open Time'].max()],  # Start at the right edge
-            'y': [current_price],
-            'text': [f'${current_price:,.2f}']
+        'x': [self.df['Open Time'].max()],
+        'y': [current_price],
+        'text': [f'${current_price:,.2f}'],
+        'color': [self.config.bullish_color]  # Default to bullish color initially
         }, name='current_price_label_source')
 
         # Create ColumnDataSource for current price line
@@ -1057,18 +969,18 @@ class ChartWidget:
                text='text',
                source=self.current_price_label_source,
                text_color=self.config.text_color,
-               text_font_size=self.config.label_font_size,
+               text_font_size=self.config.text_price_font_size,
                text_align='right',
                text_baseline='middle',
                x_offset=-10,
                background_fill_color=self.config.background_color,
                background_fill_alpha=0.8,
                border_line_color=self.config.text_color,
-               border_line_width=0.5,
+            #    border_line_width=0.5,
                padding=5,
                level='overlay',
                name='current_price_label',
-               border_radius=5)
+               border_radius=3)
 
         # Update callback
         price_callback = CustomJS(
@@ -1287,15 +1199,15 @@ if __name__ == '__main__':
     # Create the candlestick chart
     chart.save_as_html()
 
-    # Start live updates
-    try:
-        print("Press Ctrl+C to stop live updates")
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Stopping live updates...")
-    finally:
-        chart.stop_live_updates()
+    # # Start live updates
+    # try:
+    #     print("Press Ctrl+C to stop live updates")
+    #     while True:
+    #         time.sleep(1)
+    # except KeyboardInterrupt:
+    #     print("Stopping live updates...")
+    # finally:
+    #     chart.stop_live_updates()
 
 
 

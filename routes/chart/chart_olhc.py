@@ -5,7 +5,7 @@ import requests
 from typing import Optional
 from bokeh.resources import CDN
 from dotenv import load_dotenv
-from flask import render_template
+from flask import render_template, make_response
 from services.chart.candlestick import ChartWidget, ChartSettings
 from flask import request, jsonify, Blueprint, current_app
 from redis_client.redis_client import cache_with_redis
@@ -263,8 +263,8 @@ def chart_widget():
         # Get the script and div components
         script, div = chart_widget.get_chart_components()
         
-        # Render the embedded template
-        return render_template(
+        # Create response with proper headers
+        response = make_response(render_template(
             'chart_embed.html',
             script=script, 
             div=div, 
@@ -272,6 +272,13 @@ def chart_widget():
             chart_id=chart_id,
             symbol=symbol,
             interval=interval
-        )
+        ))
+        
+        # Add security headers
+        response.headers['Content-Security-Policy'] = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
+        response.headers['X-Frame-Options'] = 'ALLOWALL'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        
+        return response
     except Exception as e:
         return str(e), 500
