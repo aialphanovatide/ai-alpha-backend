@@ -77,11 +77,12 @@
                     const priceLine = doc.get_model_by_name('current_price_line_source');
 
                     if (priceLabel) {
-                        // Update the label source data
+                        // Preserve existing data and update only the values
+                        const existingData = priceLabel.data;
                         priceLabel.data = {
-                            x: [data['Open Time'][data['Open Time'].length - 1]],  // Latest timestamp
-                            y: [currentPrice],
-                            text: [`$${currentPrice.toFixed(2)}`]
+                            x: existingData.x,
+                            y: existingData.y.map(() => currentPrice),  // Update all y values to current price
+                            text: existingData.text.map(() => `$${currentPrice.toFixed(2)}`)  // Update all labels
                         };
                         priceLabel.change.emit();
                     }
