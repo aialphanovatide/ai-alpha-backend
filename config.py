@@ -1995,11 +1995,11 @@ def populate_sections():
     """
     # Datos de las secciones a añadir
     sections_data = [
-        {
-            "name": "What's happening today (Top Stories)",
-            "description": "Articles that belong to top stories",
-            "target": "article"
-        },
+        # {
+        #     "name": "What's happening today (Top Stories)",
+        #     "description": "Articles that belong to top stories",
+        #     "target": "article"
+        # },
         {
             "name": "Market Narrative (Narrative Tradings)",
             "description": "Articles referred to narrative trading posts",
