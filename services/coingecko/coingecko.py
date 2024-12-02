@@ -162,26 +162,8 @@ def get_crypto_id(symbol: str) -> Optional[str]:
         if crypto['symbol'].lower() == symbol.lower():
             return crypto['id']
     return None
-
-def get_tokenomics_data(symbol: str) -> Dict[str, Any]:
-    """
-    Retrieve detailed supply data for a given cryptocurrency symbol.
-
-    Args:
-        symbol (str): The symbol of the cryptocurrency (e.g., 'btc' for Bitcoin).
-
-    Returns:
-        Dict[str, Any]: A dictionary containing the following information:
-            - 'Total Supply': The total supply of the cryptocurrency.
-            - 'Circulating Supply': The current circulating supply.
-            - '% Circulating Supply': The percentage of total supply in circulation.
-            - 'Max Supply': The maximum supply of the cryptocurrency or '∞' if unlimited.
-    """
-    crypto_id = get_crypto_id(symbol)
-    if not crypto_id:
-        return f"No cryptocurrency found with the symbol {symbol}"
-
-    url = f'{BASE_URL}/coins/{crypto_id}'
+    
+    
 def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
     """
     Get detailed tokenomics data for a cryptocurrency using its CoinGecko ID.
