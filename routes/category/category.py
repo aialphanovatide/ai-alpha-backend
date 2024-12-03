@@ -414,25 +414,191 @@ def update_category(category_id):
     return jsonify(response), status_code
 
 
+# @category_bp.route('/categories/<int:category_id>/toggle-coins', methods=['POST'])
+# @update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
+# def toggle_category_coins(category_id):
+#     """
+#     Activate or deactivate all coins within a specific category and update the category's status.
+#     This endpoint processes all coins within a category based on the requested action. When activating,
+#     each coin undergoes validation checks for required data (fundamentals, chart data, etc.).
+#     The category's status is updated based on the collective result of the coin validations.
+    
+#     Args:
+#         category_id (int): The ID of the category to process.
+#         Request JSON:
+#         action (str): Either "activate" or "deactivate"
+#             - "activate": Attempts to activate all coins and the category
+#             - "deactivate": Deactivates all coins and the category
+        
+#         Returns:
+#         JSON: A response detailing the operation results:
+#             {
+#                 "success": bool,              # Overall operation success
+#                 "processed_coins": [          # List of processed coins
+#                     {
+#                         "id": int,           # Coin ID
+#                         "name": str,         # Coin name
+#                         "status": str,       # "activated", "deactivated", "invalid", or "unchanged"
+#                         "message": str       # Success/error message for this coin
+#                     },
+#                     ...
+#                 ],
+#                 "category_status": str,       # Final category status
+#                 "error": str or None         # Error message if operation failed
+#             }
+#         HTTP Status Code:
+#             - 200: Successfully processed the request
+#             - 400: Invalid action provided
+#             - 404: Category not found
+#             - 500: Internal server error
+        
+#         Behavior:
+        
+#         Activation:
+#             - Each coin is validated for required data (fundamentals, chart data)
+#             - Successfully validated coins are activated
+#             - Failed coins remain inactive with error messages
+#             - Category is activated only if ALL coins pass validation
+#             - If any coin fails validation, category status shows "Not all coins were activated"
+        
+#         Deactivation:
+#             - All coins are deactivated without validation
+#             - Category is always deactivated
+#             - Operation always succeeds unless a system error occurs
+#     """
+#     response = {
+#         "success": False,
+#         "processed_coins": [],
+#         "category_status": "",
+#         "error": None
+#     }
+
+#     # Get action from the request
+#     action = request.json.get('action')
+#     if action not in ['activate', 'deactivate']:
+#         response["error"] = 'Invalid action. Must be "activate" or "deactivate".'
+#         return jsonify(response), 400
+
+#     with Session() as session:
+#         try:
+#             # Fetch the category by ID
+#             category = session.query(Category).get(category_id)
+#             if not category:
+#                 response["error"] = f'Category with ID {category_id} not found.'
+#                 return jsonify(response), 404
+
+#             # Fetch all coins in the category
+#             coins = session.query(CoinBot).filter_by(category_id=category_id).all()
+
+#             if not coins:
+#                 response["error"] = f'No coins found for category with ID {category_id}.'
+#                 return jsonify(response), 404
+
+#             all_valid = True
+
+#             for coin in coins:
+#                 coin_status = {
+#                     "id": coin.bot_id,
+#                     "name": coin.name,
+#                     "status": "unchanged",
+#                     "message": ""
+#                 }
+
+#                 # Handle activation of the coin
+#                 if action == "activate":
+#                     valid, messages = validate_coin(coin)
+
+#                     if valid:
+#                         coin_status["status"] = "activated"
+#                         coin_status["message"] = "coin activated"
+#                         coin.is_active = True
+#                     else:
+#                         coin_status["status"] = "invalid"
+#                         coin_status["message"] = ', '.join(messages)
+#                         all_valid = False
+
+#                 # Handle deactivation of the coin
+#                 elif action == "deactivate":
+#                     coin_status["status"] = "deactivated"
+#                     coin_status["message"] = "coin deactivated"
+#                     coin.is_active = False
+
+#                 response["processed_coins"].append(coin_status)
+
+#             # Update category status based on the action and validation results
+#             if action == "activate":
+#                 if all_valid:
+#                     category.is_active = True
+#                     response["category_status"] = "activated"
+#                 else:
+#                     response["category_status"] = "Not all coins were activated"
+#             elif action == "deactivate":
+#                 category.is_active = False
+#                 response["category_status"] = "deactivated"
+
+#             # Commit the changes to the database
+#             session.commit()
+#             response["success"] = True
+#             return jsonify(response), 200
+
+#         except SQLAlchemyError as e:
+#             # Handle SQL errors, rollback changes if necessary
+#             session.rollback()
+#             response["error"] = f"Database error occurred: {str(e)}"
+#             return jsonify(response), 500
+
+#         except Exception as e:
+#             # Handle unexpected errors
+#             session.rollback()
+#             response["error"] = f"An unexpected error occurred: {str(e)}"
+#             return jsonify(response), 500
+    
+
 @category_bp.route('/categories/<int:category_id>/toggle-coins', methods=['POST'])
 @update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
 def toggle_category_coins(category_id):
     """
-    Activate or deactivate all coins within a specific category.
+    Toggle a category's active status, with optional coin activation.
+    This endpoint primarily controls the category's status by switching it to the opposite state.
+    When toggling to active, if coins exist, each coin will undergo validation checks for required data.
 
     Args:
         category_id (int): The ID of the category to process.
 
-    Request JSON:
-        action (str): Either "activate" or "deactivate"
-
     Returns:
-        JSON: A response detailing the status of each processed coin bot and the category.
+        JSON: A response detailing the operation results:
+            {
+                "success": bool,              # Overall operation success
+                "processed_coins": [          # List of processed coins
+                    {
+                        "id": int,           # Coin ID
+                        "name": str,         # Coin name
+                        "status": str,       # "activated", "deactivated", "invalid", or "unchanged"
+                        "message": str       # Success/error message for this coin
+                    },
+                    ...
+                ],
+                "category_status": str,       # Final category status
+                "error": str or None         # Error message if operation failed
+            }
         HTTP Status Code:
             - 200: Successfully processed the request
-            - 400: Invalid action provided
             - 404: Category not found
             - 500: Internal server error
+
+        Behavior:
+
+        Toggle to Active:
+            - Category is switched to active state
+            - If coins exist, each coin is validated for required data
+            - Valid coins are activated
+            - Invalid coins remain inactive with error messages
+            - Category status will be "activated" regardless of coin status
+
+        Toggle to Inactive:
+            - Category is switched to inactive state
+            - All coins are deactivated without validation
+            - Operation always succeeds unless a system error occurs
     """
     response = {
         "success": False,
@@ -440,13 +606,6 @@ def toggle_category_coins(category_id):
         "category_status": "",
         "error": None
     }
-
-    # Get action from the request
-    action = request.json.get('action')
-    if action not in ['activate', 'deactivate']:
-        response["error"] = 'Invalid action. Must be "activate" or "deactivate".'
-        return jsonify(response), 400
-
     with Session() as session:
         try:
             # Fetch the category by ID
@@ -455,15 +614,15 @@ def toggle_category_coins(category_id):
                 response["error"] = f'Category with ID {category_id} not found.'
                 return jsonify(response), 404
 
+            # Toggle category status
+            category.is_active = not category.is_active
+            new_status = "activated" if category.is_active else "deactivated"
+            response["category_status"] = new_status
+
             # Fetch all coins in the category
             coins = session.query(CoinBot).filter_by(category_id=category_id).all()
 
-            if not coins:
-                response["error"] = f'No coins found for category with ID {category_id}.'
-                return jsonify(response), 404
-
-            all_valid = True
-
+            # Process coins if they exist
             for coin in coins:
                 coin_status = {
                     "id": coin.bot_id,
@@ -471,160 +630,37 @@ def toggle_category_coins(category_id):
                     "status": "unchanged",
                     "message": ""
                 }
-
-                # Handle activation of the coin
-                if action == "activate":
-                    valid, messages = validate_coin(coin)
-
+                if category.is_active:
+                    # Validate and activate coins if possible
+                    valid, messages = validate_coin(coin, session)
                     if valid:
-                        coin_status["status"] = "activated"
-                        coin_status["message"] = "coin activated"
                         coin.is_active = True
+                        coin_status["status"] = "activated"
+                        coin_status["message"] = "Coin activated successfully"
                     else:
+                        coin.is_active = False
                         coin_status["status"] = "invalid"
                         coin_status["message"] = ', '.join(messages)
-                        all_valid = False
-
-                # Handle deactivation of the coin
-                elif action == "deactivate":
-                    coin_status["status"] = "deactivated"
-                    coin_status["message"] = "coin deactivated"
+                else:  # category is being deactivated
                     coin.is_active = False
-
+                    coin_status["status"] = "deactivated"
+                    coin_status["message"] = "Coin deactivated"
                 response["processed_coins"].append(coin_status)
-
-            # Update category status based on the action and validation results
-            if action == "activate":
-                if all_valid:
-                    category.is_active = True
-                    response["category_status"] = "activated"
-                else:
-                    response["category_status"] = "Not all coins were activated"
-            elif action == "deactivate":
-                category.is_active = False
-                response["category_status"] = "deactivated"
 
             # Commit the changes to the database
             session.commit()
             response["success"] = True
             return jsonify(response), 200
-
-        except SQLAlchemyError as e:
-            # Handle SQL errors, rollback changes if necessary
-            session.rollback()
-            response["error"] = f"Database error occurred: {str(e)}"
-            return jsonify(response), 500
-
-        except Exception as e:
-            # Handle unexpected errors
-            session.rollback()
-            response["error"] = f"An unexpected error occurred: {str(e)}"
-            return jsonify(response), 500
-    
-
-@category_bp.route('/categories/global-toggle', methods=['POST'])
-@update_cache_with_redis(related_get_endpoints=['get_all_categories', 'get_single_category'])
-def global_toggle_coins():
-    """
-    Activate or deactivate all coins across all categories.
-
-    Request JSON:
-        action (str): Either "activate" or "deactivate"
-
-    Returns:
-        JSON: A response detailing the status of each processed category and its coin bots.
-        HTTP Status Code:
-            - 200: Successfully processed the request
-            - 400: Invalid action provided
-            - 404: No categories or coins found
-            - 500: Internal server error
-    """
-    response = {
-        "success": False,
-        "processed_categories": [],
-        "error": None
-    }
-
-    action = request.json.get('action')
-    if action not in ['activate', 'deactivate']:
-        response["error"] = 'Invalid action. Must be "activate" or "deactivate".'
-        return jsonify(response), 400
-
-    with Session() as session:
-        try:
-            categories = session.query(Category).options(joinedload(Category.coin_bot)).all()
-
-            if not categories:
-                response["error"] = 'No categories found.'
-                return jsonify(response), 404
-
-            for category in categories:
-                category_result = {
-                    'category_id': category.category_id,
-                    'name': category.name,
-                    'status': 'unchanged',
-                    'processed_coin_bots': []
-                }
-
-                if not category.coin_bot:
-                    category_result['status'] = 'skipped'
-                    category_result['message'] = 'No coin bots found in this category'
-                    response['processed_categories'].append(category_result)
-                    continue
-
-                all_valid = True
-
-                for coin_bot in category.coin_bot:
-                    bot_result = {
-                        'bot_id': coin_bot.bot_id,
-                        'name': coin_bot.name,
-                        'status': 'unchanged',
-                        'message': ''
-                    }
-
-                    if action == 'activate':
-                        valid, messages = validate_coin(coin_bot)
-                        if valid:
-                            coin_bot.is_active = True
-                            bot_result['status'] = 'activated'
-                            bot_result['message'] = 'Coin bot activated'
-                        else:
-                            bot_result['status'] = 'invalid'
-                            bot_result['message'] = ', '.join(messages)
-                            all_valid = False
-                    else:  # deactivate
-                        coin_bot.is_active = False
-                        bot_result['status'] = 'deactivated'
-                        bot_result['message'] = 'Coin bot deactivated'
-
-                    category_result['processed_coin_bots'].append(bot_result)
-
-                if action == 'activate':
-                    if all_valid:
-                        category.is_active = True
-                        category_result['status'] = 'activated'
-                    else:
-                        category_result['status'] = 'partially activated'
-                        category_result['message'] = 'Not all coin bots were activated'
-                elif action == 'deactivate':
-                    category.is_active = False
-                    category_result['status'] = 'deactivated'
-
-                response['processed_categories'].append(category_result)
-
-            session.commit()
-            response["success"] = True
-            return jsonify(response), 200
-
         except SQLAlchemyError as e:
             session.rollback()
             response["error"] = f"Database error occurred: {str(e)}"
             return jsonify(response), 500
-
         except Exception as e:
             session.rollback()
             response["error"] = f"An unexpected error occurred: {str(e)}"
             return jsonify(response), 500
+
+
 
 
 def validate_coin(coin, session=None):

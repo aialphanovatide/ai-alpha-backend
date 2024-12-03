@@ -24,6 +24,24 @@ redis_client.ping()
 print("---- Redis client connected ----")
 
 
+def reset_redis_cache():
+   """
+   Cleans the entire Redis cache by deleting all keys in the current database.
+   
+   Returns:
+       tuple: A tuple containing a message and HTTP status code.
+       
+   Usage:
+       result = reset_redis_cache()
+       # Returns ({'message': 'Redis cache cleared successfully'}, 200)
+   """
+   try:
+       redis_client.flushdb()
+       return {'message': 'Redis cache cleared successfully'}, 200
+   except Exception as e:
+       return {'error': f'Failed to clear Redis cache: {str(e)}'}, 500
+
+
 def cache_with_redis(expiration=300):
     """
     A decorator that caches the result of a function using Redis.
@@ -90,7 +108,6 @@ def cache_with_redis(expiration=300):
             return jsonify(response_data), status_code
         return wrapper
     return decorator
-
 
 
 def update_cache_with_redis(related_get_endpoints=[]):

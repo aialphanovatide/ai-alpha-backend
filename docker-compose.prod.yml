@@ -12,8 +12,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_PROD} -d ${POSTGRES_DB_PROD}"]
-      interval: 5s
-      timeout: 5s
+      interval: 20s
+      timeout: 10s
       retries: 3
     ports:
       - "5435:5432"
@@ -65,7 +65,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
   pgadmin:
     image: dpage/pgadmin4
@@ -99,7 +99,6 @@ services:
 
   ngrok:
     image: ngrok/ngrok:latest
-    restart: unless-stopped
     command:
       - "http"
       - "--domain=${NGROK_DOMAIN}"
