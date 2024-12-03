@@ -6,12 +6,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import Tuple, Dict, Type
 from sqlalchemy.exc import SQLAlchemyError
-<<<<<<< HEAD
-from services.fundamentals_populator.populator import process_query
-from services.notification.index import Notification
-=======
 from services.notification.index import NotificationService
->>>>>>> develop
 from services.aws.s3 import ImageProcessor
 from config import Analysis, CoinBot, Session
 from flask import current_app, jsonify, Blueprint, request
@@ -341,34 +336,13 @@ def get_all_analysis():
         
     return jsonify(response), status_code
 
+
 @analysis_bp.route('/analysis', methods=['POST'])
 def post_analysis():
     """
-<<<<<<< HEAD
-    Create and publish a new analysis.
-
-    This function handles POST requests to create a new analysis. It processes
-    the form data, validates the input, and calls the publish_analysis function
-    to create and publish the analysis.
-
-    Returns:
-        tuple: A tuple containing a JSON response and an HTTP status code.
-        The JSON response includes:
-        - data: The published analysis data (if successful)
-        - error: Error message (if any)
-        - success: Boolean indicating whether the operation was successful
-
-    Raises:
-        ValueError: If the input data is invalid or missing
-        Exception: For any unexpected errors during processing
-    """
-    print("Entering post_analysis function")
-    print(f"Request form data: {request.form}")
-=======
     Create a new analysis and publish it.
     """
     current_app.logger.debug(f"Received POST request to /analysis")
->>>>>>> develop
     
     response = {
         "data": None,
@@ -376,68 +350,6 @@ def post_analysis():
         "success": False
     }
     status_code = 500
-<<<<<<< HEAD
-    
-    try:
-        # Convert form data with explicit error handling
-        try:
-            section_id = int(request.form.get("section_id"))
-            coin_id = int(request.form.get('coin_id'))
-            content = request.form.get('content')
-            category_name = request.form.get('category_name', '').strip()
-        
-        except (ValueError, TypeError) as e:
-            print(f"Error converting form data: {str(e)}")
-            response["error"] = f"Invalid input: {str(e)}"
-            return jsonify(response), 400
-
-        # Check for missing parameters
-        params = {'coin_id': coin_id, 'content': content, 'category_name': category_name, 'section_id': section_id}
-        missing_params = [param for param, value in params.items() if value is None or (isinstance(value, str) and value.strip() == '')]
-        if missing_params:
-            error_msg = f"The following required values are missing: {', '.join(missing_params)}"
-            print(error_msg)
-            response["error"] = error_msg
-            return jsonify(response), 400
-
-        # Publish analysis
-        try:
-            publish_response = publish_analysis(
-                coin_id=coin_id, 
-                section_id=section_id,
-                content=content,
-                category_name=category_name
-            )
-            
-            print(f"publish_analysis response: {publish_response}")
-
-            if publish_response.get("success"):
-                response["data"] = publish_response.get("data")
-                response["success"] = True
-                status_code = 201
-                print("Analysis published successfully")
-            else:
-                response["error"] = publish_response.get("message", "Unknown error in publish_analysis")
-                print(f"Publish analysis failed: {response['error']}")
-                status_code = 500
-
-        except Exception as e:
-            print(f"Error in publish_analysis: {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-            response["error"] = f"Error in publish analysis: {str(e)}"
-            status_code = 500
-
-    except Exception as e:
-        print(f"Unexpected error in post_analysis: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-        response["error"] = f"Request failed: {str(e)}"
-        status_code = 500
-
-    print(f"Returning response: {response}")
-    return jsonify(response), status_code
-=======
 
     try:
         # Extract and validate required data from the request
@@ -486,7 +398,7 @@ def post_analysis():
         current_app.logger.error(f"Request failed: {str(e)}", exc_info=True)
         response["error"] = f"An unexpected error occurred: {str(e)}"
         return jsonify(response), 500
->>>>>>> develop
+
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['DELETE'])
 def delete_analysis(analysis_id):
@@ -667,56 +579,9 @@ MODEL_MAPPING = {
     's_and_r_analysis': SAndRAnalysis
     }
 
-<<<<<<< HEAD
-def get_section_info(session, section_id: int):
-    """
-    Obtiene la información de la sección por su ID
-    """
-    return session.query(Sections).filter(Sections.id == section_id).first()
-
-def create_content_object(model_class: Type, content_data: Dict):
-    """
-    Crea una instancia del modelo correspondiente con los datos proporcionados
-    """
-    return model_class(
-        analysis=content_data.get('analysis'),
-        category_name=content_data.get('category_name'),
-        coin_bot_id=content_data.get('coin_bot_id'),
-        image_url=content_data.get('image_url')
-    )
-
-def publish_analysis(coin_id: int, content: str, category_name: str, section_id: int) -> dict:
-    """
-    Function to publish an analysis.
-    Args:
-        coin_id (int): The ID of the coin bot
-        content (str): The content of the analysis
-        category_name (str): The name of the category
-        section_id (str): The ID of the section
-    Returns:
-        dict: A response dictionary containing the result of the operation
-    """
-    session = Session()
-    image_filename = None
-    
-    try:
-        # Get section information
-        section = get_section_info(session, section_id)
-        if not section:
-            raise ValueError(f"No Section found with id {section_id}")
-        
-        # Get the corresponding model based on target
-        target = section.target.lower()
-        print(target)
-        model_class = MODEL_MAPPING.get(target)
-        print(model_class)
-        if not model_class:
-            raise ValueError(f"Invalid target type: {target}")
-=======
 def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
 
     logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
->>>>>>> develop
 
     with Session() as session:
         try:
@@ -1024,9 +889,6 @@ def get_scheduled_jobs():
 
     return jsonify(response), status_code
     
-<<<<<<< HEAD
-    
-=======
     
 
 
@@ -1037,4 +899,3 @@ def get_scheduled_jobs():
 # def test_emit():
 #     emit_notification('new_analysis', {'coin': 'BTC', 'title': 'New Analysis Available', 'body': 'Check it out!'})
 #     return jsonify({'message': 'Notification emitted'}), 200
->>>>>>> develop
