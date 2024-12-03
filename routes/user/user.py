@@ -1,15 +1,26 @@
 import secrets
 import string
+from dotenv import load_dotenv
+from flask_mail import Message
+from pydantic import validate_email
 from sqlalchemy import exc
 from sqlalchemy.orm import joinedload
-from flask import jsonify, request, Blueprint
+from flask import app, current_app, jsonify, request, Blueprint
 from config import PurchasedPlan, Session, User
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from routes.user.auth import patchPassword
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
+import jwt
+import datetime
+from services.email.email_service import EmailService
+
 
 user_bp = Blueprint('user', __name__)
+
+# Crear una instancia de EmailService
+email_service = EmailService()
 
 def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
@@ -526,3 +537,91 @@ def delete_user_account():
             session.rollback()
             response['message'] = f'Unexpected error: {str(e)}'
             return jsonify(response), 500
+
+
+@user_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """
+    Request a password reset link for the user.
+
+    Request JSON:
+        - email (str): The email address of the user.
+
+    Returns:
+        Response: JSON response indicating success or failure.
+    """
+    response = {'success': False, 'message': None}
+    data = request.json
+
+    email = data.get('email')
+    if not email or not validate_email(email):  # Implement validate_email function
+        response['message'] = 'Invalid email format'
+        return jsonify(response), 400
+
+    with Session() as session:
+        user = session.query(User).filter_by(email=email).first()
+        if not user:
+            response['message'] = 'Email not found'
+            return jsonify(response), 404
+
+        # Generate a unique token
+        token = jwt.encode({
+            'user_id': user.user_id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # 1 hour expiration
+        }, current_app.config['SECRET_KEY'], algorithm='HS256')
+
+        # Store the token in the database (you may want to create a new model for this)
+        # Example: store_token_in_db(user.user_id, token)
+
+        # Send password reset email using EmailService
+        reset_link = f"{request.host_url}reset-password?token={token}"
+        email_service.send_password_reset_email(user.email, user.username, reset_link)
+
+        response['success'] = True
+        response['message'] = 'Password reset link sent to your email'
+        return jsonify(response), 200
+
+
+@user_bp.route('/reset-password', methods=['POST'])
+async def reset_password():
+    """
+    Reset the user's password using the provided token.
+
+    Request JSON:
+        - token (str): The reset token.
+        - new_password (str): The new password.
+
+    Returns:
+        Response: JSON response indicating success or failure.
+    """
+    response = {'success': False, 'message': None}
+    data = request.json
+
+    token = data.get('token')
+    new_password = data.get('new_password')
+
+    if not token or not new_password:
+        response['message'] = 'Token and new password are required'
+        return jsonify(response), 400
+
+    try:
+        # Decode the token
+        payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+        user_id = payload['user_id']
+
+        # Update the password using Auth0 API
+        await patchPassword(user_id, new_password)  # Implement patchPassword to use Auth0 API
+
+        response['success'] = True
+        response['message'] = 'Password updated successfully'
+        return jsonify(response), 200
+
+    except jwt.ExpiredSignatureError:
+        response['message'] = 'Reset token has expired'
+        return jsonify(response), 400
+    except jwt.InvalidTokenError:
+        response['message'] = 'Invalid reset token'
+        return jsonify(response), 400
+    except Exception as e:
+        response['message'] = f'An unexpected error occurred: {str(e)}'
+        return jsonify(response), 500
