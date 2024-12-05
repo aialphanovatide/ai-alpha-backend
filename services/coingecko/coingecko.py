@@ -190,13 +190,11 @@ def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
     """
     if not coin_id:
         return {'error': "No valid cryptocurrency ID provided"}
-
     url = f'{BASE_URL}/coins/{coin_id}'
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
-
         market_data = data.get('market_data', {})
         total_supply = market_data.get('total_supply')
         circulating_supply = market_data.get('circulating_supply')

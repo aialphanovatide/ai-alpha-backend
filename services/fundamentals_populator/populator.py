@@ -95,7 +95,7 @@ async def process_query(section_name: str, coin_name: str) -> tuple[Any, Optiona
     It will retry up to 3 times if the result is not as expected.
 
     Args:
-        section_name (str): The name of the section to query (e.g., "revenue", "upgrade", "hacks", "dapps").
+        section_name (str): The name of the section to query (e.g., "revenue", "upgrades", "hacks", "dapps").
         coin_name (str): The name or symbol of the cryptocurrency (e.g., "BTC", "ETH").
 
     Returns:
