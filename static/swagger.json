@@ -27,28 +27,28 @@
       "description": "Operations related to the Ask AI (Coin info)"
     },
     {
-      "name": "Introductions",
-      "description": "Operations related to the Introduction section."
+    "name": "Introductions",
+    "description": "Operations related to the Introduction section."
     },
     {
-      "name": "Tokenomics",
-      "description": "Operations related to the Tokenomics section"
+    "name": "Tokenomics",
+    "description": "Operations related to the Tokenomics section"
     },
     {
-      "name": "Competitors Tokenomics",
-      "description": "Operations related to the Competitors tokenomics section"
+    "name": "Competitors Tokenomics",
+    "description": "Operations related to the Competitors tokenomics section"
     },
-    {
-      "name": "Dapps",
-      "description": "Operations related to the Dapps section "
+  {
+    "name": "Dapps",
+    "description": "Operations related to the Dapps section "
     },
     {
       "name": "Upgrades",
       "description": "Operations related to the Upgrades section"
     },
     {
-      "name": "Hacks",
-      "description": "Operations related to the Hacks section"
+    "name": "Hacks",
+    "description": "Operations related to the Hacks section"
     },
     {
       "name": "Admin",
@@ -75,7 +75,7 @@
       "description": "Operations related to CoinGecko"
     },
     {
-      "name": "Narrative trading (Deprecated)",
+      "name": "Narrative trading",
       "description": "Operations related to the Narrative Trading (Market Narrative)"
     },
     {
@@ -3603,9 +3603,7 @@
       },
       "/api/fundamental_ai_search": {
         "post": {
-          "tags": [
-            "Fundamentals"
-          ],
+          "tags": ["Fundamentals"],
           "summary": "Perform a fundamental AI search",
           "description": "This endpoint performs an AI-powered search for fundamental data of a cryptocurrency.",
           "parameters": [
@@ -3625,10 +3623,7 @@
                     "description": "The name or symbol of the cryptocurrency"
                   }
                 },
-                "required": [
-                  "section_name",
-                  "coin_name"
-                ]
+                "required": ["section_name", "coin_name"]
               }
             }
           ],
@@ -3662,11 +3657,10 @@
           }
         }
       },
+    
       "/api/save_fundamental_data": {
         "post": {
-          "tags": [
-            "Fundamentals"
-          ],
+          "tags": ["Fundamentals"],
           "summary": "Save fundamental data",
           "description": "This endpoint saves the fundamental data retrieved from the AI search.",
           "parameters": [
@@ -3690,11 +3684,7 @@
                     "description": "The content to be saved"
                   }
                 },
-                "required": [
-                  "section_name",
-                  "coin_bot_id",
-                  "content"
-                ]
+                "required": ["section_name", "coin_bot_id", "content"]
               }
             }
           ],

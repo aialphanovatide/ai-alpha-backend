@@ -34,6 +34,7 @@ from routes.external_apis.capitalcom import capitalcom_bp
 from routes.external_apis.coinalyze import coinalyze_bp
 from routes.external_apis.twelvedata import twelvedata_bp
 from routes.external_apis.binance import binance_bp
+from routes.fundamentals.fundamentals import fundamentals_bp
 from routes.analysis.sections import sections_bp
 from routes.coins.coins import coin_bp
 from routes.ask_ai.ask_ai import ask_ai_bp
@@ -129,6 +130,7 @@ app.register_blueprint(api_keys_bp)
 app.register_blueprint(narrative_trading_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(profit_bp)
+app.register_blueprint(fundamentals_bp)
 app.register_blueprint(coindar_bp)
 app.register_blueprint(revenuecat_bp)
 app.register_blueprint(capitalcom_bp)

@@ -107,3 +107,4 @@ service_account.json
 /myenv
 
 routes/news_bot/userDataDir/
+services/fundamentals_populator/tmp/

@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from config import Token_distribution, Token_utility, Value_accrual_mechanisms, session, Tokenomics, CoinBot
+from services.coingecko.coingecko import get_tokenomics_data
 
 tokenomics = Blueprint('tokenomics', __name__)
 
 # ------- GET ------------ GETS THREE TOKENOMICS, Token_distribution, Token_utility AND Value_accrual_mechanisms ------------------------
-
 
 @tokenomics.route('/api/get_tokenomics', methods=['GET'])
 def get_tokenomics():
@@ -15,15 +15,19 @@ def get_tokenomics():
         if not coin_bot_id and not coin_name:
             return jsonify({'error': 'Coin ID or name is missing', 'status': 400}), 400
 
-        coin_bot_id = coin_bot_id
-
         if coin_name:
-            coin = session.query(CoinBot).filter(
-                CoinBot.name == coin_name).first()
+            coin = session.query(CoinBot).filter(CoinBot.name == coin_name).first()
             coin_bot_id = coin.bot_id if coin else None
+            symbol = coin.symbol if coin else None
+        else:
+            coin = session.query(CoinBot).filter(CoinBot.bot_id == coin_bot_id).first()
+            symbol = coin.symbol if coin else None
 
-        if coin_bot_id is None:
+        if coin_bot_id is None or symbol is None:
             return jsonify({'error': 'No tokenomics found for the requested coin', 'status': 404}), 404
+
+        # Obtener datos de CoinGecko
+        coingecko_data = get_tokenomics_data(symbol)
 
         token_distribution_obj = session.query(Token_distribution).filter(
             Token_distribution.coin_bot_id == coin_bot_id).order_by(Token_distribution.created_at).all()
@@ -38,10 +42,6 @@ def get_tokenomics():
             'token_distributions': token_distribution.as_dict(),
         } for token_distribution in token_distribution_obj]
 
-        tokenomics_data = [{
-            'tokenomics': tokenomic.as_dict(),
-        } for tokenomic in tokenomics]
-
         token_utility_data = [{
             'token_utilities': token_utility.as_dict(),
         } for token_utility in token_utility_obj]
@@ -49,6 +49,22 @@ def get_tokenomics():
         value_accrual_mechanisms_data = [{
             'value_accrual_mechanisms': value_accrual_mechanisms.as_dict(),
         } for value_accrual_mechanisms in value_accrual_mechanisms_obj]
+
+        # Combinar datos de CoinGecko y Tokenomics
+        tokenomics_data = []
+        if all(key in coingecko_data for key in ['Total Supply', 'Circulating Supply', '% Circulating Supply', 'Max Supply']):
+            tokenomics_data.append({
+                'tokenomics': {
+                    'total_supply': coingecko_data['Total Supply'],
+                    'circulating_supply': coingecko_data['Circulating Supply'],
+                    'max_supply': coingecko_data['Max Supply'],
+                    'supply_model': tokenomics[0].supply_model if tokenomics else None
+                }
+            })
+        else:
+            tokenomics_data = [{
+                'tokenomics': tokenomic.as_dict(),
+            } for tokenomic in tokenomics]
 
         data = {
             'token_distribution': token_distribution_data,

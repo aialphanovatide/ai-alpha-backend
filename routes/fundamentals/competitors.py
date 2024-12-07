@@ -1,9 +1,15 @@
+from collections import defaultdict
+import re
 from config import CoinBot, Competitor, session, Session
 from flask import Blueprint, request, jsonify
+
+from services.coingecko.coingecko import get_competitors_data, get_tokenomics_data
 
 
 competitor_bp = Blueprint('competitor_bp', __name__)
 
+def normalize_key(key):
+    return re.sub(r'[^a-zA-Z0-9]', '', key.lower())
 
 # edits a competitor data by the ID of the competitor
 @competitor_bp.route('/edit_competitors/<int:competitor_id>', methods=['PUT'])  
@@ -25,8 +31,6 @@ def edit_competitor_data(competitor_id):
     except Exception as e:
         return {'error': f'Error editing competitor data: {str(e)}'}, 500
     
-
-# Gets a list of the competitors and the analyzed coin  
 @competitor_bp.route('/get_competitors/<int:coin_bot_id>', methods=['GET'])
 def get_competitor_data(coin_bot_id):
     try:
@@ -38,16 +42,71 @@ def get_competitor_data(coin_bot_id):
         if not coin_data:
             return jsonify({'message': 'No data found for the requested coin', 'status': 404}), 404
 
-        competitor_data = [{
-            'competitor': competitor_value.as_dict(),
-        } for competitor_value in coin_data]
-        
-        return jsonify({'competitors': competitor_data, 'status': 200}), 200
+        token_data = defaultdict(lambda: {'symbol': '', 'attributes': {}})
+
+        for competitor in coin_data:
+            token = competitor.token.strip().upper()
+            key = competitor.key.strip()
+            value = competitor.value
+
+            if not token_data[token]['symbol']:
+                token_data[token]['symbol'] = token
+            
+            token_data[token]['attributes'][key] = {
+                'value': value,
+                'is_coingecko_data': False,
+                'id': competitor.id
+            }
+
+        for token in token_data:
+            coingecko_data = get_competitors_data(token)
+            if isinstance(coingecko_data, dict):
+                for tokenomics_key, tokenomics_value in coingecko_data.items():
+                    normalized_tokenomics_key = normalize_key(tokenomics_key)
+                    matched = False
+                    for existing_key in list(token_data[token]['attributes'].keys()):
+                        if set(normalized_tokenomics_key.split()) & set(normalize_key(existing_key).split()):
+                            token_data[token]['attributes'][existing_key] = {
+                                'value': tokenomics_value,
+                                'is_coingecko_data': True,
+                                'id': token_data[token]['attributes'][existing_key]['id']
+                            }
+                            matched = True
+                            break
+                    if not matched:
+                        token_data[token]['attributes'][tokenomics_key] = {
+                            'value': tokenomics_value,
+                            'is_coingecko_data': True,
+                            'id': None
+                        }
+
+        # Crear el objeto final
+        final_data = {}
+        for token, data in token_data.items():
+            final_data[token] = {
+                'symbol': data['symbol'],
+                'attributes': {k: v for k, v in data['attributes'].items() if v['value'] is not None}
+            }
+
+        return jsonify({'competitors': final_data, 'status': 200}), 200
     
     except Exception as e:
-        return jsonify({'message': f'Error getting competitors data: {str(e)}', 'status': 500}), 500
-    
-    
+        original_data = {}
+        for competitor in coin_data:
+            token = competitor.token.strip().upper()
+            if token not in original_data:
+                original_data[token] = {'symbol': token, 'attributes': {}}
+            original_data[token]['attributes'][competitor.key.strip()] = {
+                'value': competitor.value,
+                'is_coingecko_data': False,
+                'id': competitor.id
+            }
+
+        return jsonify({
+            'competitors': original_data, 
+            'status': 200, 
+            'message': f'Error processing data, returning original data: {str(e)}'
+        }), 200
 
 #APP GET COMPETITORS ROUTE
 # Gets a list of the competitors and the analyzed coin  
