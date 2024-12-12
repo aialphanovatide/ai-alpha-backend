@@ -125,160 +125,216 @@ class Swagger:
 swagger = Swagger()
 
 # ____Add or update an endpoint____
+# Add this to your swagger builder usage section
 
-# Add this to the example usage section at the bottom of the file
-# success, message = swagger.add_or_update_endpoint(
-#    endpoint_route='/coin/{coin_id}/toggle-coin',
-#    method='post',
-#    tag='Coin',
-#    summary='Toggle coin activation status',
-#    description='Toggle a coin\'s active status. Activation requires an active category and valid coin data. Deactivation is always allowed.',
-#    params=[
-#        {
-#            'name': 'coin_id',
-#            'in': 'path',
-#            'description': 'ID of the coin to toggle',
-#            'required': True,
-#            'type': 'integer'
-#        }
-#    ],
-#    responses={
-#        '200': {
-#            'description': 'Successfully toggled coin status',
-#            'schema': {
-#                'type': 'object',
-#                'properties': {
-#                    'success': {'type': 'boolean'},
-#                    'message': {'type': 'string'},
-#                    'is_active': {'type': 'boolean'},
-#                    'error': {'type': 'null'}
-#                }
-#            }
-#        },
-#        '400': {
-#            'description': 'Invalid request (inactive category or failed validation)',
-#            'schema': {
-#                'type': 'object',
-#                'properties': {
-#                    'success': {'type': 'boolean', 'example': False},
-#                    'message': {'type': 'string'},
-#                    'is_active': {'type': 'boolean'},
-#                    'error': {'type': 'string'}
-#                }
-#            }
-#        },
-#        '404': {
-#            'description': 'Coin not found',
-#            'schema': {
-#                'type': 'object',
-#                'properties': {
-#                    'success': {'type': 'boolean', 'example': False},
-#                    'message': {'type': 'string'},
-#                    'is_active': {'type': 'boolean'},
-#                    'error': {'type': 'string'}
-#                }
-#            }
-#        },
-#        '500': {
-#            'description': 'Server error',
-#            'schema': {
-#                'type': 'object',
-#                'properties': {
-#                    'success': {'type': 'boolean', 'example': False},
-#                    'message': {'type': 'string'},
-#                    'is_active': {'type': 'boolean'},
-#                    'error': {'type': 'string'}
-#                }
-#            }
-#        }
-#    }
-# )
-# print(message)
-# PUT /analysis/{analysis_id}
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/analysis/{analysis_id}',
-#     method='put',
-#     tag='Content Creation',
-#     summary='Update analysis',
-#     description='Update the content of an existing analysis',
+#     endpoint_route='/ask-ai',
+#     method='get',
+#     tag='Ask AI',
+#     summary='Get detailed cryptocurrency information',
+#     description='[CACHED FOR 5 MINUTES] Retrieve comprehensive tokenomics data for a specific cryptocurrency using its Coin ID. '
+#                 'The response is cached to optimize performance and handle rate limiting. '
+#                 'The endpoint provides detailed information including price, market cap, supply metrics, and icon URLs in various formats.',
 #     params=[
 #         {
-#             'name': 'analysis_id',
-#             'in': 'path',
-#             'description': 'ID of the analysis to update',
+#             'name': 'coin_id',
+#             'in': 'query',
+#             'description': 'The CoinGecko ID of the cryptocurrency (e.g., "bitcoin", "ethereum")',
 #             'required': True,
-#             'type': 'integer'
-#         },
-#         {
-#             'name': 'body',
-#             'in': 'body',
-#             'description': 'Analysis update data',
-#             'required': True,
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'section_id': {
-#                         'type': 'integer',
-#                         'description': 'ID of the section the analysis belongs to'
-#                     },
-#                     'content': {
-#                         'type': 'string',
-#                         'description': 'New content for the analysis'
-#                     }
-#                 },
-#                 'required': ['section_id', 'content'],
-#                 'example': {
-#                     'section_id': 1,
-#                     'content': 'Updated analysis content here'
-#                 }
-#             }
+#             'type': 'string',
+#             'example': 'bitcoin'
 #         }
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Analysis updated successfully',
+#             'description': 'Successfully retrieved cryptocurrency data',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': True
+#                     },
+#                     'error': {
+#                         'type': 'null'
+#                     },
 #                     'data': {
 #                         'type': 'object',
 #                         'properties': {
-#                             'id': {'type': 'integer'},
-#                             'analysis': {'type': 'string'},
-#                             'created_at': {'type': 'string', 'format': 'date-time'},
-#                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                             'website': {
+#                                 'type': 'string',
+#                                 'description': 'Main project website URL',
+#                                 'example': 'https://bitcoin.org'
+#                             },
+#                             'whitepaper': {
+#                                 'type': 'string',
+#                                 'description': 'URL to project whitepaper (from CoinGecko or CoinMarketCap)',
+#                                 'example': 'https://bitcoin.org/bitcoin.pdf'
+#                             },
+#                             'categories': {
+#                                 'type': 'array',
+#                                 'description': 'List of categories the coin belongs to',
+#                                 'items': {'type': 'string'},
+#                                 'example': ['Cryptocurrency', 'Store of Value']
+#                             },
+#                             'chains': {
+#                                 'type': 'array',
+#                                 'description': 'List of blockchain platforms where the token exists',
+#                                 'items': {'type': 'string'},
+#                                 'example': ['bitcoin']
+#                             },
+#                             'current_price': {
+#                                 'type': 'number',
+#                                 'description': 'Current price in USD',
+#                                 'example': 50000.00
+#                             },
+#                             'market_cap_usd': {
+#                                 'type': 'number',
+#                                 'description': 'Market capitalization in USD',
+#                                 'example': 1000000000000
+#                             },
+#                             'fully_diluted_valuation': {
+#                                 'type': 'number',
+#                                 'description': 'Fully diluted valuation in USD',
+#                                 'example': 1100000000000
+#                             },
+#                             'ath': {
+#                                 'type': 'number',
+#                                 'description': 'All-time high price in USD',
+#                                 'example': 69000.00
+#                             },
+#                             'ath_change_percentage': {
+#                                 'type': 'number',
+#                                 'description': 'Percentage change from ATH',
+#                                 'example': -25.5
+#                             },
+#                             'circulating_supply': {
+#                                 'type': 'number',
+#                                 'description': 'Current circulating supply',
+#                                 'example': 19000000
+#                             },
+#                             'icon': {
+#                                 'type': 'object',
+#                                 'description': 'Icon URLs in various formats',
+#                                 'properties': {
+#                                     'thumb': {
+#                                         'type': 'string',
+#                                         'description': 'Thumbnail size icon URL'
+#                                     },
+#                                     'small': {
+#                                         'type': 'string',
+#                                         'description': 'Small size icon URL'
+#                                     },
+#                                     'large': {
+#                                         'type': 'string',
+#                                         'description': 'Large size icon URL'
+#                                     },
+#                                     'svg': {
+#                                         'type': 'string',
+#                                         'description': 'SVG version of the icon (if conversion successful)'
+#                                     }
+#                                 }
+#                             }
 #                         }
-#                     },
-#                     'error': {'type': 'null'},
-#                     'success': {'type': 'boolean', 'example': True}
+#                     }
 #                 }
 #             }
 #         },
 #         '400': {
-#             'description': 'Bad Request - Missing or invalid parameters',
+#             'description': 'Bad Request - Missing coin_id parameter',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean', 'example': False}
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
+#                     },
+#                     'error': {
+#                         'type': 'string',
+#                         'example': 'The parameter coin_id is required'
+#                     },
+#                     'data': {
+#                         'type': 'null'
+#                     }
 #                 }
 #             }
 #         },
 #         '404': {
-#             'description': 'Analysis or section not found',
+#             'description': 'Cryptocurrency not found or API error',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string'},
-#                     'success': {'type': 'boolean', 'example': False}
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
+#                     },
+#                     'error': {
+#                         'type': 'string',
+#                         'example': 'Cryptocurrency not found or API request failed'
+#                     },
+#                     'data': {
+#                         'type': 'null'
+#                     }
+#                 }
+#             }
+#         },
+#         '429': {
+#             'description': 'Rate limit exceeded',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
+#                     },
+#                     'error': {
+#                         'type': 'string',
+#                         'example': 'Too many requests. Please try again later.'
+#                     },
+#                     'data': {
+#                         'type': 'null'
+#                     },
+#                     'rate_limit': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'max_calls': {
+#                                 'type': 'integer',
+#                                 'example': 10
+#                             },
+#                             'period': {
+#                                 'type': 'integer',
+#                                 'example': 60
+#                             },
+#                             'current_calls': {
+#                                 'type': 'integer',
+#                                 'example': 11
+#                             }
+#                         }
+#                     }
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Server error',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
+#                     },
+#                     'error': {
+#                         'type': 'string',
+#                         'example': 'An unexpected error occurred while fetching cryptocurrency data'
+#                     },
+#                     'data': {
+#                         'type': 'null'
+#                     }
 #                 }
 #             }
 #         }
 #     }
 # )
-
 
 # ____Delete an endpoint____
 

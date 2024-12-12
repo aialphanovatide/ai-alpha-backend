@@ -5921,13 +5921,13 @@
         "tags": [
           "Ask AI"
         ],
-        "summary": "Get detailed tokenomics data for a cryptocurrency",
-        "description": "Retrieve comprehensive tokenomics information about a specific cryptocurrency using its coingecko id.\n    \nthe endpoint fetches data from both coingecko and coinmarketcap (for whitepaper if not available in coingecko).",
+        "summary": "Get detailed cryptocurrency information",
+        "description": "[cached for 5 minutes] retrieve comprehensive tokenomics data for a specific cryptocurrency using its coin id. the response is cached to optimize performance and handle rate limiting. the endpoint provides detailed information including price, market cap, supply metrics, and icon urls in various formats.",
         "parameters": [
           {
             "name": "coin_id",
             "in": "query",
-            "description": "CoinGecko ID of the cryptocurrency (e.g., \"bitcoin\", \"ethereum\")",
+            "description": "The CoinGecko ID of the cryptocurrency (e.g., \"bitcoin\", \"ethereum\")",
             "required": true,
             "type": "string",
             "schema": {}
@@ -5935,78 +5935,120 @@
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved tokenomics data",
+            "description": "Successfully retrieved cryptocurrency data",
             "schema": {
               "type": "object",
               "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "website": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "whitepaper": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "categories": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "chains": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "current_price": {
-                      "type": "number"
-                    },
-                    "market_cap_usd": {
-                      "type": "number"
-                    },
-                    "fully_diluted_valuation": {
-                      "type": "number",
-                      "nullable": true
-                    },
-                    "ath": {
-                      "type": "number"
-                    },
-                    "ath_change_percentage": {
-                      "type": "number"
-                    },
-                    "circulating_supply": {
-                      "type": "number",
-                      "nullable": true
-                    }
-                  }
-                },
                 "success": {
                   "type": "boolean",
                   "example": true
                 },
                 "error": {
-                  "type": "string",
-                  "nullable": true
+                  "type": "null"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "website": {
+                      "type": "string",
+                      "description": "Main project website URL",
+                      "example": "https://bitcoin.org"
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "description": "URL to project whitepaper (from CoinGecko or CoinMarketCap)",
+                      "example": "https://bitcoin.org/bitcoin.pdf"
+                    },
+                    "categories": {
+                      "type": "array",
+                      "description": "List of categories the coin belongs to",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "Cryptocurrency",
+                        "Store of Value"
+                      ]
+                    },
+                    "chains": {
+                      "type": "array",
+                      "description": "List of blockchain platforms where the token exists",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "bitcoin"
+                      ]
+                    },
+                    "current_price": {
+                      "type": "number",
+                      "description": "Current price in USD",
+                      "example": 50000.0
+                    },
+                    "market_cap_usd": {
+                      "type": "number",
+                      "description": "Market capitalization in USD",
+                      "example": 1000000000000
+                    },
+                    "fully_diluted_valuation": {
+                      "type": "number",
+                      "description": "Fully diluted valuation in USD",
+                      "example": 1100000000000
+                    },
+                    "ath": {
+                      "type": "number",
+                      "description": "All-time high price in USD",
+                      "example": 69000.0
+                    },
+                    "ath_change_percentage": {
+                      "type": "number",
+                      "description": "Percentage change from ATH",
+                      "example": -25.5
+                    },
+                    "circulating_supply": {
+                      "type": "number",
+                      "description": "Current circulating supply",
+                      "example": 19000000
+                    },
+                    "icon": {
+                      "type": "object",
+                      "description": "Icon URLs in various formats",
+                      "properties": {
+                        "thumb": {
+                          "type": "string",
+                          "description": "Thumbnail size icon URL"
+                        },
+                        "small": {
+                          "type": "string",
+                          "description": "Small size icon URL"
+                        },
+                        "large": {
+                          "type": "string",
+                          "description": "Large size icon URL"
+                        },
+                        "svg": {
+                          "type": "string",
+                          "description": "SVG version of the icon (if conversion successful)"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request - Missing required parameter",
+            "description": "Bad Request - Missing coin_id parameter",
             "schema": {
               "type": "object",
               "properties": {
-                "error": {
-                  "type": "string",
-                  "example": "The parameter coin_id is required"
-                },
                 "success": {
                   "type": "boolean",
                   "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "The parameter coin_id is required"
                 },
                 "data": {
                   "type": "null"
@@ -6019,12 +6061,68 @@
             "schema": {
               "type": "object",
               "properties": {
-                "error": {
-                  "type": "string"
-                },
                 "success": {
                   "type": "boolean",
                   "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Cryptocurrency not found or API request failed"
+                },
+                "data": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Too many requests. Please try again later."
+                },
+                "data": {
+                  "type": "null"
+                },
+                "rate_limit": {
+                  "type": "object",
+                  "properties": {
+                    "max_calls": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "period": {
+                      "type": "integer",
+                      "example": 60
+                    },
+                    "current_calls": {
+                      "type": "integer",
+                      "example": 11
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred while fetching cryptocurrency data"
                 },
                 "data": {
                   "type": "null"
