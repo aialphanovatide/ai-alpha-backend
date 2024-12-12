@@ -581,9 +581,7 @@ MODEL_MAPPING = {
     'support_resistance': SAndRAnalysis
 }
 
-
 def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
-
     logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
 
     with Session() as session:
@@ -599,14 +597,14 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             if not model_class:
                 raise ValueError(f"Invalid target type: {target}")
             
-            # 2. Validate coin and get symbol
+            # 2. Validate coin and get symbol - Moved up to ensure coin_name is defined early
             coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
             if not coin_bot:
                 raise ValueError(f"No coin found with id {coin_id}")
             
-            logger.info(f"Coin bot: {coin_bot}")
-
-            coin_name = coin_bot.name
+            coin_name = coin_bot.name  # Define coin_name before use
+            logger.info(f"Coin bot: {coin_bot.name}")
+            
             # 3. Validate notification topics exist
             found_topics = notification_service.validate_topics(coin_name, target)
             if not found_topics:
@@ -641,23 +639,26 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             except Exception as e:
                 raise ValueError(f"Image processing failed: {str(e)}")
             
-            # 6. Create and save content
+            # 6. Create and save content with timezone awareness
             new_content = model_class.create_entry(content, resized_image_url, category_name, coin_id)
             session.add(new_content)
             session.commit()
+            session.refresh(new_content)  # Refresh to ensure we have the latest data with proper timezone
 
             logger.info(f"New content created...")
             
             # 7. Emit notification to connected clients
+            notification_data = {
+                "coin": coin_name,
+                "title": f"{str(coin_name).upper()} New {section.name} Available",
+                "body": f"{title} - Check it out!",
+                "type": target,
+                "timeframe": ""
+            }
+            
             emit_notification(
                 event_name="new_analysis",
-                data={
-                    "coin": coin_name,
-                    "title": f"{str(coin_name).upper()} New {section.name} Available",
-                    "body": f"{title} - Check it out!",
-                    "type": target,
-                    "timeframe": ""
-                },
+                data=notification_data
             )
 
             logger.info(f"Notification emitted to connected clients")
@@ -665,8 +666,8 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             # 8. Push notification
             notification_service.push_notification(
                 coin=coin_name,
-                title=f"{str(coin_name).upper()} New {section.name} Available",
-                body=f"{title} - Check it out!",
+                title=notification_data["title"],
+                body=notification_data["body"],
                 type=target,
                 timeframe=""
             )
@@ -678,19 +679,10 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                 message=f"{section.name} published successfully",
                 success=True,
             )
+
         except ValueError as e:
             session.rollback()
             logger.error(f"Validation error: {str(e)}")
-            emit_notification(
-                event_name="new_analysis_error",
-                data={
-                    "coin": coin_name,
-                    "title": f"There was an error publishing {section.name}",
-                    "body": f"Details: {str(e)}",
-                    "type": target,
-                    "timeframe": ""
-                },
-            )
             return create_response(
                 data=None,
                 message=str(e),
@@ -704,6 +696,120 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                 message=f"An unexpected error occurred: {str(e)}",
                 success=False,
             )
+
+
+# def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
+
+#     logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
+
+#     with Session() as session:
+#         try:
+#             # 1. Initial validations
+#             section = session.query(Sections).filter(Sections.id == section_id).first()
+#             if not section:
+#                 raise ValueError(f"No Section found with id {section_id}")
+#             target = section.target.lower()
+#             model_class = MODEL_MAPPING.get(target)
+
+#             logger.info(f"Model class: {model_class}")
+#             if not model_class:
+#                 raise ValueError(f"Invalid target type: {target}")
+            
+#             # 2. Validate coin and get symbol
+#             coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
+#             if not coin_bot:
+#                 raise ValueError(f"No coin found with id {coin_id}")
+            
+#             logger.info(f"Coin bot: {coin_bot}")
+
+#             coin_name = coin_bot.name
+#             # 3. Validate notification topics exist
+#             found_topics = notification_service.validate_topics(coin_name, target)
+#             if not found_topics:
+#                 raise ValueError(f"No notification topics found for coin {coin_name} and type {target}")
+            
+#             logger.info(f"Found topics: {found_topics}")
+
+#             # 4. Extract and validate title
+#             title_end_index = content.find('<br>')
+#             if title_end_index == -1:
+#                 raise ValueError("No newline found in the content, please add a space after the title")
+#             title = content[:title_end_index].strip()
+#             content_body = content[title_end_index + 4:].strip()
+            
+#             # Format title for image filename
+#             title = BeautifulSoup(title, 'html.parser').get_text()
+#             formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
+#             image_filename = f"{formatted_title}.jpg"
+            
+#             # 5. Generate and process image only after all validations pass
+#             try:
+#                 logger.info("Generating image")
+#                 image = image_generator.generate_image(content_body)
+                
+#                 logger.info(f"Processing and uploading image with URL: {image}")
+#                 resized_image_url = image_processor.process_and_upload_image(
+#                     image_url=image,
+#                     bucket_name='appanalysisimages',
+#                     image_filename=image_filename
+#                 )
+#                 logger.info(f"Image processed and uploaded to S3: {resized_image_url}")
+#             except Exception as e:
+#                 raise ValueError(f"Image processing failed: {str(e)}")
+            
+#             # 6. Create and save content
+#             new_content = model_class.create_entry(content, resized_image_url, category_name, coin_id)
+#             session.add(new_content)
+#             session.commit()
+
+#             logger.info(f"New content created...")
+            
+#             # 7. Emit notification to connected clients
+#             emit_notification(
+#                 event_name="new_analysis",
+#                 data={
+#                     "coin": coin_name,
+#                     "title": f"{str(coin_name).upper()} New {section.name} Available",
+#                     "body": f"{title} - Check it out!",
+#                     "type": target,
+#                     "timeframe": ""
+#                 },
+#             )
+
+#             logger.info(f"Notification emitted to connected clients")
+
+#             # 8. Push notification
+#             notification_service.push_notification(
+#                 coin=coin_name,
+#                 title=f"{str(coin_name).upper()} New {section.name} Available",
+#                 body=f"{title} - Check it out!",
+#                 type=target,
+#                 timeframe=""
+#             )
+
+#             logger.info(f"Notification pushed to Firebase")
+
+#             return create_response(
+#                 data=new_content.to_dict(),
+#                 message=f"{section.name} published successfully",
+#                 success=True,
+#             )
+#         except ValueError as e:
+#             session.rollback()
+#             logger.error(f"Validation error: {str(e)}")
+#             return create_response(
+#                 data=None,
+#                 message=str(e),
+#                 success=False,
+#             )
+#         except Exception as e:
+#             session.rollback()
+#             logger.error(f"Unexpected error: {str(e)}")
+#             return create_response(
+#                 data=None,
+#                 message=f"An unexpected error occurred: {str(e)}",
+#                 success=False,
+#             )
 
 # ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
