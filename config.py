@@ -2246,4 +2246,4 @@ def init_data():
     initialize_default_roles()
 
 
-init_data()
+# init_data()
