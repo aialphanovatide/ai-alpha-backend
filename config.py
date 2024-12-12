@@ -457,6 +457,21 @@ class User(Base):
         """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
+    def generate_reset_token(self, expires_in=3600):
+        """
+        Generate a password reset token for the user.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            str: The generated reset token
+        """
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
+        
+        return token
+
 class PurchasedPlan(Base):
     """
     Represents a purchased plan associated with a user.
