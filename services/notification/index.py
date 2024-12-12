@@ -37,10 +37,10 @@ class NotificationService:
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
-                elif type in ["analysis", "narrative_trading", "s_and_r"]:
+                elif type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
-                        Topic.name.ilike(f"%{type}%")  # Match topics with the specified type
+                        Topic.type.ilike(f"%{type}%")  # Match topics with the specified type
                     )
                 else:
                     raise ValueError(f"Invalid notification type: {type}")
@@ -75,7 +75,7 @@ class NotificationService:
             with Session() as session:
                 # Save notifications to database
                 for topic in topics:
-                    if type in ["analysis", "narrative_trading", "s_and_r"]:
+                    if type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
                         new_notification = Notification(
                             topic_id=topic.id,
                             title=title,

@@ -14,7 +14,7 @@ from services.openai.dalle import ImageGenerator
 from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
 from apscheduler.jobstores.base import JobLookupError
-from config import Analysis, CoinBot, NarrativeTrading, SAndRAnalysis, Sections, Session
+from config import Analysis, CoinBot, NarrativeTrading, SAndRAnalysis, Sections, Session, DailyMacroAnalysis, SpotlightAnalysis
 from ws.socket import emit_notification
 from routes.analysis.analysis_scheduler import sched, chosen_timezone
 from utils.logging import setup_logger
@@ -574,10 +574,13 @@ def edit_analysis(analysis_id):
 
 # Define a mapping between targets and their corresponding models
 MODEL_MAPPING = {
-    'analysis': Analysis,
-    'narrative_trading': NarrativeTrading,
-    's_and_r_analysis': SAndRAnalysis
-    }
+    'deep_dive': Analysis,         
+    'daily_macro': DailyMacroAnalysis,
+    'narratives': NarrativeTrading,
+    'spotlight': SpotlightAnalysis,
+    'support_resistance': SAndRAnalysis
+}
+
 
 def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str) -> dict:
 
@@ -591,10 +594,6 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                 raise ValueError(f"No Section found with id {section_id}")
             target = section.target.lower()
             model_class = MODEL_MAPPING.get(target)
-            
-            # Removed analysis word to find the right topic
-            if target == "s_and_r_analysis":
-                target = "s_and_r"
 
             logger.info(f"Model class: {model_class}")
             if not model_class:
@@ -682,6 +681,16 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
         except ValueError as e:
             session.rollback()
             logger.error(f"Validation error: {str(e)}")
+            emit_notification(
+                event_name="new_analysis_error",
+                data={
+                    "coin": coin_name,
+                    "title": f"There was an error publishing {section.name}",
+                    "body": f"Details: {str(e)}",
+                    "type": target,
+                    "timeframe": ""
+                },
+            )
             return create_response(
                 data=None,
                 message=str(e),
