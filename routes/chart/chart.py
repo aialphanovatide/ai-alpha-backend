@@ -257,7 +257,6 @@ def receive_and_save_chart_data():
         
         # Ensure 'direction' is extracted from parsed_data
         direction = parsed_data['direction']
-        print(direction)
         # Send notification if essential
         if parsed_data['is_essential']:
             notification_service.push_notification(
