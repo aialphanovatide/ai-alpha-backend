@@ -35,3 +35,6 @@ marshmallow
 gunicorn
 flask_mail
 psutil
+flask-caching
+svgwrite
+Pillow
