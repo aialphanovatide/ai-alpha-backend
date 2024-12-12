@@ -5,7 +5,7 @@ from flask_mail import Message
 from pydantic import validate_email
 from sqlalchemy import exc
 from sqlalchemy.orm import joinedload
-from flask import app, current_app, jsonify, request, Blueprint
+from flask import app, current_app, jsonify, request, Blueprint, flash, redirect, url_for, render_template
 from config import PurchasedPlan, Session, User
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -15,11 +15,11 @@ from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 import jwt
 import datetime
 from services.email.email_service import EmailService
+import re
 
 
 user_bp = Blueprint('user', __name__)
 
-# Crear una instancia de EmailService
 email_service = EmailService()
 
 def generate_unique_short_token(length=7, max_attempts=100):
@@ -574,42 +574,143 @@ def forgot_password():
             return jsonify(response), 500
 
 
-@user_bp.route('/reset-password', methods=['POST'])
+def validate_password_strength(password):
+    """
+    Validates password strength according to Auth0 criteria:
+    - At least 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
+    - At least one special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter"
+        
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter"
+        
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number"
+        
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)"
+        
+    return True, "Password meets security requirements"
+
+
+@user_bp.route('/reset-password', methods=['GET', 'POST'])
 async def reset_password():
-    """
-    Reset the user's password using the provided token.
-    """
-    response = {'success': False, 'message': None}
-    data = request.json
+    if request.method == 'GET':
+        token = request.args.get('token')
+        if not token:
+            return render_template('error.html',
+                title='Invalid Request',
+                message='Reset token is required.',
+                button_text='Try Again'
+            )
+            
+        with Session() as session:
+            try:
+                user = User.verify_reset_token(token, session)
+                if not user:
+                    return render_template('error.html',
+                        title='Invalid Token',
+                        message='The password reset link is invalid or has expired.',
+                        button_text='Request New Reset Link'
+                    )
+                    
+                return render_template('reset_password.html', token=token)
+                
+            except Exception as e:
+                print(f"Token verification error: {str(e)}")
+                return render_template('error.html',
+                    title='Invalid Token',
+                    message='The password reset link is invalid or has expired.',
+                    button_text='Request New Reset Link'
+                )
 
-    token = data.get('token')
-    new_password = data.get('new_password')
+    # POST request
+    try:
+        token = request.form.get('token')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
 
-    if not token or not new_password:
-        response['message'] = 'Token and new password are required'
-        return jsonify(response), 400
+        if not token or not new_password or not confirm_password:
+            return render_template('error.html',
+                title='Invalid Request',
+                message='All fields are required.',
+                button_text='Try Again'
+            )
 
-    with Session() as session:
-        try:
-            # Verify token and get user
-            user = User.verify_reset_token(token, session)
-            if not user:
-                response['message'] = 'Invalid or expired token'
-                return jsonify(response), 400
+        if new_password != confirm_password:
+            return render_template('reset_password.html',
+                token=token,
+                error='Passwords do not match'
+            )
 
-            # Update password in Auth0
-            await patchPassword(user.email, new_password)
+        # Validate password strength
+        is_valid, message = validate_password_strength(new_password)
+        if not is_valid:
+            return render_template('reset_password.html',
+                token=token,
+                error=message
+            )
 
-            response['success'] = True
-            response['message'] = 'Password updated successfully'
-            return jsonify(response), 200
+        with Session() as session:
+            try:
+                user = User.verify_reset_token(token, session)
+                if not user:
+                    return render_template('error.html',
+                        title='Invalid Token',
+                        message='The password reset link is invalid or has expired.',
+                        button_text='Request New Reset Link'
+                    )
 
-        except jwt.ExpiredSignatureError:
-            response['message'] = 'Reset token has expired'
-            return jsonify(response), 400
-        except jwt.InvalidTokenError:
-            response['message'] = 'Invalid reset token'
-            return jsonify(response), 400
-        except Exception as e:
-            response['message'] = f'An unexpected error occurred: {str(e)}'
-            return jsonify(response), 500
+                try:
+                    await patchPassword(user.email, new_password)
+                except Exception as auth0_error:
+                    error_msg = str(auth0_error)
+                    if "uses Google Sign-In" in error_msg:
+                        return render_template('error.html',
+                            title='Password Reset Not Available',
+                            message='This account uses Google Sign-In. Please continue using Google to log in.',
+                            button_text='Close Window'
+                        )
+                    elif "uses Apple Sign-In" in error_msg:
+                        return render_template('error.html',
+                            title='Password Reset Not Available',
+                            message='This account uses Apple Sign-In. Please continue using Apple to log in.',
+                            button_text='Close Window'
+                        )
+                    else:
+                        print(f"Unexpected Auth0 error: {error_msg}")
+                        return render_template('error.html',
+                            title='Authentication Error',
+                            message='There was a problem updating your password. Please try again.',
+                            button_text='Try Again'
+                        )
+
+                return render_template('success.html',
+                    title='Password Reset Successful',
+                    message='Your password has been updated successfully. You can now close this window and log in with your new password.',
+                    button_text='Close Window'
+                )
+
+            except Exception as e:
+                print(f"Reset password error: {str(e)}")
+                return render_template('error.html',
+                    title='System Error',
+                    message='An unexpected error occurred. Please try again later.',
+                    button_text='Try Again'
+                )
+
+    except Exception as e:
+        print(f"Outer reset password error: {str(e)}")
+        return render_template('error.html',
+            title='System Error',
+            message='An unexpected error occurred. Please try again later.',
+            button_text='Try Again'
+        )
