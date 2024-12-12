@@ -32,7 +32,7 @@ check_create_and_apply_migrations() {
 }
 
 # Check, create, and apply migration
-# check_create_and_apply_migrations
+check_create_and_apply_migrations
 
 # Start the application
 if [ "$FLASK_ENV" = "development" ]; then
