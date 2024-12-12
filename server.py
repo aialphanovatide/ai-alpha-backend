@@ -46,7 +46,6 @@ from ws.socket import init_socketio
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 
 app.name = 'AI Alpha API'
-app.config['TIMEZONE'] = 'America/Buenos_Aires'
 
 swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
 
