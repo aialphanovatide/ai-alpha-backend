@@ -1,6 +1,6 @@
 from routes.slack.templates.poduct_alert_notification import send_notification_to_product_alerts_slack_channel
 from config import CoinBot, PurchasedPlan, User, session, Category, Article, TopStory, TopStoryImage
-from routes.news_bot.scrapper import start_periodic_scraping
+# from routes.news_bot.scrapper import start_periodic_scraping
 from apscheduler.jobstores.base import JobLookupError
 from flask import request, Blueprint, jsonify
 from datetime import datetime, timedelta
@@ -222,33 +222,33 @@ def get_categories():
     except Exception as e:
         return {'Error': f'Error getting the categories: {str(e)}'}, 500
 
-def activate_news_bot(category_name):
-    try:
-        if not scheduler.state:
-            print('Scheduler not active')
-            return 'Scheduler not active', 500
+# def activate_news_bot(category_name):
+#     try:
+#         if not scheduler.state:
+#             print('Scheduler not active')
+#             return 'Scheduler not active', 500
         
-        category = session.query(Category).filter(Category.category == category_name.casefold()).first()
+#         category = session.query(Category).filter(Category.category == category_name.casefold()).first()
         
-        if not category:
-            print(f'{category_name.capitalize()} does not match any in the database')
-            return f'{category_name.capitalize()} does not match any in the database', 404
+#         if not category:
+#             print(f'{category_name.capitalize()} does not match any in the database')
+#             return f'{category_name.capitalize()} does not match any in the database', 404
         
-        time_interval = category.time_interval
-        category.is_active = True
-        session.commit()
+#         time_interval = category.time_interval
+#         category.is_active = True
+#         session.commit()
             
-        job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=2)
-        if job:
-            print(f'{category_name.capitalize()} activated successfully')
+#         job = scheduler.add_job(start_periodic_scraping, 'interval', minutes=time_interval, id=category_name, replace_existing=True, args=[category_name], max_instances=2)
+#         if job:
+#             print(f'{category_name.capitalize()} activated successfully')
         
-        message = f'{category_name.capitalize()} activated successfully'
-        # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Message', message=f'An interval of *{time_interval} Minutes* has been set for scrapping data')
-        return f'{category_name.capitalize()} News Bot activated', 200
+#         message = f'{category_name.capitalize()} activated successfully'
+#         # send_notification_to_product_alerts_slack_channel(title_message=message, sub_title='Message', message=f'An interval of *{time_interval} Minutes* has been set for scrapping data')
+#         return f'{category_name.capitalize()} News Bot activated', 200
 
-    except Exception as e:
-        print(f'Error while activating the {category_name.capitalize()} News Bot: {str(e)}')
-        return f'Error while activating the {category_name.capitalize()} News Bot', 500
+#     except Exception as e:
+#         print(f'Error while activating the {category_name.capitalize()} News Bot: {str(e)}')
+#         return f'Error while activating the {category_name.capitalize()} News Bot', 500
 
 
 def deactivate_news_bot(category_name):
@@ -278,28 +278,28 @@ def deactivate_news_bot(category_name):
         return f'Error while deactivating {category_name.capitalize()}: {str(e)}', 500
 
 
-# Activates or desactivates a category: ex Layer 0  
-@scrapper_bp.route('/api/news/bot', methods=['POST'])
-def news_bot_commands():
+# # Activates or desactivates a category: ex Layer 0  
+# @scrapper_bp.route('/api/news/bot', methods=['POST'])
+# def news_bot_commands():
         
-        try:
-            data = request.json
-            command = data['command']
-            category = data['category']
-            category = str(category).casefold()
+#         try:
+#             data = request.json
+#             command = data['command']
+#             category = data['category']
+#             category = str(category).casefold()
 
-            if command == 'activate': 
-                res, status = start_periodic_scraping(category)
-                #res, status = activate_news_bot(category)
-                return res, status
-            elif command == 'deactivate':
-                response, status = deactivate_news_bot(category)
-                return response, status
-            else:
-                return 'Command not valid', 400
-        except Exception as e:
-            print(f'An error occurred: {str(e)}')
-            return f'An error occurred: {str(e)}'
+#             if command == 'activate': 
+#                 res, status = start_periodic_scraping(category)
+#                 #res, status = activate_news_bot(category)
+#                 return res, status
+#             elif command == 'deactivate':
+#                 response, status = deactivate_news_bot(category)
+#                 return response, status
+#             else:
+#                 return 'Command not valid', 400
+#         except Exception as e:
+#             print(f'An error occurred: {str(e)}')
+#             return f'An error occurred: {str(e)}'
         
 
 

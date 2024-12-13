@@ -1,5 +1,6 @@
 import secrets
 from time import timezone
+from routes.analysis.analysis_scheduler import chosen_timezone
 from sqlalchemy import (
     JSON, Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
@@ -28,15 +29,26 @@ from flask import current_app
 
 load_dotenv()
 
+# Database configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 env = os.getenv('FLASK_ENV', 'development')
-DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
-if env == 'production':
-    DATABASE_URL = os.getenv('DATABASE_URL_PROD')
+# Set database URL based on environment
+DATABASE_URL = os.getenv('DATABASE_URL_PROD') if env == 'production' else os.getenv('DATABASE_URL_DEV')
 
-engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
+# Configure SQLAlchemy engine with timezone support
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=30,
+    max_overflow=20,
+    connect_args={
+        'options': f'-c timezone={chosen_timezone.zone}'
+    }
+)
+
+# Initialize declarative base
 Base = declarative_base()
+
 
 # _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
 
@@ -509,8 +521,7 @@ class User(Base):
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as e:
             print(f"Token verification error: {str(e)}")
             raise
-
-class PurchasedPlan(Base):
+n(Base):
     """
     Represents a purchased plan associated with a user.
 
@@ -1169,6 +1180,7 @@ class DailyMacroAnalysis(Base):
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
     category = Column(String(100), nullable=False)
+
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -1189,14 +1201,14 @@ class SpotlightAnalysis(Base):
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
     category = Column(String(100), nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    category_name = Column(String(100), nullable=False)
 
     # Relationship
     coin_bot = relationship('CoinBot', back_populates='spotlight_analyses')
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 
 class Chart(Base):
     """
@@ -2126,7 +2138,6 @@ def populate_sections():
 
         # Commit the transaction
         session.commit()
-
         print(f"Successfully populated sections table with {len(new_sections)} sections")
         return True
 
