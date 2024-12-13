@@ -2365,40 +2365,43 @@
         "tags": [
           "Content Creation"
         ],
-        "summary": "Create new analysis",
-        "description": "Create and publish a new analysis",
+        "summary": "Create a new analysis",
+        "description": "\n    create a new analysis with a pre-generated image.\n    \n    note:\n    - all fields are required\n    - coin_id and section_id must be valid integers\n    - image_url should be a valid url (either temporary dall-e url or permanent s3 url)\n    - content should include a title followed by <br> and then the main content\n    ",
         "parameters": [
           {
             "name": "coin_id",
             "in": "formData",
             "description": "ID of the coin",
             "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "content",
-            "in": "formData",
-            "description": "Content of the analysis",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "category_name",
-            "in": "formData",
-            "description": "Name of the category",
-            "required": true,
-            "type": "string",
-            "schema": {}
+            "type": "string"
           },
           {
             "name": "section_id",
             "in": "formData",
             "description": "ID of the section",
             "required": true,
-            "type": "string",
-            "schema": {}
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Analysis content with title and body separated by <br>",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "Name of the category",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "image_url",
+            "in": "formData",
+            "description": "URL of the pre-generated image (DALL-E or S3)",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -2408,10 +2411,33 @@
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "object"
+                  "type": "object",
+                  "description": "Created analysis data",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "coin_id": {
+                      "type": "integer"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "image_url": {
+                      "type": "string"
+                    },
+                    "category_name": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
                 },
-                "error": {
-                  "type": "null"
+                "message": {
+                  "type": "string",
+                  "example": "Analysis published successfully"
                 },
                 "success": {
                   "type": "boolean",
@@ -2421,7 +2447,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request - Missing or invalid parameters",
             "schema": {
               "type": "object",
               "properties": {
@@ -2429,7 +2455,27 @@
                   "type": "null"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Missing required parameters: coin_id, content"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred"
                 },
                 "success": {
                   "type": "boolean",

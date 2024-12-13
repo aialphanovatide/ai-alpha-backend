@@ -26,123 +26,18 @@ image_generator = ImageGenerator()
 image_processor = ImageProcessor()
 notification_service = NotificationService()
 
-# @analysis_bp.route('/analysis/<int:analysis_id>', methods=['GET'])
-# def get_single_analysis(analysis_id):
-#     """
-#     Retrieve a single analysis by its ID.
-
-#     Args:
-#         analysis_id (int): The ID of the analysis to retrieve
-
-#     Query Parameters:
-#         section_id (int): The ID of the section the analysis belongs to
-
-#     Returns:
-#         JSON: A JSON object containing:
-#             - data (dict or None): The analysis object if found
-#             - error (str or None): Error message, if any
-#             - success (bool): Indicates if the operation was successful
-#         HTTP Status Code
-
-#     Raises:
-#         400 Bad Request: If section_id is not provided
-#         404 Not Found: If the analysis or section is not found
-#         500 Internal Server Error: If there's an unexpected error
-#     """
-#     response = {
-#         "data": None,
-#         "error": None,
-#         "success": False
-#     }
-#     status_code = 500  # Default to server error
-
-#     session = Session()
-#     try:
-#         # Get and validate section_id
-#         section_id = request.args.get('section_id', type=int)
-#         if not section_id:
-#             response["error"] = "section_id is required"
-#             status_code = 400
-#             return jsonify(response), status_code
-
-#         # Get section information
-#         section = session.query(Sections).filter_by(id=section_id).first()
-#         if not section:
-#             response["error"] = f"Section with id {section_id} not found"
-#             status_code = 404
-#             return jsonify(response), status_code
-
-#         # Get the corresponding model based on target
-#         target = section.target.lower()
-#         model_class = MODEL_MAPPING.get(target)
-#         if not model_class:
-#             response["error"] = f"No model found for target: {section.target}"
-#             status_code = 400
-#             return jsonify(response), status_code
-
-#         # Query for the specific analysis
-#         analysis = session.query(model_class).get(analysis_id)
-#         if not analysis:
-#             response["error"] = f"Analysis with id {analysis_id} not found"
-#             status_code = 404
-#             return jsonify(response), status_code
-
-#         # Prepare the response data
-#         response.update({
-#             "data": analysis.to_dict(),
-#             "success": True
-#         })
-#         status_code = 200
-#     except SQLAlchemyError as e:
-#         session.rollback()
-#         response["error"] = f"Database error occurred: {str(e)}"
-#         status_code = 500
-#     except Exception as e:
-#         session.rollback()
-#         response["error"] = f"An unexpected error occurred: {str(e)}"
-#         status_code = 500
-#     finally:
-#         session.close()
-#         return jsonify(response), status_code
-    
 
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['GET'])
 def get_single_analysis(analysis_id):
     """
     Retrieve a single analysis by its ID with enriched data.
-
-    Args:
-        analysis_id (int): The ID of the analysis to retrieve
-
-    Query Parameters:
-        section_id (int): The ID of the section the analysis belongs to
-
-    Returns:
-        JSON: {
-            "data": {
-                "id": int,
-                "coin_id": int,
-                "coin_name": str,
-                "coin_icon": str,
-                "section_name": str,
-                "section_id": int,
-                "title": str,
-                "content": str,
-                "image_url": str,
-                "created_at": str,
-                "category_name": str,
-                "category_icon": str
-            } or None,
-            "error": str or None,
-            "success": bool
-        }
     """
     response = {
         "data": None,
         "error": None,
         "success": False
     }
-    status_code = 500  # Default to server error
+    status_code = 500
 
     session = Session()
     try:
@@ -150,37 +45,32 @@ def get_single_analysis(analysis_id):
         section_id = request.args.get('section_id', type=int)
         if not section_id:
             response["error"] = "section_id is required"
-            status_code = 400
-            return jsonify(response), status_code
+            return jsonify(response), 400
 
         # Get section information
         section = session.query(Sections).filter_by(id=section_id).first()
         if not section:
             response["error"] = f"Section with id {section_id} not found"
-            status_code = 404
-            return jsonify(response), status_code
+            return jsonify(response), 404
 
         # Get the corresponding model based on target
         target = section.target.lower()
         model_class = MODEL_MAPPING.get(target)
         if not model_class:
             response["error"] = f"No model found for target: {section.target}"
-            status_code = 400
-            return jsonify(response), status_code
+            return jsonify(response), 400
 
-        # Query for the specific analysis with joined data
-        analysis = (
-            session.query(model_class)
-            .join(CoinBot, model_class.coin_bot_id == CoinBot.bot_id)
-            .join(Category, func.lower(model_class.category_name) == func.lower(Category.name))
-            .filter(model_class.analysis_id == analysis_id)
-            .first()
-        )
-
+        # First get the analysis
+        analysis = session.query(model_class).get(analysis_id)
         if not analysis:
             response["error"] = f"Analysis with id {analysis_id} not found"
-            status_code = 404
-            return jsonify(response), status_code
+            return jsonify(response), 404
+
+        # Get coin information
+        coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == analysis.coin_bot_id).first()
+        
+        # Get category information
+        category = session.query(Category).filter(func.lower(Category.name) == func.lower(analysis.category_name)).first()
 
         # Extract title from content
         title_end_index = analysis.content.find('<br>')
@@ -190,12 +80,12 @@ def get_single_analysis(analysis_id):
         # Clean title from HTML tags
         title = BeautifulSoup(title, 'html.parser').get_text()
 
-        # Prepare the enriched response data
+        # Prepare the response data
         response["data"] = {
-            "id": analysis.id,
-            "coin_id": analysis.coin_id,
-            "coin_name": analysis.coin.name,
-            "coin_icon": analysis.coin.icon_url,
+            "id": analysis_id,
+            "coin_id": analysis.coin_bot_id,
+            "coin_name": coin_bot.name if coin_bot else "",
+            "coin_icon": coin_bot.icon if coin_bot else "",
             "section_name": section.name,
             "section_id": section_id,
             "title": title,
@@ -203,7 +93,7 @@ def get_single_analysis(analysis_id):
             "image_url": analysis.image_url,
             "created_at": analysis.created_at.isoformat() if analysis.created_at else None,
             "category_name": analysis.category_name,
-            "category_icon": analysis.category.icon if analysis.category else None
+            "category_icon": category.icon if category else None
         }
         response["success"] = True
         status_code = 200
@@ -221,7 +111,6 @@ def get_single_analysis(analysis_id):
     finally:
         session.close()
         return jsonify(response), status_code
-    
 
 @analysis_bp.route('/analysis', methods=['GET'])
 def get_coin_analysis():
@@ -510,7 +399,7 @@ def post_analysis():
             section_id=data['section_id'],
             content=data['content'],
             category_name=data['category_name'],
-            temp_image_url=data['image_url']
+            image_url=data['image_url']
         )
 
         if result.get("success"):
@@ -800,31 +689,38 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             # 1. Initial validations
             section = session.query(Sections).filter(Sections.id == section_id).first()
             if not section:
+                logger.error(f"Section validation failed - no section found with id {section_id}")
                 raise ValueError(f"No Section found with id {section_id}")
+            
             target = section.target.lower()
             model_class = MODEL_MAPPING.get(target)
 
-            logger.info(f"Model class: {model_class}")
             if not model_class:
+                logger.error(f"Model validation failed - invalid target type: {target}")
                 raise ValueError(f"Invalid target type: {target}")
 
             category = session.query(Category).filter(Category.name.ilike(category_name)).first()
             if not category:
+                logger.error(f"Category validation failed - no category found with name {category_name}")
                 raise ValueError(f"No category found with name {category_name}")
 
             valid_starts = ('http://', 'https://')
             if not image_url.startswith(valid_starts):
+                logger.error(f"Image URL validation failed - invalid format: {image_url}")
                 raise ValueError(f"Invalid image URL format: {image_url}")
             
             # 2. Validate coin and get symbol
             coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
             if not coin_bot:
+                logger.error(f"Coin validation failed - no coin found with id {coin_id}")
                 raise ValueError(f"No coin found with id {coin_id}")
             
             # 3. Process title for image filename
             title_end_index = content.find('<br>')
             if title_end_index == -1:
+                logger.error("Title processing failed - no <br> separator found in content")
                 raise ValueError("No newline found in the content, please add a space after the title")
+            
             title = content[:title_end_index].strip()
             title = BeautifulSoup(title, 'html.parser').get_text()
             formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
@@ -833,8 +729,9 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             permanent_image_url = image_url
             if not 'appanalysisimages.s3' in image_url:
                 try:
-                    logger.info("Processing temporary DALL-E image")
+                    logger.info(f"Processing temporary DALL-E image: {image_url}")
                     image_filename = f"{formatted_title}.jpg"
+                    
                     image_processor = ImageProcessor()
                     permanent_image_url = image_processor.process_and_upload_image(
                         image_url=image_url,
@@ -843,18 +740,19 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                     )
                     
                     if not permanent_image_url:
+                        logger.error("Failed to get permanent URL from S3 upload")
                         raise ValueError("Failed to process and upload image to S3")
                     
-                    logger.info(f"Image processed and uploaded successfully: {permanent_image_url}")
                 except Exception as e:
+                    logger.error(f"Image processing failed with error: {str(e)}", exc_info=True)
                     raise ValueError(f"Image processing failed: {str(e)}")
 
             coin_name = coin_bot.name
-            logger.info(f"Coin bot: {coin_bot.name}")
             
             # 5. Validate notification topics exist
             found_topics = notification_service.validate_topics(coin_name, target)
             if not found_topics:
+                logger.error(f"No notification topics found for coin {coin_name} and type {target}")
                 raise ValueError(f"No notification topics found for coin {coin_name} and type {target}")
             
             # 6. Create and save content with permanent image URL
@@ -863,8 +761,6 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             session.commit()
             session.refresh(new_content)
 
-            logger.info(f"New content created...")
-            
             # 7. Handle notifications
             notification_data = {
                 "coin": coin_name,
@@ -875,7 +771,6 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             }
             
             emit_notification(event_name="new_analysis", data=notification_data)
-            logger.info(f"Notification emitted to connected clients")
 
             notification_service.push_notification(
                 coin=coin_name,
@@ -884,7 +779,6 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                 type=target,
                 timeframe=""
             )
-            logger.info(f"Notification pushed to Firebase")
 
             return create_response(
                 data=new_content.to_dict(),
@@ -894,7 +788,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
 
         except ValueError as e:
             session.rollback()
-            logger.error(f"Validation error: {str(e)}")
+            logger.error(f"Validation error in publish_analysis: {str(e)}")
             return create_response(
                 data=None,
                 message=str(e),
@@ -902,7 +796,7 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             )
         except Exception as e:
             session.rollback()
-            logger.error(f"Unexpected error: {str(e)}")
+            logger.error(f"Unexpected error in publish_analysis: {str(e)}", exc_info=True)
             return create_response(
                 data=None,
                 message=f"An unexpected error occurred: {str(e)}",

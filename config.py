@@ -1146,7 +1146,7 @@ class DailyMacroAnalysis(Base):
 
     @classmethod
     def create_entry(cls, content, image_url, category_name, coin_bot_id):
-        return cls(content=content, image_url=image_url, category=category_name, coin_bot_id=coin_bot_id)
+        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class SpotlightAnalysis(Base):
     """
@@ -1169,8 +1169,8 @@ class SpotlightAnalysis(Base):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
     @classmethod
-    def create_entry(cls, content, image_url, category, coin_bot_id):
-        return cls(content=content, image_url=image_url, category=category, coin_bot_id=coin_bot_id)
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class Chart(Base):
     """
