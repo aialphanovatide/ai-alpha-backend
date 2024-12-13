@@ -78,6 +78,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      LANG: 'C.UTF-8'
+      LC_ALL: 'C.UTF-8'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
