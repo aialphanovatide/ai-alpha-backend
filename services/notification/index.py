@@ -37,11 +37,10 @@ class NotificationService:
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
-
                 elif type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
-                        Topic.type.ilike(f"%{type}%")  # Match topics with the specified type
+                        Topic.name.ilike(f"%{type}%")  # Match topics with the specified type
                     )
                 else:
                     raise ValueError(f"Invalid notification type: {type}")
