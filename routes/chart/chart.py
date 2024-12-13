@@ -263,7 +263,7 @@ def receive_and_save_chart_data():
                 coin=parsed_data['token'],
                 title=f"{parsed_data['symbol']} Support/Resistance Update",
                 body=f"{direction}",
-                type="s_and_r",
+                type="support_resistance",
                 timeframe=parsed_data['timeframe']
             )
         
