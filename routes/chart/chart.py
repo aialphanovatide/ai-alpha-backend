@@ -158,7 +158,7 @@ def receive_and_save_chart_data():
     """
     def validate_incoming_data(data):
         """Validate and parse incoming webhook data."""
-        if len(data) != 11:
+        if len(data) != 12:
             raise ValueError("Incorrect data format")
         
         # Extract symbol and determine pair
@@ -175,14 +175,15 @@ def receive_and_save_chart_data():
         
         # Parse support and resistance values
         values = {}
-        for line in data[2:-1]:
+        for line in data[2:-2]:
             key, value = line.split(': ')
             values[key] = float(value)
         
         supports = [values[f'S{i}'] for i in range(1, 5)]
         resistances = [values[f'R{i}'] for i in range(1, 5)]
         
-        is_essential = data[-1].split(': ')[1].lower() == 'true'
+        is_essential = data[-2].split(': ')[1].lower() == 'true'
+        direction = data[-1].split(': ')[1]
         
         return {
             'symbol': symbol,
@@ -191,7 +192,8 @@ def receive_and_save_chart_data():
             'timeframe': timeframe,
             'supports': supports,
             'resistances': resistances,
-            'is_essential': is_essential
+            'is_essential': is_essential,
+            'direction': direction
         }
     
     def find_coin_bot(session, token):
@@ -253,12 +255,14 @@ def receive_and_save_chart_data():
         session.add(new_chart)
         session.commit()
         
+        # Ensure 'direction' is extracted from parsed_data
+        direction = parsed_data['direction']
         # Send notification if essential
         if parsed_data['is_essential']:
             notification_service.push_notification(
                 coin=parsed_data['token'],
                 title=f"{parsed_data['symbol']} Support/Resistance Update",
-                body="Check the New Levels!",
+                body=f"{direction}",
                 type="s_and_r",
                 timeframe=parsed_data['timeframe']
             )
