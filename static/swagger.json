@@ -295,57 +295,6 @@
         }
       }
     },
-    "/schedule_post": {
-      "post": {
-        "tags": [
-          "Scheduled Content Creation"
-        ],
-        "summary": "Schedule a post for future publication.",
-        "description": "Schedule a post for future publication.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Post scheduling details",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "coinBot": {
-                  "type": "string"
-                },
-                "category_name": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "scheduledDate": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "coinBot",
-                "category_name",
-                "content",
-                "scheduledDate"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Post scheduled successfully"
-          },
-          "400": {
-            "description": "Bad request (missing or invalid data)"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
     "/users": {
       "get": {
         "tags": [
@@ -2853,29 +2802,21 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Schedule new analysis",
-        "description": "Schedule a post for future publication",
+        "summary": "Schedule a new analysis post",
+        "description": "Schedule an analysis post for future publication with specified parameters",
         "parameters": [
           {
             "name": "coin_id",
             "in": "formData",
-            "description": "ID of the coin bot",
+            "description": "The ID of the coin bot",
             "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "section_id",
-            "in": "formData",
-            "description": "ID of the section",
-            "required": true,
-            "type": "string",
+            "type": "integer",
             "schema": {}
           },
           {
             "name": "category_name",
             "in": "formData",
-            "description": "Name of the category",
+            "description": "The name of the category",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2883,7 +2824,23 @@
           {
             "name": "content",
             "in": "formData",
-            "description": "Content of the post",
+            "description": "The content of the post (must include title followed by <br>)",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "formData",
+            "description": "The ID of the section",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "image_url",
+            "in": "formData",
+            "description": "The temporary URL from DALL-E image generation",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2891,7 +2848,7 @@
           {
             "name": "scheduled_date",
             "in": "formData",
-            "description": "Scheduled date and time in ISO 8601 format (e.g., 2023-01-01T12:00:00.000Z)",
+            "description": "UTC datetime in ISO 8601 format (e.g., \"2024-03-28T15:30:00.000Z\")",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2904,35 +2861,59 @@
               "type": "object",
               "properties": {
                 "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "null"
+                  "type": "string",
+                  "example": "Post scheduled successfully"
                 },
                 "success": {
                   "type": "boolean",
                   "example": true
                 },
                 "job_id": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "9a512fbba0074dada792dfa6e5f8275d"
+                },
+                "scheduled_time": {
+                  "type": "string",
+                  "example": "2024-03-28T15:30:00.000Z"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error",
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
-                  "type": "null"
-                },
                 "error": {
                   "type": "string"
                 },
                 "success": {
                   "type": "boolean",
                   "example": false
+                },
+                "message": {
+                  "type": "null"
+                },
+                "job_id": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "null"
                 },
                 "job_id": {
                   "type": "null"
@@ -2946,12 +2927,21 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Get all scheduled analyses",
-        "description": "Retrieve information about all scheduled jobs",
-        "parameters": [],
+        "summary": "Get all scheduled analyses with timeframe filtering",
+        "description": "\n    retrieve all scheduled analyses with formatted data for card rendering.\n    supports filtering by timeframe to match the ui tabs.\n    \n    timeframe filters:\n    - today: shows posts scheduled for the current day (00:00:00 to 23:59:59)\n    - week: shows posts scheduled for the current week (sunday to saturday)\n    - month: shows posts scheduled for the current calendar month\n    - no filter: shows all future scheduled posts\n    \n    all dates are handled in the configured timezone.\n    results are sorted by scheduled time in ascending order.\n    ",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Filter posts by time period (today, week, month)",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved scheduled jobs",
+            "description": "Successfully retrieved scheduled analyses",
             "schema": {
               "type": "object",
               "properties": {
@@ -2964,19 +2954,53 @@
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "9a512fbba0074dada792dfa6e5f8275d"
                           },
-                          "name": {
-                            "type": "string"
+                          "coin_id": {
+                            "type": "integer",
+                            "example": 1
                           },
-                          "trigger": {
-                            "type": "string"
+                          "coin_name": {
+                            "type": "string",
+                            "example": "Bitcoin"
                           },
-                          "args": {
-                            "type": "string"
+                          "coin_icon": {
+                            "type": "string",
+                            "example": "https://example.com/btc-icon.png"
                           },
-                          "next_run_time": {
-                            "type": "string"
+                          "section_name": {
+                            "type": "string",
+                            "example": "Technical Analysis"
+                          },
+                          "section_id": {
+                            "type": "string",
+                            "example": "tech-analysis-1"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Bitcoin Price Analysis"
+                          },
+                          "content": {
+                            "type": "string",
+                            "example": "Detailed analysis content..."
+                          },
+                          "image_url": {
+                            "type": "string",
+                            "example": "https://s3.amazonaws.com/appanalysisimages/btc-analysis.jpg"
+                          },
+                          "scheduled_time": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-03-28T15:30:00Z"
+                          },
+                          "category_name": {
+                            "type": "string",
+                            "example": "Price Action"
+                          },
+                          "category_icon": {
+                            "type": "string",
+                            "example": "https://example.com/category-icon.png"
                           }
                         }
                       }
@@ -2994,15 +3018,22 @@
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "null"
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "An error occurred while fetching scheduled analyses"
                 },
                 "success": {
                   "type": "boolean",
@@ -3019,8 +3050,8 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Delete scheduled analysis",
-        "description": "Delete a scheduled job by its id",
+        "summary": "Delete a scheduled analysis",
+        "description": "Delete a specific scheduled analysis by its id",
         "parameters": [
           {
             "name": "job_id",
@@ -3038,7 +3069,8 @@
               "type": "object",
               "properties": {
                 "message": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Scheduled job deleted successfully"
                 },
                 "error": {
                   "type": "null"
@@ -3052,6 +3084,25 @@
           },
           "404": {
             "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Scheduled job not found"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
@@ -3074,8 +3125,8 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Get scheduled analysis by id",
-        "description": "Get information about a specific scheduled job",
+        "summary": "Get a specific scheduled analysis",
+        "description": "Retrieve detailed information about a specific scheduled analysis",
         "parameters": [
           {
             "name": "job_id",
@@ -3087,8 +3138,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Successfully retrieved job information",
+          "200": {
+            "description": "Successfully retrieved scheduled analysis",
             "schema": {
               "type": "object",
               "properties": {
@@ -3098,19 +3149,34 @@
                     "id": {
                       "type": "string"
                     },
-                    "name": {
+                    "coin_id": {
+                      "type": "integer"
+                    },
+                    "coin_name": {
                       "type": "string"
                     },
-                    "func": {
+                    "coin_icon": {
                       "type": "string"
                     },
-                    "trigger": {
+                    "section_name": {
                       "type": "string"
                     },
-                    "args": {
+                    "section_id": {
                       "type": "string"
                     },
-                    "next_run_time": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "image_url": {
+                      "type": "string"
+                    },
+                    "scheduled_time": {
+                      "type": "string"
+                    },
+                    "category_name": {
                       "type": "string"
                     }
                   }
@@ -3127,6 +3193,25 @@
           },
           "404": {
             "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Scheduled job not found"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
@@ -6126,6 +6211,102 @@
                 },
                 "data": {
                   "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/generate-image": {
+      "post": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Generate an image",
+        "description": "\n    generate an ai image based on analysis content.\n    the endpoint processes the content, extracts the relevant text, and generates an appropriate image.\n    returns a temporary url that can be used to download the generated image.\n    \n    note: \n    - content must include a title followed by <br> and then the main content\n    - the image generation is based on the content body (after the <br>)\n    - the returned url is temporary and will expire\n    ",
+        "parameters": [
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Analysis content with title and body separated by <br>",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Image generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "temp_image_url": {
+                      "type": "string",
+                      "example": "https://oaidalleapiprodscus.blob.core.windows.net/private/...",
+                      "description": "Temporary URL to the generated image"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Image generated successfully"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Content is required"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Image generation failed"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during image generation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred: DALL-E API error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Internal server error during image generation"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
                 }
               }
             }

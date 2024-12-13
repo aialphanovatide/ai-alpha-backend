@@ -1127,7 +1127,7 @@ class DailyMacroAnalysis(Base):
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
-    category = Column(String(100), nullable=False)
+    category_name = Column(String(100), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -1158,7 +1158,7 @@ class SpotlightAnalysis(Base):
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
-    category = Column(String(100), nullable=False)
+    category_name = Column(String(100), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

@@ -128,207 +128,102 @@ swagger = Swagger()
 # Add this to your swagger builder usage section
 
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/ask-ai',
-#     method='get',
-#     tag='Ask AI',
-#     summary='Get detailed cryptocurrency information',
-#     description='[CACHED FOR 5 MINUTES] Retrieve comprehensive tokenomics data for a specific cryptocurrency using its Coin ID. '
-#                 'The response is cached to optimize performance and handle rate limiting. '
-#                 'The endpoint provides detailed information including price, market cap, supply metrics, and icon URLs in various formats.',
+#     endpoint_route='/analysis/generate-image',
+#     method='post',
+#     tag='Content Creation',
+#     summary='Generate an image',
+#     description='''
+#     Generate an AI image based on analysis content.
+#     The endpoint processes the content, extracts the relevant text, and generates an appropriate image.
+#     Returns a temporary URL that can be used to download the generated image.
+    
+#     Note: 
+#     - Content must include a title followed by <br> and then the main content
+#     - The image generation is based on the content body (after the <br>)
+#     - The returned URL is temporary and will expire
+#     ''',
 #     params=[
 #         {
-#             'name': 'coin_id',
-#             'in': 'query',
-#             'description': 'The CoinGecko ID of the cryptocurrency (e.g., "bitcoin", "ethereum")',
+#             'name': 'content',
+#             'in': 'formData',
+#             'description': 'Analysis content with title and body separated by <br>',
 #             'required': True,
 #             'type': 'string',
-#             'example': 'bitcoin'
+#             'example': 'Bitcoin Price Analysis<br>Bitcoin shows bullish momentum as price breaks above key resistance...'
 #         }
 #     ],
 #     responses={
-#         '200': {
-#             'description': 'Successfully retrieved cryptocurrency data',
+#         '201': {
+#             'description': 'Image generated successfully',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'temp_image_url': {
+#                                 'type': 'string',
+#                                 'example': 'https://oaidalleapiprodscus.blob.core.windows.net/private/...',
+#                                 'description': 'Temporary URL to the generated image'
+#                             }
+#                         }
+#                     },
+#                     'message': {
+#                         'type': 'string',
+#                         'example': 'Image generated successfully'
+#                     },
 #                     'success': {
 #                         'type': 'boolean',
 #                         'example': True
 #                     },
 #                     'error': {
 #                         'type': 'null'
-#                     },
-#                     'data': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'website': {
-#                                 'type': 'string',
-#                                 'description': 'Main project website URL',
-#                                 'example': 'https://bitcoin.org'
-#                             },
-#                             'whitepaper': {
-#                                 'type': 'string',
-#                                 'description': 'URL to project whitepaper (from CoinGecko or CoinMarketCap)',
-#                                 'example': 'https://bitcoin.org/bitcoin.pdf'
-#                             },
-#                             'categories': {
-#                                 'type': 'array',
-#                                 'description': 'List of categories the coin belongs to',
-#                                 'items': {'type': 'string'},
-#                                 'example': ['Cryptocurrency', 'Store of Value']
-#                             },
-#                             'chains': {
-#                                 'type': 'array',
-#                                 'description': 'List of blockchain platforms where the token exists',
-#                                 'items': {'type': 'string'},
-#                                 'example': ['bitcoin']
-#                             },
-#                             'current_price': {
-#                                 'type': 'number',
-#                                 'description': 'Current price in USD',
-#                                 'example': 50000.00
-#                             },
-#                             'market_cap_usd': {
-#                                 'type': 'number',
-#                                 'description': 'Market capitalization in USD',
-#                                 'example': 1000000000000
-#                             },
-#                             'fully_diluted_valuation': {
-#                                 'type': 'number',
-#                                 'description': 'Fully diluted valuation in USD',
-#                                 'example': 1100000000000
-#                             },
-#                             'ath': {
-#                                 'type': 'number',
-#                                 'description': 'All-time high price in USD',
-#                                 'example': 69000.00
-#                             },
-#                             'ath_change_percentage': {
-#                                 'type': 'number',
-#                                 'description': 'Percentage change from ATH',
-#                                 'example': -25.5
-#                             },
-#                             'circulating_supply': {
-#                                 'type': 'number',
-#                                 'description': 'Current circulating supply',
-#                                 'example': 19000000
-#                             },
-#                             'icon': {
-#                                 'type': 'object',
-#                                 'description': 'Icon URLs in various formats',
-#                                 'properties': {
-#                                     'thumb': {
-#                                         'type': 'string',
-#                                         'description': 'Thumbnail size icon URL'
-#                                     },
-#                                     'small': {
-#                                         'type': 'string',
-#                                         'description': 'Small size icon URL'
-#                                     },
-#                                     'large': {
-#                                         'type': 'string',
-#                                         'description': 'Large size icon URL'
-#                                     },
-#                                     'svg': {
-#                                         'type': 'string',
-#                                         'description': 'SVG version of the icon (if conversion successful)'
-#                                     }
-#                                 }
-#                             }
-#                         }
 #                     }
 #                 }
 #             }
 #         },
 #         '400': {
-#             'description': 'Bad Request - Missing coin_id parameter',
+#             'description': 'Bad request - validation error',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
-#                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'The parameter coin_id is required'
-#                     },
-#                     'data': {
-#                         'type': 'null'
-#                     }
-#                 }
-#             }
-#         },
-#         '404': {
-#             'description': 'Cryptocurrency not found or API error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
-#                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Cryptocurrency not found or API request failed'
-#                     },
-#                     'data': {
-#                         'type': 'null'
-#                     }
-#                 }
-#             }
-#         },
-#         '429': {
-#             'description': 'Rate limit exceeded',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
-#                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Too many requests. Please try again later.'
-#                     },
 #                     'data': {
 #                         'type': 'null'
 #                     },
-#                     'rate_limit': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'max_calls': {
-#                                 'type': 'integer',
-#                                 'example': 10
-#                             },
-#                             'period': {
-#                                 'type': 'integer',
-#                                 'example': 60
-#                             },
-#                             'current_calls': {
-#                                 'type': 'integer',
-#                                 'example': 11
-#                             }
-#                         }
+#                     'error': {
+#                         'type': 'string',
+#                         'example': 'Content is required'
+#                     },
+#                     'message': {
+#                         'type': 'string',
+#                         'example': 'Image generation failed'
+#                     },
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
 #                     }
 #                 }
 #             }
 #         },
 #         '500': {
-#             'description': 'Server error',
+#             'description': 'Server error during image generation',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
+#                     'data': {
+#                         'type': 'null'
 #                     },
 #                     'error': {
 #                         'type': 'string',
-#                         'example': 'An unexpected error occurred while fetching cryptocurrency data'
+#                         'example': 'An unexpected error occurred: DALL-E API error'
 #                     },
-#                     'data': {
-#                         'type': 'null'
+#                     'message': {
+#                         'type': 'string',
+#                         'example': 'Internal server error during image generation'
+#                     },
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
 #                     }
 #                 }
 #             }
@@ -338,7 +233,7 @@ swagger = Swagger()
 
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/categories/global-toggle')
+# success, message = swagger.delete_endpoint(endpoint_route='/schedule_post')
 # print(message)
 
 

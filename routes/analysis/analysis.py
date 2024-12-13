@@ -1,9 +1,9 @@
 
 import pytz
 import datetime
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Tuple, Dict, Type
 from sqlalchemy.exc import SQLAlchemyError
 from services.notification.index import NotificationService
@@ -26,10 +26,90 @@ image_generator = ImageGenerator()
 image_processor = ImageProcessor()
 notification_service = NotificationService()
 
+# @analysis_bp.route('/analysis/<int:analysis_id>', methods=['GET'])
+# def get_single_analysis(analysis_id):
+#     """
+#     Retrieve a single analysis by its ID.
+
+#     Args:
+#         analysis_id (int): The ID of the analysis to retrieve
+
+#     Query Parameters:
+#         section_id (int): The ID of the section the analysis belongs to
+
+#     Returns:
+#         JSON: A JSON object containing:
+#             - data (dict or None): The analysis object if found
+#             - error (str or None): Error message, if any
+#             - success (bool): Indicates if the operation was successful
+#         HTTP Status Code
+
+#     Raises:
+#         400 Bad Request: If section_id is not provided
+#         404 Not Found: If the analysis or section is not found
+#         500 Internal Server Error: If there's an unexpected error
+#     """
+#     response = {
+#         "data": None,
+#         "error": None,
+#         "success": False
+#     }
+#     status_code = 500  # Default to server error
+
+#     session = Session()
+#     try:
+#         # Get and validate section_id
+#         section_id = request.args.get('section_id', type=int)
+#         if not section_id:
+#             response["error"] = "section_id is required"
+#             status_code = 400
+#             return jsonify(response), status_code
+
+#         # Get section information
+#         section = session.query(Sections).filter_by(id=section_id).first()
+#         if not section:
+#             response["error"] = f"Section with id {section_id} not found"
+#             status_code = 404
+#             return jsonify(response), status_code
+
+#         # Get the corresponding model based on target
+#         target = section.target.lower()
+#         model_class = MODEL_MAPPING.get(target)
+#         if not model_class:
+#             response["error"] = f"No model found for target: {section.target}"
+#             status_code = 400
+#             return jsonify(response), status_code
+
+#         # Query for the specific analysis
+#         analysis = session.query(model_class).get(analysis_id)
+#         if not analysis:
+#             response["error"] = f"Analysis with id {analysis_id} not found"
+#             status_code = 404
+#             return jsonify(response), status_code
+
+#         # Prepare the response data
+#         response.update({
+#             "data": analysis.to_dict(),
+#             "success": True
+#         })
+#         status_code = 200
+#     except SQLAlchemyError as e:
+#         session.rollback()
+#         response["error"] = f"Database error occurred: {str(e)}"
+#         status_code = 500
+#     except Exception as e:
+#         session.rollback()
+#         response["error"] = f"An unexpected error occurred: {str(e)}"
+#         status_code = 500
+#     finally:
+#         session.close()
+#         return jsonify(response), status_code
+    
+
 @analysis_bp.route('/analysis/<int:analysis_id>', methods=['GET'])
 def get_single_analysis(analysis_id):
     """
-    Retrieve a single analysis by its ID.
+    Retrieve a single analysis by its ID with enriched data.
 
     Args:
         analysis_id (int): The ID of the analysis to retrieve
@@ -38,16 +118,24 @@ def get_single_analysis(analysis_id):
         section_id (int): The ID of the section the analysis belongs to
 
     Returns:
-        JSON: A JSON object containing:
-            - data (dict or None): The analysis object if found
-            - error (str or None): Error message, if any
-            - success (bool): Indicates if the operation was successful
-        HTTP Status Code
-
-    Raises:
-        400 Bad Request: If section_id is not provided
-        404 Not Found: If the analysis or section is not found
-        500 Internal Server Error: If there's an unexpected error
+        JSON: {
+            "data": {
+                "id": int,
+                "coin_id": int,
+                "coin_name": str,
+                "coin_icon": str,
+                "section_name": str,
+                "section_id": int,
+                "title": str,
+                "content": str,
+                "image_url": str,
+                "created_at": str,
+                "category_name": str,
+                "category_icon": str
+            } or None,
+            "error": str or None,
+            "success": bool
+        }
     """
     response = {
         "data": None,
@@ -80,25 +168,54 @@ def get_single_analysis(analysis_id):
             status_code = 400
             return jsonify(response), status_code
 
-        # Query for the specific analysis
-        analysis = session.query(model_class).get(analysis_id)
+        # Query for the specific analysis with joined data
+        analysis = (
+            session.query(model_class)
+            .join(CoinBot, model_class.coin_bot_id == CoinBot.bot_id)
+            .join(Category, func.lower(model_class.category_name) == func.lower(Category.name))
+            .filter(model_class.analysis_id == analysis_id)
+            .first()
+        )
+
         if not analysis:
             response["error"] = f"Analysis with id {analysis_id} not found"
             status_code = 404
             return jsonify(response), status_code
 
-        # Prepare the response data
-        response.update({
-            "data": analysis.to_dict(),
-            "success": True
-        })
+        # Extract title from content
+        title_end_index = analysis.content.find('<br>')
+        title = analysis.content[:title_end_index].strip() if title_end_index != -1 else ""
+        content_body = analysis.content[title_end_index + 4:].strip() if title_end_index != -1 else analysis.content
+
+        # Clean title from HTML tags
+        title = BeautifulSoup(title, 'html.parser').get_text()
+
+        # Prepare the enriched response data
+        response["data"] = {
+            "id": analysis.id,
+            "coin_id": analysis.coin_id,
+            "coin_name": analysis.coin.name,
+            "coin_icon": analysis.coin.icon_url,
+            "section_name": section.name,
+            "section_id": section_id,
+            "title": title,
+            "content": content_body,
+            "image_url": analysis.image_url,
+            "created_at": analysis.created_at.isoformat() if analysis.created_at else None,
+            "category_name": analysis.category_name,
+            "category_icon": analysis.category.icon if analysis.category else None
+        }
+        response["success"] = True
         status_code = 200
+
     except SQLAlchemyError as e:
         session.rollback()
+        logger.error(f"Database error in get_single_analysis: {str(e)}")
         response["error"] = f"Database error occurred: {str(e)}"
         status_code = 500
     except Exception as e:
         session.rollback()
+        logger.error(f"Unexpected error in get_single_analysis: {str(e)}")
         response["error"] = f"An unexpected error occurred: {str(e)}"
         status_code = 500
     finally:
@@ -664,7 +781,18 @@ MODEL_MAPPING = {
     'support_resistance': SAndRAnalysis
 }
 
-def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str, temp_image_url: str) -> dict:
+
+def publish_analysis(coin_id: int, content: str, category_name: str, section_id: str, image_url: str) -> dict:
+    """
+    Publish an analysis with an image.
+    
+    Args:
+        coin_id (int): The ID of the coin
+        content (str): The analysis content
+        category_name (str): The category name
+        section_id (str): The section ID
+        image_url (str): Either a temporary DALL-E URL or permanent S3 URL
+    """
     logger.info(f"Starting publish_analysis for coin_id: {coin_id}, category: {category_name}, section_id: {section_id}")
 
     with Session() as session:
@@ -685,8 +813,8 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                 raise ValueError(f"No category found with name {category_name}")
 
             valid_starts = ('http://', 'https://')
-            if not temp_image_url.startswith(valid_starts):
-                raise ValueError(f"Invalid image URL format: {temp_image_url}")
+            if not image_url.startswith(valid_starts):
+                raise ValueError(f"Invalid image URL format: {image_url}")
             
             # 2. Validate coin and get symbol
             coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
@@ -700,24 +828,26 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
             title = content[:title_end_index].strip()
             title = BeautifulSoup(title, 'html.parser').get_text()
             formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
-            image_filename = f"{formatted_title}.jpg"
-
-            # 4. Process and upload the temporary image to S3
-            try:
-                logger.info("Processing and uploading image to S3")
-                image_processor = ImageProcessor()
-                permanent_image_url = image_processor.process_and_upload_image(
-                    image_url=temp_image_url,
-                    bucket_name='appanalysisimages',
-                    image_filename=image_filename
-                )
-                
-                if not permanent_image_url:
-                    raise ValueError("Failed to process and upload image to S3")
-                
-                logger.info(f"Image processed and uploaded successfully: {permanent_image_url}")
-            except Exception as e:
-                raise ValueError(f"Image processing failed: {str(e)}")
+            
+            # 4. Process image if it's a temporary URL
+            permanent_image_url = image_url
+            if not 'appanalysisimages.s3' in image_url:
+                try:
+                    logger.info("Processing temporary DALL-E image")
+                    image_filename = f"{formatted_title}.jpg"
+                    image_processor = ImageProcessor()
+                    permanent_image_url = image_processor.process_and_upload_image(
+                        image_url=image_url,
+                        bucket_name='appanalysisimages',
+                        image_filename=image_filename
+                    )
+                    
+                    if not permanent_image_url:
+                        raise ValueError("Failed to process and upload image to S3")
+                    
+                    logger.info(f"Image processed and uploaded successfully: {permanent_image_url}")
+                except Exception as e:
+                    raise ValueError(f"Image processing failed: {str(e)}")
 
             coin_name = coin_bot.name
             logger.info(f"Coin bot: {coin_bot.name}")
@@ -778,11 +908,9 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
                 message=f"An unexpected error occurred: {str(e)}",
                 success=False,
             )
-        
 
 # ____________________________________ Scheduled Analysis Endpoints __________________________________________________________
         
-
 
 @analysis_bp.route('/scheduled-analyses', methods=['POST'])
 def schedule_post() -> Tuple[Dict, int]:
@@ -794,7 +922,7 @@ def schedule_post() -> Tuple[Dict, int]:
        category_name (str): The name of the category
        content (str): The content of the post
        section_id(int): The ID of section
-       image_url (str): The URL of the pre-generated image
+       temp_image_url (str): The temporary URL from DALL-E image generation
        scheduled_date (str): UTC datetime in ISO 8601 format
            Examples:
            - "2024-03-28T15:30:00.000Z"
@@ -821,9 +949,10 @@ def schedule_post() -> Tuple[Dict, int]:
                 raise ValueError(f"No category found with name {request.form['category_name']}")
 
             # 4. Validate image URL format
+            image_url = request.form['image_url']
             valid_starts = ('http://', 'https://')
-            if not request.form['image_url'].startswith(valid_starts):
-                raise ValueError(f"Invalid image URL format: {request.form['image_url']}")
+            if not image_url.startswith(valid_starts):
+                raise ValueError(f"Invalid image URL format: {image_url}")
 
             # 5. Validate coin exists
             try:
@@ -858,13 +987,35 @@ def schedule_post() -> Tuple[Dict, int]:
             if scheduled_datetime <= datetime.now(chosen_timezone):
                 raise ValueError("Scheduled date must be in the future")
 
-            # 8. Validate notification topics exist
+            # 8. Process and upload the temporary image to S3 immediately
+            try:
+                logger.info("Processing and uploading temporary image to S3")
+                title = content[:title_end_index].strip()
+                title = BeautifulSoup(title, 'html.parser').get_text()
+                formatted_title = title.replace(':', '').replace(' ', '-').strip().lower()
+                image_filename = f"{formatted_title}.jpg"
+                
+                image_processor = ImageProcessor()
+                permanent_image_url = image_processor.process_and_upload_image(
+                    image_url=image_url,
+                    bucket_name='appanalysisimages',
+                    image_filename=image_filename
+                )
+                
+                if not permanent_image_url:
+                    raise ValueError("Failed to process and upload image to S3")
+                
+                logger.info(f"Image processed and uploaded successfully: {permanent_image_url}")
+            except Exception as e:
+                raise ValueError(f"Image processing failed: {str(e)}")
+
+            # 9. Validate notification topics exist
             target = section.target.lower()
             found_topics = notification_service.validate_topics(coin_bot.name, target)
             if not found_topics:
                 raise ValueError(f"No notification topics found for coin {coin_bot.name} and type {target}")
 
-            # 9. Schedule the job
+            # 10. Schedule the job with permanent S3 URL
             job = sched.add_job(
                 publish_analysis,
                 args=[
@@ -872,7 +1023,7 @@ def schedule_post() -> Tuple[Dict, int]:
                     content,
                     request.form['category_name'],
                     request.form['section_id'],
-                    request.form['image_url']
+                    permanent_image_url  # Use permanent S3 URL instead of temporary URL
                 ],
                 trigger=DateTrigger(run_date=scheduled_datetime)
             )
@@ -896,7 +1047,8 @@ def schedule_post() -> Tuple[Dict, int]:
             **response,
             "error": f"An unexpected error occurred: {str(e)}"
         }), 500
-    
+
+
 @analysis_bp.route('/scheduled-analyses/<string:job_id>', methods=['DELETE'])
 def delete_scheduled_job(job_id):
     """
@@ -982,6 +1134,9 @@ def get_scheduled_job(job_id):
 
                     # Get coin information
                     coin_bot = session.query(CoinBot).filter(CoinBot.bot_id == coin_id).first()
+
+                    # Get category information including icon
+                    category = session.query(Category).filter(Category.name.ilike(category_name)).first()
                     
                     # Get section information
                     section = session.query(Sections).filter(Sections.id == section_id).first()
@@ -1005,7 +1160,8 @@ def get_scheduled_job(job_id):
                         "content": content_body,
                         "image_url": image_url,
                         "scheduled_time": job.next_run_time.isoformat(),
-                        "category_name": category_name
+                        "category_name": category.name if category else "",
+                        "category_icon": category.icon if category else ""
                     }
                     response["success"] = True
                     status_code = 200
@@ -1025,6 +1181,10 @@ def get_scheduled_job(job_id):
 def get_scheduled_analyses():
     """
     Get all scheduled analyses with formatted data for card rendering.
+    Supports filtering by timeframe: today, this week, this month
+    
+    Query Parameters:
+        timeframe (str): Optional filter - 'today', 'week', 'month'
     
     Returns:
         JSON: {
@@ -1041,7 +1201,8 @@ def get_scheduled_analyses():
                         "content": str,
                         "image_url": str,
                         "scheduled_time": str,
-                        "category_name": str
+                        "category_name": str,
+                        "category_icon": str
                     }
                 ]
             },
@@ -1050,12 +1211,37 @@ def get_scheduled_analyses():
         }
     """
     try:
+        timeframe = request.args.get('timeframe', '').lower()
+        now = datetime.now(chosen_timezone)
+        
+        # Define timeframe filters
+        if timeframe == 'today':
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=1)
+        elif timeframe == 'week':
+            start_date = now - timedelta(days=now.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=7)
+        elif timeframe == 'month':
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            end_date = (start_date + timedelta(days=32)).replace(day=1)
+        else:
+            # If no timeframe specified, get all future jobs
+            start_date = now
+            end_date = now.replace(year=now.year + 10)  # 10 years in the future
+
         scheduled_jobs = sched.get_jobs()
         formatted_jobs = []
 
         with Session() as session:
             for job in scheduled_jobs:
                 if job.name == 'publish_analysis':
+                    job_time = job.next_run_time.astimezone(chosen_timezone)
+                    
+                    # Skip if job is outside the selected timeframe
+                    if not (start_date <= job_time < end_date):
+                        continue
+
                     # Extract arguments from the job
                     coin_id, content, category_name, section_id, image_url = job.args
 
@@ -1064,6 +1250,9 @@ def get_scheduled_analyses():
                     
                     # Get section information
                     section = session.query(Sections).filter(Sections.id == section_id).first()
+
+                    # Get category information including icon
+                    category = session.query(Category).filter(Category.name.ilike(category_name)).first()
 
                     # Extract title from content
                     title_end_index = content.find('<br>')
@@ -1077,16 +1266,20 @@ def get_scheduled_analyses():
                         "id": job.id,
                         "coin_id": coin_id,
                         "coin_name": coin_bot.name if coin_bot else "",
-                        "coin_icon": coin_bot.icon  if coin_bot else "",
+                        "coin_icon": coin_bot.icon if coin_bot else "",
                         "section_name": section.name if section else "",
                         "section_id": section_id,
                         "title": title,
                         "content": content_body,
                         "image_url": image_url,
-                        "scheduled_time": job.next_run_time.isoformat(),
-                        "category_name": category_name
+                        "scheduled_time": job_time.isoformat(),
+                        "category_name": category_name,
+                        "category_icon": category.icon if category else None
                     }
                     formatted_jobs.append(formatted_job)
+
+        # Sort jobs by scheduled time
+        formatted_jobs.sort(key=lambda x: x['scheduled_time'])
 
         return jsonify({
             "data": {
@@ -1104,11 +1297,3 @@ def get_scheduled_analyses():
             "success": False
         }), 500
 
-
-
-
-# Test endpoint for emitting notifications
-# @analysis_bp.route('/test-emit', methods=['GET'])
-# def test_emit():
-#     emit_notification('new_analysis', {'coin': 'BTC', 'title': 'New Analysis Available', 'body': 'Check it out!'})
-#     return jsonify({'message': 'Notification emitted'}), 200
