@@ -86,7 +86,6 @@ class NotificationService:
                             updated_at=date_now
                         )
                         session.add(new_notification)
-
                 session.commit()
 
                 # Send FCM notifications

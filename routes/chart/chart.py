@@ -250,7 +250,6 @@ def receive_and_save_chart_data():
         # Prepare and save new chart data
         chart_data = prepare_chart_data(parsed_data, coin_id)
         new_chart = Chart(**chart_data)
-        
 
         session.add(new_chart)
         session.commit()
