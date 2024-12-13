@@ -37,6 +37,7 @@ class NotificationService:
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
+
                 elif type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
@@ -86,7 +87,6 @@ class NotificationService:
                             updated_at=date_now
                         )
                         session.add(new_notification)
-
                 session.commit()
 
                 # Send FCM notifications
@@ -138,7 +138,7 @@ class NotificationService:
                 raise ValueError(f"No topics found for the coin {coin} and type {type}")
 
             for topic in topics:
-                if type in ["analysis", "s_and_r"]:
+                if type in ["analysis", "support_resistance"]:
                     new_notification = notification_model( 
                         topic_id=topic.id,
                         title=title,
