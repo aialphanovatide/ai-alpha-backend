@@ -16,7 +16,7 @@ class NotificationService:
 
         Args:
             coin (str): The coin reference to filter topics by.
-            type (str): The type of notification to filter topics by. Supported types are "alert", "analysis", and "s_and_r".
+            type (str): The type of notification to filter topics by. Supported types are "alert", "analysis", and "support_resistance".
             timeframe (str, optional): The timeframe to filter topics by, applicable only for "alert" type. Defaults to None.
 
         Returns:
@@ -125,7 +125,7 @@ class NotificationService:
                     Topic.timeframe == timeframe
                 ).all()
                 
-            elif type in ["analysis", "s_and_r"]:
+            elif type in ["analysis", "support_resistance"]:
                 topics = self.session.query(Topic).filter(
                     Topic.reference.ilike(f"%{coin}%"),
                     Topic.name.ilike(f"%{type}%")
