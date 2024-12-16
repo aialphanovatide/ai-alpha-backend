@@ -120,3 +120,13 @@ class NotificationService:
         except Exception as e:
             raise RuntimeError(f"Failed to process notification: {str(e)}")
 
+
+# Test
+# notification_service = NotificationService()
+# notification_service.push_notification(
+#     coin="btc",
+#     title="Test",
+#     body="Test",
+#     type="alert",
+#     timeframe="1h"
+# )
