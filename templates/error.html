@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - AI Alpha Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F4F4F4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #FFFFFF;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .error-icon {
+            color: #D32F2F;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #D32F2F;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .button {
+            background-color: #0066CC;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0052A3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">⚠️</div>
+        <h1>{{ title|default('Error') }}</h1>
+        <p class="error-message">{{ message|default('An error has occurred. Please try again.') }}</p>
+    </div>
+</body>
+</html>

@@ -1,15 +1,26 @@
 import secrets
 import string
+from dotenv import load_dotenv
+from flask_mail import Message
+from pydantic import validate_email
 from sqlalchemy import exc
 from sqlalchemy.orm import joinedload
-from flask import jsonify, request, Blueprint
+from flask import app, current_app, jsonify, request, Blueprint, flash, redirect, url_for, render_template
 from config import PurchasedPlan, Session, User
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from routes.user.auth import patchPassword
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
+import jwt
+import datetime
+from services.email.email_service import EmailService
+import re
+
 
 user_bp = Blueprint('user', __name__)
+
+email_service = EmailService()
 
 def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
@@ -526,3 +537,180 @@ def delete_user_account():
             session.rollback()
             response['message'] = f'Unexpected error: {str(e)}'
             return jsonify(response), 500
+
+
+@user_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """
+    Request a password reset link for the user.
+    """
+    response = {'success': False, 'message': None}
+    data = request.json
+
+    email = data.get('email')
+    if not email or not validate_email(email):  
+        response['message'] = 'Invalid email format'
+        return jsonify(response), 400
+
+    with Session() as session:
+        try:
+            user = session.query(User).filter_by(email=email).first()
+            if not user:
+                response['message'] = 'Email not found'
+                return jsonify(response), 404
+
+            # Generate reset token using the new method
+            token = user.generate_reset_token()
+            reset_link = f"{request.host_url}reset-password?token={token}"
+            
+            # Send password reset email
+            email_service.send_password_reset_email(user.email, user.nickname, reset_link)
+
+            response['success'] = True
+            response['message'] = 'Password reset link sent to your email'
+            return jsonify(response), 200
+        except Exception as e:
+            response['message'] = f'An error occurred: {str(e)}'
+            return jsonify(response), 500
+
+
+def validate_password_strength(password):
+    """
+    Validates password strength according to Auth0 criteria:
+    - At least 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
+    - At least one special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter"
+        
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter"
+        
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number"
+        
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)"
+        
+    return True, "Password meets security requirements"
+
+
+@user_bp.route('/reset-password', methods=['GET', 'POST'])
+async def reset_password():
+    if request.method == 'GET':
+        token = request.args.get('token')
+        if not token:
+            return render_template('error.html',
+                title='Invalid Request',
+                message='Reset token is required.',
+                button_text='Try Again'
+            )
+            
+        with Session() as session:
+            try:
+                user = User.verify_reset_token(token, session)
+                if not user:
+                    return render_template('error.html',
+                        title='Invalid Token',
+                        message='The password reset link is invalid or has expired.',
+                        button_text='Request New Reset Link'
+                    )
+                    
+                return render_template('reset_password.html', token=token)
+                
+            except Exception as e:
+                print(f"Token verification error: {str(e)}")
+                return render_template('error.html',
+                    title='Invalid Token',
+                    message='The password reset link is invalid or has expired.',
+                    button_text='Request New Reset Link'
+                )
+
+    # POST request
+    try:
+        token = request.form.get('token')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not token or not new_password or not confirm_password:
+            return render_template('error.html',
+                title='Invalid Request',
+                message='All fields are required.',
+                button_text='Try Again'
+            )
+
+        if new_password != confirm_password:
+            return render_template('reset_password.html',
+                token=token,
+                error='Passwords do not match'
+            )
+
+        # Validate password strength
+        is_valid, message = validate_password_strength(new_password)
+        if not is_valid:
+            return render_template('reset_password.html',
+                token=token,
+                error=message
+            )
+
+        with Session() as session:
+            try:
+                user = User.verify_reset_token(token, session)
+                if not user:
+                    return render_template('error.html',
+                        title='Invalid Token',
+                        message='The password reset link is invalid or has expired.',
+                        button_text='Request New Reset Link'
+                    )
+
+                try:
+                    await patchPassword(user.email, new_password)
+                except Exception as auth0_error:
+                    error_msg = str(auth0_error)
+                    if "uses Google Sign-In" in error_msg:
+                        return render_template('error.html',
+                            title='Password Reset Not Available',
+                            message='This account uses Google Sign-In. Please continue using Google to log in.',
+                            button_text='Close Window'
+                        )
+                    elif "uses Apple Sign-In" in error_msg:
+                        return render_template('error.html',
+                            title='Password Reset Not Available',
+                            message='This account uses Apple Sign-In. Please continue using Apple to log in.',
+                            button_text='Close Window'
+                        )
+                    else:
+                        print(f"Unexpected Auth0 error: {error_msg}")
+                        return render_template('error.html',
+                            title='Authentication Error',
+                            message='There was a problem updating your password. Please try again.',
+                            button_text='Try Again'
+                        )
+
+                return render_template('success.html',
+                    title='Password Reset Successful',
+                    message='Your password has been updated successfully. You can now close this window and log in with your new password.',
+                    button_text='Close Window'
+                )
+
+            except Exception as e:
+                print(f"Reset password error: {str(e)}")
+                return render_template('error.html',
+                    title='System Error',
+                    message='An unexpected error occurred. Please try again later.',
+                    button_text='Try Again'
+                )
+
+    except Exception as e:
+        print(f"Outer reset password error: {str(e)}")
+        return render_template('error.html',
+            title='System Error',
+            message='An unexpected error occurred. Please try again later.',
+            button_text='Try Again'
+        )

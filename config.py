@@ -24,6 +24,8 @@ from pathlib import Path
 import uuid
 import json
 import os
+import jwt
+from flask import current_app
 
 load_dotenv()
 
@@ -469,7 +471,57 @@ class User(Base):
         """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-class PurchasedPlan(Base):
+    def generate_reset_token(self, expires_in=3600):
+        """
+        Generate a password reset token for the user.
+
+        Args:
+            expires_in (int): Token expiration time in seconds. Default is 1 hour.
+
+        Returns:
+            str: The generated JWT token
+        """
+        try:
+            payload = {
+                'user_id': self.user_id,
+                'exp': datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+            }
+            return jwt.encode(
+                payload, 
+                current_app.config['SECRET_KEY'], 
+                algorithm='HS256'
+            )
+        except Exception as e:
+            print(f"Error generating token: {str(e)}")
+            raise
+
+    @staticmethod
+    def verify_reset_token(token, session):
+        """
+        Verify a password reset token and return the associated user.
+
+        Args:
+            token (str): The token to verify
+            session: SQLAlchemy session
+
+        Returns:
+            User: The user associated with the token if valid
+            None: If token is invalid or expired
+        """
+        try:
+            payload = jwt.decode(
+                token, 
+                current_app.config['SECRET_KEY'], 
+                algorithms=['HS256']
+            )
+            user_id = payload.get('user_id')
+            if user_id is None:
+                return None
+            return session.query(User).filter_by(user_id=user_id).first()
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as e:
+            print(f"Token verification error: {str(e)}")
+            raise
+n(Base):
     """
     Represents a purchased plan associated with a user.
 
@@ -1127,26 +1179,16 @@ class DailyMacroAnalysis(Base):
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
-    category_name = Column(String(100), nullable=False)
+    category = Column(String(100), nullable=False)
+
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
     coin_bot = relationship('CoinBot', back_populates='daily_macro_analyses')
 
-    def to_dict(self):
-        result = {}
-        for column in self.__table__.columns:
-            value = getattr(self, column.name)
-            # Convert timezone-aware timestamps to scheduler timezone
-            if isinstance(value, datetime) and value.tzinfo is not None:
-                value = value.astimezone(chosen_timezone)
-            result[column.name] = value
-        return result
-
-    @classmethod
-    def create_entry(cls, content, image_url, category_name, coin_bot_id):
-        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class SpotlightAnalysis(Base):
     """
@@ -1158,19 +1200,15 @@ class SpotlightAnalysis(Base):
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
+    category = Column(String(100), nullable=False)
     category_name = Column(String(100), nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
     coin_bot = relationship('CoinBot', back_populates='spotlight_analyses')
 
-    def to_dict(self):
+    def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-    
-    @classmethod
-    def create_entry(cls, content, image_url, category_name, coin_bot_id):
-        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
+
 
 class Chart(Base):
     """
@@ -2100,7 +2138,6 @@ def populate_sections():
 
         # Commit the transaction
         session.commit()
-
         print(f"Successfully populated sections table with {len(new_sections)} sections")
         return True
 

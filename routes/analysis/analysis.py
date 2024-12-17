@@ -15,6 +15,7 @@ from apscheduler.triggers.date import DateTrigger
 from utils.session_management import create_response
 from apscheduler.jobstores.base import JobLookupError
 from config import Analysis, CoinBot, NarrativeTrading, SAndRAnalysis, Sections, Session, DailyMacroAnalysis, SpotlightAnalysis, Category
+
 from ws.socket import emit_notification
 from routes.analysis.analysis_scheduler import sched, chosen_timezone
 from utils.logging import setup_logger
@@ -998,8 +999,18 @@ def publish_analysis(coin_id: int, content: str, category_name: str, section_id:
 
         except ValueError as e:
             session.rollback()
-            logger.error(f"Validation error in publish_analysis: {str(e)}")
-            return create_response(
+            logger.error(f"Validation error: {str(e)}")
+            emit_notification(
+                event_name="new_analysis_error",
+                data={
+                    "coin": coin_name,
+                    "title": f"There was an error publishing {section.name}",
+                    "body": f"Details: {str(e)}",
+                    "type": target,
+                    "timeframe": ""
+                },
+            )
+         return create_response(
                 data=None,
                 message=str(e),
                 success=False,
