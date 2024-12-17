@@ -1957,8 +1957,8 @@ def populate_topics():
                 references_str = ', '.join(references)
                 # Define all topic variations we need to check/create
                 topic_variations = [
-                    {'name': name, 'timeframe': '1h', 'type': 'alert'},
-                    {'name': name, 'timeframe': '4h', 'type': 'alert'},
+                    {'name': f'{name}_alerts_1h', 'timeframe': '1h', 'type': 'alerts'},
+                    {'name': f'{name}_alerts_4h', 'timeframe': '4h', 'type': 'alerts'},
                     {'name': f'{name}_deep_dive', 'timeframe': None, 'type': 'deep_dive'},
                     {'name': f'{name}_s_and_r', 'timeframe': None, 'type': 'support_resistance'},
                     {'name': f'{name}_narratives', 'timeframe': None, 'type': 'narratives'},
@@ -2263,14 +2263,14 @@ def init_data():
     - CoinGecko Data: Initializes external price data
     - Roles: Sets up default user roles and permissions
     """
-    populate_sections()
+    # populate_sections()
     populate_topics()
-    init_superadmin()
-    init_user_data()
-    create_superadmin_api_key()
-    populate_categories_and_coins()
-    init_coingecko_data()
-    initialize_default_roles()
+    # init_superadmin()
+    # init_user_data()
+    # create_superadmin_api_key()
+    # populate_categories_and_coins()
+    # init_coingecko_data()
+    # initialize_default_roles()
 
 
 # init_data()

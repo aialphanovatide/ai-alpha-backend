@@ -204,110 +204,151 @@ swagger = Swagger()
 # ____Add or update an endpoint____
 # Add this to your swagger builder usage section
 
-# swagger.add_or_update_endpoint(
-#     endpoint_route='/analysis',
-#     method='post',
-#     tag='Content Creation',
-#     summary='Create a new analysis',
-#     description='''
-#     Create a new analysis with a pre-generated image.
+
+# Add this to your swagger builder usage section
+
+swagger.add_or_update_endpoint(
+    endpoint_route='/analyses',
+    method='get',
+    tag='Content Creation',
+    summary='Get latest analyses across all types',
+    description='''
+    Retrieve latest analyses across all analysis types with advanced filtering and search capabilities.
     
-#     Note:
-#     - All fields are required
-#     - coin_id and section_id must be valid integers
-#     - image_url should be a valid URL (either temporary DALL-E URL or permanent S3 URL)
-#     - content should include a title followed by <br> and then the main content
-#     ''',
-#     params=[
-#         {
-#             'name': 'coin_id',
-#             'in': 'formData',
-#             'description': 'ID of the coin',
-#             'required': True,
-#             'type': 'string',
-#             'example': '1'
-#         },
-#         {
-#             'name': 'section_id',
-#             'in': 'formData',
-#             'description': 'ID of the section',
-#             'required': True,
-#             'type': 'string',
-#             'example': '1'
-#         },
-#         {
-#             'name': 'content',
-#             'in': 'formData',
-#             'description': 'Analysis content with title and body separated by <br>',
-#             'required': True,
-#             'type': 'string',
-#             'example': 'Bitcoin Analysis<br>This is the main content of the analysis...'
-#         },
-#         {
-#             'name': 'category_name',
-#             'in': 'formData',
-#             'description': 'Name of the category',
-#             'required': True,
-#             'type': 'string',
-#             'example': 'Technical Analysis'
-#         },
-#         {
-#             'name': 'image_url',
-#             'in': 'formData',
-#             'description': 'URL of the pre-generated image (DALL-E or S3)',
-#             'required': True,
-#             'type': 'string',
-#             'example': 'https://appanalysisimages.s3.amazonaws.com/image.jpg'
-#         }
-#     ],
-#     responses={
-#         '201': {
-#             'description': 'Analysis created successfully',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {
-#                         'type': 'object',
-#                         'description': 'Created analysis data',
-#                         'properties': {
-#                             'id': {'type': 'integer'},
-#                             'coin_id': {'type': 'integer'},
-#                             'content': {'type': 'string'},
-#                             'image_url': {'type': 'string'},
-#                             'category_name': {'type': 'string'},
-#                             'created_at': {'type': 'string', 'format': 'date-time'}
-#                         }
-#                     },
-#                     'message': {'type': 'string', 'example': 'Analysis published successfully'},
-#                     'success': {'type': 'boolean', 'example': True}
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad Request - Missing or invalid parameters',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string', 'example': 'Missing required parameters: coin_id, content'},
-#                     'success': {'type': 'boolean', 'example': False}
-#                 }
-#             }
-#         },
-#         '500': {
-#             'description': 'Server error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'data': {'type': 'null'},
-#                     'error': {'type': 'string', 'example': 'An unexpected error occurred'},
-#                     'success': {'type': 'boolean', 'example': False}
-#                 }
-#             }
-#         }
-#     },
-#     request_body=None  # Remove request_body since we're using formData parameters
-# )
+    The endpoint queries all analysis tables (Deep Dive, Daily Macro, Narratives, Spotlight, Support & Resistance)
+    and returns the latest posts with optional filtering and search functionality.
+    
+    Results are sorted by creation date in descending order (newest first).
+    ''',
+    params=[
+        {
+            'name': 'page',
+            'in': 'query',
+            'description': 'Page number for pagination',
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        {
+            'name': 'per_page',
+            'in': 'query',
+            'description': 'Number of items per page (max: 100)',
+            'required': False,
+            'type': 'integer',
+            'default': 10
+        },
+        {
+            'name': 'search',
+            'in': 'query',
+            'description': 'Search term to filter analyses by content or title',
+            'required': False,
+            'type': 'string'
+        },
+        {
+            'name': 'coin',
+            'in': 'query',
+            'description': 'Filter analyses by specific coin name',
+            'required': False,
+            'type': 'string'
+        },
+        {
+            'name': 'category',
+            'in': 'query',
+            'description': 'Filter analyses by category name',
+            'required': False,
+            'type': 'string'
+        },
+        {
+            'name': 'section_id',
+            'in': 'query',
+            'description': 'Filter analyses by section ID',
+            'required': False,
+            'type': 'integer'
+        }
+    ],
+    responses={
+        '200': {
+            'description': 'Successful operation',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'data': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'category_icon': {'type': 'string', 'example': '/static/topmenu_icons_resize/bitcoin.png'},
+                                'category_name': {'type': 'string', 'example': 'bitcoin'},
+                                'coin_icon': {'type': 'string', 'example': '/static/topmenu_icons_resize/bitcoin.png'},
+                                'coin_id': {'type': 'integer', 'example': 1},
+                                'coin_name': {'type': 'string', 'example': 'btc'},
+                                'content': {'type': 'string', 'example': '<p>This is a test analysis for Bitcoin...</p>'},
+                                'created_at': {'type': 'string', 'format': 'date-time', 'example': '2024-12-12T22:22:32.350759-03:00'},
+                                'id': {'type': 'integer', 'example': 11},
+                                'image_url': {'type': 'string', 'example': 'https://appanalysisimages.s3.us-east-2.amazonaws.com/bitcoin-analysis.jpg'},
+                                'section_id': {'type': 'integer', 'example': 12},
+                                'section_name': {'type': 'string', 'example': 'Daily Macro'},
+                                'title': {'type': 'string', 'example': 'Bitcoin Price Analysis'}
+                            }
+                        }
+                    },
+                    'meta': {
+                        'type': 'object',
+                        'properties': {
+                            'page': {'type': 'integer', 'example': 1},
+                            'per_page': {'type': 'integer', 'example': 10},
+                            'total_items': {'type': 'integer', 'example': 66},
+                            'total_pages': {'type': 'integer', 'example': 7}
+                        }
+                    },
+                    'error': {'type': 'string', 'nullable': True},
+                    'success': {'type': 'boolean', 'example': True}
+                }
+            }
+        },
+        '400': {
+            'description': 'Bad Request - Invalid parameters',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'data': {'type': 'array', 'items': {}},
+                    'meta': {
+                        'type': 'object',
+                        'properties': {
+                            'page': {'type': 'integer'},
+                            'per_page': {'type': 'integer'},
+                            'total_items': {'type': 'integer'},
+                            'total_pages': {'type': 'integer'}
+                        }
+                    },
+                    'error': {'type': 'string', 'example': 'Invalid pagination parameters'},
+                    'success': {'type': 'boolean', 'example': False}
+                }
+            }
+        },
+        '500': {
+            'description': 'Server error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'data': {'type': 'array', 'items': {}},
+                    'meta': {
+                        'type': 'object',
+                        'properties': {
+                            'page': {'type': 'integer'},
+                            'per_page': {'type': 'integer'},
+                            'total_items': {'type': 'integer'},
+                            'total_pages': {'type': 'integer'}
+                        }
+                    },
+                    'error': {'type': 'string', 'example': 'An unexpected error occurred'},
+                    'success': {'type': 'boolean', 'example': False}
+                }
+            }
+        }
+    }
+)
+
 # ____Delete an endpoint____
 
 # success, message = swagger.delete_endpoint(endpoint_route='/schedule_post')

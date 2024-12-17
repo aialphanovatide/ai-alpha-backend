@@ -44,8 +44,8 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
         str_timeframe = str(timeframe) if timeframe is not None else ''
 
         data_payload = {
-            "type": str_type,  # Ensure type is a string
-            "coin": str_coin,  # Ensure coin is a string, handle None case
+            "type": str_type, 
+            "coin": str_coin, 
             "timeframe": str_timeframe
         }
 
