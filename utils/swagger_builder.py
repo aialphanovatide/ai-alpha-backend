@@ -206,7 +206,6 @@ swagger = Swagger()
 
 
 # Add this to your swagger builder usage section
-swagger = Swagger()
 
 swagger.add_or_update_endpoint(
     endpoint_route='/analyses',
@@ -258,6 +257,13 @@ swagger.add_or_update_endpoint(
             'description': 'Filter analyses by category name',
             'required': False,
             'type': 'string'
+        },
+        {
+            'name': 'section_id',
+            'in': 'query',
+            'description': 'Filter analyses by section ID',
+            'required': False,
+            'type': 'integer'
         }
     ],
     responses={

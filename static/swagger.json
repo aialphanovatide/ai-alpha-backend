@@ -2414,6 +2414,13 @@
             "description": "Filter analyses by category name",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "Filter analyses by section ID",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
