@@ -1,7 +1,7 @@
 
 import pytz
 import datetime
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, or_
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from typing import Tuple, Dict, Type
@@ -111,237 +111,6 @@ def get_single_analysis(analysis_id):
     finally:
         session.close()
         return jsonify(response), status_code
-
-@analysis_bp.route('/analysis', methods=['GET'])
-def get_coin_analysis():
-    """
-    Retrieve analyses for a specific coin by ID, with optional pagination.
-
-    This endpoint queries the appropriate table based on the section target
-    for analyses related to a specific coin, identified by ID.
-
-    Args:
-        coin_bot_id (int): The ID of the coin bot (required)
-        section_id (int): The ID of the section (required)
-        page (int): The page number (default: 1)
-        limit (int): The number of items per page (default: 10, max: 100)
-
-    Returns:
-        JSON: A JSON object containing:
-            - data (list): List of analysis objects
-            - error (str or None): Error message, if any
-            - success (bool): Indicates if the operation was successful
-            - total (int): Total number of analyses for this coin bot
-            - page (int): Current page number (if pagination is used)
-            - limit (int): Number of items per page (if pagination is used)
-            - total_pages (int): Total number of pages (if pagination is used)
-        HTTP Status Code
-    """
-    response = {
-        "data": None,
-        "error": None,
-        "success": False,
-        "total": 0,
-        "page": None,
-        "limit": None,
-        "total_pages": None
-    }
-    status_code = 500  # Default to server error
-
-    session = Session()
-    try:
-        # Get required parameters
-        coin_id = request.args.get('coin_id', type=int)
-        section_id = request.args.get('section_id', type=int)
-
-        if not coin_id or not section_id:
-            response["error"] = "Both coin_id and section_id are required"
-            status_code = 400
-            return jsonify(response), status_code
-
-        # Get section information
-        section = session.query(Sections).filter_by(id=section_id).first()
-        if not section:
-            response["error"] = f"Section with id {section_id} not found"
-            status_code = 404
-            return jsonify(response), status_code
-
-        # Get the corresponding model based on target
-        target = section.target.lower()
-        model_class = MODEL_MAPPING.get(target)
-        if not model_class:
-            response["error"] = f"No model found for target: {section.target}"
-            status_code = 400
-            return jsonify(response), status_code
-
-        # Get pagination parameters
-        page = request.args.get('page', 1, type=int)
-        limit = min(request.args.get('limit', 10, type=int), 100)  # Cap at 100
-
-        if page < 1 or limit < 1:
-            response["error"] = "Invalid pagination parameters"
-            status_code = 400
-            return jsonify(response), status_code
-
-        # Build the query
-        query = session.query(model_class).filter(model_class.coin_bot_id == coin_id)
-
-        # Get total count
-        total_analyses = query.count()
-
-        if total_analyses == 0:
-            response["error"] = "No analyses found for the specified coin and section"
-            status_code = 404
-            return jsonify(response), status_code
-
-        # Apply pagination
-        total_pages = (total_analyses + limit - 1) // limit
-        offset = (page - 1) * limit
-        query = query.order_by(desc(model_class.created_at)).offset(offset).limit(limit)
-
-        # Execute the query
-        analysis_objects = query.all()
-
-        # Prepare the response data
-        analysis_data = [analy.to_dict() for analy in analysis_objects]
-
-        response.update({
-            "data": analysis_data,
-            "success": True,
-            "total": total_analyses,
-            "page": page,
-            "limit": limit,
-            "total_pages": total_pages
-        })
-        status_code = 200
-
-    except SQLAlchemyError as e:
-        session.rollback()
-        response["error"] = f"Database error occurred: {str(e)}"
-        status_code = 500
-    except Exception as e:
-        session.rollback()
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        status_code = 500
-    finally:
-        session.close()
-
-    return jsonify(response), status_code
-
-
-@analysis_bp.route('/analyses', methods=['GET'])
-def get_all_analysis():
-    """
-    Retrieve all analyses with pagination based on section.
-    
-    Args:
-        section_id (str): The ID of the section to get analyses from
-        page (int): The page number (default: 1)
-        limit (int): The number of items per page (default: 10, max: 100)
-    
-    Returns:
-        JSON: A JSON object containing:
-        - data (list): List of analysis objects
-        - error (str or None): Error message, if any
-        - success (bool): Indicates if the operation was successful
-        - total (int): Total number of analyses
-        - page (int): Current page number
-        - limit (int): Number of items per page
-        - total_pages (int): Total number of pages
-        
-    Raises:
-        400 Bad Request: If invalid parameters are provided
-        404 Not Found: If section is not found
-        500 Internal Server Error: If there's an unexpected error
-    """
-    response = {
-        "data": None,
-        "error": None,
-        "success": False,
-        "total": 0,
-        "page": 1,
-        "limit": 10,
-        "total_pages": 0
-    }
-    status_code = 500  # Default to server error
-    session = Session()
-    
-    try:
-        # Get required parameters
-        section_id = request.args.get('section_id')
-        if not section_id:
-            response["error"] = "section_id is required"
-            status_code = 400
-            return jsonify(response), status_code
-
-        # Get pagination parameters
-        page = request.args.get('page', 1, type=int)
-        limit = min(request.args.get('limit', 10, type=int), 100)  # Cap at 100
-        
-        if page < 1 or limit < 1:
-            response["error"] = "Invalid pagination parameters"
-            status_code = 400
-            return jsonify(response), status_code
-
-        # Get section information
-        section = session.query(Sections).filter_by(id=section_id).first()
-        if not section:
-            response["error"] = f"Section with id {section_id} not found"
-            status_code = 404
-            return jsonify(response), status_code
-
-        # Get the corresponding model based on target
-        target = section.target.lower()
-        model_class = MODEL_MAPPING.get(target)
-        if not model_class:
-            response["error"] = f"No model found for target: {section.target}"
-            status_code = 400
-            return jsonify(response), status_code
-
-        # Query for total count
-        total_analyses = session.query(model_class).count()
-
-        # Calculate pagination values
-        total_pages = (total_analyses + limit - 1) // limit
-        offset = (page - 1) * limit
-
-        # Query with pagination
-        analysis_objects = session.query(model_class)\
-            .order_by(desc(model_class.created_at))\
-            .offset(offset)\
-            .limit(limit)\
-            .all()
-
-        # Prepare the response data
-        analysis_data = [analy.to_dict() for analy in analysis_objects]
-
-        # Update response
-        response.update({
-            "data": analysis_data,
-            "success": True,
-            "total": total_analyses,
-            "page": page,
-            "limit": limit,
-            "total_pages": total_pages,
-            "section_name": section.name
-        })
-        status_code = 200
-
-    except SQLAlchemyError as e:
-        session.rollback()
-        response["error"] = f"Database error occurred: {str(e)}"
-        status_code = 500
-        
-    except Exception as e:
-        session.rollback()
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        status_code = 500
-        
-    finally:
-        session.close()
-        
-    return jsonify(response), status_code
-
 
 @analysis_bp.route('/analysis', methods=['POST'])
 def post_analysis():
@@ -583,6 +352,218 @@ def edit_analysis(analysis_id):
         session.close()
 
     return jsonify(response), status_code
+
+
+@analysis_bp.route('/analyses', methods=['GET'])
+def get_analyses():
+    """
+    Retrieve latest analyses across all analysis types with advanced filtering and search capabilities.
+    
+    Query Parameters:
+        page (int): Page number for pagination (default: 1)
+        per_page (int): Number of items per page (default: 10, max: 100)
+        search (str): Search term to filter analyses by content or title
+        coin (str): Filter analyses by specific coin name
+        category (str): Filter analyses by category name
+    
+    Returns:
+        JSON: {
+            "data": [{
+                "category_icon": str,
+                "category_name": str,
+                "coin_icon": str,
+                "coin_id": int,
+                "coin_name": str,
+                "content": str,
+                "created_at": str,    # ISO format datetime
+                "id": int,
+                "image_url": str,
+                "section_id": int,
+                "section_name": str,
+                "title": str
+            }],
+            "meta": {
+                "page": int,
+                "per_page": int,
+                "total_items": int,
+                "total_pages": int
+            },
+            "error": str or None,
+            "success": bool
+        }
+    """
+    response = {
+        "data": [],
+        "meta": {
+            "page": 1,
+            "per_page": 10,
+            "total_items": 0,
+            "total_pages": 0
+        },
+        "error": None,
+        "success": False
+    }
+
+    try:
+        # Get query parameters with defaults
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 10, type=int), 100)
+        search = request.args.get('search', '').strip()
+        coin_name = request.args.get('coin', '').strip()
+        category = request.args.get('category', '').strip()
+
+        # Validate pagination parameters
+        if page < 1 or per_page < 1:
+            return jsonify({**response, "error": "Invalid pagination parameters"}), 400
+
+        with Session() as session:
+            # Pre-fetch coins and categories to use as lookup tables
+            coins_dict = {
+                coin.bot_id: {
+                    'name': coin.name,
+                    'icon': coin.icon
+                } for coin in session.query(CoinBot).all()
+            }
+
+            categories_dict = {
+                category.name.lower(): {
+                    'name': category.name,
+                    'icon': category.icon
+                } for category in session.query(Category).all()
+            }
+
+            sections_dict = {
+                section.target.lower(): {
+                    'id': section.id,
+                    'name': section.name
+                } for section in session.query(Sections).all()
+            }
+
+            all_results = []
+
+                        # Define column mappings for each model
+            COLUMN_MAPPINGS = {
+                'deep_dive': {
+                    'content': 'analysis',
+                    'id': 'analysis_id'
+                },
+                'daily_macro': {
+                    'content': 'content',
+                    'id': 'id'
+                },
+                'narratives': {
+                    'content': 'narrative_trading',
+                    'id': 'narrative_trading_id'
+                },
+                'spotlight': {
+                    'content': 'content',
+                    'id': 'id'
+                },
+                'support_resistance': {
+                    'content': 'analysis',
+                    'id': 'analysis_id'
+                }
+            }
+
+            # If filtering by coin name, get the coin_id first
+            coin_id = None
+            if coin_name:
+                for cid, coin_data in coins_dict.items():
+                    if coin_data['name'].lower() == coin_name.lower():
+                        coin_id = cid
+                        break
+
+            # Query each analysis type
+            for target, model_class in MODEL_MAPPING.items():
+                query = session.query(model_class)
+
+                # Apply filters
+                if coin_id is not None:
+                    query = query.filter(model_class.coin_bot_id == coin_id)
+                if category:
+                    query = query.filter(func.lower(model_class.category_name) == category.lower())
+                if search:
+                    # Use the correct column name for content search
+                    content_column = COLUMN_MAPPINGS[target]['content']
+                    query = query.filter(getattr(model_class, content_column).ilike(f"%{search}%"))
+
+                # Get results
+                analyses = query.order_by(desc(model_class.created_at)).all()
+
+                # Transform results
+                for analysis in analyses:
+                    # Skip if we don't have matching reference data
+                    if (analysis.coin_bot_id not in coins_dict or 
+                        analysis.category_name.lower() not in categories_dict or 
+                        target not in sections_dict):
+                        continue
+
+                    coin_data = coins_dict[analysis.coin_bot_id]
+                    category_data = categories_dict[analysis.category_name.lower()]
+                    section_data = sections_dict[target]
+
+                    # Get content and id using the correct column names
+                    content_column = COLUMN_MAPPINGS[target]['content']
+                    id_column = COLUMN_MAPPINGS[target]['id']
+                    
+                    content_text = getattr(analysis, content_column)
+                    analysis_id = getattr(analysis, id_column)
+
+                    # Extract title from content
+                    title_end_index = content_text.find('<br>')
+                    title = content_text[:title_end_index].strip() if title_end_index != -1 else ""
+                    content = content_text[title_end_index + 4:].strip() if title_end_index != -1 else content_text
+                    
+                    # Clean title from HTML tags
+                    title = BeautifulSoup(title, 'html.parser').get_text()
+
+                    all_results.append({
+                        "category_icon": category_data['icon'],
+                        "category_name": category_data['name'],
+                        "coin_icon": coin_data['icon'],
+                        "coin_id": analysis.coin_bot_id,
+                        "coin_name": coin_data['name'],
+                        "content": content,
+                        "created_at": analysis.created_at.isoformat(),
+                        "id": analysis_id,
+                        "image_url": analysis.image_url,
+                        "section_id": section_data['id'],
+                        "section_name": section_data['name'],
+                        "title": title
+                    })
+
+            # Sort all results by created_at
+            all_results.sort(key=lambda x: x['created_at'], reverse=True)
+            
+            # Calculate total count and pages
+            total_count = len(all_results)
+            total_pages = (total_count + per_page - 1) // per_page
+
+            # Apply pagination
+            start_idx = (page - 1) * per_page
+            end_idx = start_idx + per_page
+            paginated_results = all_results[start_idx:end_idx]
+
+            # Update response
+            response.update({
+                "data": paginated_results,
+                "meta": {
+                    "page": page,
+                    "per_page": per_page,
+                    "total_items": total_count,
+                    "total_pages": total_pages
+                },
+                "success": True
+            })
+
+            return jsonify(response), 200
+
+    except Exception as e:
+        logger.error(f"Error in get_latest_analyses: {str(e)}", exc_info=True)
+        return jsonify({
+            **response,
+            "error": f"An unexpected error occurred: {str(e)}"
+        }), 500
 
 
 @analysis_bp.route('/analysis/generate-image', methods=['POST'])
