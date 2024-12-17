@@ -35,3 +35,4 @@ marshmallow
 gunicorn
 flask_mail
 psutil
+tradingview-datafeed
