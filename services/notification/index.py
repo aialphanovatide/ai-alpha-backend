@@ -12,20 +12,25 @@ class NotificationService:
 
     def validate_topics(self, coin: str, type: str, timeframe: str = None) -> List[Topic]:
         """
-        Validates and returns a list of topics that match the given coin and type. This method queries the database to find topics that are relevant to the specified coin and notification type. It filters topics based on the notification type, coin reference, and timeframe (if applicable).
+        Validates and returns a list of topics that match the given coin and type.
 
         Args:
-            coin (str): The coin reference to filter topics by.
-            type (str): The type of notification to filter topics by. Supported types are "alert", "analysis", and "support_resistance".
-            timeframe (str, optional): The timeframe to filter topics by, applicable only for "alert" type. Defaults to None.
-
+            coin (str): The coin reference to filter topics by (e.g. 'bitcoin', 'ethereum').
+            type (str): The type of notification. Valid types are:
+                - 'alert': For price alerts, requires timeframe
+                - 'deep_dive': For in-depth analysis
+                - 'narratives': For market narrative updates
+                - 'support_resistance': For S&R level updates
+                - 'daily_macro': For daily macro analysis
+                - 'spotlight': For coin spotlights
+            timeframe (str, optional): The timeframe for alerts 1h and 4h. Required when type is 'alert'.
         Returns:
-            List[Topic]: A list of Topic objects that match the specified coin and type.
+            List[Topic]: A list of Topic objects that match the specified criteria.
 
         Raises:
-            ValueError: If the notification type is invalid or no topics are found that match the specified coin and type.
-            SQLAlchemyError: If a database operation fails during the validation process.
-            RuntimeError: For any unexpected errors that occur during the validation process.
+            ValueError: If the notification type is invalid or no matching topics are found.
+            SQLAlchemyError: If a database operation fails.
+            RuntimeError: For any unexpected errors during validation.
         """
         try:
             with Session() as session:
@@ -37,10 +42,11 @@ class NotificationService:
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
-                elif type in ["analysis", "narrative_trading", "support_resistance"]:
+
+                elif type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
-                        Topic.name.ilike(f"%{type}%")  # Match topics with the specified type
+                        Topic.type.ilike(f"%{type}%")  # Match topics with the specified type
                     )
                 else:
                     raise ValueError(f"Invalid notification type: {type}")
@@ -75,7 +81,7 @@ class NotificationService:
             with Session() as session:
                 # Save notifications to database
                 for topic in topics:
-                    if type in ["analysis", "narrative_trading", "support_resistance"]:
+                    if type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
                         new_notification = Notification(
                             topic_id=topic.id,
                             title=title,
@@ -86,15 +92,19 @@ class NotificationService:
                             updated_at=date_now
                         )
                         session.add(new_notification)
-
                 session.commit()
 
                 # Send FCM notifications
                 failed_topics = []
                 for topic in topics:
                     try:
-                        self._send_fcm_notification(
-                            topic.name, title, body, type, coin, timeframe
+                        send_notification(
+                            topic=topic.name,
+                            title=title,
+                            body=body,
+                            type=type,
+                            coin=coin,
+                            timeframe=timeframe
                         )
                     except Exception as e:
                         failed_topics.append({"topic": topic.name, "error": str(e)})
@@ -108,12 +118,6 @@ class NotificationService:
             raise
         except Exception as e:
             raise RuntimeError(f"Failed to process notification: {str(e)}")
-
-    def _send_fcm_notification(self, topic: str, title: str, body: str, type: str, 
-                             coin: str, timeframe: str) -> None:
-        """
-        Send a notification via Firebase Cloud Messaging.
-
         Raises:
             RuntimeError: If FCM notification fails
         """
@@ -186,3 +190,4 @@ class NotificationService:
             )
         except Exception as e:
             raise RuntimeError(f"Failed to send FCM notification to topic {topic}: {str(e)}")
+

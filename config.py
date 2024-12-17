@@ -1,10 +1,11 @@
 import secrets
 from time import timezone
+from routes.analysis.analysis_scheduler import chosen_timezone
 from sqlalchemy import (
     JSON, Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
 )
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, Text
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
 from utils.general import generate_unique_short_token
@@ -26,15 +27,26 @@ import os
 
 load_dotenv()
 
+# Database configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 env = os.getenv('FLASK_ENV', 'development')
-DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
-if env == 'production':
-    DATABASE_URL = os.getenv('DATABASE_URL_PROD')
+# Set database URL based on environment
+DATABASE_URL = os.getenv('DATABASE_URL_PROD') if env == 'production' else os.getenv('DATABASE_URL_DEV')
 
-engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
+# Configure SQLAlchemy engine with timezone support
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=30,
+    max_overflow=20,
+    connect_args={
+        'options': f'-c timezone={chosen_timezone.zone}'
+    }
+)
+
+# Initialize declarative base
 Base = declarative_base()
+
 
 # _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
 
@@ -457,7 +469,6 @@ class User(Base):
         """
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-
 class PurchasedPlan(Base):
     """
     Represents a purchased plan associated with a user.
@@ -497,7 +508,6 @@ class PurchasedPlan(Base):
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
-
 class Category(Base):
     """
     Represents a category for organizing CoinBots.
@@ -614,6 +624,8 @@ class CoinBot(Base):
     upgrades = relationship('Upgrades', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
     narrative_trading = relationship('NarrativeTrading', back_populates='coin_bot', lazy=True, cascade="all, delete-orphan")
     s_and_r_analysis = relationship('SAndRAnalysis', back_populates='coin_bot', cascade="all, delete-orphan")
+    daily_macro_analyses = relationship('DailyMacroAnalysis', back_populates='coin_bot', cascade='all, delete-orphan')
+    spotlight_analyses = relationship('SpotlightAnalysis', back_populates='coin_bot', cascade='all, delete-orphan')
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -785,7 +797,6 @@ class Alert(Base):
 
     def as_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
 
 class Article(Base):
     """
@@ -1105,6 +1116,61 @@ class NarrativeTrading(Base):
     @classmethod
     def create_entry(cls, content, image_url, category_name, coin_bot_id):
         return cls(narrative_trading=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
+
+class DailyMacroAnalysis(Base):
+    """
+    Daily Macro Analysis table for storing daily macro-economic analysis content.
+    """
+    __tablename__ = 'daily_macro_analysis'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    content = Column(Text, nullable=False)
+    image_url = Column(String(500))
+    category_name = Column(String(100), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationship
+    coin_bot = relationship('CoinBot', back_populates='daily_macro_analyses')
+
+    def to_dict(self):
+        result = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            # Convert timezone-aware timestamps to scheduler timezone
+            if isinstance(value, datetime) and value.tzinfo is not None:
+                value = value.astimezone(chosen_timezone)
+            result[column.name] = value
+        return result
+
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
+
+class SpotlightAnalysis(Base):
+    """
+    Spotlight Analysis table for storing focused cryptocurrency analysis content.
+    """
+    __tablename__ = 'spotlight_analysis'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
+    content = Column(Text, nullable=False)
+    image_url = Column(String(500))
+    category_name = Column(String(100), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationship
+    coin_bot = relationship('CoinBot', back_populates='spotlight_analyses')
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class Chart(Base):
     """
@@ -1657,8 +1723,6 @@ def initialize_default_roles():
         session.close()
 
 
-initialize_default_roles()
-
 # ------------- CREATE DEFAULT USERS / ALREADY REGISTER IN AUTH0 -------------------
 
 def init_user_data():
@@ -1719,7 +1783,6 @@ def init_user_data():
         session.close()
 
 
-init_user_data()
 
 # ------------- CREATE DEFAULR CATEGORIES AND COINS -------------------
 
@@ -1817,8 +1880,6 @@ def populate_categories_and_coins():
         session.close()
 
 
-populate_categories_and_coins()
-
 # ------------- CREATE DEFAULT SUPERADMIN -----------------------------
 
 def init_superadmin():
@@ -1870,10 +1931,8 @@ def init_superadmin():
         session.close()
 
 
-init_superadmin()
-
-
 # ------------- CREATE DEFAULT NOTIFICATION TOPICS -------------------
+
 def populate_topics():
     """
     Populates the database with topics based on provided data from a JSON file and timeframes.
@@ -1889,16 +1948,22 @@ def populate_topics():
     
     with Session() as session:
         try:
+            # Delete all existing topics
+            session.query(Topic).delete()
+            session.commit()
+
             topics_added = 0
             for name, references in data.items():
                 references_str = ', '.join(references)
                 # Define all topic variations we need to check/create
                 topic_variations = [
-                    {'name': name, 'timeframe': '1h', 'type': 'alert'},
-                    {'name': name, 'timeframe': '4h', 'type': 'alert'},
-                    {'name': f'{name}_analysis', 'timeframe': None, 'type': 'analysis'},
-                    {'name': f'{name}_s_and_r', 'timeframe': None, 'type': 's_and_r'},
-                    {'name': f'{name}_narrative_trading', 'timeframe': None, 'type': 'narrative_trading'}
+                    {'name': f'{name}_alerts_1h', 'timeframe': '1h', 'type': 'alerts'},
+                    {'name': f'{name}_alerts_4h', 'timeframe': '4h', 'type': 'alerts'},
+                    {'name': f'{name}_deep_dive', 'timeframe': None, 'type': 'deep_dive'},
+                    {'name': f'{name}_s_and_r', 'timeframe': None, 'type': 'support_resistance'},
+                    {'name': f'{name}_narratives', 'timeframe': None, 'type': 'narratives'},
+                    {'name': f'{name}_daily_macro', 'timeframe': None, 'type': 'daily_macro'},
+                    {'name': f'{name}_spotlight', 'timeframe': None, 'type': 'spotlight'}
                 ]
                 for variation in topic_variations:
                     # Check if this specific topic variation exists
@@ -1932,8 +1997,6 @@ def populate_topics():
             session.rollback()
             raise Exception(f'Unexpected error while populating topics: {str(e)}')
 
-        
-populate_topics()
 
 # --------------CREATE DEFAULT API KEY FOR SUPERADMIN -------------------
 
@@ -1983,76 +2046,80 @@ def create_superadmin_api_key():
         session.close()
 
 
-# create_superadmin_api_key()
-
-
 # --------------AUTOPOPULATE SECTION TABLE -------------------
 
 def populate_sections():
     """
-    Populates the database with default sections if fewer than 4 exist.
-    Each section represents a different category of content in the application.
+    Clean and repopulate the sections table with predefined sections.
+    
+    This function:
+    1. Deletes all existing records in the sections table
+    2. Inserts new, standardized sections
+    3. Handles potential database errors
+    4. Provides logging and error tracking
     """
-    # Datos de las secciones a añadir
-    sections_data = [
-        # {
-        #     "name": "What's happening today (Top Stories)",
-        #     "description": "Articles that belong to top stories",
-        #     "target": "article"
-        # },
-        {
-            "name": "Market Narrative (Narrative Tradings)",
-            "description": "Articles referred to narrative trading posts",
-            "target": "narrative_trading"
-        },
-        {
-            "name": "Daily Deeps (Analysis)",
-            "description": "Coin Analysis posts",
-            "target": "analysis"
-        },
-        {
-            "name": "S&R Lines (S&R Analysis)",
-            "description": "Posts that belong to s&r analysis for a coin",
-            "target": "s_and_r_analysis"
-        }
-    ]
+    # Create a new session
+    session = Session()
 
-    with Session() as session:
-        try:
-            # Cuenta las secciones existentes en la base de datos
-            existing_sections_count = session.query(Sections).count()
+    try:
+        session.query(Sections).delete()
 
-            if existing_sections_count < 4:
-                sections_added = 0
+        # Define new sections with comprehensive details
+        new_sections = [
+            {
+                'name': 'Deep Dives',
+                'description': 'Comprehensive deep dive analysis covering all aspects of the cryptocurrency',
+                'target': 'deep_dive'
+            },
+            {
+                'name': 'Daily Macro',
+                'description': 'Daily macroeconomic updates and market-wide cryptocurrency trends',
+                'target': 'daily_macro'
+            },
+            {
+                'name': 'Narratives',
+                'description': 'Analysis of emerging cryptocurrency market narratives and themes',
+                'target': 'narratives'
+            },
+            {
+                'name': 'Spotlight',
+                'description': 'Focused analysis highlighting specific cryptocurrencies or blockchain projects',
+                'target': 'spotlight'
+            },
+            {
+                'name': 'S&R',
+                'description': 'Support and resistance level analysis for cryptocurrency trading',
+                'target': 'support_resistance'
+            }
+        ]
 
-                for section_data in sections_data:
-                    # Verifica si la sección ya existe en la base de datos
-                    existing_section = session.query(Sections).filter_by(name=section_data["name"]).first()
-                    if not existing_section:
-                        section = Sections(
-                            name=section_data["name"],
-                            description=section_data["description"],
-                            target=section_data["target"]
-                        )
-                        session.add(section)
-                        sections_added += 1
-                        print(f"---- Section '{section_data['name']}' added ----")
+        # Insert new sections
+        for section_data in new_sections:
+            section = Sections(**section_data)
+            session.add(section)
 
-                # Guarda los cambios en la base de datos
-                session.commit()
-                print(f"---- All missing sections added. Total sections added: {sections_added} ----")
-            else:
-                print("---- Enough sections already exist. Skipping population process. ----")
+        # Commit the transaction
+        session.commit()
 
-        except SQLAlchemyError as e:
-            session.rollback()
-            print(f"---- Database error while populating sections: {str(e)} ----")
-        except Exception as e:
-            session.rollback()
-            print(f"---- Unexpected error while populating sections: {str(e)} ----")
+        print(f"Successfully populated sections table with {len(new_sections)} sections")
+        return True
 
+    except SQLAlchemyError as e:
+        # Rollback in case of any database error
+        session.rollback()
+        print(f"Error populating sections: {str(e)}")
+        return False
 
-# populate_sections()
+    except Exception as e:
+        # Catch any unexpected errors
+        session.rollback()
+        print(f"Unexpected error in populate_sections: {str(e)}")
+        return False
+
+    finally:
+        # Always close the session
+        session.close()
+
 
 # -------------- ADD COINGECKO IDS AND SYMBOLS ------------------------
 
@@ -2182,4 +2249,28 @@ def init_coingecko_data():
             print(f"Unexpected error: {str(e)}")
 
 
-# init_coingecko_data()
+
+def init_data():
+    """
+    Initialize application data by populating various database tables and configurations.
+    
+    This function orchestrates the initialization of different data components:
+    - Sections: Populates predefined sections for content organization
+    - Topics: Creates default notification topics
+    - Users: Sets up initial user accounts and roles
+    - API Keys: Generates superadmin API credentials
+    - Categories & Coins: Populates cryptocurrency data
+    - CoinGecko Data: Initializes external price data
+    - Roles: Sets up default user roles and permissions
+    """
+    # populate_sections()
+    populate_topics()
+    # init_superadmin()
+    # init_user_data()
+    # create_superadmin_api_key()
+    # populate_categories_and_coins()
+    # init_coingecko_data()
+    # initialize_default_roles()
+
+
+# init_data()

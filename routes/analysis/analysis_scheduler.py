@@ -31,7 +31,7 @@ try:
         'misfire_grace_time': 30
     }
 
-    chosen_timezone = tz('America/Argentina/Buenos_Aires')
+    chosen_timezone = tz('America/Buenos_Aires')
 
     # Create the scheduler with the SQLite job store
     sched = BackgroundScheduler(
