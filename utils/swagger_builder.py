@@ -202,152 +202,120 @@ class Swagger:
 swagger = Swagger()
 
 # ____Add or update an endpoint____
-# Add this to your swagger builder usage section
 
-
-# Add this to your swagger builder usage section
-
-swagger.add_or_update_endpoint(
-    endpoint_route='/analyses',
-    method='get',
-    tag='Content Creation',
-    summary='Get latest analyses across all types',
-    description='''
-    Retrieve latest analyses across all analysis types with advanced filtering and search capabilities.
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/topics',
+#     method='get',
+#     tag='Notifications',
+#     summary='Get all notification topics',
+#     description='''
+#     Retrieve all notification topics with optional filtering capabilities.
     
-    The endpoint queries all analysis tables (Deep Dive, Daily Macro, Narratives, Spotlight, Support & Resistance)
-    and returns the latest posts with optional filtering and search functionality.
+#     The endpoint returns a list of topics that can be filtered by coin reference, topic type, and timeframe.
+#     If no filters are provided, it returns all available topics.
     
-    Results are sorted by creation date in descending order (newest first).
-    ''',
-    params=[
-        {
-            'name': 'page',
-            'in': 'query',
-            'description': 'Page number for pagination',
-            'required': False,
-            'type': 'integer',
-            'default': 1
-        },
-        {
-            'name': 'per_page',
-            'in': 'query',
-            'description': 'Number of items per page (max: 100)',
-            'required': False,
-            'type': 'integer',
-            'default': 10
-        },
-        {
-            'name': 'search',
-            'in': 'query',
-            'description': 'Search term to filter analyses by content or title',
-            'required': False,
-            'type': 'string'
-        },
-        {
-            'name': 'coin',
-            'in': 'query',
-            'description': 'Filter analyses by specific coin name',
-            'required': False,
-            'type': 'string'
-        },
-        {
-            'name': 'category',
-            'in': 'query',
-            'description': 'Filter analyses by category name',
-            'required': False,
-            'type': 'string'
-        },
-        {
-            'name': 'section_id',
-            'in': 'query',
-            'description': 'Filter analyses by section ID',
-            'required': False,
-            'type': 'integer'
-        }
-    ],
-    responses={
-        '200': {
-            'description': 'Successful operation',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'data': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'object',
-                            'properties': {
-                                'category_icon': {'type': 'string', 'example': '/static/topmenu_icons_resize/bitcoin.png'},
-                                'category_name': {'type': 'string', 'example': 'bitcoin'},
-                                'coin_icon': {'type': 'string', 'example': '/static/topmenu_icons_resize/bitcoin.png'},
-                                'coin_id': {'type': 'integer', 'example': 1},
-                                'coin_name': {'type': 'string', 'example': 'btc'},
-                                'content': {'type': 'string', 'example': '<p>This is a test analysis for Bitcoin...</p>'},
-                                'created_at': {'type': 'string', 'format': 'date-time', 'example': '2024-12-12T22:22:32.350759-03:00'},
-                                'id': {'type': 'integer', 'example': 11},
-                                'image_url': {'type': 'string', 'example': 'https://appanalysisimages.s3.us-east-2.amazonaws.com/bitcoin-analysis.jpg'},
-                                'section_id': {'type': 'integer', 'example': 12},
-                                'section_name': {'type': 'string', 'example': 'Daily Macro'},
-                                'title': {'type': 'string', 'example': 'Bitcoin Price Analysis'}
-                            }
-                        }
-                    },
-                    'meta': {
-                        'type': 'object',
-                        'properties': {
-                            'page': {'type': 'integer', 'example': 1},
-                            'per_page': {'type': 'integer', 'example': 10},
-                            'total_items': {'type': 'integer', 'example': 66},
-                            'total_pages': {'type': 'integer', 'example': 7}
-                        }
-                    },
-                    'error': {'type': 'string', 'nullable': True},
-                    'success': {'type': 'boolean', 'example': True}
-                }
-            }
-        },
-        '400': {
-            'description': 'Bad Request - Invalid parameters',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'data': {'type': 'array', 'items': {}},
-                    'meta': {
-                        'type': 'object',
-                        'properties': {
-                            'page': {'type': 'integer'},
-                            'per_page': {'type': 'integer'},
-                            'total_items': {'type': 'integer'},
-                            'total_pages': {'type': 'integer'}
-                        }
-                    },
-                    'error': {'type': 'string', 'example': 'Invalid pagination parameters'},
-                    'success': {'type': 'boolean', 'example': False}
-                }
-            }
-        },
-        '500': {
-            'description': 'Server error',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'data': {'type': 'array', 'items': {}},
-                    'meta': {
-                        'type': 'object',
-                        'properties': {
-                            'page': {'type': 'integer'},
-                            'per_page': {'type': 'integer'},
-                            'total_items': {'type': 'integer'},
-                            'total_pages': {'type': 'integer'}
-                        }
-                    },
-                    'error': {'type': 'string', 'example': 'An unexpected error occurred'},
-                    'success': {'type': 'boolean', 'example': False}
-                }
-            }
-        }
-    }
-)
+#     Topics are used for managing notification subscriptions and message routing in the system.
+#     ''',
+#     params=[
+#         {
+#             'name': 'coin',
+#             'in': 'query',
+#             'description': 'Filter topics by coin reference (e.g., "bitcoin", "ethereum")',
+#             'required': False,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'type',
+#             'in': 'query',
+#             'description': 'Filter by topic type (e.g., "alerts", "support_resistance")',
+#             'required': False,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'timeframe',
+#             'in': 'query',
+#             'description': 'Filter by timeframe (e.g., "1d", "1w")',
+#             'required': False,
+#             'type': 'string'
+#         }
+#     ],
+#     responses={
+#         '200': {
+#             'description': 'Successful operation',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': True
+#                     },
+#                     'data': {
+#                         'type': 'array',
+#                         'items': {
+#                             'type': 'object',
+#                             'properties': {
+#                                 'id': {
+#                                     'type': 'integer',
+#                                     'example': 1
+#                                 },
+#                                 'name': {
+#                                     'type': 'string',
+#                                     'example': 'bitcoin_alerts_1d'
+#                                 },
+#                                 'reference': {
+#                                     'type': 'string',
+#                                     'example': 'bitcoin, btc'
+#                                 },
+#                                 'timeframe': {
+#                                     'type': 'string',
+#                                     'example': '1d'
+#                                 },
+#                                 'type': {
+#                                     'type': 'string',
+#                                     'example': 'alerts'
+#                                 },
+#                                 'created_at': {
+#                                     'type': 'string',
+#                                     'format': 'date-time',
+#                                     'example': '2024-03-20T12:00:00Z'
+#                                 },
+#                                 'updated_at': {
+#                                     'type': 'string',
+#                                     'format': 'date-time',
+#                                     'example': '2024-03-20T12:00:00Z'
+#                                 }
+#                             }
+#                         }
+#                     },
+#                     'count': {
+#                         'type': 'integer',
+#                         'example': 1
+#                     }
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Server error',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {
+#                         'type': 'boolean',
+#                         'example': False
+#                     },
+#                     'error': {
+#                         'type': 'string',
+#                         'example': 'Database connection error'
+#                     },
+#                     'message': {
+#                         'type': 'string',
+#                         'example': 'Failed to fetch topics'
+#                     }
+#                 }
+#             }
+#         }
+#     }
+# )
 
 # ____Delete an endpoint____
 

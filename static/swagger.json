@@ -5855,6 +5855,114 @@
           }
         }
       }
+    },
+    "/topics": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Get all notification topics",
+        "description": "\n    retrieve all notification topics with optional filtering capabilities.\n    \n    the endpoint returns a list of topics that can be filtered by coin reference, topic type, and timeframe.\n    if no filters are provided, it returns all available topics.\n    \n    topics are used for managing notification subscriptions and message routing in the system.\n    ",
+        "parameters": [
+          {
+            "name": "coin",
+            "in": "query",
+            "description": "Filter topics by coin reference (e.g., \"bitcoin\", \"ethereum\")",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by topic type (e.g., \"alerts\", \"support_resistance\")",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Filter by timeframe (e.g., \"1d\", \"1w\")",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "bitcoin_alerts_1d"
+                      },
+                      "reference": {
+                        "type": "string",
+                        "example": "bitcoin, btc"
+                      },
+                      "timeframe": {
+                        "type": "string",
+                        "example": "1d"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "alerts"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-03-20T12:00:00Z"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-03-20T12:00:00Z"
+                      }
+                    }
+                  }
+                },
+                "count": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Database connection error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Failed to fetch topics"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
