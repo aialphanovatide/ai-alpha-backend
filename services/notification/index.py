@@ -10,6 +10,9 @@ notification_model = Notification
 
 class NotificationService:
     """Service class for handling notifications and alerts."""
+    def __init__(self):
+        self.notification_model = notification_model
+        self.types = ["alert", "support_resistance"]
 
     def validate_topics(self, coin: str, type: str, timeframe: str = None) -> List[Topic]:
         """
@@ -44,7 +47,7 @@ class NotificationService:
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
 
-                elif type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
+                elif type in self.types:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.type.ilike(f"%{type}%")  # Match topics with the specified type
@@ -82,7 +85,7 @@ class NotificationService:
             with Session() as session:
                 # Save notifications to database
                 for topic in topics:
-                    if type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
+                    if type in self.types:
                         new_notification = Notification(
                             topic_id=topic.id,
                             title=title,
