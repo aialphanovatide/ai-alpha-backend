@@ -153,14 +153,15 @@ import requests
 import numpy as np
 import pandas as pd
 import bokeh.plotting as bk
-from ws.socket import socketio
+# from ws.socket import socketio
 from typing import List, Literal
+from bokeh.layouts import layout, column, grid
 from bokeh.resources import CDN
 from bokeh.embed import file_html, components
 from bokeh.models import (
     Label, ColumnDataSource, HoverTool, CrosshairTool, 
     NumeralTickFormatter, CDSView, BooleanFilter, DataRange1d, 
-    ImageURL, CustomJS, Band, DatetimeTickFormatter, Row, Button
+    ImageURL, CustomJS, Band, DatetimeTickFormatter, Row, Button, Div, 
 )
 
 
@@ -173,7 +174,7 @@ class ChartSettings:
                  interval: str = '1d',
                  resistance_levels: List[float] = [93000, 95000, 97000, 100000],
                  support_levels: List[float] = [50000, 60000, 50000, 55000, 65000],
-                 theme: Literal['dark', 'light'] = 'light',
+                 theme: Literal['dark', 'light'] = 'dark',
                  background_color_dark: str = '#171717',
                  background_color_light: str = '#FFFFFF',
                  border_fill_color_dark: str = '#171717',
@@ -269,7 +270,7 @@ class RSISettings:
         height (int, optional): Height of the RSI panel. Defaults to 150.
     """
     def __init__(self,
-                 enabled: bool = True,
+                 enabled: bool = False,
                  period: int = 14,
                  overbought: float = 70,
                  oversold: float = 30,
@@ -409,7 +410,7 @@ class ChartWidget:
                 'Volume': df['Volume'].tolist()
             }
                 
-            socketio.emit('update', new_data, namespace='/chart')
+            # socketio.emit('update', new_data, namespace='/chart')
 
         except Exception as e:
             print(f"Error updating chart: {e}")
@@ -517,6 +518,299 @@ class ChartWidget:
         
         return self.df
 
+    # def create_candlestick_chart(self) -> bk.figure:
+    #     # Fetch historical data and populate self.df
+    #     self.df = self.get_historical_data(self.symbol, self.interval)
+        
+    #     # Calculate technical indicators
+    #     self.calculate_technical_indicators()
+
+    #     # Create ColumnDataSource
+    #     self.source = ColumnDataSource(self.df, name='chart_source')
+
+    #     # Open WS for live candles data
+    #     self.start_live_updates()
+
+    #     # Calculate initial ranges based on the number of candles
+    #     time_min = self.df['Open Time'].iloc[-self.config.num_candles]
+    #     time_max = self.df['Open Time'].max()
+
+    #     # X Data Range
+    #     x_range = DataRange1d(
+    #         start=time_min,
+    #         end=time_max,
+    #         bounds=(self.df['Open Time'].min(), self.df['Open Time'].max())  # Allow scrolling to full range
+    #     )
+
+    #     # Add a callback to enforce x-range limits
+    #     x_range_callback = CustomJS(
+    #         args=dict(
+    #             x_range=x_range,
+    #             min_bound=self.df['Open Time'].min(),
+    #             max_bound=self.df['Open Time'].max()
+    #         ),
+    #         code="""
+    #         // Ensure start is not before min_bound
+    #         if (x_range.start < min_bound) {
+    #             const delta = min_bound - x_range.start;
+    #             x_range.start = min_bound;
+    #             x_range.end = Math.min(x_range.end + delta, max_bound);
+    #         }
+            
+    #         // Ensure end is not after max_bound
+    #         if (x_range.end > max_bound) {
+    #             const delta = x_range.end - max_bound;
+    #             x_range.end = max_bound;
+    #             x_range.start = Math.max(x_range.start - delta, min_bound);
+    #         }
+    #         """
+    #     )
+
+    #     # Attach the callback to both start and end changes
+    #     x_range.js_on_change('start', x_range_callback)
+    #     x_range.js_on_change('end', x_range_callback)
+
+    #     callback, y_range = self._calculate_y_range(time_min, time_max)
+
+    #     # Create figure
+    #     self.p = bk.figure(
+    #         x_axis_type='datetime',
+    #         sizing_mode='stretch_both',
+    #         background_fill_color=self.config.background_color,
+    #         border_fill_color=self.config.border_fill_color,
+    #         toolbar_location=None,
+    #         y_axis_location="right",
+    #         x_range=x_range,
+    #         y_range=y_range,
+    #         tools="xpan",
+    #         active_drag="xpan"
+    #     )
+
+    #     # Load base64 image data from file
+    #     try:
+    #         with open('static/logo.txt', 'r') as f:
+    #             base64_image = f.read().strip()  # Remove any whitespace
+    #             image_url = base64_image
+    #     except FileNotFoundError:
+    #         print("Warning: Logo file not found, using default image")
+    #         image_url = 'https://www.shutterstock.com/image-vector/bnb-binance-icon-sign-payment-600nw-2080319677.jpg'
+
+            
+    #     # Calculate positions in data space
+    #     x_pos = self.df['Open Time'].max() - (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.007
+    #     y_pos = self.df['High'].max() * 0.63  # Position at 90% of max height
+    #     width = (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.01  # 20% of time range
+    #     height = (self.df['High'].max() - self.df['Low'].min()) * 0.05  # 20% of price range
+
+    #     print(f"Image positioning - X: {x_pos}, Y: {y_pos}")
+    #     print(f"Image size - Width: {width}, Height: {height}")
+
+
+    #     image_source = ColumnDataSource({
+    #         'url': [image_url],
+    #         'x': [x_pos],
+    #         'y': [y_pos],
+    #         'w': [width],
+    #         'h': [height]
+    #     }, name='image_source')
+
+    #     # Add the image
+    #     image = ImageURL(
+    #         url="url",
+    #         x="x",
+    #         y="y",
+    #         w="w",  # Fixed width in pixels
+    #         h="h",  # Fixed height in pixels
+    #         anchor="center",  # Position in bottom left corner
+    #         global_alpha=1.0,  # Slight transparency
+    #     )
+
+    #     # Add the image to the plot
+    #     self.p.add_glyph(image_source, image)
+        
+    #     # Print the figure's range for debugging
+    #     print(f"Figure X range: {self.p.x_range.start} to {self.p.x_range.end}")
+    #     print(f"Figure Y range: {self.p.y_range.start} to {self.p.y_range.end}")
+
+    #     # Create a container div with relative positioning
+    #     container_div = Div(
+    #         text="""
+    #         <div style="position: relative; width: 100%; height: 100%;">
+    #             <div id="chart-container"></div>
+    #             <img src="{}" style="
+    #                 position: absolute;
+    #                 top: 10px;
+    #                 right: 10px;
+    #                 width: 50px;
+    #                 height: 50px;
+    #                 opacity: 0.8;
+    #                 pointer-events: none;
+    #                 z-index: 1000;
+    #             ">
+    #         </div>
+    #         """.format(image_url),
+    #         width_policy="max",
+    #         height_policy="max",
+    #         sizing_mode="stretch_both"
+    #     )
+
+    #     # Create the layout
+    #     chart_layout = layout([
+    #         [container_div],
+    #         [self.p]
+    #     ], sizing_mode="stretch_both")
+
+    #     # Trigger initial y-axis range calculation
+    #     self.p.js_on_event('document_ready', callback)
+
+    #     # Attach the callback to x_range changes
+    #     x_range.js_on_change('start', callback)
+    #     x_range.js_on_change('end', callback)
+
+    #     # Style the figure
+    #     self.style_figure(self.p)
+
+    #     self.add_candlesticks(self.p)
+
+    #     # Add current price line and label
+    #     self.add_current_price_element(self.p)
+
+    #     # Support and Resistance levels
+    #     self.add_support_resistance_levels(self.p)
+
+    #     # Add technical indicators and capture the return value
+    #     result = self.add_technical_indicators(self.p)
+
+    #     # Store the result for other methods to use
+    #     self.chart_layout = result
+
+    #     return result  # Return either the figure or the layout with RSI
+
+    # def create_candlestick_chart(self) -> bk.figure:
+    #     # Fetch historical data and populate self.df
+    #     self.df = self.get_historical_data(self.symbol, self.interval)
+        
+    #     # Calculate technical indicators
+    #     self.calculate_technical_indicators()
+
+    #     # Create ColumnDataSource
+    #     self.source = ColumnDataSource(self.df, name='chart_source')
+
+    #     # Open WS for live candles data
+    #     self.start_live_updates()
+
+    #     # Calculate initial ranges and create figure components
+    #     time_min = self.df['Open Time'].iloc[-self.config.num_candles]
+    #     time_max = self.df['Open Time'].max()
+
+    #     # Create ranges and callbacks
+    #     x_range, x_range_callback = self._setup_x_range(time_min, time_max)
+    #     callback, y_range = self._calculate_y_range(time_min, time_max)
+
+    #     # Create main figure
+    #     self.p = bk.figure(
+    #         x_axis_type='datetime',
+    #         sizing_mode='stretch_both',
+    #         background_fill_color=self.config.background_color,
+    #         border_fill_color=self.config.border_fill_color,
+    #         toolbar_location=None,
+    #         y_axis_location="right",
+    #         x_range=x_range,
+    #         y_range=y_range,
+    #         tools="xpan",
+    #         active_drag="xpan"
+    #     )
+
+    #     image_url = 'https://aialpha.ai/static/images/aialphaSmallLogo.png'
+
+    #     # Create a Div for the logo with absolute positioning
+    #     logo_div = Div(
+    #         text=f"""
+    #         <div style="
+    #             position: absolute;
+    #             top: 10px;
+    #             right: 10px;
+    #             width: 50px;
+    #             height: 50px;
+    #             z-index: 1000;
+    #             pointer-events: none;
+    #             background-image: url('{image_url}');
+    #             background-size: contain;
+    #             background-repeat: no-repeat;
+    #             background-position: center;
+    #             opacity: 0.8;
+    #         "></div>
+    #         """,
+    #         width=50,
+    #         height=50,
+    #         sizing_mode="fixed"
+    #     )
+
+    #     # Style and populate the figure
+    #     self.style_figure(self.p)
+    #     self.add_candlesticks(self.p)
+    #     self.add_current_price_element(self.p)
+    #     self.add_support_resistance_levels(self.p)
+
+    #     # Add callbacks
+    #     self.p.js_on_event('document_ready', callback)
+    #     x_range.js_on_change('start', callback)
+    #     x_range.js_on_change('end', callback)
+
+    #     # Create the final layout with logo overlay
+    #     chart_with_indicators = self.add_technical_indicators(self.p)
+        
+    #     if chart_with_indicators:
+    #         # If result is a layout (includes RSI and SMA), create nested layout
+    #         final_layout = layout([
+    #             [logo_div],
+    #             [chart_with_indicators]
+    #         ], sizing_mode="stretch_both")
+    #     else:
+    #         # If result is just the figure, create simple layout
+    #         final_layout = layout([
+    #             [logo_div],
+    #             [self.p]
+    #         ], sizing_mode="stretch_both")
+
+    #     # Store the layout for other methods to use
+    #     self.chart_layout = final_layout
+
+    #     return final_layout
+
+    # def _setup_x_range(self, time_min, time_max):
+    #     """Helper method to setup x-range and its callback"""
+    #     x_range = DataRange1d(
+    #         start=time_min,
+    #         end=time_max,
+    #         bounds=(self.df['Open Time'].min(), self.df['Open Time'].max())
+    #     )
+
+    #     x_range_callback = CustomJS(
+    #         args=dict(
+    #             x_range=x_range,
+    #             min_bound=self.df['Open Time'].min(),
+    #             max_bound=self.df['Open Time'].max()
+    #         ),
+    #         code="""
+    #         if (x_range.start < min_bound) {
+    #             const delta = min_bound - x_range.start;
+    #             x_range.start = min_bound;
+    #             x_range.end = Math.min(x_range.end + delta, max_bound);
+    #         }
+    #         if (x_range.end > max_bound) {
+    #             const delta = x_range.end - max_bound;
+    #             x_range.end = max_bound;
+    #             x_range.start = Math.max(x_range.start - delta, min_bound);
+    #         }
+    #         """
+    #     )
+
+    #     x_range.js_on_change('start', x_range_callback)
+    #     x_range.js_on_change('end', x_range_callback)
+
+    #     return x_range, x_range_callback
+
     def create_candlestick_chart(self) -> bk.figure:
         # Fetch historical data and populate self.df
         self.df = self.get_historical_data(self.symbol, self.interval)
@@ -530,48 +824,15 @@ class ChartWidget:
         # Open WS for live candles data
         self.start_live_updates()
 
-        # Calculate initial ranges based on the number of candles
+        # Calculate initial ranges and create figure components
         time_min = self.df['Open Time'].iloc[-self.config.num_candles]
         time_max = self.df['Open Time'].max()
 
-        # X Data Range
-        x_range = DataRange1d(
-            start=time_min,
-            end=time_max,
-            bounds=(self.df['Open Time'].min(), self.df['Open Time'].max())  # Allow scrolling to full range
-        )
-
-        # Add a callback to enforce x-range limits
-        x_range_callback = CustomJS(
-            args=dict(
-                x_range=x_range,
-                min_bound=self.df['Open Time'].min(),
-                max_bound=self.df['Open Time'].max()
-            ),
-            code="""
-            // Ensure start is not before min_bound
-            if (x_range.start < min_bound) {
-                const delta = min_bound - x_range.start;
-                x_range.start = min_bound;
-                x_range.end = Math.min(x_range.end + delta, max_bound);
-            }
-            
-            // Ensure end is not after max_bound
-            if (x_range.end > max_bound) {
-                const delta = x_range.end - max_bound;
-                x_range.end = max_bound;
-                x_range.start = Math.max(x_range.start - delta, min_bound);
-            }
-            """
-        )
-
-        # Attach the callback to both start and end changes
-        x_range.js_on_change('start', x_range_callback)
-        x_range.js_on_change('end', x_range_callback)
-
+        # Create ranges and callbacks
+        x_range, x_range_callback = self._setup_x_range(time_min, time_max)
         callback, y_range = self._calculate_y_range(time_min, time_max)
 
-        # Create figure
+        # Create main figure
         self.p = bk.figure(
             x_axis_type='datetime',
             sizing_mode='stretch_both',
@@ -585,77 +846,148 @@ class ChartWidget:
             active_drag="xpan"
         )
 
-        # Load base64 image data from file
-        try:
-            with open('static/logo.txt', 'r') as f:
-                base64_image = f.read().strip()  # Remove any whitespace
-                image_url = base64_image
-        except FileNotFoundError:
-            print("Warning: Logo file not found, using default image")
-            image_url = 'https://www.shutterstock.com/image-vector/bnb-binance-icon-sign-payment-600nw-2080319677.jpg'
+        # logo_url = 'https://aialpha.ai/static/images/aialphaSmallLogo.png'
+        logo_url = 'https://aialpha.ai/static/images/navbarLogo.png'
 
-            
-        # Calculate positions in data space
-        x_pos = self.df['Open Time'].max() - (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.007
-        y_pos = self.df['High'].max() * 0.63  # Position at 90% of max height
-        width = (self.df['Open Time'].max() - self.df['Open Time'].min()) * 0.01  # 20% of time range
-        height = (self.df['High'].max() - self.df['Low'].min()) * 0.05  # 20% of price range
+        # Add custom CSS for chart container and logo
+        styles = Div(text="""
+            <style>
+                .chart-container {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                }
+                .logo-overlay {
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 100px;
+                    height: 100px;
+                    z-index: 1000;
+                    pointer-events: none;
+                    opacity: 0.3;
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+            </style>
+        """)
 
-        print(f"Image positioning - X: {x_pos}, Y: {y_pos}")
-        print(f"Image size - Width: {width}, Height: {height}")
-
-
-        image_source = ColumnDataSource({
-            'url': [image_url],
-            'x': [x_pos],
-            'y': [y_pos],
-            'w': [width],
-            'h': [height]
-        }, name='image_source')
-
-        # Add the image
-        image = ImageURL(
-            url="url",
-            x="x",
-            y="y",
-            w="w",  # Fixed width in pixels
-            h="h",  # Fixed height in pixels
-            anchor="center",  # Position in bottom left corner
-            global_alpha=1.0,  # Slight transparency
+        # Create a Div for the logo with absolute positioning
+        logo_div = Div(
+        text=f"""
+        <div style="
+            position: absolute;
+            right: -10px;  /* Align with y-axis */
+            bottom: 90px;  /* Align with x-axis */
+            width: 90px;
+            height: 90px;
+            z-index: 1000;
+            pointer-events: none;
+            background-image: url('{logo_url}');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 1;
+            transform: translate(0, 0);  /* Adjust if needed for precise positioning */
+            "></div>
+            """,
+            width=90,
+            height=90,
+            sizing_mode="fixed"
         )
 
-        # Add the image to the plot
-        self.p.add_glyph(image_source, image)
-        
-        # Print the figure's range for debugging
-        print(f"Figure X range: {self.p.x_range.start} to {self.p.x_range.end}")
-        print(f"Figure Y range: {self.p.y_range.start} to {self.p.y_range.end}")
 
-        # Trigger initial y-axis range calculation
+        # Style and populate the figure
+        self.style_figure(self.p)
+        self.add_candlesticks(self.p)
+        self.add_current_price_element(self.p)
+        self.add_support_resistance_levels(self.p)
+
+        # Add callbacks
         self.p.js_on_event('document_ready', callback)
-
-        # Attach the callback to x_range changes
         x_range.js_on_change('start', callback)
         x_range.js_on_change('end', callback)
 
-        # Style the figure
-        self.style_figure(self.p)
+        # Add technical indicators and create final layout
+        chart_with_indicators = self.add_technical_indicators(self.p)
+        
+        if chart_with_indicators:
+            # If result includes RSI and SMA
+            final_layout = column(
+                children=[
+                    styles,
+                    chart_with_indicators,
+                    logo_div,
+                ],
+                sizing_mode="stretch_both",
+                css_classes=['chart-container']
+            )
+        else:
+            # If result is just the figure
+            final_layout = column(
+                children=[
+                    styles,
+                    self.p,
+                    logo_div,
+                ],
+                sizing_mode="stretch_both",
+                css_classes=['chart-container']
+            )
 
-        self.add_candlesticks(self.p)
+        
+        # Add custom CSS to ensure proper container positioning
+        styles = Div(text="""
+            <style>
+                .chart-container {
+                    position: relative !important;
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+        """)
 
-        # Add current price line and label
-        self.add_current_price_element(self.p)
+        # Update the final layout to include styles
+        final_layout = column([styles, final_layout], sizing_mode="stretch_both")
 
-        # Support and Resistance levels
-        self.add_support_resistance_levels(self.p)
+        # Store the layout for other methods to use
+        self.chart_layout = final_layout
 
-        # Add technical indicators and capture the return value
-        result = self.add_technical_indicators(self.p)
+        return final_layout
 
-        # Store the result for other methods to use
-        self.chart_layout = result
+    def _setup_x_range(self, time_min, time_max):
+        """Helper method to setup x-range and its callback"""
+        x_range = DataRange1d(
+            start=time_min,
+            end=time_max,
+            bounds=(self.df['Open Time'].min(), self.df['Open Time'].max())
+        )
 
-        return result  # Return either the figure or the layout with RSI
+        x_range_callback = CustomJS(
+            args=dict(
+                x_range=x_range,
+                min_bound=self.df['Open Time'].min(),
+                max_bound=self.df['Open Time'].max()
+            ),
+            code="""
+            if (x_range.start < min_bound) {
+                const delta = min_bound - x_range.start;
+                x_range.start = min_bound;
+                x_range.end = Math.min(x_range.end + delta, max_bound);
+            }
+            if (x_range.end > max_bound) {
+                const delta = x_range.end - max_bound;
+                x_range.end = max_bound;
+                x_range.start = Math.max(x_range.start - delta, min_bound);
+            }
+            """
+        )
+
+        x_range.js_on_change('start', x_range_callback)
+        x_range.js_on_change('end', x_range_callback)
+
+        return x_range, x_range_callback
 
     def _calculate_y_range(self, time_min, time_max):
 
@@ -1193,21 +1525,29 @@ class ChartWidget:
 
 
 if __name__ == '__main__':
+    import webbrowser
+    import os
+
     # Create a ChartWidget instance with default settings
     chart = ChartWidget()
     
-    # Create the candlestick chart
-    chart.save_as_html()
+    # Create the candlestick chart and save to HTML
+    filepath = "templates/chart_test.html"
+    chart.save_as_html(filepath)
 
-    # # Start live updates
-    # try:
-    #     print("Press Ctrl+C to stop live updates")
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     print("Stopping live updates...")
-    # finally:
-    #     chart.stop_live_updates()
+    # Open the chart in the default browser
+    file_url = f"file://{os.path.abspath(filepath)}"
+    webbrowser.open(file_url)
+
+    # Start live updates
+    try:
+        print("Press Ctrl+C to stop live updates")
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Stopping live updates...")
+    finally:
+        chart.stop_live_updates()
 
 
 

@@ -1,212 +1,220 @@
-# import websocket
-# import json
-# import time
-# import threading
-# import pandas as pd
-# from datetime import datetime
+import json
+import websocket
+import threading
+import pandas as pd
 
-# class BinanceWebSocket:
-#     def __init__(self, symbol, interval, update_callback=None):
-#         self.symbol = symbol.lower()
-#         self.interval = interval
-#         self.update_callback = update_callback
-#         self.ws = None
-#         self.ws_thread = None
-#         self.is_connected = False
-#         self.current_price = None
+class BinanceWebSocket:
+    def __init__(self, symbol, interval, update_callback=None):
+        self.symbol = symbol.lower()
+        self.interval = interval
+        self.update_callback = update_callback
+        self.ws = None
+        self.ws_thread = None
+        self.is_connected = False
+        self.current_price = None
         
-#         print(f"Initialized BinanceWebSocket for {self.symbol.upper()} {self.interval}")
-#     def _on_message(self, ws, message):
-#         try:
-#             print("Received message:", message)  # Debug: Print the raw message
-#             data = json.loads(message)
-#             print("Parsed JSON data:", data)  # Debug: Print the parsed JSON data
-
-#             if 'k' in data:  # Check if 'k' exists in the message
-#                 kline = data['k']
-#                 print("Kline data:", kline)  # Debug: Print the kline data
-
-#                 # Extract relevant information
-#                 open_time = pd.to_datetime(kline['t'], unit='ms')
-#                 open_price = float(kline['o'])
-#                 high_price = float(kline['h'])
-#                 low_price = float(kline['l'])
-#                 close_price = float(kline['c'])
-#                 volume = float(kline['v'])
-#                 close_time = pd.to_datetime(kline['T'], unit='ms')
-#                 quote_asset_volume = float(kline['q'])
-#                 number_of_trades = int(kline['n'])
-#                 taker_buy_base_volume = float(kline['V'])
-#                 taker_buy_quote_volume = float(kline['Q'])
-
-#                 # Create DataFrame
-#                 df = pd.DataFrame([{
-#                     'Open Time': open_time,
-#                     'Open': open_price,
-#                     'High': high_price,
-#                     'Low': low_price,
-#                     'Close': close_price,
-#                     'Volume': volume,
-#                     'Close Time': close_time,
-#                     'Quote Asset Volume': quote_asset_volume,
-#                     'Number of Trades': number_of_trades,
-#                     'Taker Buy Base Volume': taker_buy_base_volume,
-#                     'Taker Buy Quote Volume': taker_buy_quote_volume
-#                 }])
-
-#                 print("DataFrame created:", df)  # Debug: Print the DataFrame
-
-#                 # Update current price
-#                 self.current_price = close_price
-
-#                 if self.update_callback and callable(self.update_callback):
-#                     print("Calling update_callback with DataFrame")  # Debug: Before calling the callback
-#                     self.update_callback(df)
-#             else:
-#                 print("Waiting for kline data...")
-
-#         except Exception as e:
-#             print(f"Error processing message: {e}")
-#             print("Exception type:", type(e))  # Debug: Print the type of exception
-
-
-#     def _on_error(self, ws, error):
-#         print(f"WebSocket error: {error}")
-#         self.is_connected = False
-
-#     def _on_close(self, ws, close_status_code, close_msg):
-#         print(f"WebSocket closed. Status: {close_status_code}, Message: {close_msg}")
-#         self.is_connected = False
-
-#     def _on_open(self, ws):
-#         print("WebSocket connection opened")
-#         self.is_connected = True
-#         subscribe_message = {
-#             "method": "SUBSCRIBE",
-#             "params": [f"{self.symbol}@kline_{self.interval}"],
-#             "id": 1
-#         }
-#         ws.send(json.dumps(subscribe_message))
-
-#     def start(self):
-#         socket = f"wss://stream.binance.com:9443/ws/{self.symbol}@kline_{self.interval}"
-#         self.ws = websocket.WebSocketApp(socket,
-#                                          on_message=self._on_message,
-#                                          on_error=self._on_error,
-#                                          on_close=self._on_close,
-#                                          on_open=self._on_open)
-        
-#         self.ws_thread = threading.Thread(target=self.ws.run_forever)
-#         self.ws_thread.daemon = True
-#         self.ws_thread.start()
-
-#     def stop(self):
-#         if self.ws:
-#             self.ws.close()
-#         if self.ws_thread:
-#             self.ws_thread.join(timeout=1)
-#         print("WebSocket connection closed")
-
-#     def update_symbol(self, new_symbol):
-#         if new_symbol.lower() != self.symbol:
-#             self.symbol = new_symbol.lower()
-#             if self.is_connected:
-#                 self.stop()
-#                 self.start()
-
-#     def update_interval(self, new_interval):
-#         if new_interval != self.interval:
-#             self.interval = new_interval
-#             if self.is_connected:
-#                 self.stop()
-#                 self.start()
-
-#     def get_current_price(self):
-#         return self.current_price
-
-
-# # if __name__ == '__main__':
-# #     def update_callback(df):
-# #         print("Callback received data:")
-# #         print(df)
-# #         print(f"Current price: {ws.get_current_price()}")
-
-# #     ws = BinanceWebSocket('BTCUSDT', '1m')
-# #     ws.start()
+        print(f"Initialized BinanceWebSocket for {self.symbol.upper()} {self.interval}")
     
-# #     try:
-# #         time.sleep(10)  # Run for 10 seconds
-# #         print("Updating symbol to ETHUSDT")
-# #         ws.update_symbol('ETHUSDT')
-# #         time.sleep(10)  # Run for another 10 seconds
-# #         print("Updating interval to 5m")
-# #         ws.update_interval('5m')
-# #         time.sleep(10)  # Run for another 10 seconds
-# #     except KeyboardInterrupt:
-# #         print("Closing WebSocket connection...")
-# #     finally:
-# #         ws.stop()
+    def _on_message(self, ws, message):
+        """
+        Handles incoming messages from the Binance WebSocket.
+
+        This method parses the incoming JSON message, extracts candlestick data,
+        updates the current price, and calls the update callback function if available.
+        It handles both closed and open candles, providing different messages for each case.
+
+        Args:
+            ws (websocket.WebSocketApp): The WebSocket client instance.
+            message (str): The incoming JSON message from the Binance WebSocket.
+        """
+        try:
+            data = json.loads(message)
+            if 'k' in data:
+                kline = data['k']
+                
+                # Extract relevant information
+                open_time = pd.to_datetime(kline['t'], unit='ms')
+                close_time = pd.to_datetime(kline['T'], unit='ms')
+                is_closed = kline['x']  # Whether this kline is closed
+                
+                # Create DataFrame with the new data
+                new_data = pd.DataFrame([{
+                    'Open Time': open_time,
+                    'Close Time': close_time,
+                    'Open': float(kline['o']),
+                    'High': float(kline['h']),
+                    'Low': float(kline['l']),
+                    'Close': float(kline['c']),
+                    'Volume': float(kline['v'])
+                }])
+
+                # Update current price
+                self.current_price = float(kline['c'])
+
+                if is_closed:
+                    # This is a new candle, append it to the data
+                    print(f"\nNew closed kline for {self.symbol.upper()} ({self.interval})")
+                    if self.update_callback and callable(self.update_callback):
+                        self.update_callback(new_data, is_new_candle=True)
+                else:
+                    # This is an update to the current candle
+                    print(f"\nUpdating current kline for {self.symbol.upper()} ({self.interval})")
+                    
+                    if self.update_callback and callable(self.update_callback):
+                        self.update_callback(new_data, is_new_candle=False)
+
+                print(f"Time: {open_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"Open: {new_data['Open'][0]:.2f}")
+                print(f"High: {new_data['High'][0]:.2f}")
+                print(f"Low: {new_data['Low'][0]:.2f}")
+                print(f"Close: {new_data['Close'][0]:.2f}")
+                print(f"Volume: {new_data['Volume'][0]:.2f}")
+                print(f"Is Closed: {is_closed}")
+
+            else:
+                print("Waiting for kline data...")
+
+        except Exception as e:
+            print(f"Error processing message: {e}")
 
 
-from tradingview_datafeed import TradingViewDataFeed
-import asyncio
+    def _on_error(self, ws, error):
+        print(f"WebSocket error: {error}")
+        self.is_connected = False
 
-async def fetch_crypto_bars(symbol: str, interval: str, start_time: int = None, end_time: int = None):
-    """
-    Fetch OHLC bar data for a cryptocurrency symbol.
+    def _on_close(self, ws, close_status_code, close_msg):
+        print(f"WebSocket closed. Status: {close_status_code}, Message: {close_msg}")
+        self.is_connected = False
 
-    :param symbol: The cryptocurrency pair (e.g., BTC/USDT).
-    :param interval: Timeframe for bars (e.g., '1m', '5m', '1h', '1d').
-    :param start_time: Start timestamp in seconds.
-    :param end_time: End timestamp in seconds.
-    :return: List of OHLC bars.
-    """
-    # Initialize the TradingView DataFeed
-    tv_feed = TradingViewDataFeed()
+    def _on_open(self, ws):
+        print("WebSocket connection opened")
+        self.is_connected = True
+        subscribe_message = {
+            "method": "SUBSCRIBE",
+            "params": [f"{self.symbol}@kline_{self.interval}"],
+            "id": 1
+        }
+        ws.send(json.dumps(subscribe_message))
 
-    try:
-        # Connect to the data feed
-        await tv_feed.connect()
+    def start(self):
+        socket = f"wss://stream.binance.com:9443/ws/{self.symbol}@kline_{self.interval}"
+        self.ws = websocket.WebSocketApp(socket,
+                                         on_message=self._on_message,
+                                         on_error=self._on_error,
+                                         on_close=self._on_close,
+                                         on_open=self._on_open)
+        
+        self.ws_thread = threading.Thread(target=self.ws.run_forever)
+        self.ws_thread.daemon = True
+        self.ws_thread.start()
 
-        # Fetch historical bar data
-        bars = await tv_feed.get_historical_data(
-            symbol=symbol,
-            exchange="BINANCE",  # Specify the exchange
-            interval=interval,
-            from_timestamp=start_time,
-            to_timestamp=end_time,
-        )
+    def stop(self):
+        if self.ws:
+            self.ws.close()
+        if self.ws_thread:
+            self.ws_thread.join(timeout=1)
+        print("WebSocket connection closed")
 
-        # Format the data for easy consumption
-        bar_data = [
-            {
-                "time": bar.timestamp,
-                "open": bar.open,
-                "high": bar.high,
-                "low": bar.low,
-                "close": bar.close,
-                "volume": bar.volume,
-            }
-            for bar in bars
-        ]
+    def update_symbol(self, new_symbol):
+        if new_symbol.lower() != self.symbol:
+            self.symbol = new_symbol.lower()
+            if self.is_connected:
+                self.stop()
+                self.start()
 
-        return bar_data
+    def update_interval(self, new_interval):
+        if new_interval != self.interval:
+            self.interval = new_interval
+            if self.is_connected:
+                self.stop()
+                self.start()
 
-    except Exception as e:
-        print(f"Error fetching bars: {e}")
-        return []
+    def get_current_price(self):
+        return self.current_price
+    
 
-    finally:
-        # Disconnect from the data feed
-        await tv_feed.disconnect()
 
-# Test the function
-if __name__ == "__main__":
-    symbol = "BTC/USDT"
-    interval = "1m"  # 1-minute bars
-    start_time = 1630454400  # Example timestamp (in seconds)
-    end_time = 1630458000  # Example timestamp (in seconds)
 
-    # Run the test
-    bars = asyncio.run(fetch_crypto_bars(symbol, interval, start_time, end_time))
-    print(bars)
+# import time
+# from datetime import datetime
+# import pandas as pd
+
+# def update_callback(data: pd.DataFrame, is_new_candle: bool):
+#     """
+#     Callback function to handle updates from the WebSocket
+#     """
+#     bar_type = "NEW" if is_new_candle else "UPDATE"
+#     print(f"\n=== {bar_type} CANDLE RECEIVED ===")
+#     print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+#     print(f"Open: {data['Open'].values[0]:.2f}")
+#     print(f"High: {data['High'].values[0]:.2f}")
+#     print(f"Low: {data['Low'].values[0]:.2f}")
+#     print(f"Close: {data['Close'].values[0]:.2f}")
+#     print(f"Volume: {data['Volume'].values[0]:.2f}")
+#     print("=" * 30)
+
+# def test_binance_websocket():
+#     """
+#     Test function demonstrating various features of BinanceWebSocket
+#     """
+#     # Initialize WebSocket with BTC/USDT pair and 1-minute interval
+#     ws = BinanceWebSocket(
+#         symbol="btcusdt",
+#         interval="1m",
+#         update_callback=update_callback
+#     )
+
+#     try:
+#         # Start the WebSocket connection
+#         print("\nStarting WebSocket connection...")
+#         ws.start()
+
+#         # Wait for connection to establish
+#         time.sleep(2)
+
+#         # Test current price
+#         print("\nTesting current price...")
+#         for _ in range(3):
+#             price = ws.get_current_price()
+#             print(f"Current BTC price: ${price:.2f}" if price else "Waiting for price data...")
+#             time.sleep(1)
+
+#         # Test symbol update
+#         print("\nTesting symbol update...")
+#         ws.update_symbol("ethusdt")
+#         time.sleep(5)
+
+#         # Test interval update
+#         print("\nTesting interval update...")
+#         ws.update_interval("5m")
+#         time.sleep(5)
+
+#         # Let it run for a while to receive updates
+#         print("\nWaiting for updates (30 seconds)...")
+#         time.sleep(30)
+
+#     except KeyboardInterrupt:
+#         print("\nTest interrupted by user")
+#     except Exception as e:
+#         print(f"\nAn error occurred: {e}")
+#     finally:
+#         # Clean up
+#         print("\nCleaning up...")
+#         ws.stop()
+#         print("Test completed")
+
+# if __name__ == "__main__":
+#     # Import the BinanceWebSocket class
+#     from ws_binance import BinanceWebSocket
+    
+#     print("Starting Binance WebSocket Test")
+#     print("=" * 50)
+#     print("This test will:")
+#     print("1. Connect to Binance WebSocket")
+#     print("2. Display real-time price updates")
+#     print("3. Test symbol switching")
+#     print("4. Test interval switching")
+#     print("5. Run for 30 seconds")
+#     print("=" * 50)
+    
+#     test_binance_websocket()
