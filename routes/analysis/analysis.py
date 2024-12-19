@@ -404,18 +404,18 @@ def get_analyses():
     Returns:
         JSON: {
             "data": [{
-                "category_icon": str,
-                "category_name": str,
-                "coin_icon": str,
+                "id": int,
                 "coin_id": int,
                 "coin_name": str,
-                "content": str,
-                "created_at": str,    # ISO format datetime
-                "id": int,
-                "image_url": str,
-                "section_id": int,
+                "coin_icon": str,
                 "section_name": str,
-                "title": str
+                "section_id": int,
+                "title": str,
+                "content": str,
+                "image_url": str,
+                "created_at": str,    # ISO format datetime
+                "category_name": str,
+                "category_icon": str
             }],
             "meta": {
                 "page": int,
@@ -428,7 +428,7 @@ def get_analyses():
         }
     """
     response = {
-        "data": [],
+        "data": None,
         "meta": {
             "page": 1,
             "per_page": 10,
@@ -540,7 +540,7 @@ def get_analyses():
                     # Get results
                     analyses = query.order_by(desc(model_class.created_at)).all()
 
-                    # Transform results
+                    # Transform results to match single analysis format
                     for analysis in analyses:
                         # Skip if missing reference data
                         if (analysis.coin_bot_id not in coins_dict or 
@@ -567,18 +567,18 @@ def get_analyses():
                         title = BeautifulSoup(title, 'html.parser').get_text()
 
                         all_results.append({
-                            "category_icon": category_data['icon'],
-                            "category_name": category_data['name'],
-                            "coin_icon": coin_data['icon'],
+                            "id": analysis_id,
                             "coin_id": analysis.coin_bot_id,
                             "coin_name": coin_data['name'],
-                            "content": content,
-                            "created_at": analysis.created_at.isoformat(),
-                            "id": analysis_id,
-                            "image_url": analysis.image_url,
-                            "section_id": section_data['id'],
+                            "coin_icon": coin_data['icon'],
                             "section_name": section_data['name'],
-                            "title": title
+                            "section_id": section_data['id'],
+                            "title": title,
+                            "content": content,
+                            "image_url": analysis.image_url,
+                            "created_at": analysis.created_at.isoformat(),
+                            "category_name": category_data['name'],
+                            "category_icon": category_data['icon']
                         })
 
                 except Exception as e:
@@ -595,7 +595,7 @@ def get_analyses():
             end_idx = start_idx + per_page
             paginated_results = all_results[start_idx:end_idx]
 
-            # Update response
+            # Update response with consistent format
             response.update({
                 "data": paginated_results,
                 "meta": {
@@ -695,7 +695,7 @@ def generate_analysis_image():
 
 # Define a mapping between targets and their corresponding models
 MODEL_MAPPING = {
-    'analysis': Analysis,         
+    'deep_dive':  Analysis,         
     'daily_macro': DailyMacroAnalysis,
     'narratives': NarrativeTrading,
     'spotlight': SpotlightAnalysis,
