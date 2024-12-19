@@ -12,7 +12,7 @@ class NotificationService:
     """Service class for handling notifications and alerts."""
     def __init__(self):
         self.notification_model = notification_model
-        self.types = ["alert", "support_resistance"]
+        self.types = ["alert", "support_resistance", "deep_dive", "narratives", "daily_macro", "spotlight"]
 
     def validate_topics(self, coin: str, type: str, timeframe: str = None) -> List[Topic]:
         """

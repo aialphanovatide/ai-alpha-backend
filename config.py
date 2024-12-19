@@ -1960,10 +1960,10 @@ def populate_topics():
                     {'name': f'{name}_alerts_1d', 'timeframe': '1d', 'type': 'alerts'},
                     {'name': f'{name}_alerts_1w', 'timeframe': '1w', 'type': 'alerts'},
                     {'name': f'{name}_s_and_r', 'timeframe': None, 'type': 'support_resistance'},
-                    # {'name': f'{name}_deep_dive', 'timeframe': None, 'type': 'deep_dive'},
-                    # {'name': f'{name}_narratives', 'timeframe': None, 'type': 'narratives'},
-                    # {'name': f'{name}_daily_macro', 'timeframe': None, 'type': 'daily_macro'},
-                    # {'name': f'{name}_spotlight', 'timeframe': None, 'type': 'spotlight'}
+                    {'name': f'{name}_deep_dive', 'timeframe': None, 'type': 'deep_dive'},
+                    {'name': f'{name}_narratives', 'timeframe': None, 'type': 'narratives'},
+                    {'name': f'{name}_daily_macro', 'timeframe': None, 'type': 'daily_macro'},
+                    {'name': f'{name}_spotlight', 'timeframe': None, 'type': 'spotlight'}
                 ]
                 for variation in topic_variations:
                     # Check if this specific topic variation exists
