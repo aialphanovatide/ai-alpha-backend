@@ -225,65 +225,6 @@ def ohlc_chart():
         return jsonify(response), 500
 
 
-# @chart_graphs_bp.route('/chart/widget', methods=['GET'])
-# def chart_widget():
-#     try:
-#         # Retrieve query parameters
-#         symbol = request.args.get('symbol', 'BTCUSDT')
-#         interval = request.args.get('interval', '1h')
-#         n_bars = request.args.get('n_bars', 50, type=int)
-#         theme = request.args.get('theme', 'light')
-
-#         # Validations
-#         if not symbol or not isinstance(symbol, str):
-#             return "Invalid symbol parameter", 400
-
-#         valid_intervals = ['15m', '30m', '1h', '4h', '1d', '1w']
-#         if interval not in valid_intervals:
-#             return f"Invalid interval. Must be one of: {', '.join(valid_intervals)}", 400
-
-#         if not isinstance(n_bars, int) or n_bars < 1 or n_bars > 1000:
-#             return "n_bars must be an integer between 1 and 1000", 400
-        
-#         if theme not in ['light', 'dark']:
-#             return "Invalid theme. Must be 'light' or 'dark'", 400
-        
-#         chart_id = f"chart_{uuid.uuid4().hex}"
-
-#         # Create a ChartWidget instance with the specific parameters
-#         chart_widget = ChartWidget(
-#             config=ChartSettings(
-#                 symbol=symbol,
-#                 interval=interval,
-#                 num_candles=n_bars,
-#                 theme=theme
-#             )
-#         )
-        
-#         # Get the script and div components
-#         script, div = chart_widget.get_chart_components()
-        
-#         # Create response with proper headers
-#         response = make_response(render_template(
-#             'chart_embed.html',
-#             script=script, 
-#             div=div, 
-#             resources=CDN.render(),
-#             chart_id=chart_id,
-#             symbol=symbol,
-#             interval=interval
-#         ))
-        
-#         # Add security headers
-#         response.headers['Content-Security-Policy'] = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-#         response.headers['X-Frame-Options'] = 'ALLOWALL'
-#         response.headers['Access-Control-Allow-Origin'] = '*'
-        
-#         return response
-#     except Exception as e:
-#         return str(e), 500
-
-
 @chart_graphs_bp.route('/chart/widget', methods=['GET'])
 def chart_widget():
     try:
