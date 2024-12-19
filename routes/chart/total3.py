@@ -77,3 +77,10 @@ def get_total_3_data(days: int = 15) -> List[Dict[str, Any]]:
         return process_total_3_data(raw_data)
     except Exception as e:
         raise RuntimeError(f"Error in get_total_3_data: {str(e)}")
+    
+
+
+# Example usage
+if __name__ == "__main__":
+    data = get_total_3_data(days=15)
+    print(data)

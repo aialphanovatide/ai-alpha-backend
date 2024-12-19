@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {{ resources|safe }}
+    {{ script|safe }}
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #chart-container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const socket = io('/chart', {
+                transports: ['websocket', 'polling'],
+                autoConnect: true,
+                reconnection: true,
+                reconnectionAttempts: Infinity,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000
+            });
+
+            const chartId = '{{ chart_id }}';
+            
+            socket.on('connect', function() {
+                console.log("Connected to WebSocket");
+                socket.emit('subscribe', {
+                    chart_id: chartId,
+                    symbol: '{{ symbol }}',
+                    interval: '{{ interval }}'
+                });
+            });
+            
+            socket.on('connection_established', function(data) {
+                console.log("Chart connection established:", data);
+            });
+
+            socket.on('update', function(data) {
+                console.log("Received data:", data);
+                try {
+                    // Convert string dates to timestamps for Bokeh
+                    const formattedData = {
+                        'Open Time': data['Open Time'].map(d => new Date(d).getTime()),
+                        'Close Time': data['Close Time'].map(d => new Date(d).getTime()),
+                        'Open': data['Open'],
+                        'High': data['High'],
+                        'Low': data['Low'],
+                        'Close': data['Close'],
+                        'Volume': data['Volume']
+                    };
+                    
+                    // Get Bokeh document and data source
+                    const doc = Bokeh.documents[0];
+                    if (!doc) {
+                        throw new Error("Bokeh document not found");
+                    }
+
+                    const source = doc.get_model_by_name('chart_source');
+                    if (!source) {
+                        throw new Error("Chart source not found");
+                    }
+
+                    // Update the data source
+                    source.stream(formattedData);
+
+                    // Get the image source specifically
+                    const imageSource = doc.get_model_by_name('image_source');
+                    if (imageSource) {
+                        // Update the image source data with the correct URL format
+                        imageSource.data = {
+                            ...imageSource.data,  // Keep existing positioning data
+                            url: [imageSource.data.url[0]]  // Ensure URL is properly set
+                        };
+                        imageSource.change.emit();
+                    }
+                    
+                    // Update price indicators
+                    const currentPrice = data['Close'][data['Close'].length - 1];
+                    const priceLabel = doc.get_model_by_name('current_price_label_source');
+                    const priceLine = doc.get_model_by_name('current_price_line_source');
+
+                    if (priceLabel) {
+                        // Preserve existing data and update only the values
+                        const existingData = priceLabel.data;
+                        priceLabel.data = {
+                            x: existingData.x,
+                            y: existingData.y.map(() => currentPrice),  // Update all y values to current price
+                            text: existingData.text.map(() => `$${currentPrice.toFixed(2)}`)  // Update all labels
+                        };
+                        priceLabel.change.emit();
+                    }
+
+                    if (priceLine) {
+                        // Update the line source data
+                        const xRange = doc.get_model_by_name('x_range');
+                        if (xRange) {
+                            priceLine.data = {
+                                x: [xRange.start, xRange.end],  // Span the entire visible range
+                                y: [currentPrice, currentPrice]
+                            };
+                            priceLine.change.emit();
+                        }
+                    }
+
+                    // Try to trigger update
+                    if (source.change) {
+                        source.change.emit();
+                    }
+                    
+                } catch (err) {
+                    console.error("Error updating chart:", err);
+                }
+            });
+
+            socket.on('disconnect', function() {
+                console.log("Disconnected from WebSocket");
+            });
+
+            socket.on('connect_error', function(error) {
+                console.error("Connection error:", error);
+            });
+
+            socket.on('error', function(error) {
+                console.error("Socket error:", error);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="chart-container">
+        {{ div|safe }}
+    </div>
+</body>
+</html>

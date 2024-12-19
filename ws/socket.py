@@ -15,6 +15,27 @@ def init_socketio(app):
                      async_mode='threading',
                      ping_timeout=60,
                      ping_interval=25)
+
+    # Add chart namespace handlers
+    @socketio.on('connect', namespace='/chart')
+    def handle_chart_connect():
+        client_id = request.sid
+        logger.info(f"Chart client connected - ID: {client_id}")
+        emit('connection_established', {'client_id': client_id}, room=client_id)
+
+    @socketio.on('subscribe', namespace='/chart')
+    def handle_chart_subscribe(data):
+        client_id = request.sid
+        logger.info(f"Chart subscription from {client_id}: {data}")
+        # Here you can set up the Binance WebSocket connection for this client
+        # and associate it with the client_id
+
+    @socketio.on('disconnect', namespace='/chart')
+    def handle_chart_disconnect():
+        client_id = request.sid
+        logger.info(f"Chart client disconnected - ID: {client_id}")
+        # Clean up any Binance WebSocket connections for this client
+
     return socketio
 
 @socketio.on('connect')
