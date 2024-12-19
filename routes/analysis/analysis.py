@@ -1,4 +1,3 @@
-
 import pytz
 import datetime
 from sqlalchemy import desc, func, or_
@@ -39,6 +38,30 @@ def get_single_analysis(analysis_id):
     }
     status_code = 500
 
+    # Define column mappings for each model
+    COLUMN_MAPPINGS = {
+        'deep_dive': {
+            'content': 'analysis',
+            'id': 'analysis_id'
+        },
+        'daily_macro': {
+            'content': 'content',
+            'id': 'id'
+        },
+        'narratives': {
+            'content': 'narrative_trading',
+            'id': 'narrative_trading_id'
+        },
+        'spotlight': {
+            'content': 'content',
+            'id': 'id'
+        },
+        'support_resistance': {
+            'content': 'analysis',
+            'id': 'analysis_id'
+        }
+    }
+
     session = Session()
     try:
         # Get and validate section_id
@@ -60,8 +83,15 @@ def get_single_analysis(analysis_id):
             response["error"] = f"No model found for target: {section.target}"
             return jsonify(response), 400
 
-        # First get the analysis
-        analysis = session.query(model_class).get(analysis_id)
+        # Get the correct column mappings for this target
+        column_mapping = COLUMN_MAPPINGS.get(target)
+        if not column_mapping:
+            response["error"] = f"No column mapping found for target: {target}"
+            return jsonify(response), 400
+
+        # First get the analysis using the correct ID column
+        id_column = getattr(model_class, column_mapping['id'])
+        analysis = session.query(model_class).filter(id_column == analysis_id).first()
         if not analysis:
             response["error"] = f"Analysis with id {analysis_id} not found"
             return jsonify(response), 404
@@ -72,10 +102,13 @@ def get_single_analysis(analysis_id):
         # Get category information
         category = session.query(Category).filter(func.lower(Category.name) == func.lower(analysis.category_name)).first()
 
+        # Get content using correct column name
+        content_text = getattr(analysis, column_mapping['content'])
+
         # Extract title from content
-        title_end_index = analysis.content.find('<br>')
-        title = analysis.content[:title_end_index].strip() if title_end_index != -1 else ""
-        content_body = analysis.content[title_end_index + 4:].strip() if title_end_index != -1 else analysis.content
+        title_end_index = content_text.find('<br>')
+        title = content_text[:title_end_index].strip() if title_end_index != -1 else ""
+        content_body = content_text[title_end_index + 4:].strip() if title_end_index != -1 else content_text
 
         # Clean title from HTML tags
         title = BeautifulSoup(title, 'html.parser').get_text()
@@ -353,217 +386,6 @@ def edit_analysis(analysis_id):
 
     return jsonify(response), status_code
 
-
-# @analysis_bp.route('/analyses', methods=['GET'])
-# def get_analyses():
-#     """
-#     Retrieve latest analyses across all analysis types with advanced filtering and search capabilities.
-    
-#     Query Parameters:
-#         page (int): Page number for pagination (default: 1)
-#         per_page (int): Number of items per page (default: 10, max: 100)
-#         search (str): Search term to filter analyses by content or title
-#         coin (str): Filter analyses by specific coin name
-#         category (str): Filter analyses by category name
-    
-#     Returns:
-#         JSON: {
-#             "data": [{
-#                 "category_icon": str,
-#                 "category_name": str,
-#                 "coin_icon": str,
-#                 "coin_id": int,
-#                 "coin_name": str,
-#                 "content": str,
-#                 "created_at": str,    # ISO format datetime
-#                 "id": int,
-#                 "image_url": str,
-#                 "section_id": int,
-#                 "section_name": str,
-#                 "title": str
-#             }],
-#             "meta": {
-#                 "page": int,
-#                 "per_page": int,
-#                 "total_items": int,
-#                 "total_pages": int
-#             },
-#             "error": str or None,
-#             "success": bool
-#         }
-#     """
-#     response = {
-#         "data": [],
-#         "meta": {
-#             "page": 1,
-#             "per_page": 10,
-#             "total_items": 0,
-#             "total_pages": 0
-#         },
-#         "error": None,
-#         "success": False
-#     }
-
-#     try:
-#         # Get query parameters with defaults
-#         page = request.args.get('page', 1, type=int)
-#         per_page = min(request.args.get('per_page', 10, type=int), 100)
-#         search = request.args.get('search', '').strip()
-#         coin_name = request.args.get('coin', '').strip()
-#         category = request.args.get('category', '').strip()
-
-#         # Validate pagination parameters
-#         if page < 1 or per_page < 1:
-#             return jsonify({**response, "error": "Invalid pagination parameters"}), 400
-
-#         with Session() as session:
-#             # Pre-fetch coins and categories to use as lookup tables
-#             coins_dict = {
-#                 coin.bot_id: {
-#                     'name': coin.name,
-#                     'icon': coin.icon
-#                 } for coin in session.query(CoinBot).all()
-#             }
-
-#             categories_dict = {
-#                 category.name.lower(): {
-#                     'name': category.name,
-#                     'icon': category.icon
-#                 } for category in session.query(Category).all()
-#             }
-
-#             sections_dict = {
-#                 section.target.lower(): {
-#                     'id': section.id,
-#                     'name': section.name
-#                 } for section in session.query(Sections).all()
-#             }
-
-#             all_results = []
-
-#                         # Define column mappings for each model
-#             COLUMN_MAPPINGS = {
-#                 'deep_dive': {
-#                     'content': 'analysis',
-#                     'id': 'analysis_id'
-#                 },
-#                 'daily_macro': {
-#                     'content': 'content',
-#                     'id': 'id'
-#                 },
-#                 'narratives': {
-#                     'content': 'narrative_trading',
-#                     'id': 'narrative_trading_id'
-#                 },
-#                 'spotlight': {
-#                     'content': 'content',
-#                     'id': 'id'
-#                 },
-#                 'support_resistance': {
-#                     'content': 'analysis',
-#                     'id': 'analysis_id'
-#                 }
-#             }
-
-#             # If filtering by coin name, get the coin_id first
-#             coin_id = None
-#             if coin_name:
-#                 for cid, coin_data in coins_dict.items():
-#                     if coin_data['name'].lower() == coin_name.lower():
-#                         coin_id = cid
-#                         break
-
-#             # Query each analysis type
-#             for target, model_class in MODEL_MAPPING.items():
-#                 query = session.query(model_class)
-
-#                 # Apply filters
-#                 if coin_id is not None:
-#                     query = query.filter(model_class.coin_bot_id == coin_id)
-#                 if category:
-#                     query = query.filter(func.lower(model_class.category_name) == category.lower())
-#                 if search:
-#                     # Use the correct column name for content search
-#                     content_column = COLUMN_MAPPINGS[target]['content']
-#                     query = query.filter(getattr(model_class, content_column).ilike(f"%{search}%"))
-
-#                 # Get results
-#                 analyses = query.order_by(desc(model_class.created_at)).all()
-
-#                 # Transform results
-#                 for analysis in analyses:
-#                     # Skip if we don't have matching reference data
-#                     if (analysis.coin_bot_id not in coins_dict or 
-#                         analysis.category_name.lower() not in categories_dict or 
-#                         target not in sections_dict):
-#                         continue
-
-#                     coin_data = coins_dict[analysis.coin_bot_id]
-#                     category_data = categories_dict[analysis.category_name.lower()]
-#                     section_data = sections_dict[target]
-
-#                     # Get content and id using the correct column names
-#                     content_column = COLUMN_MAPPINGS[target]['content']
-#                     id_column = COLUMN_MAPPINGS[target]['id']
-                    
-#                     content_text = getattr(analysis, content_column)
-#                     analysis_id = getattr(analysis, id_column)
-
-#                     # Extract title from content
-#                     title_end_index = content_text.find('<br>')
-#                     title = content_text[:title_end_index].strip() if title_end_index != -1 else ""
-#                     content = content_text[title_end_index + 4:].strip() if title_end_index != -1 else content_text
-                    
-#                     # Clean title from HTML tags
-#                     title = BeautifulSoup(title, 'html.parser').get_text()
-
-#                     all_results.append({
-#                         "category_icon": category_data['icon'],
-#                         "category_name": category_data['name'],
-#                         "coin_icon": coin_data['icon'],
-#                         "coin_id": analysis.coin_bot_id,
-#                         "coin_name": coin_data['name'],
-#                         "content": content,
-#                         "created_at": analysis.created_at.isoformat(),
-#                         "id": analysis_id,
-#                         "image_url": analysis.image_url,
-#                         "section_id": section_data['id'],
-#                         "section_name": section_data['name'],
-#                         "title": title
-#                     })
-
-#             # Sort all results by created_at
-#             all_results.sort(key=lambda x: x['created_at'], reverse=True)
-            
-#             # Calculate total count and pages
-#             total_count = len(all_results)
-#             total_pages = (total_count + per_page - 1) // per_page
-
-#             # Apply pagination
-#             start_idx = (page - 1) * per_page
-#             end_idx = start_idx + per_page
-#             paginated_results = all_results[start_idx:end_idx]
-
-#             # Update response
-#             response.update({
-#                 "data": paginated_results,
-#                 "meta": {
-#                     "page": page,
-#                     "per_page": per_page,
-#                     "total_items": total_count,
-#                     "total_pages": total_pages
-#                 },
-#                 "success": True
-#             })
-
-#             return jsonify(response), 200
-
-#     except Exception as e:
-#         logger.error(f"Error in get_latest_analyses: {str(e)}", exc_info=True)
-#         return jsonify({
-#             **response,
-#             "error": f"An unexpected error occurred: {str(e)}"
-#         }), 500
 
 
 @analysis_bp.route('/analyses', methods=['GET'])
@@ -873,7 +695,7 @@ def generate_analysis_image():
 
 # Define a mapping between targets and their corresponding models
 MODEL_MAPPING = {
-    'deep_dive': Analysis,         
+    'analysis': Analysis,         
     'daily_macro': DailyMacroAnalysis,
     'narratives': NarrativeTrading,
     'spotlight': SpotlightAnalysis,
