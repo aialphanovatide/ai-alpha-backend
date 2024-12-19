@@ -72,9 +72,6 @@ class BinanceWebSocket:
                     if self.update_callback and callable(self.update_callback):
                         self.update_callback(new_data, is_new_candle=True)
                 else:
-                    # This is an update to the current candle
-                    print(f"\nUpdating current kline for {self.symbol.upper()} ({self.interval})")
-                    
                     if self.update_callback and callable(self.update_callback):
                         self.update_callback(new_data, is_new_candle=False)
 
@@ -85,9 +82,6 @@ class BinanceWebSocket:
                 # print(f"Close: {new_data['Close'][0]:.2f}")
                 # print(f"Volume: {new_data['Volume'][0]:.2f}")
                 # print(f"Is Closed: {is_closed}")
-
-            else:
-                print("Waiting for kline data...")
 
         except Exception as e:
             print(f"Error processing message: {e}")
@@ -408,8 +402,6 @@ class ChartWidget:
                 self.current_price_line_source.data.update({
                     'y': [current_price, current_price]
                 })
-
-            print(f"Chart updated {'with new candle' if is_new_candle else 'current candle'} at {latest_data['Open Time']}")
 
              # Get the last index from the current source
             current_length = len(self.source.data['index'])
