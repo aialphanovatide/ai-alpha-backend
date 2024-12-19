@@ -1413,30 +1413,30 @@ class ChartWidget:
         self.p.x_range.js_on_change('start', None)
         self.p.x_range.js_on_change('end', None)
 
-if __name__ == '__main__':
-    import webbrowser
-    import os
+# if __name__ == '__main__':
+#     import webbrowser
+#     import os
 
-    # Create a ChartWidget instance with default settings
-    chart = ChartWidget()
+#     # Create a ChartWidget instance with default settings
+#     chart = ChartWidget()
     
-    # Create the candlestick chart and save to HTML
-    filepath = "templates/chart_test.html"
-    chart.save_as_html(filepath)
+#     # Create the candlestick chart and save to HTML
+#     filepath = "templates/chart_test.html"
+#     chart.save_as_html(filepath)
 
-    # Open the chart in the default browser
-    file_url = f"file://{os.path.abspath(filepath)}"
-    webbrowser.open(file_url)
+#     # Open the chart in the default browser
+#     file_url = f"file://{os.path.abspath(filepath)}"
+#     webbrowser.open(file_url)
 
-    # Start live updates
-    try:
-        print("Press Ctrl+C to stop live updates")
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Stopping live updates...")
-    finally:
-        chart.stop_live_updates()
+#     # Start live updates
+#     try:
+#         print("Press Ctrl+C to stop live updates")
+#         while True:
+#             time.sleep(1)
+#     except KeyboardInterrupt:
+#         print("Stopping live updates...")
+#     finally:
+#         chart.stop_live_updates()
 
 
 

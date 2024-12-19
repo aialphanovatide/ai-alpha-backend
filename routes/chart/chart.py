@@ -129,7 +129,7 @@ def save_chart():
                 coin=coin_symbol,
                 title=f"{coin_symbol} Support/Resistance Update",  
                 body="Check the New Levels!",
-                type="s_and_r",
+                type="support_resistance",
                 timeframe=""  
             )
         
@@ -156,44 +156,68 @@ def receive_and_save_chart_data():
     Receives support and resistance data from TradingView, parses it,
     saves it to the database, and sends notifications if required.
     """
+
     def validate_incoming_data(data):
         """Validate and parse incoming webhook data."""
-        if len(data) != 11:
-            raise ValueError("Incorrect data format")
+        print("\n=== Raw Incoming Data ===")
+        print("Number of lines:", len(data))
+        print("Data content:")
+        for i, line in enumerate(data):
+            print(f"Line {i}: {line}")
+        print("======================\n")
+
+        if len(data) != 12:
+            raise ValueError(f"Incorrect data format. Expected 12 lines, got {len(data)}")
         
-        # Extract symbol and determine pair
-        symbol = data[0].split(': ')[1]
-        known_pairs = ['USDT', 'USD', 'ETH', 'BTC']
-        pair = next((p for p in known_pairs if symbol.endswith(p)), None)
-        
-        if not pair:
-            raise ValueError("Invalid trading pair")
-        
-        # Extract token and other details
-        token = symbol[:-len(pair)].lower()
-        timeframe = data[1].split(': ')[1]
-        
-        # Parse support and resistance values
-        values = {}
-        for line in data[2:-1]:
-            key, value = line.split(': ')
-            values[key] = float(value)
-        
-        supports = [values[f'S{i}'] for i in range(1, 5)]
-        resistances = [values[f'R{i}'] for i in range(1, 5)]
-        
-        is_essential = data[-1].split(': ')[1].lower() == 'true'
-        
-        return {
-            'symbol': symbol,
-            'token': token,
-            'pair': pair,
-            'timeframe': timeframe,
-            'supports': supports,
-            'resistances': resistances,
-            'is_essential': is_essential
-        }
-    
+        try:
+            # Extract symbol and determine pair
+            symbol = data[0].split(': ')[1]
+            known_pairs = ['USDT', 'USD', 'ETH', 'BTC']
+            pair = next((p for p in known_pairs if symbol.endswith(p)), None)
+            
+            if not pair:
+                raise ValueError(f"Invalid trading pair in symbol: {symbol}")
+            
+            # Extract token and other details
+            token = symbol[:-len(pair)].lower()
+            timeframe = data[1].split(': ')[1]
+            
+            # Parse support and resistance values
+            values = {}
+            for line in data[2:-2]:
+                key, value = line.split(': ')
+                values[key] = float(value)
+            
+            supports = [values[f'S{i}'] for i in range(1, 5)]
+            resistances = [values[f'R{i}'] for i in range(1, 5)]
+            
+            is_essential = data[-2].split(': ')[1].lower() == 'true'
+            direction = data[-1].split(': ')[1]
+            
+            print("\n=== Parsed Data ===")
+            print(f"Symbol: {symbol}")
+            print(f"Token: {token}")
+            print(f"Pair: {pair}")
+            print(f"Timeframe: {timeframe}")
+            print(f"Supports: {supports}")
+            print(f"Resistances: {resistances}")
+            print(f"Is Essential: {is_essential}")
+            print(f"Direction: {direction}")
+            print("=================\n")
+            
+            return {
+                'symbol': symbol,
+                'token': token,
+                'pair': pair,
+                'timeframe': timeframe,
+                'supports': supports,
+                'resistances': resistances,
+                'is_essential': is_essential,
+                'direction': direction
+            }
+        except Exception as e:
+            raise ValueError(f"Error parsing data: {str(e)}")
+
     def find_coin_bot(session, token):
         """Find CoinBot based on token name or alias."""
         coin_bot = session.query(CoinBot).filter(
@@ -220,8 +244,9 @@ def receive_and_save_chart_data():
             'pair': parsed_data['pair'],
             'temporality': parsed_data['timeframe'],
             'coin_bot_id': coin_id,
-            'is_essential': parsed_data['is_essential']
+            'is_essential': parsed_data['is_essential']      
         }
+    
     response = {
         "message": None,
         "error": None,
@@ -234,40 +259,42 @@ def receive_and_save_chart_data():
     try:
         # Parse incoming data
         raw_data = request.data.decode('utf-8').split('\n')
+        print(raw_data)
         parsed_data = validate_incoming_data(raw_data)
         
         # Find coin_bot_id
         coin_id = find_coin_bot(session, parsed_data['token'])
-        
-        # Remove existing chart records
-        session.query(Chart).filter(
-            Chart.coin_bot_id == coin_id, 
-            Chart.temporality == parsed_data['timeframe']
-        ).delete()
+        print(f"\nFound coin_bot_id: {coin_id} for token: {parsed_data['token']}")
         
         # Prepare and save new chart data
         chart_data = prepare_chart_data(parsed_data, coin_id)
         new_chart = Chart(**chart_data)
-        
 
         session.add(new_chart)
         session.commit()
+        print("\nNew chart record saved successfully")
         
-        # Send notification if essential
+        # Handle notification
+        direction = parsed_data.get('direction', '').strip()
+        if not direction:
+            direction = "Price crossed a level"  
+
         if parsed_data['is_essential']:
             notification_service.push_notification(
                 coin=parsed_data['token'],
                 title=f"{parsed_data['symbol']} Support/Resistance Update",
-                body="Check the New Levels!",
-                type="s_and_r",
+                body=direction if direction else "Price crossed a level",
+                type="support_resistance",
                 timeframe=parsed_data['timeframe']
             )
+            print("Notification sent successfully")
         
         response["message"] = "New chart record created successfully"
         response["status"] = HTTPStatus.CREATED
 
     except (SQLAlchemyError, ValueError) as e:
         session.rollback()
+        print(f"\nError occurred: {str(e)}")
         response["error"] = str(e)
         response["status"] = (
             HTTPStatus.BAD_REQUEST if isinstance(e, ValueError) 
@@ -275,6 +302,8 @@ def receive_and_save_chart_data():
         )
 
     except Exception as e:
+        session.rollback()
+        print(f"\nUnexpected error: {str(e)}")
         response["error"] = f"An unexpected error occurred: {str(e)}"
         response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
 
