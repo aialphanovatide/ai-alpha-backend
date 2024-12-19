@@ -44,8 +44,8 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
         str_timeframe = str(timeframe) if timeframe is not None else ''
 
         data_payload = {
-            "type": str_type,  # Ensure type is a string
-            "coin": str_coin,  # Ensure coin is a string, handle None case
+            "type": str_type, 
+            "coin": str_coin, 
             "timeframe": str_timeframe
         }
 
@@ -78,16 +78,16 @@ def send_notification(topic: str, title: str, body: str, action: str = 'new_aler
 
 
 
-# Example usage
-result = send_notification(
-    topic='bitcoin_4999_m1_analysis',
-    title='Cosmos Advances with Valence Integration',
-    body="""
-        Cosmos (ATOM) is driving blockchain interoperability with its IBC protocol and the launch of Valence, a cross-chain protocol aimed at enhancing web3 interrelation. This initiative, combined with fee-free Bitcoin bridges and strategic partnerships, suggests a bright future for ATOM. Valence's integration is expected to bolster the interchain ecosystem, promoting wider adoption and economic efficiency, potentially stabilizing and increasing ATOM's market value.
+# # Example usage
+# result = send_notification(
+#     topic='bitcoin_4999_m1_analysis',
+#     title='Cosmos Advances with Valence Integration',
+#     body="""
+#         Cosmos (ATOM) is driving blockchain interoperability with its IBC protocol and the launch of Valence, a cross-chain protocol aimed at enhancing web3 interrelation. This initiative, combined with fee-free Bitcoin bridges and strategic partnerships, suggests a bright future for ATOM. Valence's integration is expected to bolster the interchain ecosystem, promoting wider adoption and economic efficiency, potentially stabilizing and increasing ATOM's market value.
 
-        Despite the recent market selloff affecting ATOM, the Cosmos network’s advancements indicate resilience. Valence enhances interoperability across various crypto-native organizations, supporting token swaps and liquid restaking which would be highly valuable in generating engagement in the crypto community. It remains to be seen how the price of ATOM will develop after this addition, as it is difficult to understand the effect in a bear market for altcoins like the current one.
-        """,
-    coin='bitcoin',
-    # timeframe='4h'
-)
-print(result)
+#         Despite the recent market selloff affecting ATOM, the Cosmos network’s advancements indicate resilience. Valence enhances interoperability across various crypto-native organizations, supporting token swaps and liquid restaking which would be highly valuable in generating engagement in the crypto community. It remains to be seen how the price of ATOM will develop after this addition, as it is difficult to understand the effect in a bear market for altcoins like the current one.
+#         """,
+#     coin='bitcoin',
+#     # timeframe='4h'
+# )
+# print(result)

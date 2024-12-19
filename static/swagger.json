@@ -295,57 +295,6 @@
         }
       }
     },
-    "/schedule_post": {
-      "post": {
-        "tags": [
-          "Scheduled Content Creation"
-        ],
-        "summary": "Schedule a post for future publication.",
-        "description": "Schedule a post for future publication.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Post scheduling details",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "coinBot": {
-                  "type": "string"
-                },
-                "category_name": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "scheduledDate": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "coinBot",
-                "category_name",
-                "content",
-                "scheduledDate"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Post scheduled successfully"
-          },
-          "400": {
-            "description": "Bad request (missing or invalid data)"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
     "/users": {
       "get": {
         "tags": [
@@ -2301,155 +2250,47 @@
       }
     },
     "/analysis": {
-      "get": {
-        "tags": [
-          "Content Creation"
-        ],
-        "summary": "Get coin analysis",
-        "description": "Retrieve analyses for a specific coin by id, with optional pagination",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "query",
-            "description": "ID of the coin bot",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "section_id",
-            "in": "query",
-            "description": "ID of the section",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Page number",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Items per page (max 100)",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved analyses",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object"
-                  }
-                },
-                "error": {
-                  "type": "null"
-                },
-                "success": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "integer"
-                },
-                "page": {
-                  "type": "integer"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "total_pages": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "null"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean",
-                  "example": false
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server Error",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "null"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "success": {
-                  "type": "boolean",
-                  "example": false
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
           "Content Creation"
         ],
-        "summary": "Create new analysis",
-        "description": "Create and publish a new analysis",
+        "summary": "Create a new analysis",
+        "description": "\n    create a new analysis with a pre-generated image.\n    \n    note:\n    - all fields are required\n    - coin_id and section_id must be valid integers\n    - image_url should be a valid url (either temporary dall-e url or permanent s3 url)\n    - content should include a title followed by <br> and then the main content\n    ",
         "parameters": [
           {
             "name": "coin_id",
             "in": "formData",
             "description": "ID of the coin",
             "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "content",
-            "in": "formData",
-            "description": "Content of the analysis",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "category_name",
-            "in": "formData",
-            "description": "Name of the category",
-            "required": true,
-            "type": "string",
-            "schema": {}
+            "type": "string"
           },
           {
             "name": "section_id",
             "in": "formData",
             "description": "ID of the section",
             "required": true,
-            "type": "string",
-            "schema": {}
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Analysis content with title and body separated by <br>",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "category_name",
+            "in": "formData",
+            "description": "Name of the category",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "image_url",
+            "in": "formData",
+            "description": "URL of the pre-generated image (DALL-E or S3)",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -2459,10 +2300,33 @@
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "object"
+                  "type": "object",
+                  "description": "Created analysis data",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "coin_id": {
+                      "type": "integer"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "image_url": {
+                      "type": "string"
+                    },
+                    "category_name": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
                 },
-                "error": {
-                  "type": "null"
+                "message": {
+                  "type": "string",
+                  "example": "Analysis published successfully"
                 },
                 "success": {
                   "type": "boolean",
@@ -2472,7 +2336,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request - Missing or invalid parameters",
             "schema": {
               "type": "object",
               "properties": {
@@ -2480,7 +2344,27 @@
                   "type": "null"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Missing required parameters: coin_id, content"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred"
                 },
                 "success": {
                   "type": "boolean",
@@ -2497,83 +2381,213 @@
         "tags": [
           "Content Creation"
         ],
-        "summary": "Get all analyses",
-        "description": "Retrieve all analyses with pagination based on section",
+        "summary": "Get latest analyses across all types",
+        "description": "\n    retrieve latest analyses across all analysis types with advanced filtering and search capabilities.\n    \n    the endpoint queries all analysis tables (deep dive, daily macro, narratives, spotlight, support & resistance)\n    and returns the latest posts with optional filtering and search functionality.\n    \n    results are sorted by creation date in descending order (newest first).\n    ",
         "parameters": [
-          {
-            "name": "section_id",
-            "in": "query",
-            "description": "ID of the section",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
           {
             "name": "page",
             "in": "query",
-            "description": "Page number",
+            "description": "Page number for pagination",
             "required": false,
-            "type": "integer",
-            "schema": {}
+            "type": "integer"
           },
           {
-            "name": "limit",
+            "name": "per_page",
             "in": "query",
-            "description": "Items per page (max 100)",
+            "description": "Number of items per page (max: 100)",
             "required": false,
-            "type": "integer",
-            "schema": {}
+            "type": "integer"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search term to filter analyses by content or title",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "coin",
+            "in": "query",
+            "description": "Filter analyses by specific coin name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter analyses by category name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "section_id",
+            "in": "query",
+            "description": "Filter analyses by section ID",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved all analyses",
+            "description": "Successful operation",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "category_icon": {
+                        "type": "string",
+                        "example": "/static/topmenu_icons_resize/bitcoin.png"
+                      },
+                      "category_name": {
+                        "type": "string",
+                        "example": "bitcoin"
+                      },
+                      "coin_icon": {
+                        "type": "string",
+                        "example": "/static/topmenu_icons_resize/bitcoin.png"
+                      },
+                      "coin_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "coin_name": {
+                        "type": "string",
+                        "example": "btc"
+                      },
+                      "content": {
+                        "type": "string",
+                        "example": "<p>This is a test analysis for Bitcoin...</p>"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-12-12T22:22:32.350759-03:00"
+                      },
+                      "id": {
+                        "type": "integer",
+                        "example": 11
+                      },
+                      "image_url": {
+                        "type": "string",
+                        "example": "https://appanalysisimages.s3.us-east-2.amazonaws.com/bitcoin-analysis.jpg"
+                      },
+                      "section_id": {
+                        "type": "integer",
+                        "example": 12
+                      },
+                      "section_name": {
+                        "type": "string",
+                        "example": "Daily Macro"
+                      },
+                      "title": {
+                        "type": "string",
+                        "example": "Bitcoin Price Analysis"
+                      }
+                    }
+                  }
+                },
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "per_page": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "total_items": {
+                      "type": "integer",
+                      "example": 66
+                    },
+                    "total_pages": {
+                      "type": "integer",
+                      "example": 7
+                    }
                   }
                 },
                 "error": {
-                  "type": "null"
+                  "type": "string",
+                  "nullable": true
                 },
                 "success": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "integer"
-                },
-                "page": {
-                  "type": "integer"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "total_pages": {
-                  "type": "integer"
-                },
-                "section_name": {
-                  "type": "string"
-                },
-                "section_target": {
-                  "type": "string"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request - Invalid parameters",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "null"
+                  "type": "array",
+                  "items": {}
+                },
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total_items": {
+                      "type": "integer"
+                    },
+                    "total_pages": {
+                      "type": "integer"
+                    }
+                  }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Invalid pagination parameters"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {}
+                },
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total_items": {
+                      "type": "integer"
+                    },
+                    "total_pages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred"
                 },
                 "success": {
                   "type": "boolean",
@@ -2853,29 +2867,21 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Schedule new analysis",
-        "description": "Schedule a post for future publication",
+        "summary": "Schedule a new analysis post",
+        "description": "Schedule an analysis post for future publication with specified parameters",
         "parameters": [
           {
             "name": "coin_id",
             "in": "formData",
-            "description": "ID of the coin bot",
+            "description": "The ID of the coin bot",
             "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "section_id",
-            "in": "formData",
-            "description": "ID of the section",
-            "required": true,
-            "type": "string",
+            "type": "integer",
             "schema": {}
           },
           {
             "name": "category_name",
             "in": "formData",
-            "description": "Name of the category",
+            "description": "The name of the category",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2883,7 +2889,23 @@
           {
             "name": "content",
             "in": "formData",
-            "description": "Content of the post",
+            "description": "The content of the post (must include title followed by <br>)",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "section_id",
+            "in": "formData",
+            "description": "The ID of the section",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          },
+          {
+            "name": "image_url",
+            "in": "formData",
+            "description": "The temporary URL from DALL-E image generation",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2891,7 +2913,7 @@
           {
             "name": "scheduled_date",
             "in": "formData",
-            "description": "Scheduled date and time in ISO 8601 format (e.g., 2023-01-01T12:00:00.000Z)",
+            "description": "UTC datetime in ISO 8601 format (e.g., \"2024-03-28T15:30:00.000Z\")",
             "required": true,
             "type": "string",
             "schema": {}
@@ -2904,35 +2926,59 @@
               "type": "object",
               "properties": {
                 "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "null"
+                  "type": "string",
+                  "example": "Post scheduled successfully"
                 },
                 "success": {
                   "type": "boolean",
                   "example": true
                 },
                 "job_id": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "9a512fbba0074dada792dfa6e5f8275d"
+                },
+                "scheduled_time": {
+                  "type": "string",
+                  "example": "2024-03-28T15:30:00.000Z"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error",
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
-                  "type": "null"
-                },
                 "error": {
                   "type": "string"
                 },
                 "success": {
                   "type": "boolean",
                   "example": false
+                },
+                "message": {
+                  "type": "null"
+                },
+                "job_id": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "null"
                 },
                 "job_id": {
                   "type": "null"
@@ -2946,12 +2992,21 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Get all scheduled analyses",
-        "description": "Retrieve information about all scheduled jobs",
-        "parameters": [],
+        "summary": "Get all scheduled analyses with timeframe filtering",
+        "description": "\n    retrieve all scheduled analyses with formatted data for card rendering.\n    supports filtering by timeframe to match the ui tabs.\n    \n    timeframe filters:\n    - today: shows posts scheduled for the current day (00:00:00 to 23:59:59)\n    - week: shows posts scheduled for the current week (sunday to saturday)\n    - month: shows posts scheduled for the current calendar month\n    - no filter: shows all future scheduled posts\n    \n    all dates are handled in the configured timezone.\n    results are sorted by scheduled time in ascending order.\n    ",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Filter posts by time period (today, week, month)",
+            "required": false,
+            "type": "string",
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved scheduled jobs",
+            "description": "Successfully retrieved scheduled analyses",
             "schema": {
               "type": "object",
               "properties": {
@@ -2964,19 +3019,53 @@
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "9a512fbba0074dada792dfa6e5f8275d"
                           },
-                          "name": {
-                            "type": "string"
+                          "coin_id": {
+                            "type": "integer",
+                            "example": 1
                           },
-                          "trigger": {
-                            "type": "string"
+                          "coin_name": {
+                            "type": "string",
+                            "example": "Bitcoin"
                           },
-                          "args": {
-                            "type": "string"
+                          "coin_icon": {
+                            "type": "string",
+                            "example": "https://example.com/btc-icon.png"
                           },
-                          "next_run_time": {
-                            "type": "string"
+                          "section_name": {
+                            "type": "string",
+                            "example": "Technical Analysis"
+                          },
+                          "section_id": {
+                            "type": "string",
+                            "example": "tech-analysis-1"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Bitcoin Price Analysis"
+                          },
+                          "content": {
+                            "type": "string",
+                            "example": "Detailed analysis content..."
+                          },
+                          "image_url": {
+                            "type": "string",
+                            "example": "https://s3.amazonaws.com/appanalysisimages/btc-analysis.jpg"
+                          },
+                          "scheduled_time": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-03-28T15:30:00Z"
+                          },
+                          "category_name": {
+                            "type": "string",
+                            "example": "Price Action"
+                          },
+                          "category_icon": {
+                            "type": "string",
+                            "example": "https://example.com/category-icon.png"
                           }
                         }
                       }
@@ -2994,15 +3083,22 @@
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
                 "data": {
-                  "type": "null"
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  }
                 },
                 "error": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "An error occurred while fetching scheduled analyses"
                 },
                 "success": {
                   "type": "boolean",
@@ -3019,8 +3115,8 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Delete scheduled analysis",
-        "description": "Delete a scheduled job by its id",
+        "summary": "Delete a scheduled analysis",
+        "description": "Delete a specific scheduled analysis by its id",
         "parameters": [
           {
             "name": "job_id",
@@ -3038,7 +3134,8 @@
               "type": "object",
               "properties": {
                 "message": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Scheduled job deleted successfully"
                 },
                 "error": {
                   "type": "null"
@@ -3052,6 +3149,25 @@
           },
           "404": {
             "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Scheduled job not found"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
@@ -3074,8 +3190,8 @@
         "tags": [
           "Scheduled Content Creation"
         ],
-        "summary": "Get scheduled analysis by id",
-        "description": "Get information about a specific scheduled job",
+        "summary": "Get a specific scheduled analysis",
+        "description": "Retrieve detailed information about a specific scheduled analysis",
         "parameters": [
           {
             "name": "job_id",
@@ -3087,8 +3203,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Successfully retrieved job information",
+          "200": {
+            "description": "Successfully retrieved scheduled analysis",
             "schema": {
               "type": "object",
               "properties": {
@@ -3098,19 +3214,34 @@
                     "id": {
                       "type": "string"
                     },
-                    "name": {
+                    "coin_id": {
+                      "type": "integer"
+                    },
+                    "coin_name": {
                       "type": "string"
                     },
-                    "func": {
+                    "coin_icon": {
                       "type": "string"
                     },
-                    "trigger": {
+                    "section_name": {
                       "type": "string"
                     },
-                    "args": {
+                    "section_id": {
                       "type": "string"
                     },
-                    "next_run_time": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "image_url": {
+                      "type": "string"
+                    },
+                    "scheduled_time": {
+                      "type": "string"
+                    },
+                    "category_name": {
                       "type": "string"
                     }
                   }
@@ -3127,6 +3258,25 @@
           },
           "404": {
             "description": "Job not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Scheduled job not found"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "type": "object",
               "properties": {
@@ -4407,525 +4557,6 @@
         }
       }
     },
-    "/narrative-trading": {
-      "get": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Retrieve narrative trading entries for a specific coin, with pagination.",
-        "description": "Retrieve narrative trading entries for a specific coin, with pagination.",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "query",
-            "description": "ID of the coin",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "coin_name",
-            "in": "query",
-            "description": "Name of the coin",
-            "required": false,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Page number (default: 1)",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Items per page (default: 10, max: 100)",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved narrative trading data",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer"
-                      },
-                      "content": {
-                        "type": "string"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "coin_bot_name": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "total_count": {
-                  "type": "integer"
-                },
-                "total_pages": {
-                  "type": "integer"
-                },
-                "page": {
-                  "type": "integer"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - Coin ID or name is required"
-          },
-          "404": {
-            "description": "Coin not found or no narrative trading found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Create a new narrative trading post.",
-        "description": "Create a new narrative trading post.",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "formData",
-            "description": "ID of the coin bot",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "content",
-            "in": "formData",
-            "description": "Content of the post",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "category_name",
-            "in": "formData",
-            "description": "Name of the category",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Narrative Trading posted successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "data": {
-                  "type": "object"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - One or more required values are missing"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/narrative-tradings": {
-      "get": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Retrieve all narrative trading entries with optional pagination.",
-        "description": "Retrieve all narrative trading entries with optional pagination.",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Page number for pagination",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Number of items per page (max: 100)",
-            "required": false,
-            "type": "integer",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved narrative trading data",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer"
-                      },
-                      "content": {
-                        "type": "string"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "coin_name": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "total": {
-                  "type": "integer"
-                },
-                "page": {
-                  "type": "integer"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "total_pages": {
-                  "type": "integer"
-                },
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - Invalid pagination parameters"
-          },
-          "404": {
-            "description": "No narrative trading entries found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/narrative-trading/{narrative_trading_id}": {
-      "delete": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Delete a narrative trading post by narrative_trading_id and its associated s3 image.",
-        "description": "Delete a narrative trading post by narrative_trading_id and its associated s3 image.",
-        "parameters": [
-          {
-            "name": "narrative_trading_id",
-            "in": "path",
-            "description": "ID of the narrative trading post to delete",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Narrative trading and associated image deleted successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Narrative trading not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Edit an existing narrative trading post.",
-        "description": "Edit an existing narrative trading post.",
-        "parameters": [
-          {
-            "name": "narrative_trading_id",
-            "in": "path",
-            "description": "ID of the narrative trading post to edit",
-            "required": true,
-            "type": "integer",
-            "schema": {}
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "",
-            "required": true,
-            "type": "string",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "content": {
-                  "type": "string",
-                  "description": "New content for the narrative trading post"
-                }
-              },
-              "required": [
-                "content"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Narrative trading edited successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "data": {
-                  "type": "object",
-                  "description": "Updated narrative trading data"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "error": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "New content is required to edit the narrative trading"
-          },
-          "404": {
-            "description": "Narrative trading not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/schedule-narrative-trading": {
-      "post": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Schedule a narrative trading post for future publishing.",
-        "description": "Schedule a narrative trading post for future publishing.",
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "formData",
-            "description": "ID of the coin bot",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "category_name",
-            "in": "formData",
-            "description": "Name of the category",
-            "required": false,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "content",
-            "in": "formData",
-            "description": "Content of the post",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          },
-          {
-            "name": "scheduled_date",
-            "in": "formData",
-            "description": "Scheduled date and time for publishing (format: \"%a, %b %d, %Y, %I:%M:%S %p\")",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Post scheduled successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - Missing required parameters or invalid date format"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/scheduled-narrative-tradings": {
-      "get": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Retrieve a list of all scheduled narrative trading jobs.",
-        "description": "Retrieve a list of all scheduled narrative trading jobs.",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved scheduled jobs",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "jobs": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "trigger": {
-                            "type": "string"
-                          },
-                          "args": {
-                            "type": "string"
-                          },
-                          "next_run_time": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/scheduled-narrative-tradings/{job_id}": {
-      "delete": {
-        "tags": [
-          "Narrative trading"
-        ],
-        "summary": "Delete a scheduled narrative trading job by job id.",
-        "description": "Delete a scheduled narrative trading job by job id.",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "description": "ID of the job to delete",
-            "required": true,
-            "type": "string",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Scheduled job deleted successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean"
-                },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Scheduled job not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/chart": {
       "post": {
         "tags": [
@@ -5911,13 +5542,13 @@
         "tags": [
           "Ask AI"
         ],
-        "summary": "Get detailed tokenomics data for a cryptocurrency",
-        "description": "Retrieve comprehensive tokenomics information about a specific cryptocurrency using its coingecko id.\n    \nthe endpoint fetches data from both coingecko and coinmarketcap (for whitepaper if not available in coingecko).",
+        "summary": "Get detailed cryptocurrency information",
+        "description": "[cached for 5 minutes] retrieve comprehensive tokenomics data for a specific cryptocurrency using its coin id. the response is cached to optimize performance and handle rate limiting. the endpoint provides detailed information including price, market cap, supply metrics, and icon urls in various formats.",
         "parameters": [
           {
             "name": "coin_id",
             "in": "query",
-            "description": "CoinGecko ID of the cryptocurrency (e.g., \"bitcoin\", \"ethereum\")",
+            "description": "The CoinGecko ID of the cryptocurrency (e.g., \"bitcoin\", \"ethereum\")",
             "required": true,
             "type": "string",
             "schema": {}
@@ -5925,78 +5556,120 @@
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved tokenomics data",
+            "description": "Successfully retrieved cryptocurrency data",
             "schema": {
               "type": "object",
               "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "website": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "whitepaper": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "categories": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "chains": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "current_price": {
-                      "type": "number"
-                    },
-                    "market_cap_usd": {
-                      "type": "number"
-                    },
-                    "fully_diluted_valuation": {
-                      "type": "number",
-                      "nullable": true
-                    },
-                    "ath": {
-                      "type": "number"
-                    },
-                    "ath_change_percentage": {
-                      "type": "number"
-                    },
-                    "circulating_supply": {
-                      "type": "number",
-                      "nullable": true
-                    }
-                  }
-                },
                 "success": {
                   "type": "boolean",
                   "example": true
                 },
                 "error": {
-                  "type": "string",
-                  "nullable": true
+                  "type": "null"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "website": {
+                      "type": "string",
+                      "description": "Main project website URL",
+                      "example": "https://bitcoin.org"
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "description": "URL to project whitepaper (from CoinGecko or CoinMarketCap)",
+                      "example": "https://bitcoin.org/bitcoin.pdf"
+                    },
+                    "categories": {
+                      "type": "array",
+                      "description": "List of categories the coin belongs to",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "Cryptocurrency",
+                        "Store of Value"
+                      ]
+                    },
+                    "chains": {
+                      "type": "array",
+                      "description": "List of blockchain platforms where the token exists",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "bitcoin"
+                      ]
+                    },
+                    "current_price": {
+                      "type": "number",
+                      "description": "Current price in USD",
+                      "example": 50000.0
+                    },
+                    "market_cap_usd": {
+                      "type": "number",
+                      "description": "Market capitalization in USD",
+                      "example": 1000000000000
+                    },
+                    "fully_diluted_valuation": {
+                      "type": "number",
+                      "description": "Fully diluted valuation in USD",
+                      "example": 1100000000000
+                    },
+                    "ath": {
+                      "type": "number",
+                      "description": "All-time high price in USD",
+                      "example": 69000.0
+                    },
+                    "ath_change_percentage": {
+                      "type": "number",
+                      "description": "Percentage change from ATH",
+                      "example": -25.5
+                    },
+                    "circulating_supply": {
+                      "type": "number",
+                      "description": "Current circulating supply",
+                      "example": 19000000
+                    },
+                    "icon": {
+                      "type": "object",
+                      "description": "Icon URLs in various formats",
+                      "properties": {
+                        "thumb": {
+                          "type": "string",
+                          "description": "Thumbnail size icon URL"
+                        },
+                        "small": {
+                          "type": "string",
+                          "description": "Small size icon URL"
+                        },
+                        "large": {
+                          "type": "string",
+                          "description": "Large size icon URL"
+                        },
+                        "svg": {
+                          "type": "string",
+                          "description": "SVG version of the icon (if conversion successful)"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request - Missing required parameter",
+            "description": "Bad Request - Missing coin_id parameter",
             "schema": {
               "type": "object",
               "properties": {
-                "error": {
-                  "type": "string",
-                  "example": "The parameter coin_id is required"
-                },
                 "success": {
                   "type": "boolean",
                   "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "The parameter coin_id is required"
                 },
                 "data": {
                   "type": "null"
@@ -6009,15 +5682,275 @@
             "schema": {
               "type": "object",
               "properties": {
-                "error": {
-                  "type": "string"
-                },
                 "success": {
                   "type": "boolean",
                   "example": false
                 },
+                "error": {
+                  "type": "string",
+                  "example": "Cryptocurrency not found or API request failed"
+                },
                 "data": {
                   "type": "null"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Too many requests. Please try again later."
+                },
+                "data": {
+                  "type": "null"
+                },
+                "rate_limit": {
+                  "type": "object",
+                  "properties": {
+                    "max_calls": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "period": {
+                      "type": "integer",
+                      "example": 60
+                    },
+                    "current_calls": {
+                      "type": "integer",
+                      "example": 11
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred while fetching cryptocurrency data"
+                },
+                "data": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/generate-image": {
+      "post": {
+        "tags": [
+          "Content Creation"
+        ],
+        "summary": "Generate an image",
+        "description": "\n    generate an ai image based on analysis content.\n    the endpoint processes the content, extracts the relevant text, and generates an appropriate image.\n    returns a temporary url that can be used to download the generated image.\n    \n    note: \n    - content must include a title followed by <br> and then the main content\n    - the image generation is based on the content body (after the <br>)\n    - the returned url is temporary and will expire\n    ",
+        "parameters": [
+          {
+            "name": "content",
+            "in": "formData",
+            "description": "Analysis content with title and body separated by <br>",
+            "required": true,
+            "type": "string",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Image generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "temp_image_url": {
+                      "type": "string",
+                      "example": "https://oaidalleapiprodscus.blob.core.windows.net/private/...",
+                      "description": "Temporary URL to the generated image"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Image generated successfully"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Content is required"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Image generation failed"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during image generation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred: DALL-E API error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Internal server error during image generation"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topics": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Get all notification topics",
+        "description": "\n    retrieve all notification topics with optional filtering capabilities.\n    \n    the endpoint returns a list of topics that can be filtered by coin reference, topic type, and timeframe.\n    if no filters are provided, it returns all available topics.\n    \n    topics are used for managing notification subscriptions and message routing in the system.\n    ",
+        "parameters": [
+          {
+            "name": "coin",
+            "in": "query",
+            "description": "Filter topics by coin reference (e.g., \"bitcoin\", \"ethereum\")",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by topic type (e.g., \"alerts\", \"support_resistance\")",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Filter by timeframe (e.g., \"1d\", \"1w\")",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "bitcoin_alerts_1d"
+                      },
+                      "reference": {
+                        "type": "string",
+                        "example": "bitcoin, btc"
+                      },
+                      "timeframe": {
+                        "type": "string",
+                        "example": "1d"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "alerts"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-03-20T12:00:00Z"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-03-20T12:00:00Z"
+                      }
+                    }
+                  }
+                },
+                "count": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "Database connection error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Failed to fetch topics"
                 }
               }
             }

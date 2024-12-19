@@ -3,6 +3,7 @@ import requests
 from dotenv import load_dotenv
 from typing import Dict, Any, Optional, List
 from ..coinmarketcap.coinmarketcap import get_crypto_metadata
+from services.coingecko.utils import get_icon_as_svg
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -140,31 +141,8 @@ def get_coin_data(name: Optional[str] = None, symbol: Optional[str] = None) -> D
     return result
 
 
-import requests
-def get_crypto_id(symbol: str) -> Optional[str]:
-    """
-    Retrieve the CoinGecko ID for a given cryptocurrency symbol.
 
-    This function queries the CoinGecko API to find the corresponding ID
-    for a given cryptocurrency symbol.
-
-    Args:
-        symbol (str): The symbol of the cryptocurrency (e.g., 'btc' for Bitcoin).
-
-    Returns:
-        Optional[str]: The CoinGecko ID of the cryptocurrency if found, None otherwise.
-    """
-    url = 'https://api.coingecko.com/api/v3/coins/markets'
-    params = {'vs_currency': 'usd', 'order': 'market_cap_desc', 'per_page': 100, 'page': 1, 'sparkline': False}
-    response = requests.get(url, params=params)
-    data = response.json()
-    for crypto in data:
-        if crypto['symbol'].lower() == symbol.lower():
-            return crypto['id']
-    return None
-    
-    
-def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
+def get_tokenomics_data_for_ask_ai(coin_id: str) -> Dict[str, Any]:
     """
     Get detailed tokenomics data for a cryptocurrency using its CoinGecko ID.
 
@@ -177,7 +155,7 @@ def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary containing:
             - website (str): Main project website URL
-            - whitepaper (str): URL to the project's whitepaper if available (from either CoinGecko or CoinMarketCap)
+            - whitepaper (str): URL to the project's whitepaper if available
             - categories (List[str]): List of categories the coin belongs to
             - chains (List[str]): List of blockchain platforms where the token exists
             - current_price (float): Current price in USD
@@ -186,6 +164,9 @@ def get_tokenomics_data(coin_id: str) -> Dict[str, Any]:
             - ath (float): All-time high price in USD
             - ath_change_percentage (float): Percentage change from ATH
             - circulating_supply (float): Current circulating supply
+            - icons (Dict): Dictionary containing:
+                - png (Dict[str, str]): Dictionary of PNG icon URLs in different sizes
+                - svg (Optional[str]): SVG representation of the icon if conversion successful
             - error (str): Error message if the request fails
     """
     if not coin_id:
@@ -250,6 +231,20 @@ def get_competitors_data(symbol: str) -> Dict[str, Any]:
             if cmc_response.get('success'):
                 whitepaper = cmc_response.get('whitepaper')
 
+        # Extract icon URLs
+        icon_urls = {
+            'thumb': data['image'].get('thumb', None),
+            'small': data['image'].get('small', None),
+            'large': data['image'].get('large', None)
+        }
+
+        # Try to get SVG version of the icon
+        try:
+            svg_icon = get_icon_as_svg(coin_id, icon_urls)
+        except Exception as e:
+            svg_icon = None
+            print(f"Error converting icon to SVG for {coin_id}: {str(e)}")
+
         result = {
             'website': data['links']['homepage'][0] if data['links']['homepage'] else None,
             'whitepaper': whitepaper,
@@ -261,6 +256,10 @@ def get_competitors_data(symbol: str) -> Dict[str, Any]:
             'ath': data['market_data']['ath']['usd'],
             'ath_change_percentage': data['market_data']['ath_change_percentage']['usd'],
             'circulating_supply': data['market_data'].get('circulating_supply', None),
+            'icons': {
+                'png': icon_urls,
+                'svg': svg_icon
+            }
         }
 
         return result
