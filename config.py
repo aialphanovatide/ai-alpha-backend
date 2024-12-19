@@ -2249,5 +2249,15 @@ def init_coingecko_data():
 
 # init_coingecko_data()
 
+def init_data():
+    populate_topics()
+    # initialize_default_roles()
+    # init_user_data()
+    # populate_categories_and_coins()
+    # init_superadmin()
+    # create_superadmin_api_key()
+    # populate_sections()
+    # init_coingecko_data()
 
-# init_data()
+
+init_data()
