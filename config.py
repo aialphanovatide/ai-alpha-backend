@@ -477,7 +477,7 @@ class User(Base):
             expires_in (int): Token expiration time in seconds. Default is 1 hour.
 
         Returns:
-            str: The generated reset token
+            str: The generated reset  token
         """
         token = secrets.token_urlsafe(32)
         expires_at = datetime.now() + timedelta(seconds=expires_in)
