@@ -40,3 +40,4 @@ tradingview-datafeed
 flask-caching
 svgwrite
 Pillow
+bokeh
