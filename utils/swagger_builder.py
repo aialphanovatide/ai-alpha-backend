@@ -31,17 +31,27 @@ class Swagger:
         except Exception as e:
             raise Exception(f"Unexpected error loading Swagger file: {str(e)}")
 
-    def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, summary: str, description: str, params: list, responses: dict) -> Tuple[bool, str]:
+    def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, 
+                             summary: str, description: str, params: list, 
+                             responses: dict, request_body: dict = None) -> Tuple[bool, str]:
         """
         Add a new endpoint to the Swagger JSON file or update an existing one
+        
+        Args:
+            endpoint_route (str): The endpoint route
+            method (str): HTTP method
+            tag (str): API tag category
+            summary (str): Short summary
+            description (str): Detailed description
+            params (list): List of parameters
+            responses (dict): Response definitions
+            request_body (dict, optional): Request body definition
         """
         try:
-            # Open the Swagger JSON file
             swagger_json = self.load()
             if swagger_json is None:
                 return False, "Failed to load Swagger JSON file"
 
-            # Check if the endpoint already exists
             endpoint_exists = endpoint_route in swagger_json['paths'] and method in swagger_json['paths'][endpoint_route]
             
             if endpoint_exists:
@@ -49,37 +59,47 @@ class Swagger:
             else:
                 print(f'Adding new endpoint {endpoint_route} [{method}]...')
 
-            # Create or update the endpoint
             if endpoint_route not in swagger_json['paths']:
                 swagger_json['paths'][endpoint_route] = {}
             
-            # Add or update the endpoint with its details
-            swagger_json['paths'][endpoint_route][method] = {
+            # Create the endpoint definition
+            endpoint_def = {
                 'tags': [tag],
                 'summary': summary.capitalize(),
                 'description': description.capitalize(),
                 'parameters': [],
                 'responses': responses
             }
-            
+
             # Add parameters if they exist
-            try:
-                for param in params:
-                    parameter = {
+            if params:
+                endpoint_def['parameters'].extend([
+                    {
                         'name': param.get('name', ''),
                         'in': param.get('in', 'query'),
                         'description': param.get('description', ''),
                         'required': param.get('required', False),
-                        'type': param.get('type', 'string'),  # Default to string if type is missing
-                        'schema': param.get('schema', {})  # Use an empty dict as fallback
-                    }
-                    # Only append valid parameters
-                    if parameter['name']:
-                        swagger_json['paths'][endpoint_route][method]['parameters'].append(parameter)
-            except Exception as e:
-                return False, f'Error processing parameters: {str(e)}'
+                        'type': param.get('type', 'string')
+                    } for param in params if param.get('name')
+                ])
 
-            # Update the Swagger JSON file
+            # Add request body if provided
+            if request_body:
+                if method.lower() in ['post', 'put', 'patch']:
+                    endpoint_def['consumes'] = [request_body.get('content-type', 'application/json')]
+                    endpoint_def['parameters'].append({
+                        'in': 'formData' if request_body.get('content-type') == 'multipart/form-data' else 'body',
+                        'name': 'body',
+                        'description': 'Request body',
+                        'required': request_body.get('required', True),
+                        'schema': {
+                            'type': 'object',
+                            'properties': request_body.get('properties', {})
+                        }
+                    })
+
+            swagger_json['paths'][endpoint_route][method.lower()] = endpoint_def
+
             with open(self.path, 'w') as file:
                 json.dump(swagger_json, file, indent=2)
 
@@ -87,6 +107,63 @@ class Swagger:
             return True, f'Endpoint {endpoint_route} [{method}] {action} successfully'
         except Exception as e:
             return False, f'Error adding/updating endpoint {endpoint_route} [{method}]: {str(e)}'
+
+    # def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, summary: str, description: str, params: list, responses: dict) -> Tuple[bool, str]:
+    #     """
+    #     Add a new endpoint to the Swagger JSON file or update an existing one
+    #     """
+    #     try:
+    #         # Open the Swagger JSON file
+    #         swagger_json = self.load()
+    #         if swagger_json is None:
+    #             return False, "Failed to load Swagger JSON file"
+
+    #         # Check if the endpoint already exists
+    #         endpoint_exists = endpoint_route in swagger_json['paths'] and method in swagger_json['paths'][endpoint_route]
+            
+    #         if endpoint_exists:
+    #             print(f'Endpoint {endpoint_route} [{method}] already exists. Updating...')
+    #         else:
+    #             print(f'Adding new endpoint {endpoint_route} [{method}]...')
+
+    #         # Create or update the endpoint
+    #         if endpoint_route not in swagger_json['paths']:
+    #             swagger_json['paths'][endpoint_route] = {}
+            
+    #         # Add or update the endpoint with its details
+    #         swagger_json['paths'][endpoint_route][method] = {
+    #             'tags': [tag],
+    #             'summary': summary.capitalize(),
+    #             'description': description.capitalize(),
+    #             'parameters': [],
+    #             'responses': responses
+    #         }
+            
+    #         # Add parameters if they exist
+    #         try:
+    #             for param in params:
+    #                 parameter = {
+    #                     'name': param.get('name', ''),
+    #                     'in': param.get('in', 'query'),
+    #                     'description': param.get('description', ''),
+    #                     'required': param.get('required', False),
+    #                     'type': param.get('type', 'string'),  # Default to string if type is missing
+    #                     'schema': param.get('schema', {})  # Use an empty dict as fallback
+    #                 }
+    #                 # Only append valid parameters
+    #                 if parameter['name']:
+    #                     swagger_json['paths'][endpoint_route][method]['parameters'].append(parameter)
+    #         except Exception as e:
+    #             return False, f'Error processing parameters: {str(e)}'
+
+    #         # Update the Swagger JSON file
+    #         with open(self.path, 'w') as file:
+    #             json.dump(swagger_json, file, indent=2)
+
+    #         action = "updated" if endpoint_exists else "added"
+    #         return True, f'Endpoint {endpoint_route} [{method}] {action} successfully'
+    #     except Exception as e:
+    #         return False, f'Error adding/updating endpoint {endpoint_route} [{method}]: {str(e)}'
 
     def delete_endpoint(self, endpoint_route: str) -> Tuple[bool, str]:
         """
@@ -125,29 +202,46 @@ class Swagger:
 swagger = Swagger()
 
 # ____Add or update an endpoint____
-# Add this to your swagger builder usage section
 
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/ask-ai',
+#     endpoint_route='/topics',
 #     method='get',
-#     tag='Ask AI',
-#     summary='Get detailed cryptocurrency information',
-#     description='[CACHED FOR 5 MINUTES] Retrieve comprehensive tokenomics data for a specific cryptocurrency using its Coin ID. '
-#                 'The response is cached to optimize performance and handle rate limiting. '
-#                 'The endpoint provides detailed information including price, market cap, supply metrics, and icon URLs in various formats.',
+#     tag='Notifications',
+#     summary='Get all notification topics',
+#     description='''
+#     Retrieve all notification topics with optional filtering capabilities.
+    
+#     The endpoint returns a list of topics that can be filtered by coin reference, topic type, and timeframe.
+#     If no filters are provided, it returns all available topics.
+    
+#     Topics are used for managing notification subscriptions and message routing in the system.
+#     ''',
 #     params=[
 #         {
-#             'name': 'coin_id',
+#             'name': 'coin',
 #             'in': 'query',
-#             'description': 'The CoinGecko ID of the cryptocurrency (e.g., "bitcoin", "ethereum")',
-#             'required': True,
-#             'type': 'string',
-#             'example': 'bitcoin'
+#             'description': 'Filter topics by coin reference (e.g., "bitcoin", "ethereum")',
+#             'required': False,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'type',
+#             'in': 'query',
+#             'description': 'Filter by topic type (e.g., "alerts", "support_resistance")',
+#             'required': False,
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'timeframe',
+#             'in': 'query',
+#             'description': 'Filter by timeframe (e.g., "1d", "1w")',
+#             'required': False,
+#             'type': 'string'
 #         }
 #     ],
 #     responses={
 #         '200': {
-#             'description': 'Successfully retrieved cryptocurrency data',
+#             'description': 'Successful operation',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
@@ -155,161 +249,47 @@ swagger = Swagger()
 #                         'type': 'boolean',
 #                         'example': True
 #                     },
-#                     'error': {
-#                         'type': 'null'
-#                     },
 #                     'data': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'website': {
-#                                 'type': 'string',
-#                                 'description': 'Main project website URL',
-#                                 'example': 'https://bitcoin.org'
-#                             },
-#                             'whitepaper': {
-#                                 'type': 'string',
-#                                 'description': 'URL to project whitepaper (from CoinGecko or CoinMarketCap)',
-#                                 'example': 'https://bitcoin.org/bitcoin.pdf'
-#                             },
-#                             'categories': {
-#                                 'type': 'array',
-#                                 'description': 'List of categories the coin belongs to',
-#                                 'items': {'type': 'string'},
-#                                 'example': ['Cryptocurrency', 'Store of Value']
-#                             },
-#                             'chains': {
-#                                 'type': 'array',
-#                                 'description': 'List of blockchain platforms where the token exists',
-#                                 'items': {'type': 'string'},
-#                                 'example': ['bitcoin']
-#                             },
-#                             'current_price': {
-#                                 'type': 'number',
-#                                 'description': 'Current price in USD',
-#                                 'example': 50000.00
-#                             },
-#                             'market_cap_usd': {
-#                                 'type': 'number',
-#                                 'description': 'Market capitalization in USD',
-#                                 'example': 1000000000000
-#                             },
-#                             'fully_diluted_valuation': {
-#                                 'type': 'number',
-#                                 'description': 'Fully diluted valuation in USD',
-#                                 'example': 1100000000000
-#                             },
-#                             'ath': {
-#                                 'type': 'number',
-#                                 'description': 'All-time high price in USD',
-#                                 'example': 69000.00
-#                             },
-#                             'ath_change_percentage': {
-#                                 'type': 'number',
-#                                 'description': 'Percentage change from ATH',
-#                                 'example': -25.5
-#                             },
-#                             'circulating_supply': {
-#                                 'type': 'number',
-#                                 'description': 'Current circulating supply',
-#                                 'example': 19000000
-#                             },
-#                             'icon': {
-#                                 'type': 'object',
-#                                 'description': 'Icon URLs in various formats',
-#                                 'properties': {
-#                                     'thumb': {
-#                                         'type': 'string',
-#                                         'description': 'Thumbnail size icon URL'
-#                                     },
-#                                     'small': {
-#                                         'type': 'string',
-#                                         'description': 'Small size icon URL'
-#                                     },
-#                                     'large': {
-#                                         'type': 'string',
-#                                         'description': 'Large size icon URL'
-#                                     },
-#                                     'svg': {
-#                                         'type': 'string',
-#                                         'description': 'SVG version of the icon (if conversion successful)'
-#                                     }
+#                         'type': 'array',
+#                         'items': {
+#                             'type': 'object',
+#                             'properties': {
+#                                 'id': {
+#                                     'type': 'integer',
+#                                     'example': 1
+#                                 },
+#                                 'name': {
+#                                     'type': 'string',
+#                                     'example': 'bitcoin_alerts_1d'
+#                                 },
+#                                 'reference': {
+#                                     'type': 'string',
+#                                     'example': 'bitcoin, btc'
+#                                 },
+#                                 'timeframe': {
+#                                     'type': 'string',
+#                                     'example': '1d'
+#                                 },
+#                                 'type': {
+#                                     'type': 'string',
+#                                     'example': 'alerts'
+#                                 },
+#                                 'created_at': {
+#                                     'type': 'string',
+#                                     'format': 'date-time',
+#                                     'example': '2024-03-20T12:00:00Z'
+#                                 },
+#                                 'updated_at': {
+#                                     'type': 'string',
+#                                     'format': 'date-time',
+#                                     'example': '2024-03-20T12:00:00Z'
 #                                 }
 #                             }
 #                         }
-#                     }
-#                 }
-#             }
-#         },
-#         '400': {
-#             'description': 'Bad Request - Missing coin_id parameter',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
 #                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'The parameter coin_id is required'
-#                     },
-#                     'data': {
-#                         'type': 'null'
-#                     }
-#                 }
-#             }
-#         },
-#         '404': {
-#             'description': 'Cryptocurrency not found or API error',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
-#                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Cryptocurrency not found or API request failed'
-#                     },
-#                     'data': {
-#                         'type': 'null'
-#                     }
-#                 }
-#             }
-#         },
-#         '429': {
-#             'description': 'Rate limit exceeded',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
-#                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Too many requests. Please try again later.'
-#                     },
-#                     'data': {
-#                         'type': 'null'
-#                     },
-#                     'rate_limit': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'max_calls': {
-#                                 'type': 'integer',
-#                                 'example': 10
-#                             },
-#                             'period': {
-#                                 'type': 'integer',
-#                                 'example': 60
-#                             },
-#                             'current_calls': {
-#                                 'type': 'integer',
-#                                 'example': 11
-#                             }
-#                         }
+#                     'count': {
+#                         'type': 'integer',
+#                         'example': 1
 #                     }
 #                 }
 #             }
@@ -325,10 +305,11 @@ swagger = Swagger()
 #                     },
 #                     'error': {
 #                         'type': 'string',
-#                         'example': 'An unexpected error occurred while fetching cryptocurrency data'
+#                         'example': 'Database connection error'
 #                     },
-#                     'data': {
-#                         'type': 'null'
+#                     'message': {
+#                         'type': 'string',
+#                         'example': 'Failed to fetch topics'
 #                     }
 #                 }
 #             }
@@ -338,7 +319,7 @@ swagger = Swagger()
 
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/categories/global-toggle')
+# success, message = swagger.delete_endpoint(endpoint_route='/schedule_post')
 # print(message)
 
 

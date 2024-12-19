@@ -1,5 +1,6 @@
 import secrets
 from time import timezone
+from routes.analysis.analysis_scheduler import chosen_timezone
 from sqlalchemy import (
     JSON, Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Float, 
     create_engine
@@ -26,15 +27,26 @@ import os
 
 load_dotenv()
 
+# Database configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 env = os.getenv('FLASK_ENV', 'development')
-DATABASE_URL = os.getenv('DATABASE_URL_DEV')
 
-if env == 'production':
-    DATABASE_URL = os.getenv('DATABASE_URL_PROD')
+# Set database URL based on environment
+DATABASE_URL = os.getenv('DATABASE_URL_PROD') if env == 'production' else os.getenv('DATABASE_URL_DEV')
 
-engine = create_engine(DATABASE_URL, pool_size=30, max_overflow=20)
+# Configure SQLAlchemy engine with timezone support
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=30,
+    max_overflow=20,
+    connect_args={
+        'options': f'-c timezone={chosen_timezone.zone}'
+    }
+)
+
+# Initialize declarative base
 Base = declarative_base()
+
 
 # _________________________ AI ALPHA DASHBOARD TABLES _______________________________________
 
@@ -1130,15 +1142,26 @@ class DailyMacroAnalysis(Base):
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
-    category = Column(String(100), nullable=False)
+    category_name = Column(String(100), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
     coin_bot = relationship('CoinBot', back_populates='daily_macro_analyses')
 
-    def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    def to_dict(self):
+        result = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            # Convert timezone-aware timestamps to scheduler timezone
+            if isinstance(value, datetime) and value.tzinfo is not None:
+                value = value.astimezone(chosen_timezone)
+            result[column.name] = value
+        return result
+
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class SpotlightAnalysis(Base):
     """
@@ -1150,15 +1173,19 @@ class SpotlightAnalysis(Base):
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id'), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(500))
-    category = Column(String(100), nullable=False)
+    category_name = Column(String(100), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
     coin_bot = relationship('CoinBot', back_populates='spotlight_analyses')
 
-    def as_dict(self):
+    def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    @classmethod
+    def create_entry(cls, content, image_url, category_name, coin_bot_id):
+        return cls(content=content, image_url=image_url, category_name=category_name, coin_bot_id=coin_bot_id)
 
 class Chart(Base):
     """
@@ -1945,10 +1972,10 @@ def populate_topics():
                 references_str = ', '.join(references)
                 # Define all topic variations we need to check/create
                 topic_variations = [
-                    {'name': name, 'timeframe': '1h', 'type': 'alert'},
-                    {'name': name, 'timeframe': '4h', 'type': 'alert'},
-                    {'name': f'{name}_deep_dive', 'timeframe': None, 'type': 'deep_dive'},
+                    {'name': f'{name}_alerts_1d', 'timeframe': '1d', 'type': 'alerts'},
+                    {'name': f'{name}_alerts_1w', 'timeframe': '1w', 'type': 'alerts'},
                     {'name': f'{name}_s_and_r', 'timeframe': None, 'type': 'support_resistance'},
+                    {'name': f'{name}_deep_dive', 'timeframe': None, 'type': 'deep_dive'},
                     {'name': f'{name}_narratives', 'timeframe': None, 'type': 'narratives'},
                     {'name': f'{name}_daily_macro', 'timeframe': None, 'type': 'daily_macro'},
                     {'name': f'{name}_spotlight', 'timeframe': None, 'type': 'spotlight'}
@@ -2104,10 +2131,8 @@ def populate_sections():
         print(f"Unexpected error in populate_sections: {str(e)}")
         return False
 
-    finally:
-        # Always close the session
-        session.close()
 
+# populate_sections()
 
 # -------------- ADD COINGECKO IDS AND SYMBOLS ------------------------
 
@@ -2237,28 +2262,17 @@ def init_coingecko_data():
             print(f"Unexpected error: {str(e)}")
 
 
+# init_coingecko_data()
 
 def init_data():
-    """
-    Initialize application data by populating various database tables and configurations.
-    
-    This function orchestrates the initialization of different data components:
-    - Sections: Populates predefined sections for content organization
-    - Topics: Creates default notification topics
-    - Users: Sets up initial user accounts and roles
-    - API Keys: Generates superadmin API credentials
-    - Categories & Coins: Populates cryptocurrency data
-    - CoinGecko Data: Initializes external price data
-    - Roles: Sets up default user roles and permissions
-    """
-    populate_sections()
     populate_topics()
-    init_superadmin()
-    init_user_data()
-    create_superadmin_api_key()
-    populate_categories_and_coins()
-    init_coingecko_data()
-    initialize_default_roles()
+    # initialize_default_roles()
+    # init_user_data()
+    # populate_categories_and_coins()
+    # init_superadmin()
+    # create_superadmin_api_key()
+    # populate_sections()
+    # init_coingecko_data()
 
 
-# init_data()
+init_data()
