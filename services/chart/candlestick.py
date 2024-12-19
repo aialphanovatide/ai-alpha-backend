@@ -153,7 +153,7 @@ import requests
 import numpy as np
 import pandas as pd
 import bokeh.plotting as bk
-# from ws.socket import socketio
+from ws.socket import socketio
 from typing import List, Literal
 from bokeh.layouts import layout, column, grid
 from bokeh.resources import CDN
@@ -426,7 +426,7 @@ class ChartWidget:
                 'Volume': df['Volume'].tolist()
             }
                 
-            # socketio.emit('update', new_data, namespace='/chart')
+            socketio.emit('update', new_data, namespace='/chart')
 
         except Exception as e:
             print(f"Error updating chart: {e}")
@@ -563,6 +563,42 @@ class ChartWidget:
         x_range, x_range_callback = self._setup_x_range(time_min, time_max)
         callback, y_range = self._calculate_y_range(time_min, time_max)
 
+        # Add document ready callback to trigger initial update
+        doc_ready_callback = CustomJS(
+            args=dict(y_range=y_range, source=self.source, x_range=x_range),
+            code="""
+            function updateYRange(start, end) {
+                const data = source.data;
+                const time = data['Open Time'];
+                
+                // Find indices of visible points
+                let visible_indices = [];
+                for (let i = 0; i < time.length; i++) {
+                    if (time[i] >= start && time[i] <= end) {
+                        visible_indices.push(i);
+                    }
+                }
+                
+                // Calculate min and max of visible points
+                let min_price = Infinity;
+                let max_price = -Infinity;
+                
+                for (let i of visible_indices) {
+                    min_price = Math.min(min_price, data['Low'][i]);
+                    max_price = Math.max(max_price, data['High'][i]);
+                }
+                
+                // Add some padding (5%)
+                const padding = (max_price - min_price) * 0.05;
+                y_range.start = min_price - padding;
+                y_range.end = max_price + padding;
+            }
+            
+            // Initial update when document is ready
+            updateYRange(x_range.start, x_range.end);
+            """
+        )
+
         # Create main figure
         self.logger.debug("Creating main figure")
         self.p = bk.figure(
@@ -580,16 +616,16 @@ class ChartWidget:
 
         logo_url = 'https://aialpha.ai/static/images/navbarLogo.png'
 
-        # Style and populate the figure
+        # Styles and populates the figure
         self.logger.debug("Styling and populating figure")
         self.style_figure(self.p)
         self.add_candlesticks(self.p)
         self.add_current_price_element(self.p)
         self.add_support_resistance_levels(self.p)
 
-        # Add callbacks
+        # Adds callbacks
         self.logger.debug("Adding callbacks")
-        self.p.js_on_event('document_ready', callback)
+        self.p.js_on_event('document_ready', doc_ready_callback)
         x_range.js_on_change('start', callback)
         x_range.js_on_change('end', callback)
 
@@ -597,7 +633,7 @@ class ChartWidget:
         self.logger.debug("Adding technical indicators")
         chart_with_indicators = self.add_technical_indicators(self.p)
 
-        # Create a container div with relative positioning
+        # Creates a container div with relative positioning
         container_div = Div(
             text='<div style="position: relative; width: 100%; height: 100%;"></div>',
             sizing_mode="stretch_both"
@@ -630,19 +666,55 @@ class ChartWidget:
             sizing_mode="fixed"
         )
 
-        # Create the final layout
+        # Creates the final layout
         if chart_with_indicators:
             chart_element = chart_with_indicators
         else:
             chart_element = self.p
 
-        # Create the final layout using column
+
+        # css_styles = Div(text="""
+        # <style>
+        #     .chart-container {
+        #         position: relative;
+        #         width: 100%;
+        #         height: 100%;
+        #         background-color: transparent;
+        #         overflow: hidden;  /* Prevent content overflow */
+        #     }
+            
+        #     .chart-container > div {
+        #         position: relative;
+        #         width: 100%;
+        #         height: 100%;
+        #     }
+            
+        #     /* Style for the logo overlay */
+        #     .chart-container .bk-logo {
+        #         position: absolute;
+        #         right: 10px;
+        #         bottom: 10px;
+        #         width: 90px;
+        #         height: 90px;
+        #         z-index: 1000;
+        #         pointer-events: none;
+        #         opacity: 0.8;
+        #     }
+        # </style>
+        # """)
+        
         final_layout = column(
             [chart_element, logo_div],
-            sizing_mode="stretch_both"
+            sizing_mode="stretch_both",
+            spacing=0,
+            margin=0,
+            css_classes=["chart-container"],
+            width_policy="max",
+            height_policy="max",
+            align="center"
         )
 
-        # Store the layout for other methods to use
+        # Stores the layout for other methods to use
         self.chart_layout = final_layout
         self.logger.debug("Finished creating candlestick chart")
         return final_layout
@@ -737,12 +809,50 @@ class ChartWidget:
                 y_range.end = max_price + padding;
             }
             
-            // Only update on range changes
+            // Update on range changes
             updateYRange(cb_obj.start, cb_obj.end);
             """
         )
 
         return callback, y_range
+
+        # # Callback to update y-range based on visible x-range
+        # callback = CustomJS(
+        #     args=dict(y_range=y_range, source=self.source, initial_start=time_min, initial_end=time_max),
+        #     code="""
+        #     function updateYRange(start, end) {
+        #         const data = source.data;
+        #         const time = data['Open Time'];
+                
+        #         // Find indices of visible points
+        #         let visible_indices = [];
+        #         for (let i = 0; i < time.length; i++) {
+        #             if (time[i] >= start && time[i] <= end) {
+        #                 visible_indices.push(i);
+        #             }
+        #         }
+                
+        #         // Calculate min and max of visible points
+        #         let min_price = Infinity;
+        #         let max_price = -Infinity;
+                
+        #         for (let i of visible_indices) {
+        #             min_price = Math.min(min_price, data['Low'][i]);
+        #             max_price = Math.max(max_price, data['High'][i]);
+        #         }
+                
+        #         // Add some padding (5%)
+        #         const padding = (max_price - min_price) * 0.05;
+        #         y_range.start = min_price - padding;
+        #         y_range.end = max_price + padding;
+        #     }
+            
+        #     // Only update on range changes
+        #     updateYRange(cb_obj.start, cb_obj.end);
+        #     """
+        # )
+
+        # return callback, y_range
 
     def style_figure(self, p):
         p.outline_line_color = None
@@ -973,10 +1083,10 @@ class ChartWidget:
         
         # Create ColumnDataSource for current price label
         self.current_price_label_source = ColumnDataSource({
-        'x': [self.df['Open Time'].max()],
-        'y': [current_price],
-        'text': [f'${current_price:,.2f}'],
-        'color': [self.config.bullish_color]  # Default to bullish color initially
+            'x': [self.df['Open Time'].max()],
+            'y': [current_price],
+            'text': [f'${current_price:,.2f}'],
+            'color': [self.config.bullish_color]  # Default to bullish color initially
         }, name='current_price_label_source')
 
         # Create ColumnDataSource for current price line
@@ -1009,7 +1119,6 @@ class ChartWidget:
                background_fill_color=self.config.background_color,
                background_fill_alpha=0.8,
                border_line_color=self.config.text_color,
-            #    border_line_width=0.5,
                padding=5,
                level='overlay',
                name='current_price_label',
@@ -1139,22 +1248,22 @@ class ChartWidget:
                     line_width=1
                 )
 
-                # Add support labels
-                p.text(
-                    x='x',
-                    y='y',
-                    text='text',
-                    source=support_label_source,
-                    text_color=self.config.text_color,
-                    text_font_size=self.config.label_font_size,
-                    text_align='left',
-                    text_baseline='middle',
-                    x_offset=10,
-                    background_fill_color=self.config.support_label_color,
-                    border_radius=5,
-                    background_fill_alpha=0.8,
-                    padding=5
-                )
+            # Add support labels
+            p.text(
+                x='x',
+                y='y',
+                text='text',
+                source=support_label_source,
+                text_color=self.config.text_color,
+                text_font_size=self.config.label_font_size,
+                text_align='left',
+                text_baseline='middle',
+                x_offset=10,
+                background_fill_color=self.config.support_label_color,
+                border_radius=5,
+                background_fill_alpha=0.8,
+                padding=5
+            )
 
         # Add resistance levels with the same formatting
         if self.config.resistance_levels:
@@ -1170,20 +1279,36 @@ class ChartWidget:
                 )
 
                 # Add resistance labels
+        # p.text(
+        #     x='x',
+        #     y='y',
+        #     text='text',
+        #     source=resistance_label_source,
+        #     text_color=self.config.text_color,
+        #     text_font_size=self.config.label_font_size,
+        #     text_align='left',
+        #     text_baseline='middle',
+        #     x_offset=10,
+        #     background_fill_color=self.config.resistance_label_color,
+        #     border_radius=5,
+        #     background_fill_alpha=0.8,
+        #     padding=5
+        # )
+
                 p.text(
                     x='x',
                     y='y',
                     text='text',
                     source=resistance_label_source,
                     text_color=self.config.text_color,
-                    text_font_size=self.config.label_font_size,
+                    text_font_size=self.config.text_price_font_size,
                     text_align='left',
                     text_baseline='middle',
                     x_offset=10,
                     background_fill_color=self.config.resistance_label_color,
                     border_radius=5,
                     background_fill_alpha=0.8,
-                    padding=5
+                    padding=5,
                 )
 
         self.logger.debug("Creating callback for label position updates")
@@ -1192,7 +1317,10 @@ class ChartWidget:
             args=dict(
                 support_source=support_label_source,
                 resistance_source=resistance_label_source,
-                x_range=p.x_range
+                x_range=p.x_range,
+                y_range=p.y_range,
+                support_levels=self.config.support_levels,
+                resistance_levels=self.config.resistance_levels
             ), 
             code="""
                 const start = x_range.start;
@@ -1213,9 +1341,47 @@ class ChartWidget:
             """
         )
 
-        # Attach callback to x_range updates
-        # p.x_range.js_on_change('start', callback)
-        # p.x_range.js_on_change('end', callback)
+
+        # Update callback to handle both lines and labels
+        levels_callback = CustomJS(
+            args=dict(
+                support_label_source=support_label_source,
+                resistance_label_source=resistance_label_source,
+                support_line_source=self.config.support_levels,
+                resistance_line_source=self.config.resistance_levels,
+                x_range=p.x_range,
+                y_range=p.y_range,
+                support_levels=self.config.support_levels,
+                resistance_levels=self.config.resistance_levels
+            ), 
+            code="""
+                const x_start = x_range.start;
+                const x_end = x_range.end;
+                const y_start = y_range.start;
+                const y_end = y_range.end;
+                
+                // Update support lines and labels
+                const support_label_data = support_label_source.data;
+                const support_line_data = support_line_source.data;
+                
+                // Update resistance lines and labels
+                const resistance_label_data = resistance_label_source.data;
+                const resistance_line_data = resistance_line_source.data;
+                
+                // Emit changes
+                support_label_source.change.emit();
+                resistance_label_source.change.emit();
+                support_line_source.change.emit();
+                resistance_line_source.change.emit();
+            """
+        )
+
+        # Attach callback to both x and y range updates
+        p.x_range.js_on_change('start', callback)
+        p.x_range.js_on_change('end', callback)
+        p.y_range.js_on_change('start', callback)
+        p.y_range.js_on_change('end', callback)
+
         self.logger.debug("Finished adding support and resistance levels")
 
     def get_chart_components(self):
@@ -1242,7 +1408,10 @@ class ChartWidget:
             self.logger.error(f"Failed to save chart to {filepath}: {str(e)}")
             raise
         
-
+    def cleanup(self):
+        # Remove callbacks when chart is destroyed
+        self.p.x_range.js_on_change('start', None)
+        self.p.x_range.js_on_change('end', None)
 
 if __name__ == '__main__':
     import webbrowser
