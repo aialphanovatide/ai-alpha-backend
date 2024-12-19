@@ -36,6 +36,8 @@ marshmallow
 gunicorn
 flask_mail
 psutil
+tradingview-datafeed
 flask-caching
 svgwrite
 Pillow
+bokeh

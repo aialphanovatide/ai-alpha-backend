@@ -2116,10 +2116,8 @@ def populate_sections():
         print(f"Unexpected error in populate_sections: {str(e)}")
         return False
 
-    finally:
-        # Always close the session
-        session.close()
 
+# populate_sections()
 
 # -------------- ADD COINGECKO IDS AND SYMBOLS ------------------------
 
@@ -2249,28 +2247,7 @@ def init_coingecko_data():
             print(f"Unexpected error: {str(e)}")
 
 
-
-def init_data():
-    """
-    Initialize application data by populating various database tables and configurations.
-    
-    This function orchestrates the initialization of different data components:
-    - Sections: Populates predefined sections for content organization
-    - Topics: Creates default notification topics
-    - Users: Sets up initial user accounts and roles
-    - API Keys: Generates superadmin API credentials
-    - Categories & Coins: Populates cryptocurrency data
-    - CoinGecko Data: Initializes external price data
-    - Roles: Sets up default user roles and permissions
-    """
-    # populate_sections()
-    populate_topics()
-    # init_superadmin()
-    # init_user_data()
-    # create_superadmin_api_key()
-    # populate_categories_and_coins()
-    # init_coingecko_data()
-    # initialize_default_roles()
+# init_coingecko_data()
 
 
 # init_data()
