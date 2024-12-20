@@ -28,7 +28,6 @@ class NotificationService:
                 - 'daily_macro': For daily macro analysis
                 - 'spotlight': For coin spotlights
             timeframe (str, optional): The timeframe for alerts 1h and 4h. Required when type is 'alert'.
-
         Returns:
             List[Topic]: A list of Topic objects that match the specified criteria.
 
@@ -47,10 +46,11 @@ class NotificationService:
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
                         Topic.timeframe == timeframe  # Match topics with the specified timeframe
                     )
-                elif type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
+
+                elif type in self.types:
                     query = query.filter(
                         Topic.reference.ilike(f"%{coin}%"),  # Match topics with coin reference
-                        Topic.name.ilike(f"%{type}%")  # Match topics with the specified type
+                        Topic.type.ilike(f"%{type}%")  # Match topics with the specified type
                     )
                 else:
                     raise ValueError(f"Invalid notification type: {type}")
@@ -85,7 +85,7 @@ class NotificationService:
             with Session() as session:
                 # Save notifications to database
                 for topic in topics:
-                    if type in ["deep_dive", "narratives", "support_resistance", "daily_macro", "spotlight"]:
+                    if type in self.types:
                         new_notification = Notification(
                             topic_id=topic.id,
                             title=title,
@@ -124,13 +124,3 @@ class NotificationService:
             raise RuntimeError(f"Failed to process notification: {str(e)}")
   
    
-
-# Test
-# notification_service = NotificationService()
-# notification_service.push_notification(
-#     coin="btc",
-#     title="Test",
-#     body="Test",
-#     type="alert",
-#     timeframe="1h"
-# )
