@@ -24,6 +24,8 @@ from pathlib import Path
 import uuid
 import json
 import os
+import jwt
+from flask import current_app
 
 load_dotenv()
 
@@ -477,12 +479,36 @@ class User(Base):
             expires_in (int): Token expiration time in seconds. Default is 1 hour.
 
         Returns:
-            str: The generated reset  token
+            str: The generated JWT reset token
         """
-        token = secrets.token_urlsafe(32)
-        expires_at = datetime.now() + timedelta(seconds=expires_in)
-        
-        return token
+        payload = {
+            'user_id': self.user_id,
+            'exp': datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        }
+        return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
+
+    @staticmethod
+    def verify_reset_token(token, session):
+        """
+        Verify a password reset token and return the associated user.
+
+        Args:
+            token (str): The JWT token to verify
+            session: SQLAlchemy session
+
+        Returns:
+            User or None: The user associated with the token if valid, None otherwise
+        """
+        try:
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = payload.get('user_id')
+            if user_id is None:
+                return None
+            return session.query(User).filter_by(user_id=user_id).first()
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            return None
 
 class PurchasedPlan(Base):
     """
