@@ -1451,12 +1451,11 @@ class Revenue_model(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     coin_bot_id = Column(Integer, ForeignKey('coin_bot.bot_id', ondelete='CASCADE'), nullable=False)
-    analized_revenue = Column(String)
-    fees_1ys = Column(String)
+    analized_revenue = Column(Text)  # Cambiado a Text para aceptar cualquier tipo de contenido
+    fees_1ys = Column(Text)         # Cambiado a Text para aceptar cualquier tipo de contenido
     dynamic = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.now)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-
 
     coin_bot = relationship('CoinBot', back_populates='revenue_model', lazy=True)
 

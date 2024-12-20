@@ -7,25 +7,55 @@ revenue_model_bp = Blueprint('revenue_model_bp', __name__)
 # Creates a revenue model
 @revenue_model_bp.route('/api/create_revenue_model', methods=['POST'])
 def post_revenue_model():
-    try:
-        data = request.json
-        coin_bot_id = data.get('coin_bot_id')
+    """
+    Creates a revenue model with flexible input types.
+    
+    Expected JSON payload:
+    {
+        "coin_bot_id": int,          # Must be integer
+        "analized_revenue": any,     # Can be number or string
+        "fees_1ys": any             # Can be number or string
+    }
+    """
+    with Session() as session:
+        try:
+            data = request.json
+            coin_bot_id = data.get('coin_bot_id')
 
-        if not coin_bot_id:
-            return jsonify({'message': 'Coin ID missing', 'status': 400}), 400 
+            if not coin_bot_id:
+                return jsonify({'message': 'Coin ID missing', 'status': 400}), 400 
 
-        new_revenue = Revenue_model(
-            analized_revenue=data.get('analized_revenue'),
-            fees_1ys=data.get('fees_1ys'),
-            coin_bot_id=coin_bot_id
-        )
-        session.add(new_revenue)
-        session.commit()
-        return jsonify({'message': 'Revenue model created successfully', 'status': 200}), 200
-        
-    except Exception as e:
-        session.rollback()
-        return jsonify({'message': f'Error creating revenue model: {str(e)}', 'status': 500}), 500
+            # Ensure coin_bot_id is an integer
+            try:
+                coin_bot_id = int(coin_bot_id)
+            except (ValueError, TypeError):
+                return jsonify({'message': 'coin_bot_id must be an integer', 'status': 400}), 400
+
+            # Convert values to string to ensure they can be stored
+            analized_revenue = str(data.get('analized_revenue')) if data.get('analized_revenue') is not None else None
+            fees_1ys = str(data.get('fees_1ys')) if data.get('fees_1ys') is not None else None
+
+            new_revenue = Revenue_model(
+                analized_revenue=analized_revenue,
+                fees_1ys=fees_1ys,
+                coin_bot_id=coin_bot_id
+            )
+            
+            session.add(new_revenue)
+            session.commit()
+            
+            return jsonify({
+                'message': 'Revenue model created successfully', 
+                'status': 200,
+                'data': new_revenue.as_dict()
+            }), 200
+            
+        except Exception as e:
+            session.rollback()
+            return jsonify({
+                'message': f'Error creating revenue model: {str(e)}', 
+                'status': 500
+            }), 500
 
 
 # Gets the revenue of a coin
