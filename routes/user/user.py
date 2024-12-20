@@ -1,15 +1,26 @@
 import secrets
 import string
+from dotenv import load_dotenv
+from flask_mail import Message
+from pydantic import validate_email
 from sqlalchemy import exc
 from sqlalchemy.orm import joinedload
-from flask import jsonify, request, Blueprint
+from flask import app, current_app, jsonify, request, Blueprint
 from config import PurchasedPlan, Session, User
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from routes.user.auth import patchPassword
 from routes.user.custom_classes import UserRegistrationSchema, UserEditSchema
 from redis_client.redis_client import cache_with_redis, update_cache_with_redis
+import jwt
+import datetime
+from services.email.email_service import EmailService
+
 
 user_bp = Blueprint('user', __name__)
+
+# Crear una instancia de EmailService
+email_service = EmailService()
 
 def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
@@ -525,4 +536,80 @@ def delete_user_account():
         except Exception as e:
             session.rollback()
             response['message'] = f'Unexpected error: {str(e)}'
+            return jsonify(response), 500
+
+
+@user_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """
+    Request a password reset link for the user.
+    """
+    response = {'success': False, 'message': None}
+    data = request.json
+
+    email = data.get('email')
+    if not email or not validate_email(email):  
+        response['message'] = 'Invalid email format'
+        return jsonify(response), 400
+
+    with Session() as session:
+        try:
+            user = session.query(User).filter_by(email=email).first()
+            if not user:
+                response['message'] = 'Email not found'
+                return jsonify(response), 404
+
+            # Generate reset token using the new method
+            token = user.generate_reset_token()
+            reset_link = f"{request.host_url}reset-password?token={token}"
+            
+            # Send password reset email
+            email_service.send_password_reset_email(user.email, user.nickname, reset_link)
+
+            response['success'] = True
+            response['message'] = 'Password reset link sent to your email'
+            return jsonify(response), 200
+        except Exception as e:
+            response['message'] = f'An error occurred: {str(e)}'
+            return jsonify(response), 500
+
+
+@user_bp.route('/reset-password', methods=['POST'])
+async def reset_password():
+    """
+    Reset the user's password using the provided token.
+    """
+    response = {'success': False, 'message': None}
+    data = request.json
+
+    token = data.get('token')
+    new_password = data.get('new_password')
+
+    if not token or not new_password:
+        response['message'] = 'Token and new password are required'
+        return jsonify(response), 400
+
+    with Session() as session:
+        try:
+            # Verify token and get user
+            user = User.verify_reset_token(token, session)
+            if not user:
+                response['message'] = 'Invalid or expired token'
+                return jsonify(response), 400
+
+            # Update password in Auth0
+            await patchPassword(user.email, new_password)
+
+            response['success'] = True
+            response['message'] = 'Password updated successfully'
+            return jsonify(response), 200
+
+        except jwt.ExpiredSignatureError:
+            response['message'] = 'Reset token has expired'
+            return jsonify(response), 400
+        except jwt.InvalidTokenError:
+            response['message'] = 'Invalid reset token'
+            return jsonify(response), 400
+        except Exception as e:
+            response['message'] = f'An unexpected error occurred: {str(e)}'
             return jsonify(response), 500
