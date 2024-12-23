@@ -20,8 +20,8 @@ from routes.fundamentals.upgrades import upgrades_bp
 from routes.telegram.email_invitation_link.invitation_link import send_email_bp
 from routes.fundamentals.revenue_model import revenue_model_bp
 from routes.fundamentals.dapps import dapps_bp
-from routes.news_bot.used_keywords import news_bots_features_bp
-from routes.news_bot.index import scrapper_bp
+# from routes.news_bot.used_keywords import news_bots_features_bp
+# from routes.news_bot.index import scrapper_bp
 from routes.narrative_trading.narrative_trading import narrative_trading_bp
 from routes.user.user import user_bp
 from routes.coingecko.coingecko_usage import coingecko_bp
@@ -37,22 +37,18 @@ from routes.external_apis.binance import binance_bp
 from routes.analysis.sections import sections_bp
 from routes.coins.coins import coin_bp
 from routes.ask_ai.ask_ai import ask_ai_bp
-from ws.socket import emit_notification
 from flasgger import Swagger
+from routes.alerts.topics import topics_bp
 from decorators.api_key import check_api_key
 from services.email.email_service import EmailService
 from ws.socket import init_socketio
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-
 app.name = 'AI Alpha API'
-
-swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
-
 app.static_folder = 'static'
 app.secret_key = os.urandom(24)
+swagger_template_path = os.path.join(app.root_path, 'static', 'swagger.json')
 
-template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 # Check API key for all requests
 @app.before_request
@@ -105,8 +101,9 @@ CORS(app, origins='*', supports_credentials=True)
 
 
 # Register blueprints -  routes
-app.register_blueprint(scrapper_bp)
-app.register_blueprint(news_bots_features_bp)
+# app.register_blueprint(scrapper_bp)
+# app.register_blueprint(news_bots_features_bp)
+app.register_blueprint(topics_bp)
 app.register_blueprint(chart_bp)
 app.register_blueprint(healthcheck)
 app.register_blueprint(chart_graphs_bp)

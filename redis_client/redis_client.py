@@ -1,27 +1,49 @@
 import json
+import logging
 from functools import wraps
+from typing import Dict, Any
 from flask import request, Response, jsonify
 import redis
 import os
+from dotenv import load_dotenv
 
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
-REDIS_DB = int(os.getenv('REDIS_DB', 0))
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+# Load environment variables
+load_dotenv()
 
-redis_client_args = {
-    'host': REDIS_HOST,
-    'port': REDIS_PORT,
-    'db': REDIS_DB,
-    'decode_responses': True
+# Redis configuration
+REDIS_CONFIG = {
+    'host': os.getenv('REDIS_HOST', 'localhost'),
+    'port': int(os.getenv('REDIS_PORT', 6379)),
+    'db': int(os.getenv('REDIS_DB', 0)),
+    'decode_responses': True,
+    'socket_timeout': 5,
+    'socket_connect_timeout': 5,
+    'retry_on_timeout': True
 }
 
-if REDIS_PASSWORD:
-    redis_client_args['password'] = REDIS_PASSWORD
+# Add password if provided
+if redis_password := os.getenv('REDIS_PASSWORD'):
+    REDIS_CONFIG['password'] = redis_password
 
-redis_client = redis.Redis(**redis_client_args)
-redis_client.ping()
-print("---- Redis client connected ----")
+# Logging configuration
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+try:
+    # Initialize Redis client with configuration
+    redis_client = redis.Redis(**REDIS_CONFIG)
+    # Test connection
+    redis_client.ping()
+    logger.info("Redis client successfully connected")
+except redis.ConnectionError as e:
+    logger.error(f"Failed to connect to Redis: {str(e)}")
+    raise
+except Exception as e:
+    logger.error(f"Unexpected error while connecting to Redis: {str(e)}")
+    raise
 
 
 def reset_redis_cache():
@@ -37,8 +59,10 @@ def reset_redis_cache():
    """
    try:
        redis_client.flushdb()
+       logger.info("Redis cache cleared successfully")
        return {'message': 'Redis cache cleared successfully'}, 200
    except Exception as e:
+       logger.error(f"Failed to clear Redis cache: {str(e)}")
        return {'error': f'Failed to clear Redis cache: {str(e)}'}, 500
 
 
