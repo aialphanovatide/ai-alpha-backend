@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from config import Introduction, session, CoinBot
 from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
 
 introduction = Blueprint('introduction', __name__)
 
@@ -10,29 +11,72 @@ introduction = Blueprint('introduction', __name__)
 def create_content():
     try:
         data = request.get_json()
+        
+        # Convert coin_bot_id to integer and validate it exists
+        try:
+            coin_bot_id = int(data.get('coin_bot_id'))
+        except (TypeError, ValueError):
+            return jsonify({
+                'message': 'Invalid coin_bot_id format - must be an integer', 
+                'status': 400
+            }), 400
 
-        coin_bot_id = data.get('coin_bot_id')
+        # Validate required fields
         content = data.get('content')
-        website = data.get('website', None)
-        whitepaper = data.get('whitepaper', None)
+        if not content:
+            return jsonify({
+                'message': 'Content is required',
+                'status': 400
+            }), 400
 
-        existing_introduction = session.query(Introduction).filter_by(coin_bot_id=int(coin_bot_id)).first()
+        # Check if coin_bot exists
+        coin_bot = session.query(CoinBot).filter_by(bot_id=coin_bot_id).first()
+        if not coin_bot:
+            return jsonify({
+                'message': f'CoinBot with ID {coin_bot_id} does not exist',
+                'status': 404
+            }), 404
 
-        if existing_introduction:
-            return jsonify({'message': 'A record already exists for this Coin', 'status': 400}), 400
+        # Check for existing introduction
+        existing_intro = session.query(Introduction).filter_by(coin_bot_id=coin_bot_id).first()
+        if existing_intro:
+            return jsonify({
+                'message': 'An introduction already exists for this CoinBot',
+                'status': 409
+            }), 409
 
-        new_introduction = Introduction(coin_bot_id=coin_bot_id, 
-                                        content=content,
-                                        website=website,
-                                        whitepaper=whitepaper
-                                        )
+        # Create new introduction
+        new_introduction = Introduction(
+            coin_bot_id=coin_bot_id,
+            content=content,
+            website=data.get('website'),
+            whitepaper=data.get('whitepaper'),
+            dynamic=data.get('dynamic', False)
+        )
+        
         session.add(new_introduction)
         session.commit()
-        return jsonify({'message': 'Introduction created successfully', 'status': 200}), 200
         
+        return jsonify({
+            'message': 'Introduction created successfully',
+            'status': 201,
+            'data': new_introduction.as_dict()
+        }), 201
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        return jsonify({
+            'message': f'Database error: {str(e)}',
+            'status': 500
+        }), 500
     except Exception as e:
         session.rollback()
-        return jsonify({'message': str(e), 'status': 500}), 500
+        return jsonify({
+            'message': f'Unexpected error: {str(e)}',
+            'status': 500
+        }), 500
+    finally:
+        session.close()
     
 
 
