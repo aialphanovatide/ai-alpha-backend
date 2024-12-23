@@ -29,14 +29,12 @@ class ImageGenerator:
         Generate an image based on the given article using DALL-E.
         """
         try:
-            # Generate DALL-E prompt using GPT-4
             gpt_prompt = (
                 "Generate a DALL-E prompt related to this article. "
                 "Create an abstract, artistic description without specific names, "
                 "letters, numbers, or words. Maximum 400 characters:"
             )
             
-            print("Generating GPT prompt...")
             gpt_response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=[
@@ -60,15 +58,11 @@ class ImageGenerator:
                 style="vivid"
             )
             
-            image_url = dalle_response.data[0].url
-            print(f"Successfully generated image: {image_url[:50]}...")
-            
+            image_url = dalle_response.data[0].url            
             return image_url
         
         except Exception as e:
             error_msg = f"Error generating image: {str(e)}"
-            print(error_msg)
-            # Enviar error a Slack para monitoreo
             send_INFO_message_to_slack_channel(error_msg)
             raise Exception(error_msg)
 
