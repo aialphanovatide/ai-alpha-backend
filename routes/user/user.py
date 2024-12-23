@@ -543,56 +543,41 @@ def delete_user_account():
 def forgot_password():
     """
     Request a password reset link for the user.
-
-    Request JSON:
-        - email (str): The email address of the user.
-
-    Returns:
-        Response: JSON response indicating success or failure.
     """
     response = {'success': False, 'message': None}
     data = request.json
 
     email = data.get('email')
-    if not email or not validate_email(email):  # Implement validate_email function
+    if not email or not validate_email(email):  
         response['message'] = 'Invalid email format'
         return jsonify(response), 400
 
     with Session() as session:
-        user = session.query(User).filter_by(email=email).first()
-        if not user:
-            response['message'] = 'Email not found'
-            return jsonify(response), 404
+        try:
+            user = session.query(User).filter_by(email=email).first()
+            if not user:
+                response['message'] = 'Email not found'
+                return jsonify(response), 404
 
-        # Generate a unique token
-        token = jwt.encode({
-            'user_id': user.user_id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # 1 hour expiration
-        }, current_app.config['SECRET_KEY'], algorithm='HS256')
+            # Generate reset token using the new method
+            token = user.generate_reset_token()
+            reset_link = f"{request.host_url}reset-password?token={token}"
+            
+            # Send password reset email
+            email_service.send_password_reset_email(user.email, user.nickname, reset_link)
 
-        # Store the token in the database (you may want to create a new model for this)
-        # Example: store_token_in_db(user.user_id, token)
-
-        # Send password reset email using EmailService
-        reset_link = f"{request.host_url}reset-password?token={token}"
-        email_service.send_password_reset_email(user.email, user.username, reset_link)
-
-        response['success'] = True
-        response['message'] = 'Password reset link sent to your email'
-        return jsonify(response), 200
+            response['success'] = True
+            response['message'] = 'Password reset link sent to your email'
+            return jsonify(response), 200
+        except Exception as e:
+            response['message'] = f'An error occurred: {str(e)}'
+            return jsonify(response), 500
 
 
 @user_bp.route('/reset-password', methods=['POST'])
 async def reset_password():
     """
     Reset the user's password using the provided token.
-
-    Request JSON:
-        - token (str): The reset token.
-        - new_password (str): The new password.
-
-    Returns:
-        Response: JSON response indicating success or failure.
     """
     response = {'success': False, 'message': None}
     data = request.json
@@ -604,24 +589,27 @@ async def reset_password():
         response['message'] = 'Token and new password are required'
         return jsonify(response), 400
 
-    try:
-        # Decode the token
-        payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
-        user_id = payload['user_id']
+    with Session() as session:
+        try:
+            # Verify token and get user
+            user = User.verify_reset_token(token, session)
+            if not user:
+                response['message'] = 'Invalid or expired token'
+                return jsonify(response), 400
 
-        # Update the password using Auth0 API
-        await patchPassword(user_id, new_password)  # Implement patchPassword to use Auth0 API
+            # Update password in Auth0
+            await patchPassword(user.email, new_password)
 
-        response['success'] = True
-        response['message'] = 'Password updated successfully'
-        return jsonify(response), 200
+            response['success'] = True
+            response['message'] = 'Password updated successfully'
+            return jsonify(response), 200
 
-    except jwt.ExpiredSignatureError:
-        response['message'] = 'Reset token has expired'
-        return jsonify(response), 400
-    except jwt.InvalidTokenError:
-        response['message'] = 'Invalid reset token'
-        return jsonify(response), 400
-    except Exception as e:
-        response['message'] = f'An unexpected error occurred: {str(e)}'
-        return jsonify(response), 500
+        except jwt.ExpiredSignatureError:
+            response['message'] = 'Reset token has expired'
+            return jsonify(response), 400
+        except jwt.InvalidTokenError:
+            response['message'] = 'Invalid reset token'
+            return jsonify(response), 400
+        except Exception as e:
+            response['message'] = f'An unexpected error occurred: {str(e)}'
+            return jsonify(response), 500
