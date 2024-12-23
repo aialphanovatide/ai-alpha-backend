@@ -10,8 +10,7 @@ introduction = Blueprint('introduction', __name__)
 @introduction.route('/post_introduction', methods=['POST'])
 def create_content():
     try:
-        data = request.get_json()
-        
+        data = request.get_json()        
         # Convert coin_bot_id to integer and validate it exists
         try:
             coin_bot_id = int(data.get('coin_bot_id'))
@@ -54,6 +53,7 @@ def create_content():
             dynamic=data.get('dynamic', False)
         )
         
+
         session.add(new_introduction)
         session.commit()
         
@@ -133,7 +133,7 @@ def edit_content(coin_bot_id):
             if 'whitepaper' in data and data['whitepaper'] != '':
                 existing_introduction.whitepaper = data['whitepaper']
 
-            existing_introduction.updated_at = datetime.utcnow()
+            existing_introduction.updated_at = datetime.now()
             session.commit()
 
             return jsonify({'message': 'Introduction updated successfully', 'status': 200}), 200
