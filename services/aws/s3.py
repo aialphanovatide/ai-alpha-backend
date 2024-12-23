@@ -46,9 +46,6 @@ class ImageProcessor:
         """
         Fetch an image from a URL.
 
-        This method sends a GET request to the specified URL to retrieve the image content.
-        It uses a timeout of 10 seconds to prevent hanging on slow connections.
-
         Args:
             image_url (str): URL of the image to fetch.
 
@@ -56,15 +53,27 @@ class ImageProcessor:
             bytes: The raw image content.
 
         Raises:
-            RequestException: If there's an error fetching the image, such as network issues,
-                              invalid URLs, or server errors.
-
-        Note:
-            This method does not validate the content type of the response. It's the caller's
-            responsibility to ensure that the URL points to a valid image resource.
+            RequestException: If there's an error fetching the image.
         """
         try:
-            response = requests.get(image_url, timeout=10)
+            # Check if it's a DALL-E URL
+            if "oaidalleapiprodscus.blob.core.windows.net" in image_url:
+                # Use OpenAI client to regenerate the image
+                from services.openai.dalle import ImageGenerator
+                image_generator = ImageGenerator()
+                new_url = image_generator.generate_image(
+                    "Regenerate the previous image",
+                    size="1024x1024"
+                )
+                # Use the new URL
+                image_url = new_url
+
+            # Add headers for better compatibility
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(image_url, headers=headers, timeout=10)
             response.raise_for_status()
             return response.content
         except RequestException as e:
@@ -217,34 +226,29 @@ class ImageProcessor:
                                  target_size: Tuple[int, int] = (1024, 1024)) -> Optional[str]:
         """
         Fetch, resize, and upload an image to S3.
-
-        This method performs the following steps:
-        1. Fetches the image from the provided URL.
-        2. Resizes the image to the specified target size.
-        3. Uploads the resized image to the specified S3 bucket.
-
-        Args:
-            image_url (str): URL of the image to be processed and uploaded.
-            bucket_name (str): Name of the S3 bucket where the image will be uploaded.
-            image_filename (str): Desired filename for the image in S3.
-            target_size (Tuple[int, int], optional): Desired size for the resized image. 
-                                                     Default is (1024, 1024).
-
-        Returns:
-            Optional[str]: URL of the uploaded image in S3 if successful, None otherwise.
-
-        Raises:
-            RequestException: If there's an error fetching the image from the URL.
-            IOError: If there's an error processing (resizing) the image.
-            BotoCoreError: If there's an error interacting with AWS S3.
-            Exception: For any other unexpected errors.
         """
-        try:
-            image_content = self.fetch_image(image_url)
-            resized_image = self.resize_image(image_content, target_size)
-            return self.upload_to_s3(resized_image, bucket_name, image_filename)
-        except Exception as e:
-            raise Exception(f"Unexpected error processing and uploading image: {e}")
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                # Intenta obtener la imagen
+                image_content = self.fetch_image(image_url)
+                
+                # Procesa y redimensiona la imagen
+                resized_image = self.resize_image(image_content, target_size)
+                
+                # Sube la imagen a S3
+                return self.upload_to_s3(resized_image, bucket_name, image_filename)
+                
+            except RequestException as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise Exception(f"Failed to fetch image after {max_retries} attempts: {e}")
+                continue
+                
+            except Exception as e:
+                raise Exception(f"Unexpected error processing and uploading image: {e}")
     
 
 # Usage Example:
