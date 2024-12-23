@@ -10,6 +10,7 @@ introduction = Blueprint('introduction', __name__)
 def create_content():
     try:
         data = request.get_json()
+        current_time = datetime.now()
 
         coin_bot_id = data.get('coin_bot_id')
         content = data.get('content')
@@ -24,7 +25,9 @@ def create_content():
         new_introduction = Introduction(coin_bot_id=coin_bot_id, 
                                         content=content,
                                         website=website,
-                                        whitepaper=whitepaper
+                                        whitepaper=whitepaper,
+                                        created_at=current_time,
+                                        updated_at=current_time
                                         )
         session.add(new_introduction)
         session.commit()
@@ -89,7 +92,7 @@ def edit_content(coin_bot_id):
             if 'whitepaper' in data and data['whitepaper'] != '':
                 existing_introduction.whitepaper = data['whitepaper']
 
-            existing_introduction.updated_at = datetime.utcnow()
+            existing_introduction.updated_at = datetime.now()
             session.commit()
 
             return jsonify({'message': 'Introduction updated successfully', 'status': 200}), 200
