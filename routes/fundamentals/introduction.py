@@ -133,7 +133,7 @@ def edit_content(coin_bot_id):
             if 'whitepaper' in data and data['whitepaper'] != '':
                 existing_introduction.whitepaper = data['whitepaper']
 
-            existing_introduction.updated_at = datetime.utcnow()
+            existing_introduction.updated_at = datetime.now()
             session.commit()
 
             return jsonify({'message': 'Introduction updated successfully', 'status': 200}), 200
