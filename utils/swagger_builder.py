@@ -146,18 +146,13 @@ swagger = Swagger()
 
 # ____Add or update an endpoint____
 
-# # 1. POST /post_introduction
+# # POST /revenue_model
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/introduction',
+#     endpoint_route='/revenue_model',
 #     method='post',
-#     tag='Introduction',
-#     summary='Create a new introduction for a coin',
-#     description='''
-#     Creates a new introduction entry for a specific coin.
-    
-#     This endpoint allows you to create an introduction with required content, website, and whitepaper information.
-#     Each coin can only have one introduction. Attempting to create multiple introductions for the same coin will result in an error.
-#     ''',
+#     tag='Revenue Model',
+#     summary='Create a revenue model',
+#     description='Create a new revenue model for a specific coin',
 #     params=[],
 #     request_body={
 #         'content-type': 'application/json',
@@ -168,51 +163,28 @@ swagger = Swagger()
 #                 'description': 'ID of the coin',
 #                 'example': 1
 #             },
-#             'content': {
+#             'analized_revenue': {
 #                 'type': 'string',
-#                 'description': 'Introduction content',
-#                 'example': 'This is a detailed introduction about the coin...'
-#             },
-#             'website': {
-#                 'type': 'string',
-#                 'description': 'Official website URL',
-#                 'example': 'https://example.com'
-#             },
-#             'whitepaper': {
-#                 'type': 'string',
-#                 'description': 'Whitepaper URL',
-#                 'example': 'https://example.com/whitepaper.pdf'
-#             },
-#             'dynamic': {
-#                 'type': 'boolean',
-#                 'description': 'Whether the introduction is dynamic',
-#                 'example': False
+#                 'description': 'Analyzed revenue information',
+#                 'example': 'Detailed revenue analysis...'
 #             }
 #         }
 #     },
 #     responses={
 #         '201': {
-#             'description': 'Introduction created successfully',
+#             'description': 'Revenue model created successfully',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': True
-#                     },
-#                     'message': {
-#                         'type': 'string',
-#                         'example': 'Introduction created successfully'
-#                     },
+#                     'success': {'type': 'boolean', 'example': True},
+#                     'message': {'type': 'string', 'example': 'Revenue model created successfully'},
 #                     'data': {
 #                         'type': 'object',
 #                         'properties': {
 #                             'id': {'type': 'integer', 'example': 1},
-#                             'coin_id': {'type': 'integer', 'example': 1},
-#                             'content': {'type': 'string', 'example': 'Introduction content'},
-#                             'website': {'type': 'string', 'example': 'https://example.com'},
-#                             'whitepaper': {'type': 'string', 'example': 'https://example.com/whitepaper.pdf'},
-#                             'dynamic': {'type': 'boolean', 'example': False},
+#                             'coin_bot_id': {'type': 'integer', 'example': 1},
+#                             'analized_revenue': {'type': 'string', 'example': 'Detailed revenue analysis...'},
+#                             'dynamic': {'type': 'boolean', 'example': True},
 #                             'created_at': {'type': 'string', 'format': 'date-time'},
 #                             'updated_at': {'type': 'string', 'format': 'date-time'}
 #                         }
@@ -226,44 +198,47 @@ swagger = Swagger()
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': False},
-#                     'message': {'type': 'string', 'example': 'content is required'}
+#                     'message': {'type': 'string', 'example': 'coin_id and analized_revenue are required'}
 #                 }
 #             }
 #         },
 #         '409': {
-#             'description': 'Conflict - Introduction already exists',
+#             'description': 'Conflict',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': False},
-#                     'message': {'type': 'string', 'example': 'An introduction already exists for this coin'}
+#                     'message': {'type': 'string', 'example': 'Revenue model already exists for this coin'}
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Server error',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'Database error: [error details]'}
 #                 }
 #             }
 #         }
 #     }
 # )
 
-# # 2. GET /api/get_introduction
+# # GET /revenue_model/{coin_id}
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/introduction',
+#     endpoint_route='/revenue_model/{coin_id}',
 #     method='get',
-#     tag='Introduction',
-#     summary='Get introduction by coin ID or name',
-#     description='Retrieve the introduction information for a specific coin using either the coin ID or coin name.',
+#     tag='Revenue Model',
+#     summary='Get revenue model',
+#     description='Retrieve the revenue model for a specific coin',
 #     params=[
 #         {
-#             'name': 'id',
-#             'in': 'query',
-#             'description': 'Coin ID',
-#             'required': False,
+#             'name': 'coin_id',
+#             'in': 'path',
+#             'description': 'ID of the coin',
+#             'required': True,
 #             'type': 'integer'
-#         },
-#         {
-#             'name': 'coin_name',
-#             'in': 'query',
-#             'description': 'Name of the coin',
-#             'required': False,
-#             'type': 'string'
 #         }
 #     ],
 #     responses={
@@ -277,11 +252,9 @@ swagger = Swagger()
 #                         'type': 'object',
 #                         'properties': {
 #                             'id': {'type': 'integer', 'example': 1},
-#                             'coin_id': {'type': 'integer', 'example': 1},
-#                             'content': {'type': 'string', 'example': 'Introduction content'},
-#                             'website': {'type': 'string', 'example': 'https://example.com'},
-#                             'whitepaper': {'type': 'string', 'example': 'https://example.com/whitepaper.pdf'},
-#                             'dynamic': {'type': 'boolean', 'example': False},
+#                             'coin_bot_id': {'type': 'integer', 'example': 1},
+#                             'analized_revenue': {'type': 'string', 'example': 'Detailed revenue analysis...'},
+#                             'dynamic': {'type': 'boolean', 'example': True},
 #                             'created_at': {'type': 'string', 'format': 'date-time'},
 #                             'updated_at': {'type': 'string', 'format': 'date-time'}
 #                         }
@@ -289,36 +262,36 @@ swagger = Swagger()
 #                 }
 #             }
 #         },
-#         '400': {
-#             'description': 'Invalid request',
+#         '404': {
+#             'description': 'Not found',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': False},
-#                     'message': {'type': 'string', 'example': 'Either id or coin_name is required'}
+#                     'message': {'type': 'string', 'example': 'No revenue model found for this coin'}
 #                 }
 #             }
 #         },
-#         '404': {
-#             'description': 'Introduction not found',
+#         '500': {
+#             'description': 'Server error',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': False},
-#                     'message': {'type': 'string', 'example': 'No introduction found for the specified coin'}
+#                     'message': {'type': 'string', 'example': 'Database error: [error details]'}
 #                 }
 #             }
 #         }
 #     }
 # )
 
-# # 3. PUT /edit_introduction/{coin_bot_id}
+# # PUT /revenue_model/{coin_id}
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/introduction/{coin_id}',
+#     endpoint_route='/revenue_model/{coin_id}',
 #     method='put',
-#     tag='Introduction',
-#     summary='Update introduction for a specific coin',
-#     description='Update the content, website, or whitepaper information for an existing introduction.',
+#     tag='Revenue Model',
+#     summary='Update revenue model',
+#     description='Update the revenue model for a specific coin',
 #     params=[
 #         {
 #             'name': 'coin_id',
@@ -332,40 +305,33 @@ swagger = Swagger()
 #         'content-type': 'application/json',
 #         'required': True,
 #         'properties': {
-#             'content': {
+#             'analized_revenue': {
 #                 'type': 'string',
-#                 'description': 'Updated introduction content',
-#                 'example': 'Updated introduction content...'
+#                 'description': 'Updated analyzed revenue information',
+#                 'example': 'Updated revenue analysis...'
 #             },
-#             'website': {
-#                 'type': 'string',
-#                 'description': 'Updated website URL',
-#                 'example': 'https://updated-example.com'
-#             },
-#             'whitepaper': {
-#                 'type': 'string',
-#                 'description': 'Updated whitepaper URL',
-#                 'example': 'https://updated-example.com/whitepaper.pdf'
+#             'dynamic': {
+#                 'type': 'boolean',
+#                 'description': 'Whether the revenue model is dynamic',
+#                 'example': True
 #             }
 #         }
 #     },
 #     responses={
 #         '200': {
-#             'description': 'Introduction updated successfully',
+#             'description': 'Success',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': True},
-#                     'message': {'type': 'string', 'example': 'Introduction updated successfully'},
+#                     'message': {'type': 'string', 'example': 'Revenue model updated successfully'},
 #                     'data': {
 #                         'type': 'object',
 #                         'properties': {
 #                             'id': {'type': 'integer', 'example': 1},
-#                             'coin_id': {'type': 'integer', 'example': 1},
-#                             'content': {'type': 'string', 'example': 'Updated content'},
-#                             'website': {'type': 'string', 'example': 'https://updated-example.com'},
-#                             'whitepaper': {'type': 'string', 'example': 'https://updated-example.com/whitepaper.pdf'},
-#                             'dynamic': {'type': 'boolean', 'example': False},
+#                             'coin_bot_id': {'type': 'integer', 'example': 1},
+#                             'analized_revenue': {'type': 'string', 'example': 'Updated revenue analysis...'},
+#                             'dynamic': {'type': 'boolean', 'example': True},
 #                             'created_at': {'type': 'string', 'format': 'date-time'},
 #                             'updated_at': {'type': 'string', 'format': 'date-time'}
 #                         }
@@ -379,100 +345,36 @@ swagger = Swagger()
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': False},
-#                     'message': {'type': 'string', 'example': 'At least one field (content, website, or whitepaper) is required'}
+#                     'message': {'type': 'string', 'example': 'analized_revenue is required'}
 #                 }
 #             }
 #         },
 #         '404': {
-#             'description': 'Introduction not found',
+#             'description': 'Not found',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
 #                     'success': {'type': 'boolean', 'example': False},
-#                     'message': {'type': 'string', 'example': 'No introduction found for the specified coin'}
+#                     'message': {'type': 'string', 'example': 'No revenue model found for this coin'}
+#                 }
+#             }
+#         },
+#         '500': {
+#             'description': 'Server error',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'Database error: [error details]'}
 #                 }
 #             }
 #         }
 #     }
 # )
 
-swagger = Swagger()
-
-# GET /introduction/{coin_id}
-swagger.add_or_update_endpoint(
-    endpoint_route='/introduction/{coin_id}',
-    method='get',
-    tag='Introduction',
-    summary='Get introduction by coin ID',
-    description='Retrieve the introduction information for a specific coin using the coin ID.',
-    params=[
-        {
-            'name': 'coin_id',
-            'in': 'path',
-            'description': 'ID of the coin',
-            'required': True,
-            'type': 'integer'
-        }
-    ],
-    responses={
-        '200': {
-            'description': 'Success',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'success': {'type': 'boolean', 'example': True},
-                    'data': {
-                        'type': 'object',
-                        'properties': {
-                            'id': {'type': 'integer', 'example': 1},
-                            'coin_bot_id': {'type': 'integer', 'example': 1},
-                            'content': {'type': 'string', 'example': 'Introduction content'},
-                            'website': {'type': 'string', 'example': 'https://example.com'},
-                            'whitepaper': {'type': 'string', 'example': 'https://example.com/whitepaper.pdf'},
-                            'dynamic': {'type': 'boolean', 'example': False},
-                            'created_at': {'type': 'string', 'format': 'date-time'},
-                            'updated_at': {'type': 'string', 'format': 'date-time'}
-                        }
-                    }
-                }
-            }
-        },
-        '400': {
-            'description': 'Invalid request',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'success': {'type': 'boolean', 'example': False},
-                    'message': {'type': 'string', 'example': 'coin_id is required'}
-                }
-            }
-        },
-        '404': {
-            'description': 'Introduction not found',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'success': {'type': 'boolean', 'example': False},
-                    'message': {'type': 'string', 'example': 'No introduction found for the specified coin'}
-                }
-            }
-        },
-        '500': {
-            'description': 'Server error',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'success': {'type': 'boolean', 'example': False},
-                    'message': {'type': 'string', 'example': 'Database error: [error details]'}
-                }
-            }
-        }
-    }
-)
-
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/api/get_introduction')
+# success, message = swagger.delete_endpoint(endpoint_route='/api/get_revenue_models')
 # print(message)
 
 

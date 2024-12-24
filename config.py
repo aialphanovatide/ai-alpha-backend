@@ -1502,7 +1502,13 @@ class Revenue_model(Base):
     coin_bot = relationship('CoinBot', back_populates='revenue_model', lazy=True)
 
     def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        return {
+            'id': self.id,
+            'coin_bot_id': self.coin_bot_id,
+            'analized_revenue': self.analized_revenue,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
 
 
 class Hacks(Base):
