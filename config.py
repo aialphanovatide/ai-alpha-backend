@@ -2260,4 +2260,4 @@ def init_data():
     # init_coingecko_data()
 
 
-init_data()
+# init_data()

@@ -108,63 +108,6 @@ class Swagger:
         except Exception as e:
             return False, f'Error adding/updating endpoint {endpoint_route} [{method}]: {str(e)}'
 
-    # def add_or_update_endpoint(self, endpoint_route: str, method: str, tag: str, summary: str, description: str, params: list, responses: dict) -> Tuple[bool, str]:
-    #     """
-    #     Add a new endpoint to the Swagger JSON file or update an existing one
-    #     """
-    #     try:
-    #         # Open the Swagger JSON file
-    #         swagger_json = self.load()
-    #         if swagger_json is None:
-    #             return False, "Failed to load Swagger JSON file"
-
-    #         # Check if the endpoint already exists
-    #         endpoint_exists = endpoint_route in swagger_json['paths'] and method in swagger_json['paths'][endpoint_route]
-            
-    #         if endpoint_exists:
-    #             print(f'Endpoint {endpoint_route} [{method}] already exists. Updating...')
-    #         else:
-    #             print(f'Adding new endpoint {endpoint_route} [{method}]...')
-
-    #         # Create or update the endpoint
-    #         if endpoint_route not in swagger_json['paths']:
-    #             swagger_json['paths'][endpoint_route] = {}
-            
-    #         # Add or update the endpoint with its details
-    #         swagger_json['paths'][endpoint_route][method] = {
-    #             'tags': [tag],
-    #             'summary': summary.capitalize(),
-    #             'description': description.capitalize(),
-    #             'parameters': [],
-    #             'responses': responses
-    #         }
-            
-    #         # Add parameters if they exist
-    #         try:
-    #             for param in params:
-    #                 parameter = {
-    #                     'name': param.get('name', ''),
-    #                     'in': param.get('in', 'query'),
-    #                     'description': param.get('description', ''),
-    #                     'required': param.get('required', False),
-    #                     'type': param.get('type', 'string'),  # Default to string if type is missing
-    #                     'schema': param.get('schema', {})  # Use an empty dict as fallback
-    #                 }
-    #                 # Only append valid parameters
-    #                 if parameter['name']:
-    #                     swagger_json['paths'][endpoint_route][method]['parameters'].append(parameter)
-    #         except Exception as e:
-    #             return False, f'Error processing parameters: {str(e)}'
-
-    #         # Update the Swagger JSON file
-    #         with open(self.path, 'w') as file:
-    #             json.dump(swagger_json, file, indent=2)
-
-    #         action = "updated" if endpoint_exists else "added"
-    #         return True, f'Endpoint {endpoint_route} [{method}] {action} successfully'
-    #     except Exception as e:
-    #         return False, f'Error adding/updating endpoint {endpoint_route} [{method}]: {str(e)}'
-
     def delete_endpoint(self, endpoint_route: str) -> Tuple[bool, str]:
         """
         Delete an endpoint from the Swagger JSON file
@@ -203,45 +146,53 @@ swagger = Swagger()
 
 # ____Add or update an endpoint____
 
+# # 1. POST /post_introduction
 # swagger.add_or_update_endpoint(
-#     endpoint_route='/topics',
-#     method='get',
-#     tag='Notifications',
-#     summary='Get all notification topics',
+#     endpoint_route='/introduction',
+#     method='post',
+#     tag='Introduction',
+#     summary='Create a new introduction for a coin',
 #     description='''
-#     Retrieve all notification topics with optional filtering capabilities.
+#     Creates a new introduction entry for a specific coin.
     
-#     The endpoint returns a list of topics that can be filtered by coin reference, topic type, and timeframe.
-#     If no filters are provided, it returns all available topics.
-    
-#     Topics are used for managing notification subscriptions and message routing in the system.
+#     This endpoint allows you to create an introduction with required content, website, and whitepaper information.
+#     Each coin can only have one introduction. Attempting to create multiple introductions for the same coin will result in an error.
 #     ''',
-#     params=[
-#         {
-#             'name': 'coin',
-#             'in': 'query',
-#             'description': 'Filter topics by coin reference (e.g., "bitcoin", "ethereum")',
-#             'required': False,
-#             'type': 'string'
-#         },
-#         {
-#             'name': 'type',
-#             'in': 'query',
-#             'description': 'Filter by topic type (e.g., "alerts", "support_resistance")',
-#             'required': False,
-#             'type': 'string'
-#         },
-#         {
-#             'name': 'timeframe',
-#             'in': 'query',
-#             'description': 'Filter by timeframe (e.g., "1d", "1w")',
-#             'required': False,
-#             'type': 'string'
+#     params=[],
+#     request_body={
+#         'content-type': 'application/json',
+#         'required': True,
+#         'properties': {
+#             'coin_id': {
+#                 'type': 'integer',
+#                 'description': 'ID of the coin',
+#                 'example': 1
+#             },
+#             'content': {
+#                 'type': 'string',
+#                 'description': 'Introduction content',
+#                 'example': 'This is a detailed introduction about the coin...'
+#             },
+#             'website': {
+#                 'type': 'string',
+#                 'description': 'Official website URL',
+#                 'example': 'https://example.com'
+#             },
+#             'whitepaper': {
+#                 'type': 'string',
+#                 'description': 'Whitepaper URL',
+#                 'example': 'https://example.com/whitepaper.pdf'
+#             },
+#             'dynamic': {
+#                 'type': 'boolean',
+#                 'description': 'Whether the introduction is dynamic',
+#                 'example': False
+#             }
 #         }
-#     ],
+#     },
 #     responses={
-#         '200': {
-#             'description': 'Successful operation',
+#         '201': {
+#             'description': 'Introduction created successfully',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
@@ -249,77 +200,279 @@ swagger = Swagger()
 #                         'type': 'boolean',
 #                         'example': True
 #                     },
-#                     'data': {
-#                         'type': 'array',
-#                         'items': {
-#                             'type': 'object',
-#                             'properties': {
-#                                 'id': {
-#                                     'type': 'integer',
-#                                     'example': 1
-#                                 },
-#                                 'name': {
-#                                     'type': 'string',
-#                                     'example': 'bitcoin_alerts_1d'
-#                                 },
-#                                 'reference': {
-#                                     'type': 'string',
-#                                     'example': 'bitcoin, btc'
-#                                 },
-#                                 'timeframe': {
-#                                     'type': 'string',
-#                                     'example': '1d'
-#                                 },
-#                                 'type': {
-#                                     'type': 'string',
-#                                     'example': 'alerts'
-#                                 },
-#                                 'created_at': {
-#                                     'type': 'string',
-#                                     'format': 'date-time',
-#                                     'example': '2024-03-20T12:00:00Z'
-#                                 },
-#                                 'updated_at': {
-#                                     'type': 'string',
-#                                     'format': 'date-time',
-#                                     'example': '2024-03-20T12:00:00Z'
-#                                 }
-#                             }
-#                         }
+#                     'message': {
+#                         'type': 'string',
+#                         'example': 'Introduction created successfully'
 #                     },
-#                     'count': {
-#                         'type': 'integer',
-#                         'example': 1
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'id': {'type': 'integer', 'example': 1},
+#                             'coin_id': {'type': 'integer', 'example': 1},
+#                             'content': {'type': 'string', 'example': 'Introduction content'},
+#                             'website': {'type': 'string', 'example': 'https://example.com'},
+#                             'whitepaper': {'type': 'string', 'example': 'https://example.com/whitepaper.pdf'},
+#                             'dynamic': {'type': 'boolean', 'example': False},
+#                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                         }
 #                     }
 #                 }
 #             }
 #         },
-#         '500': {
-#             'description': 'Server error',
+#         '400': {
+#             'description': 'Invalid request',
 #             'schema': {
 #                 'type': 'object',
 #                 'properties': {
-#                     'success': {
-#                         'type': 'boolean',
-#                         'example': False
-#                     },
-#                     'error': {
-#                         'type': 'string',
-#                         'example': 'Database connection error'
-#                     },
-#                     'message': {
-#                         'type': 'string',
-#                         'example': 'Failed to fetch topics'
-#                     }
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'content is required'}
+#                 }
+#             }
+#         },
+#         '409': {
+#             'description': 'Conflict - Introduction already exists',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'An introduction already exists for this coin'}
 #                 }
 #             }
 #         }
 #     }
 # )
 
+# # 2. GET /api/get_introduction
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/introduction',
+#     method='get',
+#     tag='Introduction',
+#     summary='Get introduction by coin ID or name',
+#     description='Retrieve the introduction information for a specific coin using either the coin ID or coin name.',
+#     params=[
+#         {
+#             'name': 'id',
+#             'in': 'query',
+#             'description': 'Coin ID',
+#             'required': False,
+#             'type': 'integer'
+#         },
+#         {
+#             'name': 'coin_name',
+#             'in': 'query',
+#             'description': 'Name of the coin',
+#             'required': False,
+#             'type': 'string'
+#         }
+#     ],
+#     responses={
+#         '200': {
+#             'description': 'Success',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': True},
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'id': {'type': 'integer', 'example': 1},
+#                             'coin_id': {'type': 'integer', 'example': 1},
+#                             'content': {'type': 'string', 'example': 'Introduction content'},
+#                             'website': {'type': 'string', 'example': 'https://example.com'},
+#                             'whitepaper': {'type': 'string', 'example': 'https://example.com/whitepaper.pdf'},
+#                             'dynamic': {'type': 'boolean', 'example': False},
+#                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                         }
+#                     }
+#                 }
+#             }
+#         },
+#         '400': {
+#             'description': 'Invalid request',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'Either id or coin_name is required'}
+#                 }
+#             }
+#         },
+#         '404': {
+#             'description': 'Introduction not found',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'No introduction found for the specified coin'}
+#                 }
+#             }
+#         }
+#     }
+# )
+
+# # 3. PUT /edit_introduction/{coin_bot_id}
+# swagger.add_or_update_endpoint(
+#     endpoint_route='/introduction/{coin_id}',
+#     method='put',
+#     tag='Introduction',
+#     summary='Update introduction for a specific coin',
+#     description='Update the content, website, or whitepaper information for an existing introduction.',
+#     params=[
+#         {
+#             'name': 'coin_id',
+#             'in': 'path',
+#             'description': 'ID of the coin',
+#             'required': True,
+#             'type': 'integer'
+#         }
+#     ],
+#     request_body={
+#         'content-type': 'application/json',
+#         'required': True,
+#         'properties': {
+#             'content': {
+#                 'type': 'string',
+#                 'description': 'Updated introduction content',
+#                 'example': 'Updated introduction content...'
+#             },
+#             'website': {
+#                 'type': 'string',
+#                 'description': 'Updated website URL',
+#                 'example': 'https://updated-example.com'
+#             },
+#             'whitepaper': {
+#                 'type': 'string',
+#                 'description': 'Updated whitepaper URL',
+#                 'example': 'https://updated-example.com/whitepaper.pdf'
+#             }
+#         }
+#     },
+#     responses={
+#         '200': {
+#             'description': 'Introduction updated successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': True},
+#                     'message': {'type': 'string', 'example': 'Introduction updated successfully'},
+#                     'data': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'id': {'type': 'integer', 'example': 1},
+#                             'coin_id': {'type': 'integer', 'example': 1},
+#                             'content': {'type': 'string', 'example': 'Updated content'},
+#                             'website': {'type': 'string', 'example': 'https://updated-example.com'},
+#                             'whitepaper': {'type': 'string', 'example': 'https://updated-example.com/whitepaper.pdf'},
+#                             'dynamic': {'type': 'boolean', 'example': False},
+#                             'created_at': {'type': 'string', 'format': 'date-time'},
+#                             'updated_at': {'type': 'string', 'format': 'date-time'}
+#                         }
+#                     }
+#                 }
+#             }
+#         },
+#         '400': {
+#             'description': 'Invalid request',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'At least one field (content, website, or whitepaper) is required'}
+#                 }
+#             }
+#         },
+#         '404': {
+#             'description': 'Introduction not found',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'success': {'type': 'boolean', 'example': False},
+#                     'message': {'type': 'string', 'example': 'No introduction found for the specified coin'}
+#                 }
+#             }
+#         }
+#     }
+# )
+
+swagger = Swagger()
+
+# GET /introduction/{coin_id}
+swagger.add_or_update_endpoint(
+    endpoint_route='/introduction/{coin_id}',
+    method='get',
+    tag='Introduction',
+    summary='Get introduction by coin ID',
+    description='Retrieve the introduction information for a specific coin using the coin ID.',
+    params=[
+        {
+            'name': 'coin_id',
+            'in': 'path',
+            'description': 'ID of the coin',
+            'required': True,
+            'type': 'integer'
+        }
+    ],
+    responses={
+        '200': {
+            'description': 'Success',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': True},
+                    'data': {
+                        'type': 'object',
+                        'properties': {
+                            'id': {'type': 'integer', 'example': 1},
+                            'coin_bot_id': {'type': 'integer', 'example': 1},
+                            'content': {'type': 'string', 'example': 'Introduction content'},
+                            'website': {'type': 'string', 'example': 'https://example.com'},
+                            'whitepaper': {'type': 'string', 'example': 'https://example.com/whitepaper.pdf'},
+                            'dynamic': {'type': 'boolean', 'example': False},
+                            'created_at': {'type': 'string', 'format': 'date-time'},
+                            'updated_at': {'type': 'string', 'format': 'date-time'}
+                        }
+                    }
+                }
+            }
+        },
+        '400': {
+            'description': 'Invalid request',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': False},
+                    'message': {'type': 'string', 'example': 'coin_id is required'}
+                }
+            }
+        },
+        '404': {
+            'description': 'Introduction not found',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': False},
+                    'message': {'type': 'string', 'example': 'No introduction found for the specified coin'}
+                }
+            }
+        },
+        '500': {
+            'description': 'Server error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': False},
+                    'message': {'type': 'string', 'example': 'Database error: [error details]'}
+                }
+            }
+        }
+    }
+)
+
 # ____Delete an endpoint____
 
-# success, message = swagger.delete_endpoint(endpoint_route='/schedule_post')
+# success, message = swagger.delete_endpoint(endpoint_route='/api/get_introduction')
 # print(message)
 
 
