@@ -2290,8 +2290,8 @@ def init_coingecko_data():
 
 # init_coingecko_data()
 
-def init_data():
-    populate_topics()
+# def init_data():
+    # populate_topics()
     # initialize_default_roles()
     # init_user_data()
     # populate_categories_and_coins()
@@ -2301,4 +2301,4 @@ def init_data():
     # init_coingecko_data()
 
 
-init_data()
+# init_data()
