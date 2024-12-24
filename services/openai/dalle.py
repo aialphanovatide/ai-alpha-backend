@@ -13,7 +13,7 @@ class ImageGenerator:
         """
         Initialize the ImageGenerator with the OpenAI API key.
         """
-        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
+        self.api_key = api_key or os.getenv('NEWS_BOT_API_KEY')
         if not self.api_key:
             raise ValueError("OpenAI API key is not provided or not found in the environment variables.")
         
