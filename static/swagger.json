@@ -19,44 +19,16 @@
   ],
   "tags": [
     {
-      "name": "Content Creation",
-      "description": "Operations related to the Content Creation"
-    },
-    {
-      "name": "Ask AI",
-      "description": "Operations related to the Ask AI (Coin info)"
-    },
-    {
-      "name": "Introductions",
-      "description": "Operations related to the Introduction section."
-    },
-    {
-      "name": "Tokenomics",
-      "description": "Operations related to the Tokenomics section"
-    },
-    {
-      "name": "Competitors Tokenomics",
-      "description": "Operations related to the Competitors tokenomics section"
-    },
-    {
-      "name": "Dapps",
-      "description": "Operations related to the Dapps section "
-    },
-    {
-      "name": "Upgrades",
-      "description": "Operations related to the Upgrades section"
-    },
-    {
-      "name": "Hacks",
-      "description": "Operations related to the Hacks section"
-    },
-    {
       "name": "Admin",
       "description": "Handles management and administrative operations within the internal dashboard."
     },
     {
       "name": "Alerts",
       "description": "Operations related to the Alerts"
+    },
+    {
+      "name": "Ask AI",
+      "description": "Operations related to the Ask AI (Coin info)"
     },
     {
       "name": "Category",
@@ -75,8 +47,24 @@
       "description": "Operations related to CoinGecko"
     },
     {
-      "name": "User",
-      "description": "Operations related to the User"
+      "name": "Competitors Tokenomics",
+      "description": "Operations related to the Competitors tokenomics section"
+    },
+    {
+      "name": "Content Creation",
+      "description": "Operations related to the Content Creation"
+    },
+    {
+      "name": "Dapps",
+      "description": "Operations related to the Dapps section "
+    },
+    {
+      "name": "Hacks",
+      "description": "Operations related to the Hacks section"
+    },
+    {
+      "name": "Introduction",
+      "description": "Operations related to the Introduction section."
     },
     {
       "name": "Providers",
@@ -85,6 +73,18 @@
     {
       "name": "Sections",
       "description": "Operations related to the Sections"
+    },
+    {
+      "name": "Tokenomics",
+      "description": "Operations related to the Tokenomics section"
+    },
+    {
+      "name": "Upgrades",
+      "description": "Operations related to the Upgrades section"
+    },
+    {
+      "name": "User",
+      "description": "Operations related to the User"
     }
   ],
   "paths": {
@@ -1173,118 +1173,6 @@
           },
           "400": {
             "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/get_introduction": {
-      "get": {
-        "summary": "Get introduction data",
-        "description": "Retrieve introduction data for a specific coin bot",
-        "tags": [
-          "Introductions"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the coin bot"
-          },
-          {
-            "name": "coin_name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Name of the coin bot"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "No record found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/get_revenue_models": {
-      "get": {
-        "summary": "Get revenue models",
-        "description": "Retrieve revenue model data for a specific coin bot",
-        "tags": [
-          "Revenue Models"
-        ],
-        "parameters": [
-          {
-            "name": "coin_id",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID of the coin bot"
-          },
-          {
-            "name": "coin_name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Name of the coin bot"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "revenue_model": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "No revenue model found"
           },
           "500": {
             "description": "Internal server error"
@@ -5962,6 +5850,750 @@
             }
           }
         }
+      }
+    },
+    "/introduction": {
+      "post": {
+        "tags": [
+          "Introduction"
+        ],
+        "summary": "Create a new introduction for a coin",
+        "description": "\n    creates a new introduction entry for a specific coin.\n    \n    this endpoint allows you to create an introduction with required content, website, and whitepaper information.\n    each coin can only have one introduction. attempting to create multiple introductions for the same coin will result in an error.\n    ",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_id": {
+                  "type": "integer",
+                  "description": "ID of the coin",
+                  "example": 1
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Introduction content",
+                  "example": "This is a detailed introduction about the coin..."
+                },
+                "website": {
+                  "type": "string",
+                  "description": "Official website URL",
+                  "example": "https://example.com"
+                },
+                "whitepaper": {
+                  "type": "string",
+                  "description": "Whitepaper URL",
+                  "example": "https://example.com/whitepaper.pdf"
+                },
+                "dynamic": {
+                  "type": "boolean",
+                  "description": "Whether the introduction is dynamic",
+                  "example": false
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Introduction created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Introduction created successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "coin_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "content": {
+                      "type": "string",
+                      "example": "Introduction content"
+                    },
+                    "website": {
+                      "type": "string",
+                      "example": "https://example.com"
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "example": "https://example.com/whitepaper.pdf"
+                    },
+                    "dynamic": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "content is required"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Introduction already exists",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "An introduction already exists for this coin"
+                }
+              }
+            }
+          }
+        },
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
+    "/introduction/{coin_id}": {
+      "put": {
+        "tags": [
+          "Introduction"
+        ],
+        "summary": "Update introduction for a specific coin",
+        "description": "Update the content, website, or whitepaper information for an existing introduction.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "ID of the coin",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "Updated introduction content",
+                  "example": "Updated introduction content..."
+                },
+                "website": {
+                  "type": "string",
+                  "description": "Updated website URL",
+                  "example": "https://updated-example.com"
+                },
+                "whitepaper": {
+                  "type": "string",
+                  "description": "Updated whitepaper URL",
+                  "example": "https://updated-example.com/whitepaper.pdf"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Introduction updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Introduction updated successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "coin_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "content": {
+                      "type": "string",
+                      "example": "Updated content"
+                    },
+                    "website": {
+                      "type": "string",
+                      "example": "https://updated-example.com"
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "example": "https://updated-example.com/whitepaper.pdf"
+                    },
+                    "dynamic": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "At least one field (content, website, or whitepaper) is required"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introduction not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "No introduction found for the specified coin"
+                }
+              }
+            }
+          }
+        },
+        "consumes": [
+          "application/json"
+        ]
+      },
+      "get": {
+        "tags": [
+          "Introduction"
+        ],
+        "summary": "Get introduction by coin id",
+        "description": "Retrieve the introduction information for a specific coin using the coin id.",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "ID of the coin",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "coin_bot_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "content": {
+                      "type": "string",
+                      "example": "Introduction content"
+                    },
+                    "website": {
+                      "type": "string",
+                      "example": "https://example.com"
+                    },
+                    "whitepaper": {
+                      "type": "string",
+                      "example": "https://example.com/whitepaper.pdf"
+                    },
+                    "dynamic": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "coin_id is required"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introduction not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "No introduction found for the specified coin"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Database error: [error details]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/revenue_model": {
+      "post": {
+        "tags": [
+          "Revenue Model"
+        ],
+        "summary": "Create a revenue model",
+        "description": "Create a new revenue model for a specific coin",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coin_id": {
+                  "type": "integer",
+                  "description": "ID of the coin",
+                  "example": 1
+                },
+                "analized_revenue": {
+                  "type": "string",
+                  "description": "Analyzed revenue information",
+                  "example": "Detailed revenue analysis..."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Revenue model created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Revenue model created successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "coin_bot_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "analized_revenue": {
+                      "type": "string",
+                      "example": "Detailed revenue analysis..."
+                    },
+                    "dynamic": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "coin_id and analized_revenue are required"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Revenue model already exists for this coin"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Database error: [error details]"
+                }
+              }
+            }
+          }
+        },
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
+    "/revenue_model/{coin_id}": {
+      "get": {
+        "tags": [
+          "Revenue Model"
+        ],
+        "summary": "Get revenue model",
+        "description": "Retrieve the revenue model for a specific coin",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "ID of the coin",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "coin_bot_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "analized_revenue": {
+                      "type": "string",
+                      "example": "Detailed revenue analysis..."
+                    },
+                    "dynamic": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "No revenue model found for this coin"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Database error: [error details]"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Revenue Model"
+        ],
+        "summary": "Update revenue model",
+        "description": "Update the revenue model for a specific coin",
+        "parameters": [
+          {
+            "name": "coin_id",
+            "in": "path",
+            "description": "ID of the coin",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "analized_revenue": {
+                  "type": "string",
+                  "description": "Updated analyzed revenue information",
+                  "example": "Updated revenue analysis..."
+                },
+                "dynamic": {
+                  "type": "boolean",
+                  "description": "Whether the revenue model is dynamic",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Revenue model updated successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "coin_bot_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "analized_revenue": {
+                      "type": "string",
+                      "example": "Updated revenue analysis..."
+                    },
+                    "dynamic": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "analized_revenue is required"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "No revenue model found for this coin"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Database error: [error details]"
+                }
+              }
+            }
+          }
+        },
+        "consumes": [
+          "application/json"
+        ]
       }
     }
   },
