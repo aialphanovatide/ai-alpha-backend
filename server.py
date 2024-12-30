@@ -37,6 +37,7 @@ from routes.external_apis.binance import binance_bp
 from routes.analysis.sections import sections_bp
 from routes.coins.coins import coin_bp
 from routes.ask_ai.ask_ai import ask_ai_bp
+from routes.notification.index import notification_bp
 from flasgger import Swagger
 from routes.alerts.topics import topics_bp
 from decorators.api_key import check_api_key
@@ -135,6 +136,7 @@ app.register_blueprint(binance_bp)
 app.register_blueprint(coin_bp)
 app.register_blueprint(sections_bp)
 app.register_blueprint(ask_ai_bp)
+app.register_blueprint(notification_bp)
 
 if __name__ == '__main__':
     try:
