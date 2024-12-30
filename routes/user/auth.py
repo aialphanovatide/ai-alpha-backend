@@ -1,6 +1,7 @@
 import httpx
 import os
 from dotenv import load_dotenv
+import aiohttp
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,47 +30,26 @@ async def get_management_api_token():
             print(f"Error fetching management API token: {e}")
             return None
 
-async def patchPassword(email, new_password):
+async def patchPassword(email: str, new_password: str) -> bool:
+    """
+    Update user password in Auth0 using password change endpoint
+    """
     try:
-        # Step 1: Get the Auth0 Management API token
-        token = await get_management_api_token()
-        if not token:
-            raise Exception("Failed to obtain management API token")
+        auth0_url = f'https://{auth0Domain}/dbconnections/change_password'
+        payload = {
+            'client_id': auth0ManagementAPI_Client,
+            'email': email,
+            'connection': 'Username-Password-Authentication',
+            'new_password': new_password
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(auth0_url, json=payload) as response:
+                if response.status != 200:
+                    error_detail = await response.text()
+                    raise Exception(f"Password update failed. Status: {response.status}. Details: {error_detail}")
+                
+                return True
 
-        async with httpx.AsyncClient() as client:
-            # Step 2: Fetch the user data by email
-            email_check_url = f"https://{auth0Domain}/api/v2/users-by-email"
-            email_check_response = await client.get(
-                email_check_url,
-                params={'email': email},
-                headers={'Authorization': f'Bearer {token}'}
-            )
-            email_check_response.raise_for_status()
-            
-            user_data = email_check_response.json()
-            if not user_data:
-                raise Exception("User not found")
-
-            user_id = user_data[0]['user_id']
-
-            # Step 3: Patch the password
-            patch_url = f"https://{auth0Domain}/api/v2/users/{user_id}"
-            patch_response = await client.patch(
-                patch_url,
-                headers={
-                    'Authorization': f'Bearer {token}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'password': new_password,
-                    'connection': 'Username-Password-Authentication'
-                }
-            )
-            
-            patch_response.raise_for_status()
-            return True
-
-    except httpx.RequestError as error:
-        raise Exception(f"Auth0 API error: {str(error)}")
-    except Exception as error:
-        raise Exception(f"Password update failed: {str(error)}")
+    except Exception as e:
+        raise Exception(f"Password update failed: {str(e)}")

@@ -61,7 +61,7 @@ def check_api_key():
         JSON response: If the API key is missing or invalid.
         JSON response: If there's an error during the database operation.
     """
-    whitelist = ['/admin', '/api/alert/tv', '/slack/events', '/api-keys/', '/docs', '/flasgger_static', '/swagger.json', '/health', '/chart-data', '/chart/widget', '/favicon.ico', '/static']
+    whitelist = ['/admin', '/api/alert/tv', '/slack/events', '/api-keys/', '/docs', '/flasgger_static', '/swagger.json', '/health', '/chart-data', '/chart/widget', '/favicon.ico', "/reset-password", '/static']
 
     if request.path == '/':
         return None

@@ -26,6 +26,8 @@ import json
 import os
 import jwt
 from flask import current_app
+import string
+from sqlalchemy.orm import joinedload
 
 load_dotenv()
 
@@ -462,6 +464,7 @@ class User(Base):
     # Relationship with PurchasedPlan model
     purchased_plans = relationship('PurchasedPlan', back_populates='user', lazy=True)
 
+
     def as_dict(self):
         """
         Convert the User object to a dictionary.
@@ -473,42 +476,79 @@ class User(Base):
 
     def generate_reset_token(self, expires_in=3600):
         """
-        Generate a password reset token for the user.
+        Generate a password reset token and store it in the password_resets table.
 
         Args:
             expires_in (int): Token expiration time in seconds. Default is 1 hour.
 
         Returns:
-            str: The generated JWT reset token
+            str: The generated reset code
         """
-        payload = {
-            'user_id': self.user_id,
-            'exp': datetime.now(timezone.utc) + timedelta(seconds=expires_in)
-        }
-        return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
+        # Generate a 6-digit code
+        reset_code = ''.join(secrets.choice(string.digits) for _ in range(6))
+        
+        # Create expiration timestamp
+        expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        
+        # Create new password reset record
+        password_reset = UserPasswordReset(
+            user_id=self.user_id,
+            reset_code=reset_code,
+            expires_at=expires_at
+        )
+        
+        return password_reset, reset_code
 
     @staticmethod
-    def verify_reset_token(token, session):
+    def verify_reset_token(reset_id, session):
         """
         Verify a password reset token and return the associated user.
 
         Args:
-            token (str): The JWT token to verify
+            reset_id: The ID of the reset record
             session: SQLAlchemy session
 
         Returns:
-            User or None: The user associated with the token if valid, None otherwise
+            UserPasswordReset or None: The reset record if valid, None otherwise
         """
         try:
-            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
-            user_id = payload.get('user_id')
-            if user_id is None:
-                return None
-            return session.query(User).filter_by(user_id=user_id).first()
-        except jwt.ExpiredSignatureError:
+            now = datetime.now(timezone.utc)
+            
+            reset_record = session.query(UserPasswordReset).filter(
+                UserPasswordReset.id == reset_id,
+                UserPasswordReset.expires_at > now,
+                UserPasswordReset.is_used == False
+            ).options(joinedload(UserPasswordReset.user)).first()
+            
+            return reset_record
+
+        except Exception as e:
+            print(f"Error verifying reset token: {e}")
             return None
-        except jwt.InvalidTokenError:
-            return None
+
+class UserPasswordReset(Base):
+    """
+    Stores password reset tokens for users.
+    
+    Attributes:
+        id (int): Primary key
+        user_id (int): Foreign key to user_table
+        reset_code (str): 6-digit reset code
+        created_at (datetime): When the reset code was created
+        expires_at (datetime): When the reset code expires
+        is_used (bool): Whether the reset code has been used
+    """
+    __tablename__ = 'password_resets'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_table.user_id'), nullable=False)
+    reset_code = Column(String(6), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    expires_at = Column(TIMESTAMP(timezone=True), nullable=False)
+    is_used = Column(Boolean, default=False)
+
+    # Relationship
+    user = relationship('User', backref='password_resets')
 
 class PurchasedPlan(Base):
     """
@@ -1502,7 +1542,13 @@ class Revenue_model(Base):
     coin_bot = relationship('CoinBot', back_populates='revenue_model', lazy=True)
 
     def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        return {
+            'id': self.id,
+            'coin_bot_id': self.coin_bot_id,
+            'analized_revenue': self.analized_revenue,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
 
 
 class Hacks(Base):
