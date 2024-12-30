@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success - AI Alpha</title>
+    <style>
+        :root {
+            --primary-color: #FF6B00;
+            --text-color: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--primary-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .success-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--text-color);
+            border-radius: 50%;
+        }
+
+        .success-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-color);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .app-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 16px;
+            border-bottom: 1px solid var(--text-color);
+            padding-bottom: 2px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 6L9 17L4 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        
+        <h1 class="success-title">Password Saved</h1>
+    </div>
+</body>
+</html>

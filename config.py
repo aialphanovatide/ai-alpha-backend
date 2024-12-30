@@ -491,18 +491,19 @@ class User(Base):
         expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
         
         # Create new password reset record
-        password_reset = UserPasswordReset(
+        reset_record = UserPasswordReset(
             user_id=self.user_id,
             reset_code=reset_code,
             expires_at=expires_at
         )
         
-        return password_reset, reset_code
+        return reset_record, reset_code
 
     @staticmethod
     def verify_reset_token(reset_id, session):
         """
-        Verify a password reset token and return the associated user.
+        Verify a password reset token and return the associated record.
+        If the token is valid, it will be marked as used.
 
         Args:
             reset_id: The ID of the reset record
@@ -514,16 +515,22 @@ class User(Base):
         try:
             now = datetime.now(timezone.utc)
             
+            # Find valid token
             reset_record = session.query(UserPasswordReset).filter(
                 UserPasswordReset.id == reset_id,
                 UserPasswordReset.expires_at > now,
                 UserPasswordReset.is_used == False
-            ).options(joinedload(UserPasswordReset.user)).first()
+            ).options(joinedload(UserPasswordReset.user)).with_for_update().first()
             
+            if reset_record:
+                # Mark token as used immediately when found valid
+                reset_record.is_used = True
+                session.commit()
+                
             return reset_record
 
         except Exception as e:
-            print(f"Error verifying reset token: {e}")
+            session.rollback()
             return None
 
 class UserPasswordReset(Base):
