@@ -26,7 +26,6 @@ async def get_management_api_token():
             response = await client.post(url, headers=headers, json=body)
             response.raise_for_status()
             data = response.json()
-            print(data)
             return data['access_token']
         except httpx.RequestError as e:
             print(f"Error fetching management API token: {e}")
@@ -90,6 +89,7 @@ async def list_all_users(per_page: int = 100, page: int = 1):
 
 
 async def patchPassword(email: str, new_password: str) -> bool:
+    print(f"Attempting to update password for email: {email}")
     """
     Update user password in Auth0 using Management API
     """

@@ -680,8 +680,12 @@ async def reset_password(reset_id):
                     logger.error("User not found for reset record")
                     return render_template('user_error.html'), 400
                 
-                # Update password in Auth0
-                await patchPassword(user.auth0id, new_password)
+                if not user.email:
+                    logger.error("User email not found")
+                    return render_template('user_error.html'), 400
+                
+                # Update password in Auth0 using email
+                await patchPassword(user.email, new_password)
                 
                 # Mark token as used
                 reset_record.is_used = True
