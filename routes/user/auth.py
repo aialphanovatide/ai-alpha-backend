@@ -26,6 +26,7 @@ async def get_management_api_token():
             response = await client.post(url, headers=headers, json=body)
             response.raise_for_status()
             data = response.json()
+            print(data)
             return data['access_token']
         except httpx.RequestError as e:
             print(f"Error fetching management API token: {e}")
