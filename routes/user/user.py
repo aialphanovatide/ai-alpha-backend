@@ -5,8 +5,8 @@ from flask_mail import Message
 from pydantic import validate_email
 from sqlalchemy import exc
 from sqlalchemy.orm import joinedload
-from flask import app, current_app, jsonify, request, Blueprint
-from config import PurchasedPlan, Session, User
+from flask import app, current_app, jsonify, request, Blueprint, flash, redirect, url_for, render_template, session as flask_session
+from config import PurchasedPlan, Session, User, UserPasswordReset
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from routes.user.auth import patchPassword
@@ -15,12 +15,17 @@ from redis_client.redis_client import cache_with_redis, update_cache_with_redis
 import jwt
 import datetime
 from services.email.email_service import EmailService
+from datetime import datetime, timezone
+import logging
 
 
 user_bp = Blueprint('user', __name__)
 
 # Crear una instancia de EmailService
 email_service = EmailService()
+
+# Configurar el logger
+logger = logging.getLogger(__name__)
 
 def generate_unique_short_token(length=7, max_attempts=100):
     characters = string.ascii_letters + string.digits
@@ -542,13 +547,38 @@ def delete_user_account():
 @user_bp.route('/forgot-password', methods=['POST'])
 def forgot_password():
     """
-    Request a password reset link for the user.
+    Handle password reset request by sending a reset link via email.
+
+    This endpoint processes a password reset request by generating a secure reset token
+    and sending it to the user's email address.
+
+    Request Body:
+        - email (str): The email address of the user requesting password reset
+
+    Returns:
+        JSON response with:
+        - success (bool): Whether the operation was successful
+        - message (str): Description of the result
+
+    Status Codes:
+        - 200: Reset link sent successfully
+        - 400: Invalid email format
+        - 404: Email not found
+        - 500: Server error
+
+    Details:
+        - Validates email format
+        - Checks if user exists
+        - Generates secure reset token
+        - Sends reset link via email
+        - Handles errors appropriately
     """
     response = {'success': False, 'message': None}
     data = request.json
 
     email = data.get('email')
-    if not email or not validate_email(email):  
+    if not email or not validate_email(email):
+        print(f"Invalid email format attempted: {email}")
         response['message'] = 'Invalid email format'
         return jsonify(response), 400
 
@@ -556,60 +586,124 @@ def forgot_password():
         try:
             user = session.query(User).filter_by(email=email).first()
             if not user:
+                print(f"Password reset attempted for non-existent email: {email}")
                 response['message'] = 'Email not found'
                 return jsonify(response), 404
 
-            # Generate reset token using the new method
-            token = user.generate_reset_token()
-            reset_link = f"{request.host_url}reset-password?token={token}"
+            # Generate reset token and store in database
+            print(f"Generating password reset token for user: {email}")
+            reset_record, reset_code = user.generate_reset_token()
+            session.add(reset_record)
+            session.commit()
+            
+            # Use reset record ID and code for verification
+            reset_link = f"{request.host_url}reset-password/{reset_record.id}?code={reset_code}"
             
             # Send password reset email
-            email_service.send_password_reset_email(user.email, user.nickname, reset_link)
+            print(f"Sending password reset email to: {email}")
+            email_service.send_password_reset_email_user(user.email, user.nickname, reset_link)
 
+            print(f"Password reset link sent successfully to: {email}")
             response['success'] = True
             response['message'] = 'Password reset link sent to your email'
             return jsonify(response), 200
+            
         except Exception as e:
+            session.rollback()
+            print(f"Error processing password reset for {email}: {str(e)}")
             response['message'] = f'An error occurred: {str(e)}'
             return jsonify(response), 500
 
 
-@user_bp.route('/reset-password', methods=['POST'])
-async def reset_password():
-    """
-    Reset the user's password using the provided token.
-    """
-    response = {'success': False, 'message': None}
-    data = request.json
-
-    token = data.get('token')
-    new_password = data.get('new_password')
-
-    if not token or not new_password:
-        response['message'] = 'Token and new password are required'
-        return jsonify(response), 400
-
+@user_bp.route('/reset-password/<reset_id>', methods=['GET', 'POST'])
+async def reset_password(reset_id):
     with Session() as session:
         try:
-            # Verify token and get user
-            user = User.verify_reset_token(token, session)
-            if not user:
-                response['message'] = 'Invalid or expired token'
-                return jsonify(response), 400
+            if request.method == 'POST':
+                reset_code = request.args.get('code')
+                if not reset_code:
+                    logger.warning("Reset attempt without code")
+                    return render_template('user_error.html'), 400
 
-            # Update password in Auth0
-            await patchPassword(user.email, new_password)
+                # First, get the reset record with FOR UPDATE
+                reset_record = session.query(UserPasswordReset).filter(
+                    UserPasswordReset.id == reset_id,
+                    UserPasswordReset.reset_code == reset_code,
+                    UserPasswordReset.expires_at > datetime.now(timezone.utc),
+                    UserPasswordReset.is_used == False
+                ).with_for_update().first()
 
-            response['success'] = True
-            response['message'] = 'Password updated successfully'
-            return jsonify(response), 200
+                # Then, if found, get the associated user
+                if reset_record:
+                    # Load the user separately
+                    user = session.query(User).filter(
+                        User.user_id == reset_record.user_id
+                    ).first()
+                    reset_record.user = user
+            else:
+                # For GET requests, just verify the reset_id exists
+                reset_record = session.query(UserPasswordReset).get(reset_id)
 
-        except jwt.ExpiredSignatureError:
-            response['message'] = 'Reset token has expired'
-            return jsonify(response), 400
-        except jwt.InvalidTokenError:
-            response['message'] = 'Invalid reset token'
-            return jsonify(response), 400
+            if not reset_record:
+                    logger.warning(f"Invalid or expired reset token attempted: {reset_id}") 
+                    return render_template('user_error.html'), 400
+
+            if request.method == 'GET':
+                logger.info(f"Password reset form requested for token: {reset_id}")
+                return render_template('user_reset_password.html', 
+                                    reset_id=reset_id, 
+                                    code=request.args.get('code'))
+
+            # Process POST request
+            data = request.form
+            new_password = data.get('new_password')
+            confirm_password = data.get('confirm_password')
+
+            # Validate password fields
+            if not new_password or not confirm_password:
+                logger.warning("Password reset attempt with missing fields")
+                flash('All fields are required', 'error')
+                return render_template('user_reset_password.html', 
+                                    reset_id=reset_id, 
+                                    code=reset_code)
+
+            if new_password != confirm_password:
+                logger.warning("Password reset attempt with non-matching passwords")
+                flash('Passwords do not match', 'error')
+                return render_template('user_reset_password.html', 
+                                    reset_id=reset_id, 
+                                    code=reset_code)
+
+            try:
+                user = reset_record.user
+                if not user:
+                    logger.error("User not found for reset record")
+                    return render_template('user_error.html'), 400
+                
+                if not user.email:
+                    logger.error("User email not found")
+                    return render_template('user_error.html'), 400
+                
+                # Update password in Auth0 using email
+                await patchPassword(user.email, new_password)
+                
+                # Mark token as used
+                reset_record.is_used = True
+                session.commit()
+                
+                logger.info(f"Password successfully reset for user: {user.email}")
+                return render_template('user_success.html')
+
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Failed to update password: {str(e)}", exc_info=True)
+                flash(f'Failed to update password: {str(e)}', 'error')
+                return render_template('user_reset_password.html', 
+                                    reset_id=reset_id, 
+                                    code=reset_code)
+
         except Exception as e:
-            response['message'] = f'An unexpected error occurred: {str(e)}'
-            return jsonify(response), 500
+            session.rollback()
+            logger.error(f"Unexpected error in password reset: {str(e)}", exc_info=True)
+            flash(f'An unexpected error occurred: {str(e)}', 'error')
+            return render_template('error.html'), 500

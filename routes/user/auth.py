@@ -1,13 +1,15 @@
+import asyncio
 import httpx
 import os
 from dotenv import load_dotenv
+import aiohttp
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(override=True)
 
 auth0Domain = os.getenv("AUTH0_DOMAIN")
-auth0ManagementAPI_Client = os.getenv("AUTH0_CLIENT_ID")
-auth0ManagementAPI_Secret = os.getenv("AUTH0_CLIENT_SECRET")
+auth0ManagementAPI_Client = os.getenv("AUTH0_MANAGEMENTAPI_CLIENT")
+auth0ManagementAPI_Secret = os.getenv("AUTH0_MANAGEMENTAPI_SECRET")
 
 async def get_management_api_token():
     url = f"https://{auth0Domain}/oauth/token"
@@ -29,47 +31,105 @@ async def get_management_api_token():
             print(f"Error fetching management API token: {e}")
             return None
 
-async def patchPassword(email, new_password):
+
+async def get_users_by_name_or_email(search_term: str):
+    token = await get_management_api_token()
+    if not token:
+        raise Exception("Failed to obtain Management API token")
+
+    url = f"https://{auth0Domain}/api/v2/users"
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    params = {
+        'q': f'name:*{search_term}* OR email:*{search_term}*',
+        'search_engine': 'v3'
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            raise Exception(f"Error fetching users: {e.response.text}")
+
+
+async def list_all_users(per_page: int = 100, page: int = 1):
+    token = await get_management_api_token()
+    if not token:
+        raise Exception("Failed to obtain Management API token")
+
+    url = f"https://{auth0Domain}/api/v2/users"
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    params = {
+        'per_page': per_page,
+        'page': page
+    }
+
+    all_users = []
+    async with httpx.AsyncClient() as client:
+        while True:
+            try:
+                response = await client.get(url, headers=headers, params=params)
+                response.raise_for_status()
+                users = response.json()
+                if not users:
+                    break
+                all_users.extend(users)
+                params['page'] += 1
+            except httpx.HTTPStatusError as e:
+                raise Exception(f"Error fetching users: {e.response.text}")
+
+    return all_users
+
+
+async def patchPassword(email: str, new_password: str) -> bool:
+    print(f"Attempting to update password for email: {email}")
+    """
+    Update user password in Auth0 using Management API
+    """
     try:
-        # Step 1: Get the Auth0 Management API token
+        # Step 1: Get Management API token
         token = await get_management_api_token()
         if not token:
-            raise Exception("Failed to obtain management API token")
+            raise Exception("Failed to obtain Management API token")
 
+        # Step 2: Fetch user by email
+        users_url = f'https://{auth0Domain}/api/v2/users-by-email'
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        }
+        params = {'email': email}
+        
         async with httpx.AsyncClient() as client:
-            # Step 2: Fetch the user data by email
-            email_check_url = f"https://{auth0Domain}/api/v2/users-by-email"
-            email_check_response = await client.get(
-                email_check_url,
-                params={'email': email},
-                headers={'Authorization': f'Bearer {token}'}
-            )
-            email_check_response.raise_for_status()
+            # Get user ID from email
+            response = await client.get(users_url, headers=headers, params=params)
+            response.raise_for_status()
+            users = response.json()
             
-            user_data = email_check_response.json()
-            if not user_data:
-                raise Exception("User not found")
-
-            user_id = user_data[0]['user_id']
-
-            # Step 3: Patch the password
-            patch_url = f"https://{auth0Domain}/api/v2/users/{user_id}"
-            patch_response = await client.patch(
-                patch_url,
-                headers={
-                    'Authorization': f'Bearer {token}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'password': new_password,
-                    'connection': 'Username-Password-Authentication'
-                }
-            )
+            if not users:
+                raise Exception("No user found with the provided email")
             
-            patch_response.raise_for_status()
+            user_id = users[0]['user_id']
+            
+            # Step 3: Update password
+            auth0_url = f'https://{auth0Domain}/api/v2/users/{user_id}'
+            payload = {
+                'password': new_password,
+                'connection': 'Username-Password-Authentication'
+            }
+            
+            response = await client.patch(auth0_url, headers=headers, json=payload)
+            response.raise_for_status()
             return True
 
-    except httpx.RequestError as error:
-        raise Exception(f"Auth0 API error: {str(error)}")
-    except Exception as error:
-        raise Exception(f"Password update failed: {str(error)}")
+    except httpx.HTTPStatusError as e:
+        raise Exception(f"Password update failed: {e.response.text}")
+    except Exception as e:
+        raise Exception(f"Password update failed: {str(e)}")

@@ -606,6 +606,56 @@
         }
       }
     },
+    "/forgot-password": {
+  "post": {
+    "tags": ["User"],
+    "summary": "Request a password reset link",
+    "description": "Sends a password reset link to the user's email address",
+    "parameters": [
+      {
+        "name": "body",
+        "in": "body",
+        "description": "Email for password reset",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "User's email address"
+            }
+          },
+          "required": ["email"]
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Password reset link sent successfully",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid email format"
+      },
+      "404": {
+        "description": "Email not found"
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  }
+},
     "/sections": {
       "get": {
         "tags": [

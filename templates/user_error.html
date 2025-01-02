@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - AI Alpha</title>
+    <style>
+        :root {
+            --primary-color: #FF6B00;
+            --primary-hover: #FF8533;
+            --background-color: #000000;
+            --text-color: #FFFFFF;
+            --text-secondary: #999999;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 3rem;
+        }
+
+        .logo img {
+            width: 120px;
+            height: auto;
+        }
+
+        .error-title {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .action-button {
+            display: inline-block;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .logo img {
+                width: 100px;
+            }
+
+            .error-title {
+                font-size: 24px;
+            }
+
+            .error-message {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="/static/logo.png" alt="AI Alpha Logo">
+        </div>
+        
+        <h1 class="error-title">Sorry</h1>
+        
+        <p class="error-message">
+            {% if message %}
+                {{ message }}
+            {% else %}
+                The reset password link you have used seems to be invalid or expired. Please open the AI Alpha mobile app and use the "Reset Password" option to request a new reset link.
+            {% endif %}
+        </p>
+    </div>
+</body>
+</html>
