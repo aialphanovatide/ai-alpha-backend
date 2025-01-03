@@ -185,6 +185,57 @@
         }
       }
     },
+    "/admin/all": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Retrieve all admins with their roles",
+        "description": "Get a list of all admins with their roles",
+        "responses": {
+          "200": {
+            "description": "List of admins retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "admins": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "admin_id": {
+                        "type": "integer"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database error or unexpected error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/admin/{admin_id}": {
       "get": {
         "tags": [
@@ -217,7 +268,7 @@
           "Admin"
         ],
         "summary": "Update admin information.",
-        "description": "Update admin information.",
+        "description": "Update admin username or role",
         "parameters": [
           {
             "name": "admin_id",
@@ -233,17 +284,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "email": {
-                  "type": "string"
-                },
                 "username": {
-                  "type": "string"
-                },
-                "password": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "New username for the admin"
                 },
                 "role": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "New role for the admin (admin or superadmin)"
                 }
               }
             }
@@ -251,13 +298,28 @@
         ],
         "responses": {
           "200": {
-            "description": "Admin updated successfully"
+            "description": "Admin updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request (invalid data)"
           },
           "404": {
             "description": "Admin not found"
+          },
+          "409": {
+            "description": "Conflict (username already exists)"
           },
           "500": {
             "description": "Database error or unexpected error"

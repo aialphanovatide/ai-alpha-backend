@@ -210,15 +210,15 @@ def get_admin(admin_id):
 @token_required
 def update_admin(admin_id):
     """
-    Update admin information.
+    Update admin username or role
     
     Args:
         admin_id (int): The ID of the admin to update
-        email (str, optional): New email address
-        username (str, optional): New username
-        password (str, optional): New password
-        role (str, optional): New role ('superadmin' or 'admin')
-    
+    Request JSON:
+    {
+        "username": string,  # Optional
+        "role": string      # Optional: 'admin' or 'superadmin'
+    }
     Returns:
         JSON response with status code:
         - 200: Admin updated successfully
@@ -229,51 +229,58 @@ def update_admin(admin_id):
     data = request.json
     session = Session()
     response = {"message": None, "error": None}
-    status_code = 500  # Default to server error
+    status_code = 500
     
     try:
         admin = session.query(Admin).get(admin_id)
-        if admin:
-            if 'email' in data:
-                admin.email = data['email']
-            if 'username' in data:
-                admin.username = data['username']
-            if 'password' in data:
-                admin.password = data['password']
-            if 'role' in data:
-                new_role_name = data['role'].lower()
-                if new_role_name not in ['superadmin', 'admin']:
-                    response["error"] = "Invalid role"
-                    status_code = 400
-                    return jsonify(response), status_code
-                new_role = session.query(Role).filter_by(name=new_role_name).first()
-                if not new_role:
-                    new_role = Role(name=new_role_name)
-                    session.add(new_role)
-                admin_role = session.query(AdminRole).filter_by(admin_id=admin.admin_id).first()
-                if admin_role:
-                    admin_role.role_id = new_role.id
-                else:
-                    new_admin_role = AdminRole(admin_id=admin.admin_id, role_id=new_role.id)
-                    session.add(new_admin_role)
-            session.commit()
-            response["message"] = "Admin updated successfully"
-            status_code = 200
-        else:
+        if not admin:
             response["error"] = "Admin not found"
-            status_code = 404
+            return jsonify(response), 404
+
+        if 'username' in data:
+            # Verify username is unique
+            existing = session.query(Admin).filter(
+                Admin.username == data['username'],
+                Admin.admin_id != admin_id
+            ).first()
+            if existing:
+                response["error"] = "Username already exists"
+                return jsonify(response), 409
+            admin.username = data['username']
+
+        if 'role' in data:
+            new_role_name = data['role'].lower()
+            if new_role_name not in ['superadmin', 'admin']:
+                response["error"] = "Invalid role"
+                return jsonify(response), 400
+
+            role = session.query(Role).filter_by(name=new_role_name).first()
+            if not role:
+                role = Role(name=new_role_name)
+                session.add(role)
+                session.flush()
+
+            admin_role = session.query(AdminRole).filter_by(admin_id=admin.admin_id).first()
+            if admin_role:
+                admin_role.role_id = role.id
+            else:
+                new_admin_role = AdminRole(admin_id=admin.admin_id, role_id=role.id)
+                session.add(new_admin_role)
+
+        session.commit()
+        response["message"] = "Admin updated successfully"
+        return jsonify(response), 200
+
     except SQLAlchemyError as e:
         session.rollback()
         response["error"] = f"Database error: {str(e)}"
-        status_code = 500
+        return jsonify(response), 500
     except Exception as e:
         session.rollback()
-        response["error"] = f"An unexpected error occurred: {str(e)}"
-        status_code = 500
+        response["error"] = str(e)
+        return jsonify(response), 500
     finally:
         session.close()
-
-    return jsonify(response), status_code
 
 
 @dashboard_access_bp.route('/admin/<int:admin_id>', methods=['DELETE'])
@@ -415,3 +422,41 @@ def get_admin_roles():
             response["error"] = f"An unexpected error occurred: {str(e)}"
 
     return jsonify(response), status_code
+
+@dashboard_access_bp.route('/admin/all', methods=['GET'])
+@token_required
+def get_all_admins():
+    """
+    Retrieve all admins with their roles
+    """
+    session = Session()
+    response = {"admins": [], "error": None}
+    
+    try:
+        admins = session.query(Admin).all()
+        admin_list = []
+        
+        for admin in admins:
+            # Obtener el nombre del rol en lugar del objeto Role
+            admin_role = session.query(Role).join(AdminRole).filter(AdminRole.admin_id == admin.admin_id).first()
+            role_name = admin_role.name if admin_role else "no role"
+            
+            admin_data = {
+                "admin_id": admin.admin_id,
+                "username": admin.username,
+                "email": admin.email,
+                "role": role_name
+            }
+            admin_list.append(admin_data)
+        
+        response["admins"] = admin_list
+        return jsonify(response), 200
+
+    except SQLAlchemyError as e:
+        response["error"] = f"Database error: {str(e)}"
+        return jsonify(response), 500
+    except Exception as e:
+        response["error"] = str(e)
+        return jsonify(response), 500
+    finally:
+        session.close()
